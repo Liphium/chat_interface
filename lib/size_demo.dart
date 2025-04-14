@@ -14,7 +14,10 @@ class SizeDemo extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         // Calculate the available height for every participant
-        double computedHeight = calculateMaxChildHeight(Size(constraints.biggest.width, constraints.biggest.height), n);
+        double computedHeight = calculateMaxChildHeight(
+          Size(constraints.biggest.width, constraints.biggest.height),
+          n,
+        );
         computedHeight -= defaultSpacing * n;
 
         return Center(
@@ -29,7 +32,10 @@ class SizeDemo extends StatelessWidget {
               n,
               (index) => ConstrainedBox(
                 constraints: BoxConstraints(maxHeight: computedHeight),
-                child: AspectRatio(aspectRatio: 16 / 9, child: Container(color: Colors.primaries[index % Colors.primaries.length])),
+                child: AspectRatio(
+                  aspectRatio: 16 / 9,
+                  child: Container(color: Colors.primaries[index % Colors.primaries.length]),
+                ),
               ),
             ),
           ),

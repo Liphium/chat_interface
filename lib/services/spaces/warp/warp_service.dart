@@ -89,7 +89,9 @@ class WarpService {
       return ("warp.error.port_not_used".tr, null);
     }
 
-    final event = await SpaceConnection.spaceConnector!.sendActionAndWait(ServerAction("wp_create", port));
+    final event = await SpaceConnection.spaceConnector!.sendActionAndWait(
+      ServerAction("wp_create", port),
+    );
     if (event == null) {
       return ("server.error".tr, null);
     }

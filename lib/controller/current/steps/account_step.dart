@@ -39,7 +39,10 @@ class AccountStep extends ConnectionStep {
     final dNameChanged = StatusController.displayName.value != account["display_name"];
 
     // Set the account id if there isn't one
-    if (StatusController.ownAccountId == "" || uNameChanged || dNameChanged || StatusController.ownAccountId != account["id"]) {
+    if (StatusController.ownAccountId == "" ||
+        uNameChanged ||
+        dNameChanged ||
+        StatusController.ownAccountId != account["id"]) {
       sendLog("setting account id");
       await setEncryptedValue("cache_account_id", account["id"]);
       await setEncryptedValue("cache_account_uname", account["username"]);

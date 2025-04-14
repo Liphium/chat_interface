@@ -71,7 +71,10 @@ class SpaceInfoWindow extends StatelessWidget {
                       padding: const EdgeInsets.only(bottom: elementSpacing),
                       child: Row(
                         children: [
-                          Text(member.friend.displayName.value, style: Get.theme.textTheme.bodyMedium),
+                          Text(
+                            member.friend.displayName.value,
+                            style: Get.theme.textTheme.bodyMedium,
+                          ),
                           horizontalSpacing(defaultSpacing),
                           Text("#${member.id}", style: Get.theme.textTheme.bodyMedium),
                         ],

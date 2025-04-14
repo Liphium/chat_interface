@@ -98,18 +98,31 @@ class _SquareFileRendererState extends State<SquareFileRenderer> {
           borderRadius: BorderRadius.circular(defaultSpacing),
           child: Stack(
             children: [
-              Container(color: Get.theme.colorScheme.primaryContainer, width: 200, height: 200, child: FilePreview(file: widget.file.file)),
+              Container(
+                color: Get.theme.colorScheme.primaryContainer,
+                width: 200,
+                height: 200,
+                child: FilePreview(file: widget.file.file),
+              ),
               Align(
                 alignment: Alignment.topRight,
                 child: Padding(
                   padding: const EdgeInsets.all(defaultSpacing),
                   child: Container(
-                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(defaultSpacing), color: Get.theme.colorScheme.inverseSurface),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(defaultSpacing),
+                      color: Get.theme.colorScheme.inverseSurface,
+                    ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         horizontalSpacing(defaultSpacing),
-                        Expanded(child: Text(path.basename(widget.file.file.path), overflow: TextOverflow.ellipsis)),
+                        Expanded(
+                          child: Text(
+                            path.basename(widget.file.file.path),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
                         horizontalSpacing(defaultSpacing),
                         Watch(
                           (ctx) => Visibility(

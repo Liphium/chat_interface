@@ -102,7 +102,11 @@ class _FriendsPageState extends State<FriendsPage> {
                         Watch(
                           (ctx) => Animate(
                             effects: [
-                              ExpandEffect(curve: Curves.easeInOut, duration: 250.ms, axis: Axis.vertical),
+                              ExpandEffect(
+                                curve: Curves.easeInOut,
+                                duration: 250.ms,
+                                axis: Axis.vertical,
+                              ),
                               FadeEffect(end: 0, begin: 1, duration: 250.ms),
                             ],
                             target: _revealSuccess.value ? 1.0 : 0.0,
@@ -113,19 +117,36 @@ class _FriendsPageState extends State<FriendsPage> {
                         Watch((ctx) {
                           final found = FriendController.friends.values.any(
                             (friend) =>
-                                (friend.displayName.value.toLowerCase().contains(_query.value.toLowerCase()) ||
-                                    friend.name.toLowerCase().contains(_query.value.toLowerCase())) &&
+                                (friend.displayName.value.toLowerCase().contains(
+                                      _query.value.toLowerCase(),
+                                    ) ||
+                                    friend.name.toLowerCase().contains(
+                                      _query.value.toLowerCase(),
+                                    )) &&
                                 friend.id != StatusController.ownAddress,
                           );
                           return Animate(
                             effects: [
-                              ExpandEffect(curve: Curves.easeInOut, duration: 250.ms, axis: Axis.vertical),
+                              ExpandEffect(
+                                curve: Curves.easeInOut,
+                                duration: 250.ms,
+                                axis: Axis.vertical,
+                              ),
                               FadeEffect(end: 1, begin: 0, duration: 250.ms),
                             ],
                             target: found ? 0.0 : 1.0,
                             child: Padding(
-                              padding: const EdgeInsets.only(top: defaultSpacing, left: defaultSpacing, right: defaultSpacing),
-                              child: Center(child: Text("friends.empty".tr, style: Get.theme.textTheme.bodyMedium)),
+                              padding: const EdgeInsets.only(
+                                top: defaultSpacing,
+                                left: defaultSpacing,
+                                right: defaultSpacing,
+                              ),
+                              child: Center(
+                                child: Text(
+                                  "friends.empty".tr,
+                                  style: Get.theme.textTheme.bodyMedium,
+                                ),
+                              ),
                             ),
                           );
                         }),
@@ -134,7 +155,11 @@ class _FriendsPageState extends State<FriendsPage> {
                         Watch(
                           (ctx) => Animate(
                             effects: [
-                              ReverseExpandEffect(curve: Curves.easeInOut, duration: 250.ms, axis: Axis.vertical),
+                              ReverseExpandEffect(
+                                curve: Curves.easeInOut,
+                                duration: 250.ms,
+                                axis: Axis.vertical,
+                              ),
                               FadeEffect(end: 0, begin: 1, duration: 250.ms),
                             ],
                             target: _query.value.isEmpty ? 0.0 : 1.0,
@@ -146,7 +171,10 @@ class _FriendsPageState extends State<FriendsPage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   verticalSpacing(sectionSpacing),
-                                  Text("friends.requests".tr, style: Get.theme.textTheme.labelLarge),
+                                  Text(
+                                    "friends.requests".tr,
+                                    style: Get.theme.textTheme.labelLarge,
+                                  ),
                                   verticalSpacing(elementSpacing),
                                   Builder(
                                     builder: (context) {
@@ -155,15 +183,20 @@ class _FriendsPageState extends State<FriendsPage> {
                                       }
                                       return Column(
                                         mainAxisSize: MainAxisSize.min,
-                                        children: List.generate(RequestController.requests.length, (index) {
-                                          final request = RequestController.requests.values.elementAt(index);
+                                        children: List.generate(RequestController.requests.length, (
+                                          index,
+                                        ) {
+                                          final request = RequestController.requests.values
+                                              .elementAt(index);
                                           return RequestButton(request: request, self: false);
                                         }),
                                       );
                                     },
                                   ),
                                   Visibility(
-                                    visible: FriendController.friends.length > 1 || RequestController.requestsSent.isNotEmpty,
+                                    visible:
+                                        FriendController.friends.length > 1 ||
+                                        RequestController.requestsSent.isNotEmpty,
                                     child: verticalSpacing(sectionSpacing - elementSpacing),
                                   ),
                                 ],
@@ -176,7 +209,11 @@ class _FriendsPageState extends State<FriendsPage> {
                         Watch(
                           (ctx) => Animate(
                             effects: [
-                              ReverseExpandEffect(curve: Curves.easeInOut, duration: 250.ms, axis: Axis.vertical),
+                              ReverseExpandEffect(
+                                curve: Curves.easeInOut,
+                                duration: 250.ms,
+                                axis: Axis.vertical,
+                              ),
                               FadeEffect(end: 0, begin: 1, duration: 250.ms),
                             ],
                             target: _query.value.isEmpty ? 0.0 : 1.0,
@@ -189,7 +226,10 @@ class _FriendsPageState extends State<FriendsPage> {
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text("friends.requests_sent".tr, style: Get.theme.textTheme.labelLarge),
+                                    Text(
+                                      "friends.requests_sent".tr,
+                                      style: Get.theme.textTheme.labelLarge,
+                                    ),
                                     verticalSpacing(elementSpacing),
                                     Builder(
                                       builder: (context) {
@@ -198,17 +238,26 @@ class _FriendsPageState extends State<FriendsPage> {
                                         }
                                         return Column(
                                           mainAxisSize: MainAxisSize.min,
-                                          children: List.generate(RequestController.requestsSent.length, (index) {
-                                            final request = RequestController.requestsSent.values.elementAt(index);
-                                            return Padding(
-                                              padding: const EdgeInsets.only(bottom: elementSpacing),
-                                              child: RequestButton(request: request, self: true),
-                                            );
-                                          }),
+                                          children: List.generate(
+                                            RequestController.requestsSent.length,
+                                            (index) {
+                                              final request = RequestController.requestsSent.values
+                                                  .elementAt(index);
+                                              return Padding(
+                                                padding: const EdgeInsets.only(
+                                                  bottom: elementSpacing,
+                                                ),
+                                                child: RequestButton(request: request, self: true),
+                                              );
+                                            },
+                                          ),
                                         );
                                       },
                                     ),
-                                    Visibility(visible: FriendController.friends.length > 1, child: verticalSpacing(sectionSpacing - elementSpacing)),
+                                    Visibility(
+                                      visible: FriendController.friends.length > 1,
+                                      child: verticalSpacing(sectionSpacing - elementSpacing),
+                                    ),
                                   ],
                                 ),
                               ),
@@ -233,16 +282,23 @@ class _FriendsPageState extends State<FriendsPage> {
                                     shrinkWrap: true,
                                     itemCount: FriendController.friends.length,
                                     itemBuilder: (context, index) {
-                                      final friend = FriendController.friends.values.elementAt(index);
+                                      final friend = FriendController.friends.values.elementAt(
+                                        index,
+                                      );
 
-                                      if (friend.unknown || friend.id == StatusController.ownAddress) {
+                                      if (friend.unknown ||
+                                          friend.id == StatusController.ownAddress) {
                                         return const SizedBox();
                                       }
                                       return Watch((ctx) {
                                         final visible =
                                             _query.value.isEmpty ||
-                                            friend.displayName.value.toLowerCase().contains(_query.value.toLowerCase()) ||
-                                            friend.name.toLowerCase().contains(_query.value.toLowerCase());
+                                            friend.displayName.value.toLowerCase().contains(
+                                              _query.value.toLowerCase(),
+                                            ) ||
+                                            friend.name.toLowerCase().contains(
+                                              _query.value.toLowerCase(),
+                                            );
 
                                         return Animate(
                                           effects: [
@@ -256,8 +312,13 @@ class _FriendsPageState extends State<FriendsPage> {
                                           ],
                                           target: visible ? 0.0 : 1.0,
                                           child: Padding(
-                                            padding: EdgeInsets.only(top: index == 0 ? defaultSpacing : elementSpacing),
-                                            child: FriendButton(friend: friend, position: _position),
+                                            padding: EdgeInsets.only(
+                                              top: index == 0 ? defaultSpacing : elementSpacing,
+                                            ),
+                                            child: FriendButton(
+                                              friend: friend,
+                                              position: _position,
+                                            ),
                                           ),
                                         );
                                       });

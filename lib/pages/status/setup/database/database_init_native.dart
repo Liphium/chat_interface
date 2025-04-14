@@ -42,7 +42,9 @@ Future<List<Instance>?> getInstances() async {
   await dir.create();
 
   // Convert the list of files in the folder to instance names
-  return (await dir.list().toList()).map((e) => Instance(path.basenameWithoutExtension(e.path))).toList();
+  return (await dir.list().toList())
+      .map((e) => Instance(path.basenameWithoutExtension(e.path)))
+      .toList();
 }
 
 Future<String?> deleteInstance(String name) async {

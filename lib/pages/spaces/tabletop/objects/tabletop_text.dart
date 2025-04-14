@@ -16,7 +16,8 @@ class TextObject extends TableObject {
   final fontSize = AnimatedDouble(0);
   String text = "";
 
-  TextObject(String id, int order, Offset location, Size size) : super(id, order, location, size, TableObjectType.text);
+  TextObject(String id, int order, Offset location, Size size)
+    : super(id, order, location, size, TableObjectType.text);
 
   factory TextObject.createFromText(Offset location, String text, double fontSize) {
     final obj = TextObject("", 0, location, const Size(0, 0));
@@ -29,7 +30,10 @@ class TextObject extends TableObject {
   @override
   void render(Canvas canvas, Offset location) {
     final realFontSize = fontSize.value(DateTime.now()) * fontSizeMultiplier;
-    var textSpan = TextSpan(text: text, style: Get.theme.textTheme.labelLarge!.copyWith(fontSize: realFontSize));
+    var textSpan = TextSpan(
+      text: text,
+      style: Get.theme.textTheme.labelLarge!.copyWith(fontSize: realFontSize),
+    );
     final textPainter = TextPainter(text: textSpan, textDirection: TextDirection.ltr);
     textPainter.layout();
     final hintRect = Rect.fromLTWH(
@@ -38,7 +42,10 @@ class TextObject extends TableObject {
       textPainter.size.width + realFontSize / 2,
       textPainter.size.height + realFontSize / 2 / 2,
     );
-    canvas.drawRRect(RRect.fromRectAndRadius(hintRect, Radius.circular(realFontSize / 4)), Paint()..color = Get.theme.colorScheme.primaryContainer);
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(hintRect, Radius.circular(realFontSize / 4)),
+      Paint()..color = Get.theme.colorScheme.primaryContainer,
+    );
     textPainter.paint(canvas, location);
   }
 
@@ -55,7 +62,12 @@ class TextObject extends TableObject {
   }
 
   void evaluateSize() {
-    var textSpan = TextSpan(text: text, style: Get.theme.textTheme.labelLarge!.copyWith(fontSize: fontSize.realValue * fontSizeMultiplier));
+    var textSpan = TextSpan(
+      text: text,
+      style: Get.theme.textTheme.labelLarge!.copyWith(
+        fontSize: fontSize.realValue * fontSizeMultiplier,
+      ),
+    );
     final textPainter = TextPainter(text: textSpan, textDirection: TextDirection.ltr);
     textPainter.layout();
     size = textPainter.size;
@@ -112,7 +124,11 @@ class _TextObjectCreationWindowState extends State<TextObjectCreationWindow> wit
         children: [
           Text("tabletop.object.text.create".tr, style: Get.theme.textTheme.titleMedium),
           verticalSpacing(sectionSpacing),
-          FJTextField(hintText: "tabletop.object.text.placeholder".tr, controller: _textController, onChange: (value) => _text.value = value),
+          FJTextField(
+            hintText: "tabletop.object.text.placeholder".tr,
+            controller: _textController,
+            onChange: (value) => _text.value = value,
+          ),
           verticalSpacing(defaultSpacing),
           FJSliderWithInput(
             min: 16,
@@ -122,7 +138,10 @@ class _TextObjectCreationWindowState extends State<TextObjectCreationWindow> wit
             onChanged: (value) => _fontSize.value = value,
           ),
           verticalSpacing(defaultSpacing),
-          Text(_text.value, style: Get.theme.textTheme.labelLarge!.copyWith(fontSize: _fontSize.value)),
+          Text(
+            _text.value,
+            style: Get.theme.textTheme.labelLarge!.copyWith(fontSize: _fontSize.value),
+          ),
           verticalSpacing(defaultSpacing),
           FJElevatedButton(
             onTap: () {
@@ -136,10 +155,19 @@ class _TextObjectCreationWindowState extends State<TextObjectCreationWindow> wit
                 });
                 return;
               }
-              final object = TextObject.createFromText(widget.location, _textController.text, _fontSize.value.roundToDouble());
+              final object = TextObject.createFromText(
+                widget.location,
+                _textController.text,
+                _fontSize.value.roundToDouble(),
+              );
               object.sendAdd();
             },
-            child: Center(child: Text((widget.object != null ? "edit" : "create").tr, style: Get.theme.textTheme.labelLarge)),
+            child: Center(
+              child: Text(
+                (widget.object != null ? "edit" : "create").tr,
+                style: Get.theme.textTheme.labelLarge,
+              ),
+            ),
           ),
         ],
       ),

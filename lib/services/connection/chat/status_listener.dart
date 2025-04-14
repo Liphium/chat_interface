@@ -23,13 +23,18 @@ void setupStatusListener() {
 
     // Get dm with friend
     final dm = ConversationController.conversations.values.firstWhere(
-      (element) => element.members.length == 2 && element.members.values.any((element) => element.address == friend.id),
+      (element) =>
+          element.members.length == 2 &&
+          element.members.values.any((element) => element.address == friend.id),
     );
 
     sendLog("sending status answer");
     await postNodeJSON("/conversations/answer_status", {
       "token": dm.token.toMap(),
-      "data": {"status": StatusController.statusPacket(), "data": StatusController.sharedContentPacket()},
+      "data": {
+        "status": StatusController.statusPacket(),
+        "data": StatusController.sharedContentPacket(),
+      },
     });
   }, afterSetup: true);
 
@@ -54,7 +59,11 @@ Future<Friend?> handleStatus(Event event, bool own) async {
     await FriendController.friends[StatusController.ownAddress]!.loadStatus(message);
     StatusController.fromStatusJson(decryptSymmetric(message, profileKey));
     // Load own shared content
-    final (container, shouldUpdate) = _dataToContainer(StatusController.ownContainer.value, event.data["d"], profileKey);
+    final (container, shouldUpdate) = _dataToContainer(
+      StatusController.ownContainer.value,
+      event.data["d"],
+      profileKey,
+    );
     if (shouldUpdate) {
       StatusController.ownContainer.value = container;
     }
@@ -92,7 +101,11 @@ Future<Friend?> handleStatus(Event event, bool own) async {
   await friend.loadStatus(message);
 
   // Extract shared content
-  final (container, shouldUpdate) = _dataToContainer(StatusController.sharedContent[friend.id], event.data["d"], (await friend.getKeys()).profileKey);
+  final (container, shouldUpdate) = _dataToContainer(
+    StatusController.sharedContent[friend.id],
+    event.data["d"],
+    (await friend.getKeys()).profileKey,
+  );
   if (shouldUpdate) {
     if (container == null) {
       final container = StatusController.sharedContent.remove(friend.id);
@@ -106,7 +119,11 @@ Future<Friend?> handleStatus(Event event, bool own) async {
 }
 
 /// Turn the shared data from a status into a share container (returns container (if existent) and if it has changed)
-(ShareContainer?, bool) _dataToContainer(ShareContainer? existing, String data, SecureKey profileKey) {
+(ShareContainer?, bool) _dataToContainer(
+  ShareContainer? existing,
+  String data,
+  SecureKey profileKey,
+) {
   if (data != "") {
     final sharedJson = decryptSymmetric(data, profileKey);
     final shared = jsonDecode(sharedJson) as Map<String, dynamic>;

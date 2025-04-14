@@ -42,7 +42,10 @@ class ImagePreviewWindow extends StatelessWidget {
                         delay: 100.ms,
                         duration: 400.ms,
                         hz: randomHz,
-                        offset: Offset(random.nextBool() ? randomOffset : -randomOffset, random.nextBool() ? randomOffset : -randomOffset),
+                        offset: Offset(
+                          random.nextBool() ? randomOffset : -randomOffset,
+                          random.nextBool() ? randomOffset : -randomOffset,
+                        ),
                         rotation: 0,
                         curve: Curves.decelerate,
                       ),
@@ -66,7 +69,14 @@ class ImagePreviewWindow extends StatelessWidget {
             );
           },
         ),
-        Positioned(top: 0, right: 0, child: IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.of(context).pop())),
+        Positioned(
+          top: 0,
+          right: 0,
+          child: IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
+        ),
       ],
     );
   }

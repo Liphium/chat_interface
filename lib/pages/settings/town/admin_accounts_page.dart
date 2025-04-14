@@ -48,7 +48,14 @@ class AccountData {
 
   // Method to convert Account object to JSON
   Map<String, dynamic> toJson() {
-    return {'id': id, 'email': email, 'username': username, 'display_name': displayName, 'rank': rankID, 'created_at': createdAt.toIso8601String()};
+    return {
+      'id': id,
+      'email': email,
+      'username': username,
+      'display_name': displayName,
+      'rank': rankID,
+      'created_at': createdAt.toIso8601String(),
+    };
   }
 }
 
@@ -103,7 +110,10 @@ class _AdminAccountsPageState extends State<AdminAccountsPage> {
     _currentPage.value = page;
 
     // Get the files from the server
-    final json = await postAuthorizedJSON("/townhall/accounts/list", {"page": page, "query": _query.value});
+    final json = await postAuthorizedJSON("/townhall/accounts/list", {
+      "page": page,
+      "query": _query.value,
+    });
     _startLoading.value = false;
     _pageLoading.value = false;
 
@@ -172,7 +182,12 @@ class _AdminAccountsPageState extends State<AdminAccountsPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Top page switcher element
-                LPHPageSwitcher(loading: _pageLoading, currentPage: _currentPage, count: _totalCount, page: (page) => goToPage(page)),
+                LPHPageSwitcher(
+                  loading: _pageLoading,
+                  currentPage: _currentPage,
+                  count: _totalCount,
+                  page: (page) => goToPage(page),
+                ),
                 verticalSpacing(defaultSpacing),
 
                 // The view rendering all the accounts
@@ -187,8 +202,17 @@ class _AdminAccountsPageState extends State<AdminAccountsPage> {
                       (ctx) => Animate(
                         key: ValueKey(account.id),
                         effects: [
-                          ReverseExpandEffect(axis: Axis.vertical, curve: const ElasticOutCurve(2.0), duration: 1000.ms),
-                          ScaleEffect(begin: const Offset(1, 1), end: const Offset(0, 0), curve: Curves.ease, duration: 1000.ms),
+                          ReverseExpandEffect(
+                            axis: Axis.vertical,
+                            curve: const ElasticOutCurve(2.0),
+                            duration: 1000.ms,
+                          ),
+                          ScaleEffect(
+                            begin: const Offset(1, 1),
+                            end: const Offset(0, 0),
+                            curve: Curves.ease,
+                            duration: 1000.ms,
+                          ),
                           FadeEffect(begin: 1, end: 0, duration: 1000.ms),
                         ],
                         onInit: (controller) => controller.value = account.deleted.value ? 1 : 0,
@@ -199,20 +223,30 @@ class _AdminAccountsPageState extends State<AdminAccountsPage> {
                             color: Get.theme.colorScheme.onInverseSurface,
                             borderRadius: BorderRadius.circular(10),
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: defaultSpacing, vertical: defaultSpacing),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: defaultSpacing,
+                                vertical: defaultSpacing,
+                              ),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   Row(
                                     children: [
-                                      Icon(Icons.account_circle, color: Theme.of(context).colorScheme.onPrimary, size: 30),
+                                      Icon(
+                                        Icons.account_circle,
+                                        color: Theme.of(context).colorScheme.onPrimary,
+                                        size: 30,
+                                      ),
                                       horizontalSpacing(defaultSpacing),
 
                                       // Account data (name and creation)
                                       Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
                                         children: [
-                                          Text("${account.displayName} (${account.username})", style: Get.theme.textTheme.labelMedium),
+                                          Text(
+                                            "${account.displayName} (${account.username})",
+                                            style: Get.theme.textTheme.labelMedium,
+                                          ),
                                           Text(
                                             "settings.accounts.created".trParams({
                                               "date": formatOnlyYear(account.createdAt),
@@ -229,7 +263,11 @@ class _AdminAccountsPageState extends State<AdminAccountsPage> {
                                   Row(
                                     children: [
                                       // Launch button (go to manage their account)
-                                      LoadingIconButton(onTap: () => Get.dialog(AdminAccountProfile(account: account)), icon: Icons.launch),
+                                      LoadingIconButton(
+                                        onTap:
+                                            () => Get.dialog(AdminAccountProfile(account: account)),
+                                        icon: Icons.launch,
+                                      ),
 
                                       // Delete icon button
                                       LoadingIconButton(
@@ -246,7 +284,10 @@ class _AdminAccountsPageState extends State<AdminAccountsPage> {
                                                 text: "settings.accounts.delete.desc".tr,
                                                 onConfirm: () async {
                                                   account.deleteLoading.value = true;
-                                                  final json = await postAuthorizedJSON("/townhall/accounts/delete", {"account": account.id});
+                                                  final json = await postAuthorizedJSON(
+                                                    "/townhall/accounts/delete",
+                                                    {"account": account.id},
+                                                  );
                                                   account.deleteLoading.value = false;
 
                                                   if (!json["success"]) {
@@ -275,7 +316,12 @@ class _AdminAccountsPageState extends State<AdminAccountsPage> {
                 ),
 
                 // Bottom page switcher
-                LPHPageSwitcher(loading: _pageLoading, currentPage: _currentPage, count: _totalCount, page: (page) => goToPage(page)),
+                LPHPageSwitcher(
+                  loading: _pageLoading,
+                  currentPage: _currentPage,
+                  count: _totalCount,
+                  page: (page) => goToPage(page),
+                ),
                 verticalSpacing(defaultSpacing),
               ],
             );

@@ -38,7 +38,10 @@ class ConversationMessageProvider extends MessageProvider {
       }
 
       // Load messages from the server
-      final json = await postNodeJSON("/conversations/message/list_before", {"token": conversation.token.toMap(), "data": time});
+      final json = await postNodeJSON("/conversations/message/list_before", {
+        "token": conversation.token.toMap(),
+        "data": time,
+      });
 
       // Check if there was an error
       if (!json["success"]) {
@@ -51,7 +54,10 @@ class ConversationMessageProvider extends MessageProvider {
         return (null, false);
       }
       // Unpack the messages in an isolate
-      final messages = await MessageListener.unpackMessagesInIsolate(conversation, json["messages"]);
+      final messages = await MessageListener.unpackMessagesInIsolate(
+        conversation,
+        json["messages"],
+      );
 
       // Prepare messages for
       await initAttachmentsForMessages(messages);
@@ -82,7 +88,10 @@ class ConversationMessageProvider extends MessageProvider {
       }
 
       // Load the messages from the server
-      final json = await postNodeJSON("/conversations/message/list_after", {"token": conversation.token.toMap(), "data": time});
+      final json = await postNodeJSON("/conversations/message/list_after", {
+        "token": conversation.token.toMap(),
+        "data": time,
+      });
 
       // Check if there was an error
       if (!json["success"]) {
@@ -96,7 +105,10 @@ class ConversationMessageProvider extends MessageProvider {
       }
 
       // Unpack the messages in an isolate
-      final messages = await MessageListener.unpackMessagesInIsolate(conversation, json["messages"]);
+      final messages = await MessageListener.unpackMessagesInIsolate(
+        conversation,
+        json["messages"],
+      );
 
       // Prepare messages for
       await initAttachmentsForMessages(messages);
@@ -125,7 +137,10 @@ class ConversationMessageProvider extends MessageProvider {
       }
 
       // Get the message from the server
-      final json = await postNodeJSON("/conversations/message/get", {"token": conversation.token.toMap(), "data": id});
+      final json = await postNodeJSON("/conversations/message/get", {
+        "token": conversation.token.toMap(),
+        "data": id,
+      });
 
       // Check if there is an error
       if (!json["success"]) {
@@ -161,7 +176,8 @@ class ConversationMessageProvider extends MessageProvider {
       final (message, _) = decryptFromLocalDatabase(data, databaseKey);
 
       // Don't render system messages that shouldn't be rendered (this is only for safety, should never actually happen)
-      if (message.type == MessageType.system && SystemMessages.messages[message.content]?.render == false) {
+      if (message.type == MessageType.system &&
+          SystemMessages.messages[message.content]?.render == false) {
         continue;
       }
 
@@ -185,7 +201,11 @@ class ConversationMessageProvider extends MessageProvider {
   /// Decrypt a message from the local database.
   ///
   /// Returns message and conversation found in the local database.
-  static (Message, String) decryptFromLocalDatabase(MessageData data, SecureKey key, {Sodium? sodium}) {
+  static (Message, String) decryptFromLocalDatabase(
+    MessageData data,
+    SecureKey key, {
+    Sodium? sodium,
+  }) {
     // Create a new base message
     final message = Message(
       id: data.id,
@@ -222,7 +242,10 @@ class ConversationMessageProvider extends MessageProvider {
     }
 
     // Send a request to the server
-    final json = await postNodeJSON("/conversations/message/delete", {"token": token.toMap(), "data": message.id});
+    final json = await postNodeJSON("/conversations/message/delete", {
+      "token": token.toMap(),
+      "data": message.id,
+    });
 
     if (!json["success"]) {
       return json["error"];
@@ -246,7 +269,9 @@ class ConversationMessageProvider extends MessageProvider {
   @override
   Future<(String, int)?> getTimestamp() async {
     // Grab a new timestamp from the server
-    var json = await postNodeJSON("/conversations/timestamp", {"token": conversation.token.toMap()});
+    var json = await postNodeJSON("/conversations/timestamp", {
+      "token": conversation.token.toMap(),
+    });
     if (!json["success"]) {
       return null;
     }

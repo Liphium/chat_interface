@@ -16,7 +16,9 @@ class SpacesMessageFeedState extends State<SpacesMessageFeed> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Expanded(child: MessageList(provider: SpaceController.provider, overwritePadding: sectionSpacing)),
+        Expanded(
+          child: MessageList(provider: SpaceController.provider, overwritePadding: sectionSpacing),
+        ),
         MessageInput(draft: "spaces_input", provider: SpaceController.provider, secondary: true),
       ],
     );

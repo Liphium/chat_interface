@@ -37,12 +37,17 @@ class LogManager {
     }
 
     // Set the logging directory
-    loggingDirectory = Directory(path.join((await getApplicationSupportDirectory()).path, "logs_$currentInstance"));
+    loggingDirectory = Directory(
+      path.join((await getApplicationSupportDirectory()).path, "logs_$currentInstance"),
+    );
     await loggingDirectory!.create();
 
     // Initialize the newest log file
     currentLogFile = File(
-      path.join(loggingDirectory!.path, "log-${DateTime.now().toUtc().toString().replaceAll(" ", "_").replaceAll(":", "-").split(".")[0]}.txt"),
+      path.join(
+        loggingDirectory!.path,
+        "log-${DateTime.now().toUtc().toString().replaceAll(" ", "_").replaceAll(":", "-").split(".")[0]}.txt",
+      ),
     );
     await currentLogFile!.create();
 
@@ -54,7 +59,11 @@ class LogManager {
     if (currentLogFile == null) {
       return false;
     }
-    currentLogFile!.writeAsStringSync("${DateTime.now().toUtc()}: $line\n", mode: FileMode.append, flush: true);
+    currentLogFile!.writeAsStringSync(
+      "${DateTime.now().toUtc()}: $line\n",
+      mode: FileMode.append,
+      flush: true,
+    );
     return true;
   }
 
@@ -94,7 +103,13 @@ class LogSettingsPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          DoubleSelectionSetting(settingName: LogSettings.amountOfLogs, description: "logging.amount.desc", rounded: true, min: 1, max: 30),
+          DoubleSelectionSetting(
+            settingName: LogSettings.amountOfLogs,
+            description: "logging.amount.desc",
+            rounded: true,
+            min: 1,
+            max: 30,
+          ),
           verticalSpacing(elementSpacing),
           FJElevatedButton(
             onTap: () => OpenFile.open(LogManager.loggingDirectory!.path),

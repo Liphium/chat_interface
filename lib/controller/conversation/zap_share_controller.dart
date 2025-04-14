@@ -105,7 +105,11 @@ class ZapShareController {
 
   //* Everything about sending starts here
 
-  static Future<void> newTransaction(LPHAddress friend, LPHAddress conversationId, List<XFile> files) async {
+  static Future<void> newTransaction(
+    LPHAddress friend,
+    LPHAddress conversationId,
+    List<XFile> files,
+  ) async {
     if (files.length > 1) {
       sendLog("zapping multiple files is currently not supported");
       return;
@@ -149,8 +153,20 @@ class ZapShareController {
         uploadToken = event.data["upload_token"];
 
         // Send live share message
-        final container = LiveshareInviteContainer(event.data["url"], transactionId!, transactionToken!, fileName, key!);
-        SidebarController.getCurrentProvider()!.sendMessage(signal(false), msg.MessageType.liveshare, [], container.toJson(), "");
+        final container = LiveshareInviteContainer(
+          event.data["url"],
+          transactionId!,
+          transactionToken!,
+          fileName,
+          key!,
+        );
+        SidebarController.getCurrentProvider()!.sendMessage(
+          signal(false),
+          msg.MessageType.liveshare,
+          [],
+          container.toJson(),
+          "",
+        );
       },
     );
   }
@@ -229,7 +245,10 @@ class ZapShareController {
 
     // Calculate the size of the next chunk to prefill the list (optimization)
     final fileSize = await file.length();
-    final Uint8List toEncrypt = chunk * chunkSize >= fileSize ? Uint8List(fileSize - (chunk - 1) * chunkSize) : Uint8List(chunkSize);
+    final Uint8List toEncrypt =
+        chunk * chunkSize >= fileSize
+            ? Uint8List(fileSize - (chunk - 1) * chunkSize)
+            : Uint8List(chunkSize);
 
     // Send the chunk once done
     final completer = Completer<bool>();
@@ -255,7 +274,10 @@ class ZapShareController {
         final res = await dio.post(
           nodePath("/auth/liveshare/upload"),
           data: formData,
-          options: d.Options(validateStatus: (status) => true, headers: {authorizationHeader: authorizationValue()}),
+          options: d.Options(
+            validateStatus: (status) => true,
+            headers: {authorizationHeader: authorizationValue()},
+          ),
         );
 
         // Could've been stopped at this point
@@ -324,7 +346,11 @@ class ZapShareController {
   //* Everything about receiving starts here
 
   /// Join a transaction with a given ID and token + start listening for parts
-  static Future<void> joinTransaction(LPHAddress conversation, LPHAddress friendAddress, LiveshareInviteContainer container) async {
+  static Future<void> joinTransaction(
+    LPHAddress conversation,
+    LPHAddress friendAddress,
+    LiveshareInviteContainer container,
+  ) async {
     if (isRunning()) {
       sendLog("Already in a transaction");
       return;
@@ -338,7 +364,10 @@ class ZapShareController {
     step.value = "preparing".tr;
 
     // Get info about the file
-    final json = await postAny("${nodeProtocol()}${container.url}/liveshare/info", {"id": container.id, "token": container.token});
+    final json = await postAny("${nodeProtocol()}${container.url}/liveshare/info", {
+      "id": container.id,
+      "token": container.token,
+    });
     if (!json["success"]) {
       showErrorPopup("error", "chat.zapshare.not_found".tr);
       return;
@@ -428,11 +457,18 @@ class ZapShareController {
             }
 
             // Download stuff
-            final formData = d.FormData.fromMap({"id": container.id, "token": container.token, "chunk": currentChunk});
+            final formData = d.FormData.fromMap({
+              "id": container.id,
+              "token": container.token,
+              "chunk": currentChunk,
+            });
             final res = await dio.get<Uint8List>(
               "${nodeProtocol()}${container.url}/liveshare/download",
               data: formData,
-              options: d.Options(responseType: d.ResponseType.bytes, validateStatus: (status) => true),
+              options: d.Options(
+                responseType: d.ResponseType.bytes,
+                validateStatus: (status) => true,
+              ),
             );
 
             if (res.statusCode != 200) {
@@ -487,7 +523,14 @@ class ZapShareController {
     );
   }
 
-  static Future<void> _tellReceived(String url, String id, String token, String receiverId, {Function(bool)? callback, Function()? onError}) async {
+  static Future<void> _tellReceived(
+    String url,
+    String id,
+    String token,
+    String receiverId, {
+    Function(bool)? callback,
+    Function()? onError,
+  }) async {
     // Send receive confirmation
     final res = await dio.post(
       "${nodeProtocol()}$url/liveshare/received",
@@ -520,10 +563,22 @@ class LiveshareInviteContainer {
 
   factory LiveshareInviteContainer.fromJson(String json) {
     final data = jsonDecode(json);
-    return LiveshareInviteContainer(data["url"], data["id"], data["token"], data["name"], unpackageSymmetricKey(data["key"]));
+    return LiveshareInviteContainer(
+      data["url"],
+      data["id"],
+      data["token"],
+      data["name"],
+      unpackageSymmetricKey(data["key"]),
+    );
   }
 
   String toJson() {
-    return jsonEncode({"url": url, "id": id, "token": token, "name": fileName, "key": packageSymmetricKey(key)});
+    return jsonEncode({
+      "url": url,
+      "id": id,
+      "token": token,
+      "name": fileName,
+      "key": packageSymmetricKey(key),
+    });
   }
 }

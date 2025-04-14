@@ -65,7 +65,12 @@ class _ChatPageDesktopState extends State<ChatPageDesktop> {
                   child: Watch(
                     (ctx) => Animate(
                       effects: [
-                        ExpandEffect(curve: Curves.easeInOut, duration: 250.ms, axis: Axis.horizontal, alignment: Alignment.centerRight),
+                        ExpandEffect(
+                          curve: Curves.easeInOut,
+                          duration: 250.ms,
+                          axis: Axis.horizontal,
+                          alignment: Alignment.centerRight,
+                        ),
                         FadeEffect(duration: 250.ms),
                       ],
                       onInit: (ac) => ac.value = SidebarController.hideSidebar.value ? 0 : 1,
@@ -99,7 +104,10 @@ class DefaultSidebarTab extends SidebarTab {
         verticalSpacing(sectionSpacing),
         Text('app.welcome'.tr, style: Theme.of(context).textTheme.bodyLarge),
         verticalSpacing(elementSpacing),
-        Text('app.build'.trParams({"build": "Alpha"}), style: Theme.of(context).textTheme.bodyLarge),
+        Text(
+          'app.build'.trParams({"build": "Alpha"}),
+          style: Theme.of(context).textTheme.bodyLarge,
+        ),
       ],
     );
   }
@@ -109,14 +117,19 @@ class DefaultSidebarTab extends SidebarTab {
 class ConversationSidebarTab extends SidebarTab {
   final ConversationMessageProvider provider;
 
-  ConversationSidebarTab(this.provider) : super(SidebarTabType.conversation, "conv-${provider.conversation.id.encode()}");
+  ConversationSidebarTab(this.provider)
+    : super(SidebarTabType.conversation, "conv-${provider.conversation.id.encode()}");
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         // Render the message bar for desktop
-        DevicePadding(top: true, padding: const EdgeInsets.all(0), child: MessageBar(conversation: provider.conversation, provider: provider)),
+        DevicePadding(
+          top: true,
+          padding: const EdgeInsets.all(0),
+          child: MessageBar(conversation: provider.conversation, provider: provider),
+        ),
 
         // Render the message feed + search sidebar
         Expanded(
@@ -131,12 +144,20 @@ class ConversationSidebarTab extends SidebarTab {
                   (ctx) => Animate(
                     key: ValueKey("rsa-${provider.conversation.id.encode()}"),
                     effects: [
-                      ExpandEffect(curve: Curves.easeInOut, duration: 250.ms, axis: Axis.horizontal, alignment: Alignment.centerLeft),
+                      ExpandEffect(
+                        curve: Curves.easeInOut,
+                        duration: 250.ms,
+                        axis: Axis.horizontal,
+                        alignment: Alignment.centerLeft,
+                      ),
                       FadeEffect(duration: 250.ms),
                     ],
                     onInit: (ac) => ac.value = SidebarController.rightSidebar[key] != null ? 1 : 0,
                     target: SidebarController.rightSidebar[key] != null ? 1 : 0,
-                    child: SizedBox(width: 350, child: SidebarController.rightSidebar[key]?.build(ctx)),
+                    child: SizedBox(
+                      width: 350,
+                      child: SidebarController.rightSidebar[key]?.build(ctx),
+                    ),
                   ),
                 ),
               ),

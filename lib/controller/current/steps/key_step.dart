@@ -51,7 +51,9 @@ class KeySetup extends ConnectionStep {
       final genVaultKey = randomSymmetricKey();
 
       // Set public key on the server
-      res = await postAuthorizedJSON("/account/keys/public/set", <String, dynamic>{"key": packagedPub});
+      res = await postAuthorizedJSON("/account/keys/public/set", <String, dynamic>{
+        "key": packagedPub,
+      });
       if (!res["success"]) {
         return SetupResponse(error: "key.error");
       }
@@ -67,7 +69,9 @@ class KeySetup extends ConnectionStep {
       if (!res["success"]) {
         return SetupResponse(error: "key.error");
       }
-      res = await postAuthorizedJSON("/account/keys/signature/set", <String, dynamic>{"key": packagedSignaturePub});
+      res = await postAuthorizedJSON("/account/keys/signature/set", <String, dynamic>{
+        "key": packagedSignaturePub,
+      });
       if (!res["success"]) {
         return SetupResponse(error: "key.error");
       }
@@ -155,7 +159,12 @@ class KeySetup extends ConnectionStep {
     // Go to the key setup page
     unawaited(
       Get.dialog(
-        KeySetupPage(signature: signature, signatureKeyPair: signatureKeyPair, encryptionKeyPair: encryptionKeyPair, exists: json["exists"]),
+        KeySetupPage(
+          signature: signature,
+          signatureKeyPair: signatureKeyPair,
+          encryptionKeyPair: encryptionKeyPair,
+          exists: json["exists"],
+        ),
         barrierDismissible: false,
       ),
     );
@@ -169,7 +178,13 @@ class KeySetupPage extends StatefulWidget {
   final String signature;
   final bool exists;
 
-  const KeySetupPage({super.key, required this.signatureKeyPair, required this.signature, required this.encryptionKeyPair, required this.exists});
+  const KeySetupPage({
+    super.key,
+    required this.signatureKeyPair,
+    required this.signature,
+    required this.encryptionKeyPair,
+    required this.exists,
+  });
 
   @override
   State<KeySetupPage> createState() => _KeySetupPageState();
@@ -186,7 +201,11 @@ class _KeySetupPageState extends State<KeySetupPage> {
     if (widget.exists) {
       // If there is a key request already, go to the code page
       controller.transitionTo(
-        KeyCodePage(signature: widget.signature, signatureKeyPair: widget.signatureKeyPair, encryptionKeyPair: widget.encryptionKeyPair),
+        KeyCodePage(
+          signature: widget.signature,
+          signatureKeyPair: widget.signatureKeyPair,
+          encryptionKeyPair: widget.encryptionKeyPair,
+        ),
       );
     } else {
       // If there is no key request, go to the key sync page
@@ -252,7 +271,8 @@ class _KeySynchronizationPageState extends State<KeySynchronizationPage> {
                 widget.signatureKeyPair.secretKey,
                 hashSha(widget.signature + packagePublicKey(widget.encryptionKeyPair.publicKey)),
               ),
-              "key": "${packagePublicKey(widget.signatureKeyPair.publicKey)}:${packagePublicKey(widget.encryptionKeyPair.publicKey)}",
+              "key":
+                  "${packagePublicKey(widget.signatureKeyPair.publicKey)}:${packagePublicKey(widget.encryptionKeyPair.publicKey)}",
             });
 
             if (!json["success"]) {
@@ -262,7 +282,11 @@ class _KeySynchronizationPageState extends State<KeySynchronizationPage> {
 
             unawaited(
               widget.controller.transitionTo(
-                KeyCodePage(encryptionKeyPair: widget.encryptionKeyPair, signatureKeyPair: widget.signatureKeyPair, signature: widget.signature),
+                KeyCodePage(
+                  encryptionKeyPair: widget.encryptionKeyPair,
+                  signatureKeyPair: widget.signatureKeyPair,
+                  signature: widget.signature,
+                ),
               ),
             );
           },
@@ -277,7 +301,12 @@ class KeyCodePage extends StatefulWidget {
   final KeyPair signatureKeyPair, encryptionKeyPair;
   final String signature;
 
-  const KeyCodePage({super.key, required this.signatureKeyPair, required this.signature, required this.encryptionKeyPair});
+  const KeyCodePage({
+    super.key,
+    required this.signatureKeyPair,
+    required this.signature,
+    required this.encryptionKeyPair,
+  });
 
   @override
   State<KeyCodePage> createState() => _KeyCodePageState();
@@ -292,8 +321,12 @@ class _KeyCodePageState extends State<KeyCodePage> {
     _timer = Timer.periodic(5000.ms, (timer) async {
       final json = await postJSON("/account/keys/requests/check", {
         "token": refreshToken,
-        "signature": signMessage(widget.signatureKeyPair.secretKey, hashSha(widget.signature + packagePublicKey(widget.encryptionKeyPair.publicKey))),
-        "key": "${packagePublicKey(widget.signatureKeyPair.publicKey)}:${packagePublicKey(widget.encryptionKeyPair.publicKey)}",
+        "signature": signMessage(
+          widget.signatureKeyPair.secretKey,
+          hashSha(widget.signature + packagePublicKey(widget.encryptionKeyPair.publicKey)),
+        ),
+        "key":
+            "${packagePublicKey(widget.signatureKeyPair.publicKey)}:${packagePublicKey(widget.encryptionKeyPair.publicKey)}",
       });
 
       if (!json["success"]) {
@@ -303,7 +336,11 @@ class _KeyCodePageState extends State<KeyCodePage> {
 
       // Add all the keys to the database if there is a payload
       if (json["payload"] != null && json["payload"] != "") {
-        final payload = decryptAsymmetricAnonymous(widget.encryptionKeyPair.publicKey, widget.encryptionKeyPair.secretKey, json["payload"]);
+        final payload = decryptAsymmetricAnonymous(
+          widget.encryptionKeyPair.publicKey,
+          widget.encryptionKeyPair.secretKey,
+          json["payload"],
+        );
         if (payload == "") {
           sendLog("couldn't decrypt message ${json["payload"]}");
           return;
@@ -332,7 +369,11 @@ class _KeyCodePageState extends State<KeyCodePage> {
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text("key.code".trParams({"code": widget.signature}), style: Get.textTheme.headlineMedium, textAlign: TextAlign.center),
+        Text(
+          "key.code".trParams({"code": widget.signature}),
+          style: Get.textTheme.headlineMedium,
+          textAlign: TextAlign.center,
+        ),
         verticalSpacing(sectionSpacing),
         Text('key.code.desc'.tr, style: Get.textTheme.bodyMedium),
       ],

@@ -78,7 +78,10 @@ class _MessageBarState extends State<MessageBar> {
                 Watch(
                   (ctx) => LoadingIconButton(
                     onTap: () => SidebarController.toggleSidebar(),
-                    icon: SidebarController.hideSidebar.value ? Icons.arrow_forward : Icons.arrow_back,
+                    icon:
+                        SidebarController.hideSidebar.value
+                            ? Icons.arrow_forward
+                            : Icons.arrow_back,
                   ),
                 ),
                 horizontalSpacing(elementSpacing),
@@ -92,16 +95,30 @@ class _MessageBarState extends State<MessageBar> {
                     borderRadius: BorderRadius.circular(defaultSpacing),
                     hoverColor: Get.theme.hoverColor,
                     onTap: () {
-                      showModal(ConversationInfoWindow(conversation: widget.conversation, position: ContextMenuData.fromKey(_infoKey, below: true)));
+                      showModal(
+                        ConversationInfoWindow(
+                          conversation: widget.conversation,
+                          position: ContextMenuData.fromKey(_infoKey, below: true),
+                        ),
+                      );
                     },
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: elementSpacing, horizontal: defaultSpacing),
+                      padding: const EdgeInsets.symmetric(
+                        vertical: elementSpacing,
+                        horizontal: defaultSpacing,
+                      ),
                       child: Row(
                         children: [
-                          Icon(widget.conversation.isGroup ? Icons.group : Icons.person, size: 30, color: Theme.of(context).colorScheme.onPrimary),
+                          Icon(
+                            widget.conversation.isGroup ? Icons.group : Icons.person,
+                            size: 30,
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
                           horizontalSpacing(defaultSpacing),
                           Text(
-                            widget.conversation.isGroup ? widget.conversation.containerSub.value.name : widget.conversation.dmName,
+                            widget.conversation.isGroup
+                                ? widget.conversation.containerSub.value.name
+                                : widget.conversation.dmName,
                             style: Theme.of(context).textTheme.titleMedium,
                           ),
                         ],
@@ -125,15 +142,23 @@ class _MessageBarState extends State<MessageBar> {
                     child: Row(
                       children: [
                         //* Zap share
-                        if (widget.conversation.type == model.ConversationType.directMessage && isDirectorySupported && !error)
+                        if (widget.conversation.type == model.ConversationType.directMessage &&
+                            isDirectorySupported &&
+                            !error)
                           Stack(
                             key: _zapShareKey,
                             children: [
                               IconButton(
                                 onPressed: () async {
-                                  await ZapShareController.openWindow(widget.conversation, ContextMenuData.fromKey(_zapShareKey, below: true));
+                                  await ZapShareController.openWindow(
+                                    widget.conversation,
+                                    ContextMenuData.fromKey(_zapShareKey, below: true),
+                                  );
                                 },
-                                icon: Icon(Icons.electric_bolt, color: Get.theme.colorScheme.onPrimary),
+                                icon: Icon(
+                                  Icons.electric_bolt,
+                                  color: Get.theme.colorScheme.onPrimary,
+                                ),
                                 tooltip: "chat.zapshare".tr,
                               ),
                               IgnorePointer(
@@ -144,9 +169,14 @@ class _MessageBarState extends State<MessageBar> {
                                     padding: const EdgeInsets.all(2.0),
                                     child: Watch(
                                       (ctx) => CircularProgressIndicator(
-                                        value: ZapShareController.waiting.value ? null : ZapShareController.progress.value.clamp(0, 1),
+                                        value:
+                                            ZapShareController.waiting.value
+                                                ? null
+                                                : ZapShareController.progress.value.clamp(0, 1),
                                         strokeWidth: 3,
-                                        valueColor: AlwaysStoppedAnimation<Color>(Get.theme.colorScheme.onPrimary),
+                                        valueColor: AlwaysStoppedAnimation<Color>(
+                                          Get.theme.colorScheme.onPrimary,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -185,7 +215,11 @@ class _MessageBarState extends State<MessageBar> {
                           ),
 
                         // Give the user the ability to add people to a conversation
-                        if (!error) ConversationAddButton(conversation: widget.conversation, loading: additionLoading),
+                        if (!error)
+                          ConversationAddButton(
+                            conversation: widget.conversation,
+                            loading: additionLoading,
+                          ),
 
                         Visibility(
                           visible: widget.conversation.isGroup,
@@ -195,19 +229,27 @@ class _MessageBarState extends State<MessageBar> {
                               icon: Icon(
                                 Icons.group,
                                 color:
-                                    SidebarController.rightSidebar[SidebarController.getCurrentKey()] is ConversationMembersRightSidebar
+                                    SidebarController
+                                                .rightSidebar[SidebarController.getCurrentKey()]
+                                            is ConversationMembersRightSidebar
                                         ? Theme.of(context).colorScheme.onPrimary
                                         : Theme.of(context).colorScheme.onSurface,
                               ),
                               onPressed: () {
-                                if (SidebarController.rightSidebar[SidebarController.getCurrentKey()] is ConversationMembersRightSidebar) {
+                                if (SidebarController
+                                        .rightSidebar[SidebarController.getCurrentKey()]
+                                    is ConversationMembersRightSidebar) {
                                   // Hide the sidebar in case it is currently there
-                                  SettingController.settings[AppSettings.showGroupMembers]!.setValue(false);
+                                  SettingController.settings[AppSettings.showGroupMembers]!
+                                      .setValue(false);
                                   SidebarController.setRightSidebar(null);
                                 } else {
                                   // Show the sidebar
-                                  SettingController.settings[AppSettings.showGroupMembers]!.setValue(true);
-                                  SidebarController.setRightSidebar(ConversationMembersRightSidebar(widget.conversation));
+                                  SettingController.settings[AppSettings.showGroupMembers]!
+                                      .setValue(true);
+                                  SidebarController.setRightSidebar(
+                                    ConversationMembersRightSidebar(widget.conversation),
+                                  );
                                 }
                               },
                             ),
@@ -224,16 +266,21 @@ class _MessageBarState extends State<MessageBar> {
                       icon: Icon(
                         Icons.search,
                         color:
-                            SidebarController.rightSidebar[SidebarController.getCurrentKey()] is MessageSearchRightSidebar
+                            SidebarController.rightSidebar[SidebarController.getCurrentKey()]
+                                    is MessageSearchRightSidebar
                                 ? Theme.of(context).colorScheme.onPrimary
                                 : Theme.of(context).colorScheme.onSurface,
                       ),
                       onPressed: () {
-                        if (SidebarController.rightSidebar[SidebarController.getCurrentKey()] is MessageSearchRightSidebar) {
+                        if (SidebarController.rightSidebar[SidebarController.getCurrentKey()]
+                            is MessageSearchRightSidebar) {
                           MessageController.restoreRightSidebar();
                         } else {
                           SidebarController.setRightSidebar(
-                            MessageSearchRightSidebar(SidebarController.getCurrentKey(), widget.conversation.id.encode()),
+                            MessageSearchRightSidebar(
+                              SidebarController.getCurrentKey(),
+                              widget.conversation.id.encode(),
+                            ),
                           );
                         }
                       },
@@ -281,7 +328,9 @@ class _ConversationAddButtonState extends State<ConversationAddButton> {
       onTap: () {
         // Calculate position of the window
         final RenderBox box = _groupAddKey.currentContext?.findRenderObject() as RenderBox;
-        final Offset globalPos = box.localToGlobal(box.size.bottomRight(const Offset(0, elementSpacing)));
+        final Offset globalPos = box.localToGlobal(
+          box.size.bottomRight(const Offset(0, elementSpacing)),
+        );
         final windowWidth = Get.mediaQuery.size.width;
         final position = Offset(windowWidth - globalPos.dx, globalPos.dy);
 
@@ -316,7 +365,10 @@ class _ConversationAddButtonState extends State<ConversationAddButton> {
 
                 // Add the people to the conversation
                 for (var friend in finalList) {
-                  final error = await ConversationService.addToConversation(widget.conversation, friend);
+                  final error = await ConversationService.addToConversation(
+                    widget.conversation,
+                    friend,
+                  );
                   if (error != null) {
                     showErrorPopup("error", error);
                     return null;
@@ -329,11 +381,20 @@ class _ConversationAddButtonState extends State<ConversationAddButton> {
           );
         } else {
           // Get the friend and open the window
-          final friend = widget.conversation.members.values.firstWhere((element) => element.address != StatusController.ownAddress).getFriend();
+          final friend =
+              widget.conversation.members.values
+                  .firstWhere((element) => element.address != StatusController.ownAddress)
+                  .getFriend();
           if (friend.unknown) {
             return;
           }
-          showModal(ConversationAddWindow(title: "conversations.add.create", position: ContextMenuData(position, true, false), initial: [friend]));
+          showModal(
+            ConversationAddWindow(
+              title: "conversations.add.create",
+              position: ContextMenuData(position, true, false),
+              initial: [friend],
+            ),
+          );
         }
       },
     );

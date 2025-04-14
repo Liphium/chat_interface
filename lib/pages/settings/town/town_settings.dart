@@ -33,7 +33,10 @@ class _TownSettingsPageState extends State<TownSettingsPage> {
           verticalSpacing(defaultSpacing),
 
           Container(
-            decoration: BoxDecoration(color: Get.theme.colorScheme.onInverseSurface, borderRadius: BorderRadius.circular(sectionSpacing)),
+            decoration: BoxDecoration(
+              color: Get.theme.colorScheme.onInverseSurface,
+              borderRadius: BorderRadius.circular(sectionSpacing),
+            ),
             padding: const EdgeInsets.all(sectionSpacing),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -45,7 +48,11 @@ class _TownSettingsPageState extends State<TownSettingsPage> {
                       Text("settings.town.own_town".tr, style: Get.theme.textTheme.labelMedium),
                       verticalSpacing(elementSpacing),
                       Text(
-                        "settings.town.own_town.desc".trParams({"domain": basePath, "version": apiVersion, "protocol": protocolVersion.toString()}),
+                        "settings.town.own_town.desc".trParams({
+                          "domain": basePath,
+                          "version": apiVersion,
+                          "protocol": protocolVersion.toString(),
+                        }),
                         style: Get.theme.textTheme.bodyMedium,
                       ),
                     ],
@@ -56,7 +63,10 @@ class _TownSettingsPageState extends State<TownSettingsPage> {
           ),
           verticalSpacing(defaultSpacing),
           Container(
-            decoration: BoxDecoration(color: Get.theme.colorScheme.onInverseSurface, borderRadius: BorderRadius.circular(sectionSpacing)),
+            decoration: BoxDecoration(
+              color: Get.theme.colorScheme.onInverseSurface,
+              borderRadius: BorderRadius.circular(sectionSpacing),
+            ),
             padding: const EdgeInsets.all(sectionSpacing),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -67,13 +77,18 @@ class _TownSettingsPageState extends State<TownSettingsPage> {
                     children: [
                       Text("settings.town.address".tr, style: Get.theme.textTheme.labelMedium),
                       verticalSpacing(elementSpacing),
-                      Text("settings.town.address.desc".trParams(), style: Get.theme.textTheme.bodyMedium),
+                      Text(
+                        "settings.town.address.desc".trParams(),
+                        style: Get.theme.textTheme.bodyMedium,
+                      ),
                     ],
                   ),
                 ),
                 FJElevatedButton(
                   onTap: () async {
-                    await Clipboard.setData(ClipboardData(text: StatusController.ownAddress.encode()));
+                    await Clipboard.setData(
+                      ClipboardData(text: StatusController.ownAddress.encode()),
+                    );
                     showSuccessPopup("success", "settings.town.address.copied".tr);
                   },
                   child: Text("copy".tr, style: Get.textTheme.labelMedium),

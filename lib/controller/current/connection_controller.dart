@@ -81,7 +81,9 @@ class ConnectionController {
 
       // If a retry is requested, retry all setups
       if (result.retryConnection) {
-        await Future.delayed(500.ms); // To prevent CPU overuse in case of a bug (hopefully never happens)
+        await Future.delayed(
+          500.ms,
+        ); // To prevent CPU overuse in case of a bug (hopefully never happens)
         unawaited(tryConnection());
         return;
       }

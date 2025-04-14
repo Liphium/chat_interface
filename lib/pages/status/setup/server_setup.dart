@@ -20,7 +20,9 @@ class ServerSetup extends Setup {
 
   @override
   Future<Widget?> load() async {
-    final server = await (db.select(db.setting)..where((tbl) => tbl.key.equals("server_url"))).getSingleOrNull();
+    final server =
+        await (db.select(db.setting)
+          ..where((tbl) => tbl.key.equals("server_url"))).getSingleOrNull();
 
     if (server == null) {
       return const ServerSelectorPage();
@@ -63,7 +65,11 @@ class _ServerSelectorPageState extends State<ServerSelectorPage> {
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text("setup.choose.town".tr, style: Get.textTheme.headlineMedium, textAlign: TextAlign.center),
+        Text(
+          "setup.choose.town".tr,
+          style: Get.textTheme.headlineMedium,
+          textAlign: TextAlign.center,
+        ),
         verticalSpacing(sectionSpacing),
         Text("setup.choose.town.desc".tr, style: Get.textTheme.bodyMedium),
         verticalSpacing(defaultSpacing),
@@ -74,16 +80,26 @@ class _ServerSelectorPageState extends State<ServerSelectorPage> {
           label: "learn_more".tr,
         ),
         verticalSpacing(sectionSpacing),
-        Align(alignment: Alignment.centerLeft, child: Text("setup.choose.town.selector".tr, style: Get.textTheme.titleMedium)),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: Text("setup.choose.town.selector".tr, style: Get.textTheme.titleMedium),
+        ),
         verticalSpacing(defaultSpacing),
         FJTextField(controller: _name, hintText: "placeholder.domain".tr),
         verticalSpacing(defaultSpacing),
-        AnimatedErrorContainer(padding: const EdgeInsets.only(bottom: defaultSpacing), message: _error, expand: true),
+        AnimatedErrorContainer(
+          padding: const EdgeInsets.only(bottom: defaultSpacing),
+          message: _error,
+          expand: true,
+        ),
         FJElevatedLoadingButton(
           loading: _loading,
           onTap: () async {
             _loading.value = true;
-            final json = await postAny("${formatPath(_name.text)}/pub", {}); // Send a request to get the public key (good test ig)
+            final json = await postAny(
+              "${formatPath(_name.text)}/pub",
+              {},
+            ); // Send a request to get the public key (good test ig)
             _loading.value = false;
             if (json["pub"] == null) {
               _error.value = "server.not_found".tr;
@@ -120,7 +136,9 @@ class _ServerSelectorPageState extends State<ServerSelectorPage> {
 
     // Set the path in the app and update it in the database
     basePath = path;
-    db.into(db.setting).insertOnConflictUpdate(SettingCompanion.insert(key: "server_url", value: path));
+    db
+        .into(db.setting)
+        .insertOnConflictUpdate(SettingCompanion.insert(key: "server_url", value: path));
     isHttps = path.startsWith("https://");
     if (widget.onSelected != null) {
       widget.onSelected!.call();

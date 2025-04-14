@@ -18,10 +18,18 @@ class Member {
       role = MemberRole.fromValue(json['role']);
 
   Member.fromData(MemberData data)
-    : this(LPHAddress.from(data.id), LPHAddress.from(fromDbEncrypted(data.accountId)), MemberRole.fromValue(data.roleId));
+    : this(
+        LPHAddress.from(data.id),
+        LPHAddress.from(fromDbEncrypted(data.accountId)),
+        MemberRole.fromValue(data.roleId),
+      );
 
-  MemberData toData(LPHAddress conversation) =>
-      MemberData(id: tokenId.encode(), accountId: dbEncrypted(address.encode()), roleId: role.value, conversationId: conversation.encode());
+  MemberData toData(LPHAddress conversation) => MemberData(
+    id: tokenId.encode(),
+    accountId: dbEncrypted(address.encode()),
+    roleId: role.value,
+    conversationId: conversation.encode(),
+  );
 
   Friend getFriend() {
     if (StatusController.ownAddress == address) return Friend.me();
@@ -32,7 +40,10 @@ class Member {
   ///
   /// Returns an error if there was one.
   Future<String?> promote(Conversation conversation) async {
-    final json = await postNodeJSON("/conversations/promote_token", {"token": conversation.token.toMap(), "data": tokenId.encode()});
+    final json = await postNodeJSON("/conversations/promote_token", {
+      "token": conversation.token.toMap(),
+      "data": tokenId.encode(),
+    });
 
     // Check if there was an error
     if (!json["success"]) {
@@ -45,7 +56,10 @@ class Member {
   ///
   /// Returns an error if there was one.
   Future<String?> demote(Conversation conversation) async {
-    final json = await postNodeJSON("/conversations/demote_token", {"token": conversation.token.toMap(), "data": tokenId.encode()});
+    final json = await postNodeJSON("/conversations/demote_token", {
+      "token": conversation.token.toMap(),
+      "data": tokenId.encode(),
+    });
 
     // Check if there was an error
     if (!json["success"]) {
@@ -59,7 +73,10 @@ class Member {
   /// Returns an error if there was one.
   Future<String?> remove(Conversation conversation) async {
     // Kick the member's token out of the conversation
-    final json = await postNodeJSON("/conversations/kick_member", {"token": conversation.token.toMap(), "data": tokenId.encode()});
+    final json = await postNodeJSON("/conversations/kick_member", {
+      "token": conversation.token.toMap(),
+      "data": tokenId.encode(),
+    });
 
     // Check if there was an error
     if (!json["success"]) {

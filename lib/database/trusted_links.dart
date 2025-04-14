@@ -41,7 +41,12 @@ class TrustedLinkHelper {
       return false;
     }
 
-    final result = await showConfirmPopup(ConfirmWindow(title: "file.links.title".tr, text: "file.links.description".trParams({"domain": domain})));
+    final result = await showConfirmPopup(
+      ConfirmWindow(
+        title: "file.links.title".tr,
+        text: "file.links.description".trParams({"domain": domain}),
+      ),
+    );
 
     if (result) {
       await db.trustedLink.insertOnConflictUpdate(TrustedLinkData(domain: domain));
@@ -96,7 +101,9 @@ class TrustedLinkHelper {
       return false;
     }
 
-    final result = await (db.trustedLink.select()..where((tbl) => tbl.domain.contains(domain))).getSingleOrNull();
+    final result =
+        await (db.trustedLink.select()..where((tbl) => tbl.domain.contains(domain)))
+            .getSingleOrNull();
     if (result == null) {
       return false;
     }

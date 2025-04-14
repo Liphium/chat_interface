@@ -75,9 +75,17 @@ class _TabletopRotateWindowState extends State<TabletopRotateWindow> {
     final canvasWidth = Get.width - TabletopController.globalCanvasPosition.dx;
     final canvasHeight = Get.height - TabletopController.globalCanvasPosition.dy;
     final center = Offset(canvasWidth / 2, canvasHeight / 2);
-    final focalPoint = TabletopView.localToWorldPos(center, TabletopController.canvasZoom, TabletopController.canvasOffset);
+    final focalPoint = TabletopView.localToWorldPos(
+      center,
+      TabletopController.canvasZoom,
+      TabletopController.canvasOffset,
+    );
     TabletopController.canvasRotation.value = value;
-    final newFocalPoint = TabletopView.localToWorldPos(center, TabletopController.canvasZoom, TabletopController.canvasOffset);
+    final newFocalPoint = TabletopView.localToWorldPos(
+      center,
+      TabletopController.canvasZoom,
+      TabletopController.canvasOffset,
+    );
 
     TabletopController.canvasOffset -= focalPoint - newFocalPoint;
   }

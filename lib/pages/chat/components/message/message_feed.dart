@@ -42,7 +42,11 @@ class _MessageFeedState extends State<MessageFeed> {
               children: [
                 Text("conversation.error".tr, style: Get.textTheme.titleMedium),
                 verticalSpacing(defaultSpacing),
-                Text(provider.conversation.error.value!, style: Get.textTheme.bodyMedium, textAlign: TextAlign.center),
+                Text(
+                  provider.conversation.error.value!,
+                  style: Get.textTheme.bodyMedium,
+                  textAlign: TextAlign.center,
+                ),
               ],
             ),
           ),
@@ -64,7 +68,15 @@ class _MessageFeedState extends State<MessageFeed> {
                         Center(
                           child: ConstrainedBox(
                             constraints: BoxConstraints(
-                              maxWidth: (SettingController.settings[ChatSettings.chatTheme]!.value.value ?? 1) == 0 ? double.infinity : 1200,
+                              maxWidth:
+                                  (SettingController
+                                                  .settings[ChatSettings.chatTheme]!
+                                                  .value
+                                                  .value ??
+                                              1) ==
+                                          0
+                                      ? double.infinity
+                                      : 1200,
                             ),
                             child: Watch((ctx) {
                               if (!MessageController.loaded.value) {
@@ -100,7 +112,10 @@ class _MessageFeedState extends State<MessageFeed> {
                                         SizedBox(
                                           width: Get.textTheme.labelMedium!.fontSize! * 1.5,
                                           height: Get.textTheme.labelMedium!.fontSize! * 1.5,
-                                          child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary, strokeWidth: 3),
+                                          child: CircularProgressIndicator(
+                                            color: Get.theme.colorScheme.onPrimary,
+                                            strokeWidth: 3,
+                                          ),
                                         ),
                                         horizontalSpacing(defaultSpacing),
                                         Text("loading".tr, style: Get.textTheme.labelMedium),
@@ -121,7 +136,11 @@ class _MessageFeedState extends State<MessageFeed> {
                     child:
                         provider.conversation.borked
                             ? const SizedBox.shrink()
-                            : MessageInput(rectangle: widget.rectInput, draft: provider.conversation.id.encode(), provider: provider),
+                            : MessageInput(
+                              rectangle: widget.rectInput,
+                              draft: provider.conversation.id.encode(),
+                              provider: provider,
+                            ),
                   ),
                 ],
               ),

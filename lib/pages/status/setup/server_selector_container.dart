@@ -16,7 +16,8 @@ class ServerSelectorContainer extends StatelessWidget {
       color: Get.theme.colorScheme.inverseSurface,
       borderRadius: BorderRadius.circular(defaultSpacing),
       child: InkWell(
-        onTap: () => setupManager.controller!.transitionTo(ServerSelectorPage(onSelected: onSelected)),
+        onTap:
+            () => setupManager.controller!.transitionTo(ServerSelectorPage(onSelected: onSelected)),
         borderRadius: BorderRadius.circular(defaultSpacing),
         child: Padding(
           padding: const EdgeInsets.all(defaultSpacing),
@@ -24,7 +25,13 @@ class ServerSelectorContainer extends StatelessWidget {
             children: [
               Icon(Icons.public, color: Get.theme.colorScheme.onPrimary),
               horizontalSpacing(defaultSpacing),
-              Expanded(child: Text(basePath.replaceAll("/v1", ""), style: Get.theme.textTheme.labelMedium, overflow: TextOverflow.ellipsis)),
+              Expanded(
+                child: Text(
+                  basePath.replaceAll("/v1", ""),
+                  style: Get.theme.textTheme.labelMedium,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
               horizontalSpacing(defaultSpacing),
               Icon(Icons.edit, color: Get.theme.colorScheme.onPrimary),
             ],

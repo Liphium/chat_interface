@@ -24,20 +24,32 @@ class _ColorPreviewState extends State<ColorPreview> {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
         child: Container(
-          decoration: BoxDecoration(color: colors.getBackground2(), borderRadius: BorderRadius.circular(defaultSpacing)),
+          decoration: BoxDecoration(
+            color: colors.getBackground2(),
+            borderRadius: BorderRadius.circular(defaultSpacing),
+          ),
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.only(top: sectionSpacing, right: sectionSpacing, left: sectionSpacing),
+                padding: const EdgeInsets.only(
+                  top: sectionSpacing,
+                  right: sectionSpacing,
+                  left: sectionSpacing,
+                ),
                 child: Container(
-                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(defaultSpacing), color: colors.getPrimaryContainer()),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(defaultSpacing),
+                    color: colors.getPrimaryContainer(),
+                  ),
                   padding: const EdgeInsets.all(defaultSpacing),
                   height: 60,
                   child: Row(
                     children: [
                       Icon(Icons.color_lens, color: colors.getPrimary(), size: 40),
                       horizontalSpacing(defaultSpacing),
-                      Expanded(child: Text("theme.primary".tr, style: Get.theme.textTheme.labelLarge)),
+                      Expanded(
+                        child: Text("theme.primary".tr, style: Get.theme.textTheme.labelLarge),
+                      ),
                     ],
                   ),
                 ),
@@ -45,28 +57,41 @@ class _ColorPreviewState extends State<ColorPreview> {
               Padding(
                 padding: const EdgeInsets.all(sectionSpacing),
                 child: Container(
-                  decoration: BoxDecoration(borderRadius: BorderRadius.circular(defaultSpacing), color: colors.getSecondaryContainer()),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(defaultSpacing),
+                    color: colors.getSecondaryContainer(),
+                  ),
                   padding: const EdgeInsets.all(defaultSpacing),
                   height: 60,
                   child: Row(
                     children: [
                       Icon(Icons.color_lens, color: colors.getSecondary(), size: 40),
                       horizontalSpacing(defaultSpacing),
-                      Expanded(child: Text("theme.secondary".tr, style: Get.theme.textTheme.labelLarge)),
+                      Expanded(
+                        child: Text("theme.secondary".tr, style: Get.theme.textTheme.labelLarge),
+                      ),
                     ],
                   ),
                 ),
               ),
               verticalSpacing(widget.mobile ? 30 : 100),
               Container(
-                decoration: BoxDecoration(borderRadius: BorderRadius.circular(defaultSpacing), color: colors.getBackground3()),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(defaultSpacing),
+                  color: colors.getBackground3(),
+                ),
                 padding: const EdgeInsets.all(defaultSpacing),
                 height: 60,
                 child: Row(
                   children: [
                     Icon(Icons.person, color: colors.getPrimary(), size: 40),
                     horizontalSpacing(defaultSpacing),
-                    Expanded(child: Text(StatusController.name.value, style: Get.theme.textTheme.labelLarge)),
+                    Expanded(
+                      child: Text(
+                        StatusController.name.value,
+                        style: Get.theme.textTheme.labelLarge,
+                      ),
+                    ),
                   ],
                 ),
               ),

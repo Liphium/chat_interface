@@ -47,7 +47,14 @@ class _VideoPreviewState extends State<VideoPreview> with SignalsMixin {
       'video':
           video
               ? {
-                'mandatory': {'minWidth': '1920', 'minHeight': '1080', 'width': '1920', 'height': '1080', 'minFrameRate': '24', 'frameRate': '30'},
+                'mandatory': {
+                  'minWidth': '1920',
+                  'minHeight': '1080',
+                  'width': '1920',
+                  'height': '1080',
+                  'minFrameRate': '24',
+                  'frameRate': '30',
+                },
                 'facingMode': 'user',
                 'optional': [],
               }

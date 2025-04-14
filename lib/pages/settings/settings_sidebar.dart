@@ -13,7 +13,12 @@ class SettingsSidebar extends StatefulWidget {
   final String? currentCategory;
   final double sidebarWidth;
 
-  const SettingsSidebar({super.key, required this.sidebarWidth, this.currentCategory, this.category});
+  const SettingsSidebar({
+    super.key,
+    required this.sidebarWidth,
+    this.currentCategory,
+    this.category,
+  });
 
   @override
   State<SettingsSidebar> createState() => _SettingsSidebarState();
@@ -33,13 +38,25 @@ class _SettingsSidebarState extends State<SettingsSidebar> {
     return ConstrainedBox(
       constraints: BoxConstraints(maxWidth: widget.sidebarWidth),
       child: Padding(
-        padding: const EdgeInsets.only(top: defaultSpacing * 1.5, bottom: defaultSpacing * 1.5, right: defaultSpacing, left: defaultSpacing * 1.5),
+        padding: const EdgeInsets.only(
+          top: defaultSpacing * 1.5,
+          bottom: defaultSpacing * 1.5,
+          right: defaultSpacing,
+          left: defaultSpacing * 1.5,
+        ),
         child: Container(
-          decoration: BoxDecoration(color: Get.theme.colorScheme.onInverseSurface, borderRadius: BorderRadius.circular(sectionSpacing)),
+          decoration: BoxDecoration(
+            color: Get.theme.colorScheme.onInverseSurface,
+            borderRadius: BorderRadius.circular(sectionSpacing),
+          ),
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.only(top: sectionSpacing, right: sectionSpacing, left: sectionSpacing),
+                padding: const EdgeInsets.only(
+                  top: sectionSpacing,
+                  right: sectionSpacing,
+                  left: sectionSpacing,
+                ),
                 child: FJElevatedButton(
                   onTap: () => Get.back(),
                   child: Padding(
@@ -87,7 +104,8 @@ class _SettingsSidebarState extends State<SettingsSidebar> {
                                     if (!element.web && isWeb) {
                                       return const SizedBox();
                                     }
-                                    if (!StatusController.permissions.contains("admin") && element.admin) {
+                                    if (!StatusController.permissions.contains("admin") &&
+                                        element.admin) {
                                       return const SizedBox();
                                     }
 
@@ -115,7 +133,9 @@ class _SettingsSidebarState extends State<SettingsSidebar> {
                                                 Icon(
                                                   element.icon,
                                                   color: Theme.of(context).colorScheme.onPrimary,
-                                                  size: Get.theme.textTheme.titleLarge!.fontSize! * 1.5,
+                                                  size:
+                                                      Get.theme.textTheme.titleLarge!.fontSize! *
+                                                      1.5,
                                                 ),
                                                 horizontalSpacing(defaultSpacing),
                                                 Expanded(

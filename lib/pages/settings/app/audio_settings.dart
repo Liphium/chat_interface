@@ -86,28 +86,52 @@ class _AudioSettingsPageState extends State<AudioSettingsPage> {
     });
 
     // Set the selected devices
-    await libspace.setInputDevice(engine: _engine.peek()!, device: AudioSettings.microphone.getValue());
-    await libspace.setOutputDevice(engine: _engine.peek()!, device: AudioSettings.microphone.getValue());
+    await libspace.setInputDevice(
+      engine: _engine.peek()!,
+      device: AudioSettings.microphone.getValue(),
+    );
+    await libspace.setOutputDevice(
+      engine: _engine.peek()!,
+      device: AudioSettings.microphone.getValue(),
+    );
 
     // Add subscriptions to automatically update the engine
     _disposeFunctions.add(
       AudioSettings.microphoneActivationMode.value.subscribe((value) {
-        libspace.setActivityDetection(engine: _engine.peek()!, enabled: AudioSettings.microphoneActivationMode.getValue() == 0);
+        libspace.setActivityDetection(
+          engine: _engine.peek()!,
+          enabled: AudioSettings.microphoneActivationMode.getValue() == 0,
+        );
       }),
     );
-    await libspace.setActivityDetection(engine: _engine.peek()!, enabled: AudioSettings.microphoneActivationMode.getValue() == 0);
+    await libspace.setActivityDetection(
+      engine: _engine.peek()!,
+      enabled: AudioSettings.microphoneActivationMode.getValue() == 0,
+    );
     _disposeFunctions.add(
       AudioSettings.automaticVoiceActivity.value.subscribe((value) {
-        libspace.setAutomaticDetection(engine: _engine.peek()!, enabled: AudioSettings.automaticVoiceActivity.getValue());
+        libspace.setAutomaticDetection(
+          engine: _engine.peek()!,
+          enabled: AudioSettings.automaticVoiceActivity.getValue(),
+        );
       }),
     );
-    await libspace.setAutomaticDetection(engine: _engine.peek()!, enabled: AudioSettings.automaticVoiceActivity.getValue());
+    await libspace.setAutomaticDetection(
+      engine: _engine.peek()!,
+      enabled: AudioSettings.automaticVoiceActivity.getValue(),
+    );
     _disposeFunctions.add(
       AudioSettings.microphoneSensitivity.value.subscribe((value) {
-        libspace.setTalkingAmplitude(engine: _engine.peek()!, amplitude: AudioSettings.microphoneSensitivity.getValue());
+        libspace.setTalkingAmplitude(
+          engine: _engine.peek()!,
+          amplitude: AudioSettings.microphoneSensitivity.getValue(),
+        );
       }),
     );
-    await libspace.setTalkingAmplitude(engine: _engine.peek()!, amplitude: AudioSettings.microphoneSensitivity.getValue());
+    await libspace.setTalkingAmplitude(
+      engine: _engine.peek()!,
+      amplitude: AudioSettings.microphoneSensitivity.getValue(),
+    );
 
     // Enable the packet sending
     await libspace.setVoiceEnabled(engine: _engine.peek()!, enabled: true);
@@ -139,13 +163,19 @@ class _AudioSettingsPageState extends State<AudioSettingsPage> {
           // Render a list selection for the microphones
           Text("settings.audio.microphone".tr, style: theme.textTheme.labelLarge),
           verticalSpacing(defaultSpacing),
-          Watch((ctx) => _engine.value == null ? SizedBox() : MicrophoneSelection(engine: _engine.value!)),
+          Watch(
+            (ctx) =>
+                _engine.value == null ? SizedBox() : MicrophoneSelection(engine: _engine.value!),
+          ),
           verticalSpacing(sectionSpacing),
 
           // Render a selection for the output device
           Text("settings.audio.output_device".tr, style: theme.textTheme.labelLarge),
           verticalSpacing(defaultSpacing),
-          Watch((ctx) => _engine.value == null ? SizedBox() : OutputDeviceSelection(engine: _engine.value!)),
+          Watch(
+            (ctx) =>
+                _engine.value == null ? SizedBox() : OutputDeviceSelection(engine: _engine.value!),
+          ),
           verticalSpacing(sectionSpacing),
 
           // The selection for the microphone activation mode
@@ -174,7 +204,10 @@ class _AudioSettingsPageState extends State<AudioSettingsPage> {
               ),
             ],
           ),
-          ListSelectionSetting(setting: AudioSettings.microphoneActivationMode, items: AudioSettings.activationModes),
+          ListSelectionSetting(
+            setting: AudioSettings.microphoneActivationMode,
+            items: AudioSettings.activationModes,
+          ),
           verticalSpacing(defaultSpacing),
 
           // Only render automatic sensitivity detection when
@@ -191,7 +224,9 @@ class _AudioSettingsPageState extends State<AudioSettingsPage> {
           // Only render the sensitivity slider in case automatic detection is off
           Watch(
             (ctx) => Visibility(
-              visible: AudioSettings.microphoneActivationMode.getValue() == 0 && !AudioSettings.automaticVoiceActivity.getValue(),
+              visible:
+                  AudioSettings.microphoneActivationMode.getValue() == 0 &&
+                  !AudioSettings.automaticVoiceActivity.getValue(),
               child: DoubleSelectionSetting(
                 settingName: AudioSettings.microphoneSensitivity.label,
                 description: "settings.audio.microphone.sensitivity.desc",

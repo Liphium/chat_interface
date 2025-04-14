@@ -4,7 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
-const noTextHeight = TextHeightBehavior(applyHeightToFirstAscent: false, applyHeightToLastDescent: false);
+const noTextHeight = TextHeightBehavior(
+  applyHeightToFirstAscent: false,
+  applyHeightToLastDescent: false,
+);
 
 Widget verticalSpacing(double height) {
   return SizedBox(height: height);
@@ -17,7 +20,9 @@ Widget horizontalSpacing(double width) {
 String getRandomString(int length) {
   const chars = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
   final random = Random();
-  return String.fromCharCodes(List.generate(length, (index) => chars.codeUnitAt(random.nextInt(chars.length))));
+  return String.fromCharCodes(
+    List.generate(length, (index) => chars.codeUnitAt(random.nextInt(chars.length))),
+  );
 }
 
 bool isMobileMode() {
@@ -47,7 +52,10 @@ Future<T?>? showModal<T>(Widget widget, {mobileSliding = false}) async {
       builder: (context) {
         return LayoutBuilder(
           builder: (context, constraints) {
-            return Padding(padding: EdgeInsets.only(bottom: Get.mediaQuery.viewInsets.bottom), child: widget);
+            return Padding(
+              padding: EdgeInsets.only(bottom: Get.mediaQuery.viewInsets.bottom),
+              child: widget,
+            );
           },
         );
       },
@@ -84,11 +92,18 @@ String formatDay(DateTime time) {
 }
 
 String formatOnlyYear(DateTime time) {
-  return "time".trParams({"day": time.day.toString().padLeft(2, "0"), "month": time.month.toString().padLeft(2, "0"), "year": time.year.toString()});
+  return "time".trParams({
+    "day": time.day.toString().padLeft(2, "0"),
+    "month": time.month.toString().padLeft(2, "0"),
+    "year": time.year.toString(),
+  });
 }
 
 String formatMessageTime(DateTime time) {
-  return "message.time".trParams({"hour": time.hour.toString().padLeft(2, "0"), "minute": time.minute.toString().padLeft(2, "0")});
+  return "message.time".trParams({
+    "hour": time.hour.toString().padLeft(2, "0"),
+    "minute": time.minute.toString().padLeft(2, "0"),
+  });
 }
 
 String formatGeneralTime(DateTime time) {
@@ -102,19 +117,25 @@ String formatGeneralTime(DateTime time) {
 }
 
 class ExpandEffect extends CustomEffect {
-  ExpandEffect({super.curve, super.duration, Axis? axis, Alignment? alignment, double? customHeightFactor, super.delay})
-    : super(
-        builder: (context, value, child) {
-          return ClipRect(
-            child: Align(
-              alignment: alignment ?? Alignment.topCenter,
-              heightFactor: customHeightFactor ?? (axis == Axis.vertical ? max(value, 0.0) : null),
-              widthFactor: axis == Axis.horizontal ? max(value, 0.0) : null,
-              child: child,
-            ),
-          );
-        },
-      );
+  ExpandEffect({
+    super.curve,
+    super.duration,
+    Axis? axis,
+    Alignment? alignment,
+    double? customHeightFactor,
+    super.delay,
+  }) : super(
+         builder: (context, value, child) {
+           return ClipRect(
+             child: Align(
+               alignment: alignment ?? Alignment.topCenter,
+               heightFactor: customHeightFactor ?? (axis == Axis.vertical ? max(value, 0.0) : null),
+               widthFactor: axis == Axis.horizontal ? max(value, 0.0) : null,
+               child: child,
+             ),
+           );
+         },
+       );
 }
 
 class ReverseExpandEffect extends CustomEffect {
@@ -142,7 +163,15 @@ class DevicePadding extends StatelessWidget {
   final EdgeInsets padding;
   final Widget? child;
 
-  const DevicePadding({super.key, this.top = false, this.bottom = false, this.left = false, this.right = false, required this.padding, this.child});
+  const DevicePadding({
+    super.key,
+    this.top = false,
+    this.bottom = false,
+    this.left = false,
+    this.right = false,
+    required this.padding,
+    this.child,
+  });
 
   @override
   Widget build(BuildContext context) {

@@ -55,7 +55,8 @@ class GeneralSettingsTranslations extends Translations {
       'links.warning':
           'This an advanced section. Changing the default behavior of the app might result in leaks of your data or other various things. Only change things here if you know what you\'re doing.',
       'links.locations': 'Settings for locations',
-      'links.unsafe_sources': 'Allow accessing resources from unsafe locations (e.g. websites with HTTP)',
+      'links.unsafe_sources':
+          'Allow accessing resources from unsafe locations (e.g. websites with HTTP)',
       'links.trusted_domains': 'Trusted domains',
       'links.trust_mode': 'Select which domains you want to trust.',
       'links.trust_mode.all': 'All domains',

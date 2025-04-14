@@ -25,9 +25,13 @@ class ProfileHelper {
   /// Returns the file ID associated with the profile picture.
   static Future<String?> downloadProfilePicture(Friend friend) async {
     // Get old profile picture
-    final oldProfile = await (db.profile.select()..where((tbl) => tbl.id.equals(friend.id.encode()))).getSingleOrNull();
+    final oldProfile =
+        await (db.profile.select()..where((tbl) => tbl.id.equals(friend.id.encode())))
+            .getSingleOrNull();
 
-    final json = await postAddress(friend.id.server, "/account/profile/get", <String, dynamic>{"id": friend.id.id});
+    final json = await postAddress(friend.id.server, "/account/profile/get", <String, dynamic>{
+      "id": friend.id.id,
+    });
 
     if (!json["success"]) {
       sendLog("ERROR WHILE GETTING PROFILE: ${json["error"]}");
@@ -52,7 +56,9 @@ class ProfileHelper {
     }
 
     // Decrypt the profile picture data
-    final containerJson = jsonDecode(decryptSymmetric(json["profile"]["container"], (await friend.getKeys()).profileKey));
+    final containerJson = jsonDecode(
+      decryptSymmetric(json["profile"]["container"], (await friend.getKeys()).profileKey),
+    );
     final container = AttachmentController.fromJson(StorageType.permanent, containerJson);
 
     String? oldPictureId;
@@ -74,7 +80,11 @@ class ProfileHelper {
     }
 
     // Download the file
-    final success = await AttachmentController.downloadAttachment(container, popups: false, trustPopups: true);
+    final success = await AttachmentController.downloadAttachment(
+      container,
+      popups: false,
+      trustPopups: true,
+    );
     if (!success) {
       sendLog("download failed");
       return null;
@@ -94,9 +104,18 @@ class ProfileHelper {
   }
 
   /// Upload a profile picture to the server and set it as the current profile picture
-  static Future<bool> uploadProfilePicture(XFile file, String originalName, {Uint8List? bytes}) async {
+  static Future<bool> uploadProfilePicture(
+    XFile file,
+    String originalName, {
+    Uint8List? bytes,
+  }) async {
     // Upload the file
-    final response = await AttachmentController.uploadFile(UploadData(file), StorageType.permanent, Constants.fileAppDataTag, bytes: bytes);
+    final response = await AttachmentController.uploadFile(
+      UploadData(file),
+      StorageType.permanent,
+      Constants.fileAppDataTag,
+      bytes: bytes,
+    );
     if (response.container == null) {
       showErrorPopup("error", response.message);
       return false;
@@ -114,7 +133,9 @@ class ProfileHelper {
     }
 
     // Set in local database
-    await FriendController.friends[StatusController.ownAddress]!.updateProfilePicture(response.container!);
+    await FriendController.friends[StatusController.ownAddress]!.updateProfilePicture(
+      response.container!,
+    );
 
     return true;
   }
@@ -134,7 +155,8 @@ class ProfileHelper {
 
   /// Get the file id of the profile picture of a friend
   static Future<ProfileData?> getProfileDataLocal(String id) async {
-    final profile = await (db.profile.select()..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
+    final profile =
+        await (db.profile.select()..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
     return profile;
   }
 

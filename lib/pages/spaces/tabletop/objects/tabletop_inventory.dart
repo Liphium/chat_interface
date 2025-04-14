@@ -40,7 +40,8 @@ class InventoryObject extends TableObject {
 
   int inventoryHoverIndex = -1;
 
-  InventoryObject(String id, int order, Offset location, Size size) : super(id, order, location, size, TableObjectType.inventory);
+  InventoryObject(String id, int order, Offset location, Size size)
+    : super(id, order, location, size, TableObjectType.inventory);
 
   @override
   void render(Canvas canvas, Offset location) {
@@ -90,7 +91,9 @@ class InventoryObject extends TableObject {
 
     // Check if the general inventory is hovered
     final bool inventoryHovered =
-        backRect.contains(TabletopController.mousePos) && TabletopController.heldObject != null && TabletopController.heldObject != this;
+        backRect.contains(TabletopController.mousePos) &&
+        TabletopController.heldObject != null &&
+        TabletopController.heldObject != this;
     if (inventoryHovered) {
       inventoryHoverIndex = 0;
     } else {
@@ -112,7 +115,9 @@ class InventoryObject extends TableObject {
 
       // Draw the card and update positions
       object.positionOverwrite = true;
-      if (TabletopController.hoveringObjects.contains(this) || location != this.location || object.positionX.lastValue == 0) {
+      if (TabletopController.hoveringObjects.contains(this) ||
+          location != this.location ||
+          object.positionX.lastValue == 0) {
         object.positionX.setRealValue(calcX);
         object.positionY.setRealValue(calcY);
       } else {
@@ -126,7 +131,8 @@ class InventoryObject extends TableObject {
 
       // Tell the controller about the hover state
       if (ownInventory) {
-        final hovered = rect.contains(TabletopController.mousePos) && TabletopController.heldObject == null;
+        final hovered =
+            rect.contains(TabletopController.mousePos) && TabletopController.heldObject == null;
         if (hovered && !TabletopController.hoveringObjects.contains(object)) {
           TabletopController.hoveringObjects.insert(0, object);
         } else if (!hovered && TabletopController.hoveringObjects.contains(object)) {
@@ -186,7 +192,9 @@ class InventoryObject extends TableObject {
     });
 
     // Remove all cards that are not in the new data
-    _cards.removeWhere((c) => !cardList.any((o) => o["i"] == c.container?.id && o["u"] == c.container?.url));
+    _cards.removeWhere(
+      (c) => !cardList.any((o) => o["i"] == c.container?.id && o["u"] == c.container?.url),
+    );
 
     // Go through all cards and unpack them (only works in main thread cause sodium)
     int index = -1;
@@ -267,7 +275,13 @@ class _InventoryObjectWindowState extends State<InventoryObjectWindow> {
         children: [
           Text("Inventory settings".tr, style: Get.theme.textTheme.titleMedium),
           verticalSpacing(sectionSpacing),
-          Row(children: [Text("Show cards to other players", style: theme.textTheme.bodyMedium), const Spacer(), FJSwitch(value: false)]),
+          Row(
+            children: [
+              Text("Show cards to other players", style: theme.textTheme.bodyMedium),
+              const Spacer(),
+              FJSwitch(value: false),
+            ],
+          ),
           verticalSpacing(defaultSpacing),
           FJElevatedButton(
             onTap: () {
@@ -278,7 +292,12 @@ class _InventoryObjectWindowState extends State<InventoryObjectWindow> {
               final object = InventoryObject("", 0, widget.location, Size(200, 200));
               object.sendAdd();
             },
-            child: Center(child: Text((widget.object != null ? "edit" : "create").tr, style: Get.theme.textTheme.labelLarge)),
+            child: Center(
+              child: Text(
+                (widget.object != null ? "edit" : "create").tr,
+                style: Get.theme.textTheme.labelLarge,
+              ),
+            ),
           ),
         ],
       ),

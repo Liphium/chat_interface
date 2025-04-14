@@ -99,16 +99,30 @@ class _SpaceRendererState extends State<SpaceRenderer> with SignalsMixin {
                 children: [
                   Padding(
                     padding: const EdgeInsets.all(elementSpacing),
-                    child: SizedBox(width: 30, height: 30, child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary)),
+                    child: SizedBox(
+                      width: 30,
+                      height: 30,
+                      child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary),
+                    ),
                   ),
                   horizontalSpacing(defaultSpacing),
                   Flexible(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("chat.space.loading".tr, style: Get.theme.textTheme.labelMedium, overflow: TextOverflow.ellipsis),
+                        Text(
+                          "chat.space.loading".tr,
+                          style: Get.theme.textTheme.labelMedium,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                         verticalSpacing(elementSpacing),
-                        Flexible(child: Text("#${widget.container.roomId}", style: Get.theme.textTheme.bodySmall, overflow: TextOverflow.ellipsis)),
+                        Flexible(
+                          child: Text(
+                            "#${widget.container.roomId}",
+                            style: Get.theme.textTheme.bodySmall,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -139,9 +153,17 @@ class _SpaceRendererState extends State<SpaceRenderer> with SignalsMixin {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("chat.space.not_found".tr, style: Get.theme.textTheme.labelMedium, overflow: TextOverflow.ellipsis),
+                        Text(
+                          "chat.space.not_found".tr,
+                          style: Get.theme.textTheme.labelMedium,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                         verticalSpacing(elementSpacing),
-                        Text("#${widget.container.roomId}", style: Get.theme.textTheme.bodySmall, overflow: TextOverflow.ellipsis),
+                        Text(
+                          "#${widget.container.roomId}",
+                          style: Get.theme.textTheme.bodySmall,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ],
                     ),
                   ),
@@ -181,7 +203,8 @@ class _SpaceRendererState extends State<SpaceRenderer> with SignalsMixin {
                     }
                     : null,
             child: Padding(
-              padding: widget.clickable ? const EdgeInsets.all(defaultSpacing) : const EdgeInsets.all(0),
+              padding:
+                  widget.clickable ? const EdgeInsets.all(defaultSpacing) : const EdgeInsets.all(0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -204,7 +227,11 @@ class _SpaceRendererState extends State<SpaceRenderer> with SignalsMixin {
                                         left: index * 25,
                                         child: Tooltip(
                                           message: info.friends[index].displayName.value,
-                                          child: SizedBox(width: 44, height: 44, child: UserAvatar(id: info.friends[index].id, size: 44)),
+                                          child: SizedBox(
+                                            width: 44,
+                                            height: 44,
+                                            child: UserAvatar(id: info.friends[index].id, size: 44),
+                                          ),
                                         ),
                                       );
                                     }),
@@ -213,13 +240,25 @@ class _SpaceRendererState extends State<SpaceRenderer> with SignalsMixin {
                               ),
                             ),
                             Visibility(
-                              visible: partyAmount >= renderAmount && renderAmount > 0 && partyAmount != renderAmount,
+                              visible:
+                                  partyAmount >= renderAmount &&
+                                  renderAmount > 0 &&
+                                  partyAmount != renderAmount,
                               child: Padding(
                                 padding: const EdgeInsets.only(left: defaultSpacing),
-                                child: Text("+${partyAmount - renderAmount}", style: Get.theme.textTheme.bodyLarge),
+                                child: Text(
+                                  "+${partyAmount - renderAmount}",
+                                  style: Get.theme.textTheme.bodyLarge,
+                                ),
                               ),
                             ),
-                            Visibility(visible: renderAmount == 0, child: Text("$partyAmount members", style: Get.theme.textTheme.bodyLarge)),
+                            Visibility(
+                              visible: renderAmount == 0,
+                              child: Text(
+                                "$partyAmount members",
+                                style: Get.theme.textTheme.bodyLarge,
+                              ),
+                            ),
                           ],
                         ),
                       ],

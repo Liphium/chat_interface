@@ -17,7 +17,10 @@ class StatusService {
     final event = await connector.sendActionAndWait(
       ServerAction("st_validate", <String, dynamic>{
         "status": StatusController.statusPacket(
-          StatusController.newStatusJson(message ?? StatusController.status.peek(), type ?? StatusController.type.peek()),
+          StatusController.newStatusJson(
+            message ?? StatusController.status.peek(),
+            type ?? StatusController.type.peek(),
+          ),
         ),
         "data": StatusController.sharedContentPacket(),
       }),

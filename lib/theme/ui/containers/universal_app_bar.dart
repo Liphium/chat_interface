@@ -22,7 +22,12 @@ class UniversalAppBar extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: elementSpacing, horizontal: defaultSpacing),
         child: Row(
           children: [
-            LoadingIconButton(onTap: () => Get.back(), iconSize: fittedIconSize(24), icon: Icons.arrow_back, color: Get.theme.colorScheme.onPrimary),
+            LoadingIconButton(
+              onTap: () => Get.back(),
+              iconSize: fittedIconSize(24),
+              icon: Icons.arrow_back,
+              color: Get.theme.colorScheme.onPrimary,
+            ),
             horizontalSpacing(defaultSpacing),
             Text(label.tr, style: Get.theme.textTheme.labelLarge),
           ],

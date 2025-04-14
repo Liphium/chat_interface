@@ -41,14 +41,27 @@ class _AdminAccountProfileState extends State<AdminAccountProfile> {
               // Fields for copying all the account data
               LPHCopyField(label: "settings.acc_profile.info.id".tr, value: widget.account.id),
               verticalSpacing(defaultSpacing),
-              LPHCopyField(label: "settings.acc_profile.info.email".tr, value: widget.account.email),
+              LPHCopyField(
+                label: "settings.acc_profile.info.email".tr,
+                value: widget.account.email,
+              ),
               verticalSpacing(defaultSpacing),
               Row(
                 mainAxisSize: MainAxisSize.max,
                 children: [
-                  Expanded(child: LPHCopyField(label: "settings.acc_profile.info.username".tr, value: widget.account.username)),
+                  Expanded(
+                    child: LPHCopyField(
+                      label: "settings.acc_profile.info.username".tr,
+                      value: widget.account.username,
+                    ),
+                  ),
                   horizontalSpacing(defaultSpacing),
-                  Expanded(child: LPHCopyField(label: "settings.acc_profile.info.display_name".tr, value: widget.account.displayName)),
+                  Expanded(
+                    child: LPHCopyField(
+                      label: "settings.acc_profile.info.display_name".tr,
+                      value: widget.account.displayName,
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -58,12 +71,18 @@ class _AdminAccountProfileState extends State<AdminAccountProfile> {
             children: [
               LPHActionField(
                 primary: "rank".tr,
-                secondary: StatusController.ranks.firstWhere((rank) => rank.id == widget.account.rankID).name,
+                secondary:
+                    StatusController.ranks
+                        .firstWhere((rank) => rank.id == widget.account.rankID)
+                        .name,
                 actions: [
                   LPHActionData(
                     icon: Icons.edit,
                     tooltip: "edit".tr,
-                    onClick: () => Get.dialog(ChangeRankWindow(data: widget.account, onUpdate: acceptUpdate)),
+                    onClick:
+                        () => Get.dialog(
+                          ChangeRankWindow(data: widget.account, onUpdate: acceptUpdate),
+                        ),
                   ),
                 ],
               ),
@@ -84,7 +103,9 @@ class _AdminAccountProfileState extends State<AdminAccountProfile> {
     return DialogBase(
       title: [
         Text(
-          "settings.acc_profile.title".trParams({"name": "${widget.account.displayName} (${widget.account.username})"}),
+          "settings.acc_profile.title".trParams({
+            "name": "${widget.account.displayName} (${widget.account.username})",
+          }),
           style: Get.textTheme.labelLarge,
         ),
       ],
@@ -144,7 +165,10 @@ class _ChangeRankWindowState extends State<ChangeRankWindow> {
                   child: InkWell(
                     borderRadius: BorderRadius.circular(defaultSpacing),
                     onTap: () async {
-                      final json = await postAuthorizedJSON("/townhall/accounts/change_rank", {"account": widget.data.id, "rank": rank.id});
+                      final json = await postAuthorizedJSON("/townhall/accounts/change_rank", {
+                        "account": widget.data.id,
+                        "rank": rank.id,
+                      });
 
                       if (!json["success"]) {
                         showErrorPopup("error", json["error"]);

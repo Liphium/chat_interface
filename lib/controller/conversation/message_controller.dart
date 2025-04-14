@@ -38,7 +38,8 @@ class MessageController {
       SidebarController.openTab(ConversationSidebarTab(provider));
 
       // Open the member sidebar in case desired
-      if (SettingController.settings[AppSettings.showGroupMembers]!.getValue() as bool && conversation.isGroup) {
+      if (SettingController.settings[AppSettings.showGroupMembers]!.getValue() as bool &&
+          conversation.isGroup) {
         SidebarController.setRightSidebar(ConversationMembersRightSidebar(conversation));
       }
     }
@@ -60,7 +61,7 @@ class MessageController {
   static void restoreRightSidebar() {
     if (SettingController.settings[AppSettings.showGroupMembers]!.getValue() as bool) {
       final provider = SidebarController.getCurrentProvider();
-      if (provider != null) {
+      if (provider != null && provider.conversation.isGroup) {
         SidebarController.setRightSidebar(ConversationMembersRightSidebar(provider.conversation));
       } else {
         SidebarController.setRightSidebar(null);
@@ -73,7 +74,12 @@ class MessageController {
   /// Add a message to the cache.
   ///
   /// [simple] can be set to [true] in case you want to only add the message (no extra fancy stuff).
-  static Future<bool> addMessage(Message message, Conversation conversation, {bool simple = false, (String, String)? part}) async {
+  static Future<bool> addMessage(
+    Message message,
+    Conversation conversation, {
+    bool simple = false,
+    (String, String)? part,
+  }) async {
     // Make sure there even is a conversation
     var tab = SidebarController.currentOpenTab.peek();
     if (tab is! ConversationSidebarTab) {

@@ -51,7 +51,14 @@ class SettingsPageBase extends StatelessWidget {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Padding(padding: const EdgeInsets.only(top: defaultSpacing, bottom: defaultSpacing, right: sectionSpacing), child: child),
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            top: defaultSpacing,
+                            bottom: defaultSpacing,
+                            right: sectionSpacing,
+                          ),
+                          child: child,
+                        ),
                       ],
                     ),
                   ),

@@ -22,11 +22,17 @@ class BoolSettingSmall extends StatelessWidget {
           Switch(
             activeColor: Get.theme.colorScheme.secondary,
             trackColor: WidgetStateColor.resolveWith(
-              (states) => states.contains(WidgetState.selected) ? Get.theme.colorScheme.primary : Get.theme.colorScheme.onInverseSurface,
+              (states) =>
+                  states.contains(WidgetState.selected)
+                      ? Get.theme.colorScheme.primary
+                      : Get.theme.colorScheme.onInverseSurface,
             ),
             hoverColor: Get.theme.hoverColor,
             thumbColor: WidgetStateColor.resolveWith(
-              (states) => states.contains(WidgetState.selected) ? Get.theme.colorScheme.onPrimary : Get.theme.colorScheme.surface,
+              (states) =>
+                  states.contains(WidgetState.selected)
+                      ? Get.theme.colorScheme.onPrimary
+                      : Get.theme.colorScheme.surface,
             ),
             value: SettingController.settings[settingName]!.getValue(),
             onChanged: (value) {

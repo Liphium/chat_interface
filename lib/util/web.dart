@@ -96,7 +96,8 @@ class LPHAddress {
       identical(this, other) ||
       other is LPHAddress &&
           runtimeType == other.runtimeType &&
-          TrustedLinkHelper.extractDomain(server) == TrustedLinkHelper.extractDomain(other.server) &&
+          TrustedLinkHelper.extractDomain(server) ==
+              TrustedLinkHelper.extractDomain(other.server) &&
           id == other.id;
 
   // So it works properly with HashMaps
@@ -114,7 +115,11 @@ String serverPath(String server, String path, {bool noApiVersion = false}) {
 }
 
 /// Grab the public key from the server
-Future<String?> grabServerPublicURL(String server, {String defaultError = "server.error", bool checkProtocol = true}) async {
+Future<String?> grabServerPublicURL(
+  String server, {
+  String defaultError = "server.error",
+  bool checkProtocol = true,
+}) async {
   final Response res;
   try {
     res = await post(Uri.parse(serverPath(server, "/pub", noApiVersion: true)));
@@ -150,7 +155,14 @@ Future<Map<String, dynamic>> postJSON(
   String? token,
   bool checkProtocol = true,
 }) {
-  return postAddress(basePath, path, body, defaultError: defaultError, token: token, checkProtocol: checkProtocol);
+  return postAddress(
+    basePath,
+    path,
+    body,
+    defaultError: defaultError,
+    token: token,
+    checkProtocol: checkProtocol,
+  );
 }
 
 /// Post request to any server (with Through Cloudflare Protection)
@@ -223,17 +235,29 @@ Future<Map<String, dynamic>> postAddress(
 }
 
 // Post request to node-backend with any token (new)
-Future<Map<String, dynamic>> postAuthJSON(String path, Map<String, dynamic> body, String token) async {
+Future<Map<String, dynamic>> postAuthJSON(
+  String path,
+  Map<String, dynamic> body,
+  String token,
+) async {
   return postJSON(path, body, token: token);
 }
 
 // Post request to node-backend with session token (new)
-Future<Map<String, dynamic>> postAuthorizedJSON(String path, Map<String, dynamic> body, {bool checkProtocol = true}) async {
+Future<Map<String, dynamic>> postAuthorizedJSON(
+  String path,
+  Map<String, dynamic> body, {
+  bool checkProtocol = true,
+}) async {
   return postJSON(path, body, token: sessionToken, checkProtocol: checkProtocol);
 }
 
 // Post request to chat-node with any token (node needs to be connected already) (new)
-Future<Map<String, dynamic>> postNodeJSON(String path, Map<String, dynamic> body, {String defaultError = "server.error"}) async {
+Future<Map<String, dynamic>> postNodeJSON(
+  String path,
+  Map<String, dynamic> body, {
+  String defaultError = "server.error",
+}) async {
   if (connector.nodePublicKey == null) {
     return <String, dynamic>{"success": false, "error": defaultError.tr};
   }
@@ -244,13 +268,27 @@ Future<Map<String, dynamic>> postNodeJSON(String path, Map<String, dynamic> body
     body["data"] ??= "";
   }
 
-  return _postTCP(connector.nodePublicKey!, "${nodeProtocol()}$nodeDomain$path", body, defaultError: defaultError, token: sessionToken);
+  return _postTCP(
+    connector.nodePublicKey!,
+    "${nodeProtocol()}$nodeDomain$path",
+    body,
+    defaultError: defaultError,
+    token: sessionToken,
+  );
 }
 
 // Post request to any domain
-Future<Map<String, dynamic>> postAny(String url, Map<String, dynamic> body, {String defaultError = "server.error"}) async {
+Future<Map<String, dynamic>> postAny(
+  String url,
+  Map<String, dynamic> body, {
+  String defaultError = "server.error",
+}) async {
   try {
-    final res = await dio.post(url, data: jsonEncode(body), options: d.Options(validateStatus: (status) => true));
+    final res = await dio.post(
+      url,
+      data: jsonEncode(body),
+      options: d.Options(validateStatus: (status) => true),
+    );
     if (res.statusCode != 200) {
       return <String, dynamic>{"success": false, "error": defaultError.tr};
     }

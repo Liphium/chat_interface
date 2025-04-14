@@ -78,7 +78,10 @@ class _ErrorPageState extends State<ErrorPage> with SignalsMixin {
           ],
         ),
         verticalSpacing(defaultSpacing),
-        FJElevatedButton(onTap: () => setupManager.retry(), child: Center(child: Text('retry'.tr, style: Get.textTheme.labelLarge))),
+        FJElevatedButton(
+          onTap: () => setupManager.retry(),
+          child: Center(child: Text('retry'.tr, style: Get.textTheme.labelLarge)),
+        ),
       ],
     );
   }

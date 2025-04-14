@@ -25,7 +25,15 @@ class ThemePreset extends SelectableItem {
   final int themeMode;
   final int backgroundMode;
 
-  const ThemePreset(super.label, super.icon, this.primaryHue, this.secondaryHue, this.baseSaturation, this.themeMode, this.backgroundMode);
+  const ThemePreset(
+    super.label,
+    super.icon,
+    this.primaryHue,
+    this.secondaryHue,
+    this.baseSaturation,
+    this.themeMode,
+    this.backgroundMode,
+  );
 }
 
 class ThemeSettings {
@@ -48,7 +56,10 @@ class ThemeSettings {
     1, // Light
   ];
 
-  static final backgroundModes = [SelectableItem("custom.none".tr, Icons.close), SelectableItem("custom.colored".tr, Icons.color_lens)];
+  static final backgroundModes = [
+    SelectableItem("custom.none".tr, Icons.close),
+    SelectableItem("custom.colored".tr, Icons.color_lens),
+  ];
 
   static final themePresets = [
     ThemePreset("theme.default_dark".tr, Icons.dark_mode, 0.54, 0.62, 0.6, 0, 0),
@@ -94,7 +105,10 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage> {
     });
 
     if (isMobileMode()) {
-      return SettingsPageBase(label: "colors", child: ColorPreview(factory: _factory, mobile: true));
+      return SettingsPageBase(
+        label: "colors",
+        child: ColorPreview(factory: _factory, mobile: true),
+      );
     }
 
     return SettingsPageBase(
@@ -128,11 +142,16 @@ class _ThemeSettingsElementState extends State<ThemeSettingsElement> {
       children: [
         Text("theme.presets".tr, style: Get.theme.textTheme.labelLarge),
         verticalSpacing(elementSpacing),
-        ListSelectionSetting(setting: SettingController.settings[ThemeSettings.themePreset]! as Setting<int>, items: ThemeSettings.themePresets),
+        ListSelectionSetting(
+          setting: SettingController.settings[ThemeSettings.themePreset]! as Setting<int>,
+          items: ThemeSettings.themePresets,
+        ),
         verticalSpacing(sectionSpacing),
         Watch(
           (ctx) => Visibility(
-            visible: SettingController.settings[ThemeSettings.themePreset]!.getValue() == ThemeSettings.customThemeIndex,
+            visible:
+                SettingController.settings[ThemeSettings.themePreset]!.getValue() ==
+                ThemeSettings.customThemeIndex,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -141,13 +160,28 @@ class _ThemeSettingsElementState extends State<ThemeSettingsElement> {
                 verticalSpacing(defaultSpacing),
 
                 // Sliders
-                const DoubleSelectionSetting(settingName: ThemeSettings.primaryHue, description: "custom.primary_hue", min: 0.0, max: 1.0),
+                const DoubleSelectionSetting(
+                  settingName: ThemeSettings.primaryHue,
+                  description: "custom.primary_hue",
+                  min: 0.0,
+                  max: 1.0,
+                ),
                 verticalSpacing(defaultSpacing),
 
-                const DoubleSelectionSetting(settingName: ThemeSettings.secondaryHue, description: "custom.secondary_hue", min: 0.0, max: 1.0),
+                const DoubleSelectionSetting(
+                  settingName: ThemeSettings.secondaryHue,
+                  description: "custom.secondary_hue",
+                  min: 0.0,
+                  max: 1.0,
+                ),
                 verticalSpacing(defaultSpacing),
 
-                const DoubleSelectionSetting(settingName: ThemeSettings.baseSaturation, description: "custom.base_saturation", min: 0.0, max: 1.0),
+                const DoubleSelectionSetting(
+                  settingName: ThemeSettings.baseSaturation,
+                  description: "custom.base_saturation",
+                  min: 0.0,
+                  max: 1.0,
+                ),
                 verticalSpacing(defaultSpacing),
 
                 // Selections
@@ -155,14 +189,18 @@ class _ThemeSettingsElementState extends State<ThemeSettingsElement> {
                 verticalSpacing(elementSpacing),
                 ListSelectionSetting(
                   setting: SettingController.settings[ThemeSettings.themeMode]! as Setting<int>,
-                  items: [SelectableItem("custom.dark".tr, Icons.dark_mode), SelectableItem("custom.light".tr, Icons.light_mode)],
+                  items: [
+                    SelectableItem("custom.dark".tr, Icons.dark_mode),
+                    SelectableItem("custom.light".tr, Icons.light_mode),
+                  ],
                 ),
                 verticalSpacing(defaultSpacing),
 
                 Text("custom.background_mode".tr),
                 verticalSpacing(elementSpacing),
                 ListSelectionSetting(
-                  setting: SettingController.settings[ThemeSettings.backgroundMode]! as Setting<int>,
+                  setting:
+                      SettingController.settings[ThemeSettings.backgroundMode]! as Setting<int>,
                   items: ThemeSettings.backgroundModes,
                 ),
 

@@ -107,7 +107,10 @@ class _SmoothDialogState extends State<SmoothDialog> with TickerProviderStateMix
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 370),
           child: Container(
-            decoration: BoxDecoration(color: Get.theme.colorScheme.onInverseSurface, borderRadius: BorderRadius.circular(sectionSpacing)),
+            decoration: BoxDecoration(
+              color: Get.theme.colorScheme.onInverseSurface,
+              borderRadius: BorderRadius.circular(sectionSpacing),
+            ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -122,7 +125,10 @@ class _SmoothDialogState extends State<SmoothDialog> with TickerProviderStateMix
                   child: Padding(
                     padding: const EdgeInsets.all(sectionSpacing),
                     child: Watch(
-                      (ctx) => SizedBox(key: ValueKey(widget.controller.keyOne), child: widget.controller.widgetOne.value ?? const SizedBox()),
+                      (ctx) => SizedBox(
+                        key: ValueKey(widget.controller.keyOne),
+                        child: widget.controller.widgetOne.value ?? const SizedBox(),
+                      ),
                     ),
                   ),
                 ),
@@ -136,7 +142,12 @@ class _SmoothDialogState extends State<SmoothDialog> with TickerProviderStateMix
                   ],
                   child: Padding(
                     padding: const EdgeInsets.all(sectionSpacing),
-                    child: Watch((ctx) => SizedBox(key: ValueKey(widget.controller.keyTwo), child: widget.controller.widgetTwo.value!)),
+                    child: Watch(
+                      (ctx) => SizedBox(
+                        key: ValueKey(widget.controller.keyTwo),
+                        child: widget.controller.widgetTwo.value!,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -186,7 +197,10 @@ class _SmoothDialogWindowState extends State<SmoothDialogWindow> with TickerProv
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 370),
         child: Container(
-          decoration: BoxDecoration(color: Get.theme.colorScheme.onInverseSurface, borderRadius: BorderRadius.circular(sectionSpacing)),
+          decoration: BoxDecoration(
+            color: Get.theme.colorScheme.onInverseSurface,
+            borderRadius: BorderRadius.circular(sectionSpacing),
+          ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -201,7 +215,10 @@ class _SmoothDialogWindowState extends State<SmoothDialogWindow> with TickerProv
                 child: Padding(
                   padding: const EdgeInsets.all(sectionSpacing),
                   child: Watch(
-                    (ctx) => SizedBox(key: ValueKey(widget.controller.keyOne), child: widget.controller.widgetOne.value ?? const SizedBox()),
+                    (ctx) => SizedBox(
+                      key: ValueKey(widget.controller.keyOne),
+                      child: widget.controller.widgetOne.value ?? const SizedBox(),
+                    ),
                   ),
                 ),
               ),
@@ -215,7 +232,12 @@ class _SmoothDialogWindowState extends State<SmoothDialogWindow> with TickerProv
                 ],
                 child: Padding(
                   padding: const EdgeInsets.all(sectionSpacing),
-                  child: Watch((ctx) => SizedBox(key: ValueKey(widget.controller.keyTwo), child: widget.controller.widgetTwo.value!)),
+                  child: Watch(
+                    (ctx) => SizedBox(
+                      key: ValueKey(widget.controller.keyTwo),
+                      child: widget.controller.widgetTwo.value!,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -266,14 +288,30 @@ class _SmoothBoxState extends State<SmoothBox> with TickerProviderStateMixin {
         Animate(
           controller: _one,
           autoPlay: false,
-          effects: [ExpandEffect(axis: Axis.vertical, alignment: Alignment.bottomCenter), const FadeEffect(begin: 0, end: 1, curve: Curves.linear)],
-          child: Watch((ctx) => SizedBox(key: ValueKey(widget.controller.keyOne), child: widget.controller.widgetOne.value ?? const SizedBox())),
+          effects: [
+            ExpandEffect(axis: Axis.vertical, alignment: Alignment.bottomCenter),
+            const FadeEffect(begin: 0, end: 1, curve: Curves.linear),
+          ],
+          child: Watch(
+            (ctx) => SizedBox(
+              key: ValueKey(widget.controller.keyOne),
+              child: widget.controller.widgetOne.value ?? const SizedBox(),
+            ),
+          ),
         ),
         Animate(
           controller: _two,
           autoPlay: false,
-          effects: [ExpandEffect(axis: Axis.vertical, alignment: Alignment.topCenter), const FadeEffect(begin: 0, end: 1)],
-          child: Watch((ctx) => SizedBox(key: ValueKey(widget.controller.keyTwo), child: widget.controller.widgetTwo.value!)),
+          effects: [
+            ExpandEffect(axis: Axis.vertical, alignment: Alignment.topCenter),
+            const FadeEffect(begin: 0, end: 1),
+          ],
+          child: Watch(
+            (ctx) => SizedBox(
+              key: ValueKey(widget.controller.keyTwo),
+              child: widget.controller.widgetTwo.value!,
+            ),
+          ),
         ),
       ],
     );
@@ -288,7 +326,9 @@ class SmoothDialogTest extends StatefulWidget {
 }
 
 class _SmoothDialogTestState extends State<SmoothDialogTest> {
-  final controller = SmoothDialogController(const SetupLoadingWidget(text: "Welcome to this experiment!"));
+  final controller = SmoothDialogController(
+    const SetupLoadingWidget(text: "Welcome to this experiment!"),
+  );
 
   @override
   void initState() {
@@ -318,7 +358,9 @@ class SmoothDialogBoxTest extends StatefulWidget {
 }
 
 class _SmoothDialogBoxTestState extends State<SmoothDialogBoxTest> {
-  final controller = SmoothDialogController(const SetupLoadingWidget(text: "Welcome to this experiment!"));
+  final controller = SmoothDialogController(
+    const SetupLoadingWidget(text: "Welcome to this experiment!"),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -331,7 +373,9 @@ class _SmoothDialogBoxTestState extends State<SmoothDialogBoxTest> {
               controller.transitionTo(
                 Builder(
                   builder: (context) {
-                    return SetupLoadingWidget(text: "Hi ${Random().nextDouble().toStringAsFixed(2)}");
+                    return SetupLoadingWidget(
+                      text: "Hi ${Random().nextDouble().toStringAsFixed(2)}",
+                    );
                   },
                 ),
               );

@@ -47,14 +47,29 @@ class _OwnProfileMobileState extends State<OwnProfileMobile> {
             child: Stack(
               children: [
                 Container(
-                  decoration: BoxDecoration(color: Get.theme.colorScheme.inverseSurface, borderRadius: BorderRadius.circular(defaultSpacing)),
+                  decoration: BoxDecoration(
+                    color: Get.theme.colorScheme.inverseSurface,
+                    borderRadius: BorderRadius.circular(defaultSpacing),
+                  ),
                   height: 60 + defaultSpacing * 2,
                   padding: const EdgeInsets.all(defaultSpacing),
                   child: Row(
                     children: [
-                      SizedBox(width: 60, height: 60, child: Stack(children: [UserAvatar(id: StatusController.ownAddress, size: 60)])),
+                      SizedBox(
+                        width: 60,
+                        height: 60,
+                        child: Stack(
+                          children: [UserAvatar(id: StatusController.ownAddress, size: 60)],
+                        ),
+                      ),
                       horizontalSpacing(sectionSpacing),
-                      Expanded(child: Text(StatusController.name.value, overflow: TextOverflow.ellipsis, style: Get.theme.textTheme.headlineMedium)),
+                      Expanded(
+                        child: Text(
+                          StatusController.name.value,
+                          overflow: TextOverflow.ellipsis,
+                          style: Get.theme.textTheme.headlineMedium,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -99,7 +114,11 @@ class _OwnProfileMobileState extends State<OwnProfileMobile> {
             if (StatusController.ownContainer.value != null) {
               return Padding(
                 padding: const EdgeInsets.only(bottom: elementSpacing),
-                child: ProfileButton(icon: Icons.stop, label: 'profile.stop_sharing'.tr, onTap: () => StatusController.stopSharing()),
+                child: ProfileButton(
+                  icon: Icons.stop,
+                  label: 'profile.stop_sharing'.tr,
+                  onTap: () => StatusController.stopSharing(),
+                ),
               );
             }
 
@@ -134,7 +153,8 @@ class _OwnProfileMobileState extends State<OwnProfileMobile> {
                   return Padding(
                     padding: const EdgeInsets.only(bottom: defaultSpacing),
                     child: Material(
-                      color: selected ? theme.colorScheme.primary : theme.colorScheme.inverseSurface,
+                      color:
+                          selected ? theme.colorScheme.primary : theme.colorScheme.inverseSurface,
                       borderRadius: BorderRadius.circular(defaultSpacing),
                       child: InkWell(
                         borderRadius: BorderRadius.circular(defaultSpacing),
@@ -156,7 +176,10 @@ class _OwnProfileMobileState extends State<OwnProfileMobile> {
                               Text(
                                 "status.${index.toString()}".tr,
                                 style: theme.textTheme.bodyMedium!.copyWith(
-                                  color: selected ? theme.colorScheme.onSurface : theme.colorScheme.surface,
+                                  color:
+                                      selected
+                                          ? theme.colorScheme.onSurface
+                                          : theme.colorScheme.surface,
                                 ),
                                 textHeightBehavior: noTextHeight,
                               ),

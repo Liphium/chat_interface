@@ -38,7 +38,10 @@ class _ChatSettingsPageState extends State<ChatSettingsPage> {
           Text("appearance.chat.theme".tr, style: Get.theme.textTheme.labelLarge),
           verticalSpacing(defaultSpacing),
 
-          ListSelectionSetting(setting: SettingController.settings[ChatSettings.chatTheme]! as Setting<int>, items: ChatSettings.chatThemes),
+          ListSelectionSetting(
+            setting: SettingController.settings[ChatSettings.chatTheme]! as Setting<int>,
+            items: ChatSettings.chatThemes,
+          ),
         ],
       ),
     );

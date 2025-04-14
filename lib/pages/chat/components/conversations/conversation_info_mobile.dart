@@ -35,10 +35,16 @@ class _ConversationInfoMobileState extends State<ConversationInfoMobile> {
       title: [
         Row(
           children: [
-            Icon(widget.conversation.isGroup ? Icons.group : Icons.person, size: 30, color: Theme.of(context).colorScheme.onPrimary),
+            Icon(
+              widget.conversation.isGroup ? Icons.group : Icons.person,
+              size: 30,
+              color: Theme.of(context).colorScheme.onPrimary,
+            ),
             horizontalSpacing(defaultSpacing),
             Text(
-              widget.conversation.isGroup ? widget.conversation.containerSub.value.name : widget.conversation.dmName,
+              widget.conversation.isGroup
+                  ? widget.conversation.containerSub.value.name
+                  : widget.conversation.dmName,
               style: Theme.of(context).textTheme.titleMedium,
             ),
           ],
@@ -49,7 +55,10 @@ class _ConversationInfoMobileState extends State<ConversationInfoMobile> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Show basic information about the conversation
-          Text("conversation.info.town".trParams({"town": widget.conversation.id.server}), style: Get.textTheme.bodyMedium),
+          Text(
+            "conversation.info.town".trParams({"town": widget.conversation.id.server}),
+            style: Get.textTheme.bodyMedium,
+          ),
           verticalSpacing(sectionSpacing),
 
           // Show things that can be done with the current conversation
@@ -72,7 +81,11 @@ class _ConversationInfoMobileState extends State<ConversationInfoMobile> {
               child: ProfileButton(
                 icon: Icons.electric_bolt,
                 label: "chat.zapshare".tr,
-                onTap: () => ZapShareController.openWindow(widget.conversation, ContextMenuData.fromPosition(Offset.zero)),
+                onTap:
+                    () => ZapShareController.openWindow(
+                      widget.conversation,
+                      ContextMenuData.fromPosition(Offset.zero),
+                    ),
               ),
             ),
           ),
@@ -97,7 +110,11 @@ class _ConversationInfoMobileState extends State<ConversationInfoMobile> {
           verticalSpacing(defaultSpacing),
 
           // Make sure they have the ability to learn more in case they want to
-          ProfileButton(icon: Icons.launch, label: "learn_more".tr, onTap: () => launchUrlString(Constants.docsEncryptionAndPrivacy)),
+          ProfileButton(
+            icon: Icons.launch,
+            label: "learn_more".tr,
+            onTap: () => launchUrlString(Constants.docsEncryptionAndPrivacy),
+          ),
 
           verticalSpacing(sectionSpacing),
           Text("Danger zone", style: Get.theme.textTheme.labelMedium),

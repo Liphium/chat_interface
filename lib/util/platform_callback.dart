@@ -7,7 +7,13 @@ class PlatformCallback extends StatefulWidget {
   final bool preventDoubleCalling;
   final Widget child;
 
-  const PlatformCallback({super.key, this.mobile, this.desktop, this.preventDoubleCalling = true, required this.child});
+  const PlatformCallback({
+    super.key,
+    this.mobile,
+    this.desktop,
+    this.preventDoubleCalling = true,
+    required this.child,
+  });
 
   @override
   State<PlatformCallback> createState() => _PlatformCallbackState();

@@ -41,15 +41,28 @@ class _FriendAddWindowState extends State<FriendAddWindow> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text("friends.add.desc".tr, style: Get.theme.textTheme.bodyMedium, textAlign: TextAlign.start),
+          Text(
+            "friends.add.desc".tr,
+            style: Get.theme.textTheme.bodyMedium,
+            textAlign: TextAlign.start,
+          ),
           verticalSpacing(defaultSpacing),
-          FJTextField(controller: _name, hintText: 'friends.name_placeholder'.tr, autofocus: true, onSubmitted: (t) => sendRequest()),
+          FJTextField(
+            controller: _name,
+            hintText: 'friends.name_placeholder'.tr,
+            autofocus: true,
+            onSubmitted: (t) => sendRequest(),
+          ),
           verticalSpacing(defaultSpacing),
           Watch(
             (ctx) => FJElevatedLoadingButton(
               onTap: () => sendRequest(),
               label: 'friends.add.button'.tr,
-              loading: computed(() => RequestController.requestsLoading.value || FriendsVault.friendsVaultRefreshing.value),
+              loading: computed(
+                () =>
+                    RequestController.requestsLoading.value ||
+                    FriendsVault.friendsVaultRefreshing.value,
+              ),
             ),
           ),
         ],

@@ -11,7 +11,10 @@ class SuccessContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(dialogPadding),
-      decoration: BoxDecoration(color: Get.theme.colorScheme.inverseSurface, borderRadius: BorderRadius.circular(dialogBorderRadius)),
+      decoration: BoxDecoration(
+        color: Get.theme.colorScheme.inverseSurface,
+        borderRadius: BorderRadius.circular(dialogBorderRadius),
+      ),
       child: Row(
         children: [
           Icon(Icons.check, color: Get.theme.colorScheme.secondary),

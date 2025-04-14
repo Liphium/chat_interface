@@ -108,7 +108,13 @@ class SetupManager {
         await controller!.transitionComplete;
       }
       controller = null;
-      unawaited(Get.offAll(getChatPage(), transition: Transition.fade, duration: const Duration(milliseconds: 500)));
+      unawaited(
+        Get.offAll(
+          getChatPage(),
+          transition: Transition.fade,
+          duration: const Duration(milliseconds: 500),
+        ),
+      );
       unawaited(ConnectionController.tryConnection());
     }
   }

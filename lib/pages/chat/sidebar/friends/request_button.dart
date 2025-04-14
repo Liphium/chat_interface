@@ -25,7 +25,10 @@ class _RequestButtonState extends State<RequestButton> with SignalsMixin {
   Widget build(BuildContext context) {
     //* Accept/decline buttons
     final children = <Widget>[
-      IconButton(icon: Icon(Icons.close, color: Theme.of(context).colorScheme.onPrimary), onPressed: () => widget.request.delete()),
+      IconButton(
+        icon: Icon(Icons.close, color: Theme.of(context).colorScheme.onPrimary),
+        onPressed: () => widget.request.delete(),
+      ),
     ];
 
     // Add accept button if request is for self
@@ -59,7 +62,10 @@ class _RequestButtonState extends State<RequestButton> with SignalsMixin {
 
         //* Request item content
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: defaultSpacing, vertical: defaultSpacing * 0.5),
+          padding: const EdgeInsets.symmetric(
+            horizontal: defaultSpacing,
+            vertical: defaultSpacing * 0.5,
+          ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -72,7 +78,9 @@ class _RequestButtonState extends State<RequestButton> with SignalsMixin {
                     Padding(
                       padding: const EdgeInsets.only(left: defaultSpacing),
                       child: Tooltip(
-                        message: "friends.different_town".trParams({"town": widget.request.id.server}),
+                        message: "friends.different_town".trParams({
+                          "town": widget.request.id.server,
+                        }),
                         child: Icon(Icons.sensors, color: Get.theme.colorScheme.onPrimary),
                       ),
                     ),
@@ -86,7 +94,10 @@ class _RequestButtonState extends State<RequestButton> with SignalsMixin {
                         ? const SizedBox(
                           width: 25,
                           height: 25,
-                          child: Padding(padding: EdgeInsets.all(defaultSpacing * 0.25), child: CircularProgressIndicator(strokeWidth: 2.0)),
+                          child: Padding(
+                            padding: EdgeInsets.all(defaultSpacing * 0.25),
+                            child: CircularProgressIndicator(strokeWidth: 2.0),
+                          ),
                         )
                         :
                         //* Accept/decline

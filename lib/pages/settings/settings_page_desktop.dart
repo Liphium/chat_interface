@@ -71,7 +71,10 @@ class _SettingsHomepageState extends State<SettingsPageDesktop> {
                             ConstrainedBox(
                               constraints: BoxConstraints(maxWidth: pageWidth),
                               child: Padding(
-                                padding: const EdgeInsets.only(bottom: defaultSpacing, right: defaultSpacing),
+                                padding: const EdgeInsets.only(
+                                  bottom: defaultSpacing,
+                                  right: defaultSpacing,
+                                ),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -79,8 +82,14 @@ class _SettingsHomepageState extends State<SettingsPageDesktop> {
                                       final category = SettingController.currentCategory;
                                       if (category.value != null && category.value!.displayTitle) {
                                         return Padding(
-                                          padding: const EdgeInsets.only(top: defaultSpacing, bottom: sectionSpacing),
-                                          child: Text("settings.${category.value!.label}".tr, style: Get.theme.textTheme.headlineMedium),
+                                          padding: const EdgeInsets.only(
+                                            top: defaultSpacing,
+                                            bottom: sectionSpacing,
+                                          ),
+                                          child: Text(
+                                            "settings.${category.value!.label}".tr,
+                                            style: Get.theme.textTheme.headlineMedium,
+                                          ),
                                         );
                                       }
 
@@ -89,7 +98,10 @@ class _SettingsHomepageState extends State<SettingsPageDesktop> {
                                     Watch((ctx) {
                                       final category = SettingController.currentCategory;
                                       if (category.value == null) {
-                                        return SettingSelectionMobile(category: category, desktop: true);
+                                        return SettingSelectionMobile(
+                                          category: category,
+                                          desktop: true,
+                                        );
                                       }
 
                                       return category.value!.widget ?? const Placeholder();

@@ -26,9 +26,14 @@ class CardObject extends TableObject {
   bool inventoryFlip = false;
   final flipAnimation = AnimatedDouble(-1, duration: 750);
 
-  CardObject(String id, int order, Offset location, Size size) : super(id, order, location, size, TableObjectType.card);
+  CardObject(String id, int order, Offset location, Size size)
+    : super(id, order, location, size, TableObjectType.card);
 
-  static Future<CardObject?> downloadCard(AttachmentContainer container, Offset location, {String id = ""}) async {
+  static Future<CardObject?> downloadCard(
+    AttachmentContainer container,
+    Offset location, {
+    String id = "",
+  }) async {
     // Check if the container fits the new standard
     if (container.width == null || container.height == null) {
       return null;
@@ -46,7 +51,9 @@ class CardObject extends TableObject {
       AttachmentController.downloadAttachment(container).then((success) async {
         if (success) {
           // Get the actual image and add it to the object
-          final buffer = await ui.ImmutableBuffer.fromUint8List(await container.file!.readAsBytes());
+          final buffer = await ui.ImmutableBuffer.fromUint8List(
+            await container.file!.readAsBytes(),
+          );
           final descriptor = await ui.ImageDescriptor.encoded(buffer);
           final codec = await descriptor.instantiateCodec();
           obj.image = (await codec.getNextFrame()).image;
@@ -66,10 +73,16 @@ class CardObject extends TableObject {
   static Size normalizeSize(Size size, double targetSize) {
     if (size.width > size.height) {
       final decreasingFactor = targetSize / size.width;
-      size = Size((size.width * decreasingFactor).roundToDouble(), (size.height * decreasingFactor).roundToDouble());
+      size = Size(
+        (size.width * decreasingFactor).roundToDouble(),
+        (size.height * decreasingFactor).roundToDouble(),
+      );
     } else {
       final decreasingFactor = targetSize / size.height;
-      size = Size((size.width * decreasingFactor).roundToDouble(), (size.height * decreasingFactor).roundToDouble());
+      size = Size(
+        (size.width * decreasingFactor).roundToDouble(),
+        (size.height * decreasingFactor).roundToDouble(),
+      );
     }
 
     return size;
@@ -82,19 +95,31 @@ class CardObject extends TableObject {
     final size = 75.0;
     final cornerPaint = Paint()..color = Get.theme.colorScheme.onPrimary;
     canvas.drawRRect(
-      RRect.fromRectAndRadius(Rect.fromLTWH(card.left + padding, card.top + padding, size, size), Radius.circular(spacing)),
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(card.left + padding, card.top + padding, size, size),
+        Radius.circular(spacing),
+      ),
       cornerPaint,
     );
     canvas.drawRRect(
-      RRect.fromRectAndRadius(Rect.fromLTWH(card.left + padding, card.bottom - size - padding, size, size), Radius.circular(spacing)),
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(card.left + padding, card.bottom - size - padding, size, size),
+        Radius.circular(spacing),
+      ),
       cornerPaint,
     );
     canvas.drawRRect(
-      RRect.fromRectAndRadius(Rect.fromLTWH(card.right - size - padding, card.top + padding, size, size), Radius.circular(spacing)),
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(card.right - size - padding, card.top + padding, size, size),
+        Radius.circular(spacing),
+      ),
       cornerPaint,
     );
     canvas.drawRRect(
-      RRect.fromRectAndRadius(Rect.fromLTWH(card.right - size - padding, card.bottom - size - padding, size, size), Radius.circular(spacing)),
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(card.right - size - padding, card.bottom - size - padding, size, size),
+        Radius.circular(spacing),
+      ),
       cornerPaint,
     );
   }
@@ -117,7 +142,8 @@ class CardObject extends TableObject {
       final paint = Paint()..color = Colors.white;
 
       // Show that the card is about to be dropped
-      if (TabletopController.heldObject == this && TabletopController.hoveringObjects.any((element) => element is DeckObject)) {
+      if (TabletopController.heldObject == this &&
+          TabletopController.hoveringObjects.any((element) => element is DeckObject)) {
         paint.color = Colors.white.withAlpha(120);
       }
 
@@ -127,7 +153,9 @@ class CardObject extends TableObject {
         bool found = false;
         for (var object in TabletopController.objects.values) {
           if (object is InventoryObject && TabletopController.inventory != object) {
-            if (object.getInventoryRect(invisRangeX: size.width / 2, invisRangeY: size.height / 2).contains(center)) {
+            if (object
+                .getInventoryRect(invisRangeX: size.width / 2, invisRangeY: size.height / 2)
+                .contains(center)) {
               found = true;
             }
           }
@@ -172,7 +200,12 @@ class CardObject extends TableObject {
         } else {
           canvas.drawImageRect(
             image!,
-            Rect.fromLTWH(0, 0, size.width * (imageSize!.width / size.width), size.height * (imageSize!.height / size.height)),
+            Rect.fromLTWH(
+              0,
+              0,
+              size.width * (imageSize!.width / size.width),
+              size.height * (imageSize!.height / size.height),
+            ),
             imageRect,
             paint,
           );

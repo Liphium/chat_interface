@@ -56,7 +56,10 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
           padding: const EdgeInsets.only(top: defaultSpacing),
           itemBuilder: (context, index) {
             // Normal conversation renderer
-            Conversation conversation = ConversationController.conversations[ConversationController.order.elementAt(index)]!;
+            Conversation conversation =
+                ConversationController.conversations[ConversationController.order.elementAt(
+                  index,
+                )]!;
 
             Friend? friend;
             if (!conversation.isGroup) {
@@ -65,7 +68,8 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                   conversation.members.values
                       .firstWhere(
                         (element) => element.address != StatusController.ownAddress,
-                        orElse: () => Member(LPHAddress.error(), LPHAddress.error(), MemberRole.user),
+                        orElse:
+                            () => Member(LPHAddress.error(), LPHAddress.error(), MemberRole.user),
                       )
                       .address;
 
@@ -81,7 +85,10 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
 
             // Hover menu
             return Watch(key: ValueKey(conversation.id), (ctx) {
-              var title = conversation.isGroup || friend == null ? conversation.containerSub.value.name : conversation.dmName;
+              var title =
+                  conversation.isGroup || friend == null
+                      ? conversation.containerSub.value.name
+                      : conversation.dmName;
               if (friend == null && !conversation.isGroup) {
                 title = ".$title";
               }
@@ -154,10 +161,23 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                                     return Visibility(
                                       visible: notifications > 0,
                                       child: Container(
-                                        decoration: BoxDecoration(shape: BoxShape.circle, color: Get.theme.colorScheme.error),
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: Get.theme.colorScheme.error,
+                                        ),
                                         child: Padding(
-                                          padding: const EdgeInsets.only(left: 5, right: 5, top: 2, bottom: 3),
-                                          child: Center(child: Text(min(notifications, 99).toString(), style: Get.textTheme.labelSmall)),
+                                          padding: const EdgeInsets.only(
+                                            left: 5,
+                                            right: 5,
+                                            top: 2,
+                                            bottom: 3,
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              min(notifications, 99).toString(),
+                                              style: Get.textTheme.labelSmall,
+                                            ),
+                                          ),
                                         ),
                                       ),
                                     );
@@ -178,7 +198,12 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
   }
 
   /// Render a direct message preview for the sidebar
-  Widget renderDirectMessage(Friend? friend, String title, Conversation conversation, ConversationMessageProvider? provider) {
+  Widget renderDirectMessage(
+    Friend? friend,
+    String title,
+    Conversation conversation,
+    ConversationMessageProvider? provider,
+  ) {
     // Get the friend associated
 
     return Expanded(
@@ -188,7 +213,7 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
           if (friend == null)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: elementSpacing * 0.5),
-              child: Icon(friend == null ? Icons.person_off : Icons.person, size: 35, color: Get.theme.colorScheme.onPrimary),
+              child: Icon(Icons.person_off, size: 35, color: Get.theme.colorScheme.onPrimary),
             )
           else
             UserAvatar(id: friend.id, size: 40),
@@ -203,7 +228,10 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                     Flexible(
                       child: Text(
                         conversation.dmName,
-                        style: provider?.conversation == conversation ? Get.theme.textTheme.labelMedium : Get.theme.textTheme.bodyMedium,
+                        style:
+                            provider?.conversation == conversation
+                                ? Get.theme.textTheme.labelMedium
+                                : Get.theme.textTheme.bodyMedium,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         textHeightBehavior: noTextHeight,
@@ -217,7 +245,11 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                         child: Tooltip(
                           waitDuration: const Duration(milliseconds: 500),
                           message: "friends.different_town".trParams({"town": friend.id.server}),
-                          child: Icon(Icons.sensors, color: Get.theme.colorScheme.onPrimary, size: 21),
+                          child: Icon(
+                            Icons.sensors,
+                            color: Get.theme.colorScheme.onPrimary,
+                            size: 21,
+                          ),
                         ),
                       ),
                     horizontalSpacing(defaultSpacing),
@@ -229,7 +261,10 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
 
                 friend == null
                     ? verticalSpacing(elementSpacing * 0.5)
-                    : Visibility(visible: conversation.isGroup || friend.status.value != "", child: verticalSpacing(elementSpacing * 0.5)),
+                    : Visibility(
+                      visible: conversation.isGroup || friend.status.value != "",
+                      child: verticalSpacing(elementSpacing * 0.5),
+                    ),
 
                 // Friend status message (if available)
                 if (friend == null)
@@ -243,7 +278,8 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                 else
                   Watch(
                     (ctx) => Visibility(
-                      visible: friend.status.value != "" && friend.statusType.value != statusOffline,
+                      visible:
+                          friend.status.value != "" && friend.statusType.value != statusOffline,
                       child: Text(
                         friend.status.value,
                         style: Get.textTheme.bodySmall,
@@ -262,7 +298,11 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
   }
 
   /// Render a group preview for the sidebar
-  Widget renderGroup(String title, Conversation conversation, ConversationMessageProvider? provider) {
+  Widget renderGroup(
+    String title,
+    Conversation conversation,
+    ConversationMessageProvider? provider,
+  ) {
     return Expanded(
       child: Row(
         children: [
@@ -282,7 +322,10 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                     Flexible(
                       child: Text(
                         conversation.containerSub.value.name,
-                        style: provider?.conversation == conversation ? Get.theme.textTheme.labelMedium : Get.theme.textTheme.bodyMedium,
+                        style:
+                            provider?.conversation == conversation
+                                ? Get.theme.textTheme.labelMedium
+                                : Get.theme.textTheme.bodyMedium,
                         textHeightBehavior: noTextHeight,
                       ),
                     ),
@@ -293,8 +336,14 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                         padding: const EdgeInsets.only(left: defaultSpacing),
                         child: Tooltip(
                           waitDuration: const Duration(milliseconds: 500),
-                          message: "conversations.different_town".trParams({"town": conversation.id.server}),
-                          child: Icon(Icons.sensors, color: Get.theme.colorScheme.onPrimary, size: 21),
+                          message: "conversations.different_town".trParams({
+                            "town": conversation.id.server,
+                          }),
+                          child: Icon(
+                            Icons.sensors,
+                            color: Get.theme.colorScheme.onPrimary,
+                            size: 21,
+                          ),
                         ),
                       ),
                   ],
@@ -304,7 +353,9 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
 
                 // Render the amount of members of the conversation
                 Text(
-                  "chat.members".trParams(<String, String>{"count": conversation.members.length.toString()}),
+                  "chat.members".trParams(<String, String>{
+                    "count": conversation.members.length.toString(),
+                  }),
                   style: Get.textTheme.bodySmall,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,

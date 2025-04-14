@@ -40,7 +40,11 @@ class _ImageAttachmentRendererState extends State<ImageAttachmentRenderer> {
                   child: SizedBox(
                     width: 40,
                     height: 40,
-                    child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary, value: widget.image.percentage.value, strokeWidth: 5),
+                    child: CircularProgressIndicator(
+                      color: Get.theme.colorScheme.onPrimary,
+                      value: widget.image.percentage.value,
+                      strokeWidth: 5,
+                    ),
                   ),
                 ),
               );
@@ -95,7 +99,12 @@ class _ImageAttachmentRendererState extends State<ImageAttachmentRenderer> {
                   cursor: SystemMouseCursors.click,
                   child: GestureDetector(
                     onTap: () => Get.dialog(ImagePreviewWindow(file: widget.image.file!)),
-                    child: XImage(file: widget.image.file!, fit: BoxFit.fill, width: double.infinity, height: double.infinity),
+                    child: XImage(
+                      file: widget.image.file!,
+                      fit: BoxFit.fill,
+                      width: double.infinity,
+                      height: double.infinity,
+                    ),
                   ),
                 ),
               ),

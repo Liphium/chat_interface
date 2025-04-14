@@ -79,7 +79,10 @@ class AttachmentController {
       },
     );
     if (res.statusCode != 200) {
-      return FileUploadResponse("server.error.code".trParams({"code": res.statusCode.toString()}), null);
+      return FileUploadResponse(
+        "server.error.code".trParams({"code": res.statusCode.toString()}),
+        null,
+      );
     }
     final json = res.data;
     if (!json["success"]) {
@@ -90,7 +93,10 @@ class AttachmentController {
     if (!isWeb) {
       // Only copy the file if it's a media file (other file types don't really matter because they aren't displayed)
       if (FileSettings.isMediaFile(json["id"])) {
-        final filePath = path.join(AttachmentController.getFilePathForType(type), json["id"].toString());
+        final filePath = path.join(
+          AttachmentController.getFilePathForType(type),
+          json["id"].toString(),
+        );
         await fileUtil.write(XFile(filePath), bytes);
         sendLog("wrote file to $filePath");
       }
@@ -178,7 +184,10 @@ class AttachmentController {
     // Download and show progress
     final res = await dio.get<Uint8List>(
       serverPath(container.url, "/account/files_unencrypted/download/${container.id}").toString(),
-      options: dio_rs.Options(responseType: dio_rs.ResponseType.bytes, validateStatus: (status) => true),
+      options: dio_rs.Options(
+        responseType: dio_rs.ResponseType.bytes,
+        validateStatus: (status) => true,
+      ),
       onReceiveProgress: (count, total) {
         container.percentage.value = count / total;
       },
@@ -250,10 +259,16 @@ class AttachmentController {
     // Move into isolate in the future?
     final cacheType = SettingController.settings[FileSettings.fileCacheType]!.getValue();
     if (cacheType == 0) return;
-    final maxSize = SettingController.settings[FileSettings.maxCacheSize]!.getValue() * 1000 * 1000; // Convert to bytes
+    final maxSize =
+        SettingController.settings[FileSettings.maxCacheSize]!.getValue() *
+        1000 *
+        1000; // Convert to bytes
     final dir = Directory(getFilePathForType(StorageType.temporary));
     final files = await dir.list().toList();
-    var cacheSize = files.fold(0, (previousValue, element) => previousValue + element.statSync().size);
+    var cacheSize = files.fold(
+      0,
+      (previousValue, element) => previousValue + element.statSync().size,
+    );
     if (cacheSize < maxSize) return;
 
     // Delete oldest files
@@ -286,17 +301,26 @@ class AttachmentController {
   static Future<void> initFilePath(String accountId) async {
     if (!isWeb) {
       // Init folder for cached files
-      final cacheFolder = path.join((await getApplicationCacheDirectory()).path, ".file_cache_$accountId");
+      final cacheFolder = path.join(
+        (await getApplicationCacheDirectory()).path,
+        ".file_cache_$accountId",
+      );
       _pathCache = cacheFolder;
       await XDirectory(cacheFolder).create();
 
       // Init folder for temporary files
-      final fileFolder = path.join((await getApplicationSupportDirectory()).path, "cloud_files_$accountId");
+      final fileFolder = path.join(
+        (await getApplicationSupportDirectory()).path,
+        "cloud_files_$accountId",
+      );
       _pathTemporary = fileFolder;
       await XDirectory(fileFolder).create();
 
       // Init folder for permanent files
-      final saveFolder = path.join((await getApplicationSupportDirectory()).path, "saved_files_$accountId");
+      final saveFolder = path.join(
+        (await getApplicationSupportDirectory()).path,
+        "saved_files_$accountId",
+      );
       _pathPermanent = saveFolder;
       await XDirectory(saveFolder).create();
     }
@@ -314,7 +338,11 @@ class AttachmentController {
   }
 
   /// Get the storage type for a file (or the default type)
-  static Future<StorageType> checkLocations(String id, StorageType defaultType, {types = StorageType.values}) async {
+  static Future<StorageType> checkLocations(
+    String id,
+    StorageType defaultType, {
+    types = StorageType.values,
+  }) async {
     // Check if the file is in any of the existing folders
     for (final type in types) {
       final file = XFile(path.join(getFilePathForType(type), id));
@@ -368,7 +396,11 @@ class AttachmentController {
   }
 
   /// Get an attachment container from json
-  static AttachmentContainer fromJson(StorageType type, Map<String, dynamic> json, [Sodium? sodium]) {
+  static AttachmentContainer fromJson(
+    StorageType type,
+    Map<String, dynamic> json, [
+    Sodium? sodium,
+  ]) {
     var container = attachments[json["i"]];
     if (container != null) {
       return container;
@@ -378,7 +410,8 @@ class AttachmentController {
     container = AttachmentContainer(
       storageType: type,
       id: json["i"],
-      fileName: json["n"], // The name could be null (if it is null it'll the object in the map will also be null)
+      fileName:
+          json["n"], // The name could be null (if it is null it'll the object in the map will also be null)
       size: json["s"] ?? -1,
       url: json["u"],
       key: unpackageSymmetricKey(json["k"], sodium),
@@ -512,7 +545,8 @@ class AttachmentContainer {
     return size;
   }
 
-  AttachmentContainer.remoteImage(String url) : this(storageType: StorageType.cache, id: "", fileName: "", size: 0, url: url, key: null);
+  AttachmentContainer.remoteImage(String url)
+    : this(storageType: StorageType.cache, id: "", fileName: "", size: 0, url: url, key: null);
 
   String toAttachment() {
     switch (attachmentType) {

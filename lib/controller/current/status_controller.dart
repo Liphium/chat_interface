@@ -48,10 +48,14 @@ class StatusController {
   void setName(String value) => name.value = value;
 
   /// Get the current status json for the current client.
-  static String statusJson() => jsonEncode(<String, dynamic>{"s": base64Encode(utf8.encode(status.peek())), "t": type.peek()});
+  static String statusJson() => jsonEncode(<String, dynamic>{
+    "s": base64Encode(utf8.encode(status.peek())),
+    "t": type.peek(),
+  });
 
   /// Create a new status json.
-  static String newStatusJson(String status, int type) => jsonEncode(<String, dynamic>{"s": base64Encode(utf8.encode(status)), "t": type});
+  static String newStatusJson(String status, int type) =>
+      jsonEncode(<String, dynamic>{"s": base64Encode(utf8.encode(status)), "t": type});
 
   /// Load the default status because nothing has been saved yet.
   static void loadDefaultStatus() {
@@ -146,7 +150,11 @@ class RankData {
 
   // Factory constructor to create Rank object from JSON
   factory RankData.fromJson(Map<String, dynamic> json) {
-    return RankData(id: json['id'] as int, name: json['name'] as String, level: json['level'] as int);
+    return RankData(
+      id: json['id'] as int,
+      name: json['name'] as String,
+      level: json['level'] as int,
+    );
   }
 
   // Method to convert Rank object to JSON

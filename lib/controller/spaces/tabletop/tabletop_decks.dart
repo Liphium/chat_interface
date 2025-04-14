@@ -8,7 +8,10 @@ import 'package:signals/signals.dart';
 
 class TabletopDecks {
   static Future<List<TabletopDeck>?> listDecks() async {
-    final json = await postAuthorizedJSON("/account/vault/list", {"after": 0, "tag": Constants.vaultDeckTag});
+    final json = await postAuthorizedJSON("/account/vault/list", {
+      "after": 0,
+      "tag": Constants.vaultDeckTag,
+    });
 
     if (!json["success"]) {
       return null;
@@ -67,7 +70,11 @@ class TabletopDeck {
   Future<void> loadCards(StorageType usecase) async {
     bool removed = false;
     for (var card in encodedCards) {
-      final type = await AttachmentController.checkLocations(card['i'], usecase, types: [StorageType.permanent, StorageType.cache]);
+      final type = await AttachmentController.checkLocations(
+        card['i'],
+        usecase,
+        types: [StorageType.permanent, StorageType.cache],
+      );
       final container = AttachmentController.fromJson(type, card);
       amounts.value[container.id] = card['a'] ?? 1;
       final result = await AttachmentController.downloadAttachment(container);

@@ -54,7 +54,9 @@ class LibraryManager extends VaultTarget {
         if (!container.downloaded.value) {
           break;
         }
-        final size = await _calculateImageDimension(Image.memory(await container.file!.readAsBytes()));
+        final size = await _calculateImageDimension(
+          Image.memory(await container.file!.readAsBytes()),
+        );
         entry = LibraryEntry(
           "",
           LibraryEntryType.fromFileName(container.file!.path),
@@ -169,7 +171,13 @@ class LibraryEntry {
 
   /// Convert a LibraryEntry to a JSON map
   Map<String, dynamic> toJson() {
-    return {'type': type.index, 'data': data, 'created_at': createdAt.millisecondsSinceEpoch, 'width': width, 'height': height};
+    return {
+      'type': type.index,
+      'data': data,
+      'created_at': createdAt.millisecondsSinceEpoch,
+      'width': width,
+      'height': height,
+    };
   }
 
   /// Create a LibraryEntry from a JSON map

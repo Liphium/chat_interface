@@ -10,7 +10,13 @@ class TabletopPainter extends CustomPainter {
   final double scale;
   final double rotation;
 
-  TabletopPainter({required this.offset, required this.mousePosition, required this.mousePositionUnmodified, this.scale = 1.0, this.rotation = 0});
+  TabletopPainter({
+    required this.offset,
+    required this.mousePosition,
+    required this.mousePositionUnmodified,
+    this.scale = 1.0,
+    this.rotation = 0,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -121,7 +127,10 @@ class TabletopPainter extends CustomPainter {
         object.scale.setValue(1.0);
         object.unhoverRotation();
       }
-      final location = TabletopController.heldObject == object ? object.location : object.interpolatedLocation(now);
+      final location =
+          TabletopController.heldObject == object
+              ? object.location
+              : object.interpolatedLocation(now);
       drawObject(canvas, location, object, now);
     }
 
@@ -139,7 +148,13 @@ class TabletopPainter extends CustomPainter {
   }
 
   /// Apply the nessecary scaling and rotation for object drawing (called before object rendering)
-  static void preDraw(Canvas canvas, Offset location, TableObject object, DateTime now, {bool rotation = true}) {
+  static void preDraw(
+    Canvas canvas,
+    Offset location,
+    TableObject object,
+    DateTime now, {
+    bool rotation = true,
+  }) {
     final scale = object.scale.value(now);
     canvas.save();
     final focalX = location.dx + object.size.width / 2;

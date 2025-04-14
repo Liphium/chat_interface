@@ -42,7 +42,10 @@ class LoadingIconButton extends StatelessWidget {
         height: iconSize + extra + padding,
         child: Material(
           borderRadius: BorderRadius.circular(50),
-          color: background ? backgroundColor ?? Get.theme.colorScheme.primaryContainer : Colors.transparent,
+          color:
+              background
+                  ? backgroundColor ?? Get.theme.colorScheme.primaryContainer
+                  : Colors.transparent,
           child: InkWell(
             borderRadius: BorderRadius.circular(50),
             onTap: () {
@@ -76,7 +79,10 @@ class LoadingIconButton extends StatelessWidget {
                             loading!.value
                                 ? Padding(
                                   padding: const EdgeInsets.all(defaultSpacing),
-                                  child: CircularProgressIndicator(strokeWidth: 3.0, color: Get.theme.colorScheme.onPrimary),
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 3.0,
+                                    color: Get.theme.colorScheme.onPrimary,
+                                  ),
                                 )
                                 : Icon(icon, color: color ?? Colors.white, size: iconSize),
                       )

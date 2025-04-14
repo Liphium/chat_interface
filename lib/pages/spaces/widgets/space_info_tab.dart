@@ -42,7 +42,10 @@ class _SpaceInfoTabState extends State<SpaceInfoTab> {
                   if (StudioController.connectionError.value != "") {
                     return Padding(
                       padding: const EdgeInsets.only(top: sectionSpacing),
-                      child: Text(StudioController.connectionError.value, style: theme.textTheme.labelMedium),
+                      child: Text(
+                        StudioController.connectionError.value,
+                        style: theme.textTheme.labelMedium,
+                      ),
                     );
                   }
 
@@ -53,7 +56,11 @@ class _SpaceInfoTabState extends State<SpaceInfoTab> {
                       padding: EdgeInsets.only(top: sectionSpacing),
                       child: Row(
                         children: [
-                          SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: theme.colorScheme.onPrimary)),
+                          SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(color: theme.colorScheme.onPrimary),
+                          ),
                           horizontalSpacing(defaultSpacing),
                           Text("spaces.studio.connecting".tr, style: Get.textTheme.bodyMedium),
                         ],

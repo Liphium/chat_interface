@@ -88,7 +88,11 @@ class KeyRequest {
 
     // Respond to the key request
     processing.value = true;
-    final json = await postAuthorizedJSON("/account/keys/requests/respond", {"session": session, "delete": delete, "payload": payload});
+    final json = await postAuthorizedJSON("/account/keys/requests/respond", {
+      "session": session,
+      "delete": delete,
+      "payload": payload,
+    });
     processing.value = false;
 
     if (!json["success"]) {
@@ -162,16 +166,30 @@ class _KeyRequestsWindowState extends State<KeyRequestsWindow> with SignalsMixin
   Widget build(BuildContext context) {
     return DialogBase(
       title: [
-        Expanded(child: Text("Synchronization requests".tr, style: Get.theme.textTheme.labelLarge, overflow: TextOverflow.ellipsis)),
+        Expanded(
+          child: Text(
+            "Synchronization requests".tr,
+            style: Get.theme.textTheme.labelLarge,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
         Visibility(
           visible: _loading.value,
-          child: SizedBox(width: 24, height: 24, child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary)),
+          child: SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary),
+          ),
         ),
       ],
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          AnimatedErrorContainer(expand: true, padding: const EdgeInsets.only(bottom: defaultSpacing), message: _error),
+          AnimatedErrorContainer(
+            expand: true,
+            padding: const EdgeInsets.only(bottom: defaultSpacing),
+            message: _error,
+          ),
           Builder(
             builder: (context) {
               // Check if the requests are empty
@@ -187,14 +205,19 @@ class _KeyRequestsWindowState extends State<KeyRequestsWindow> with SignalsMixin
                     padding: EdgeInsets.only(top: index == 0 ? 0 : defaultSpacing),
                     child: Container(
                       padding: const EdgeInsets.all(defaultSpacing),
-                      decoration: BoxDecoration(color: Get.theme.colorScheme.inverseSurface, borderRadius: BorderRadius.circular(defaultSpacing)),
+                      decoration: BoxDecoration(
+                        color: Get.theme.colorScheme.inverseSurface,
+                        borderRadius: BorderRadius.circular(defaultSpacing),
+                      ),
                       child: Row(
                         children: [
                           Icon(Icons.key, color: Get.theme.colorScheme.onPrimary),
                           horizontalSpacing(defaultSpacing),
                           Expanded(
                             child: Text(
-                              formatGeneralTime(DateTime.fromMillisecondsSinceEpoch(request.createdAt)),
+                              formatGeneralTime(
+                                DateTime.fromMillisecondsSinceEpoch(request.createdAt),
+                              ),
                               style: Get.textTheme.labelMedium,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -207,7 +230,10 @@ class _KeyRequestsWindowState extends State<KeyRequestsWindow> with SignalsMixin
                                 height: 31,
                                 child: Padding(
                                   padding: const EdgeInsets.all(6.0),
-                                  child: CircularProgressIndicator(strokeWidth: 3.0, color: Get.theme.colorScheme.onPrimary),
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 3.0,
+                                    color: Get.theme.colorScheme.onPrimary,
+                                  ),
                                 ),
                               );
                             }
@@ -216,7 +242,9 @@ class _KeyRequestsWindowState extends State<KeyRequestsWindow> with SignalsMixin
                               children: [
                                 LoadingIconButton(
                                   onTap: () async {
-                                    final result = await Get.dialog(KeyRequestAcceptWindow(request: request));
+                                    final result = await Get.dialog(
+                                      KeyRequestAcceptWindow(request: request),
+                                    );
                                     if (result != null && result) {
                                       _requests.remove(request);
                                     }
@@ -280,7 +308,11 @@ class _KeyRequestAcceptWindowState extends State<KeyRequestAcceptWindow> with Si
         children: [
           Text("key_requests.code.description".tr, style: Get.theme.textTheme.bodyMedium),
           verticalSpacing(defaultSpacing),
-          AnimatedErrorContainer(expand: true, padding: const EdgeInsets.only(bottom: defaultSpacing), message: _error),
+          AnimatedErrorContainer(
+            expand: true,
+            padding: const EdgeInsets.only(bottom: defaultSpacing),
+            message: _error,
+          ),
           FJTextField(
             controller: _codeController,
             hintText: "key_requests.code.placeholder".tr, // DRa6KS

@@ -53,7 +53,10 @@ class _AudioAttachmentPlayerState extends State<AudioAttachmentPlayer> with Sign
       constraints: BoxConstraints(maxWidth: 350),
       child: Container(
         padding: const EdgeInsets.all(defaultSpacing),
-        decoration: BoxDecoration(borderRadius: BorderRadius.circular(defaultSpacing), color: Get.theme.colorScheme.primaryContainer),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(defaultSpacing),
+          color: Get.theme.colorScheme.primaryContainer,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -63,18 +66,29 @@ class _AudioAttachmentPlayerState extends State<AudioAttachmentPlayer> with Sign
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.library_music, size: sectionSpacing * 2, color: Get.theme.colorScheme.onPrimary),
+                    Icon(
+                      Icons.library_music,
+                      size: sectionSpacing * 2,
+                      color: Get.theme.colorScheme.onPrimary,
+                    ),
                     horizontalSpacing(defaultSpacing),
                     Flexible(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Flexible(child: Text(widget.container.name, style: Get.theme.textTheme.labelMedium)),
+                          Flexible(
+                            child: Text(
+                              widget.container.name,
+                              style: Get.theme.textTheme.labelMedium,
+                            ),
+                          ),
                           Flexible(
                             child: Watch(
                               (ctx) => Text(
-                                !widget.container.error.value ? formatFileSize(1000) : 'file.not_uploaded'.tr,
+                                !widget.container.error.value
+                                    ? formatFileSize(1000)
+                                    : 'file.not_uploaded'.tr,
                                 style: Get.theme.textTheme.bodyMedium,
                               ),
                             ),
@@ -92,7 +106,10 @@ class _AudioAttachmentPlayerState extends State<AudioAttachmentPlayer> with Sign
                     return SizedBox(
                       width: 30,
                       height: 30,
-                      child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary, value: widget.container.percentage.value),
+                      child: CircularProgressIndicator(
+                        color: Get.theme.colorScheme.onPrimary,
+                        value: widget.container.percentage.value,
+                      ),
                     );
                   }
 
@@ -148,7 +165,10 @@ class _AudioAttachmentPlayerState extends State<AudioAttachmentPlayer> with Sign
                 if (_currentDuration.value == null || _currentMax.value == null) {
                   return Container(
                     height: 10,
-                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(defaultSpacing), color: Get.theme.colorScheme.primary),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(defaultSpacing),
+                      color: Get.theme.colorScheme.primary,
+                    ),
                   );
                 }
 
@@ -162,13 +182,20 @@ class _AudioAttachmentPlayerState extends State<AudioAttachmentPlayer> with Sign
                   child: GestureDetector(
                     onTap: () {
                       final percentage = (_hoverPosition.value! / constraints.maxWidth);
-                      _player.seek(Duration(milliseconds: (_currentMax.value!.inMilliseconds * percentage).toInt()));
+                      _player.seek(
+                        Duration(
+                          milliseconds: (_currentMax.value!.inMilliseconds * percentage).toInt(),
+                        ),
+                      );
                     },
                     child: Stack(
                       children: [
                         Container(
                           height: 10,
-                          decoration: BoxDecoration(borderRadius: BorderRadius.circular(defaultSpacing), color: Get.theme.colorScheme.primary),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(defaultSpacing),
+                            color: Get.theme.colorScheme.primary,
+                          ),
                         ),
                         Watch(
                           (ctx) => AnimatedContainer(
@@ -177,10 +204,14 @@ class _AudioAttachmentPlayerState extends State<AudioAttachmentPlayer> with Sign
                             width:
                                 constraints.maxWidth *
                                 (_hoverPosition.value == null
-                                        ? (_currentDuration.value!.inMilliseconds / _currentMax.value!.inMilliseconds)
+                                        ? (_currentDuration.value!.inMilliseconds /
+                                            _currentMax.value!.inMilliseconds)
                                         : (_hoverPosition.value! / constraints.maxWidth))
                                     .clamp(0, 1),
-                            decoration: BoxDecoration(borderRadius: BorderRadius.circular(defaultSpacing), color: Get.theme.colorScheme.onPrimary),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(defaultSpacing),
+                              color: Get.theme.colorScheme.onPrimary,
+                            ),
                           ),
                         ),
                       ],

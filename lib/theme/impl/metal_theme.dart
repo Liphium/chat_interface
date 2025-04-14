@@ -58,8 +58,15 @@ final ThemeData darkMetalTheme = defaultDarkTheme.copyWith(
     onSurface: Color(0xFFFFFFFF),
   ),
   tooltipTheme: TooltipThemeData(
-    decoration: BoxDecoration(color: const Color(0xFF171717), borderRadius: BorderRadius.circular(defaultSpacing)),
-    textStyle: defaultDarkTheme.textTheme.labelMedium!.copyWith(fontSize: 16, fontWeight: FontWeight.normal, color: const Color(0xFFFFFFFF)),
+    decoration: BoxDecoration(
+      color: const Color(0xFF171717),
+      borderRadius: BorderRadius.circular(defaultSpacing),
+    ),
+    textStyle: defaultDarkTheme.textTheme.labelMedium!.copyWith(
+      fontSize: 16,
+      fontWeight: FontWeight.normal,
+      color: const Color(0xFFFFFFFF),
+    ),
   ),
   textSelectionTheme: const TextSelectionThemeData(
     cursorColor: Color(0xFF99c1f1),
@@ -69,21 +76,60 @@ final ThemeData darkMetalTheme = defaultDarkTheme.copyWith(
   dividerColor: const Color(0xFF5c5c5c),
   textTheme: defaultDarkTheme.textTheme.copyWith(
     //* Headlines
-    headlineMedium: defaultDarkTheme.textTheme.headlineMedium!.copyWith(fontFamily: 'Roboto Mono', fontWeight: FontWeight.bold),
+    headlineMedium: defaultDarkTheme.textTheme.headlineMedium!.copyWith(
+      fontFamily: 'Roboto Mono',
+      fontWeight: FontWeight.bold,
+    ),
 
     //* Normal body text
-    bodySmall: defaultDarkTheme.textTheme.bodySmall!.copyWith(fontSize: 14, fontWeight: FontWeight.normal, color: const Color(0xFFbababa)),
-    bodyMedium: defaultDarkTheme.textTheme.bodyMedium!.copyWith(fontSize: 16, fontWeight: FontWeight.normal, color: const Color(0xFFbababa)),
-    bodyLarge: defaultDarkTheme.textTheme.bodyLarge!.copyWith(fontSize: 18, fontWeight: FontWeight.normal, color: const Color(0xFFbababa)),
+    bodySmall: defaultDarkTheme.textTheme.bodySmall!.copyWith(
+      fontSize: 14,
+      fontWeight: FontWeight.normal,
+      color: const Color(0xFFbababa),
+    ),
+    bodyMedium: defaultDarkTheme.textTheme.bodyMedium!.copyWith(
+      fontSize: 16,
+      fontWeight: FontWeight.normal,
+      color: const Color(0xFFbababa),
+    ),
+    bodyLarge: defaultDarkTheme.textTheme.bodyLarge!.copyWith(
+      fontSize: 18,
+      fontWeight: FontWeight.normal,
+      color: const Color(0xFFbababa),
+    ),
 
     //* Labels
-    labelLarge: defaultDarkTheme.textTheme.labelLarge!.copyWith(fontSize: 18, fontWeight: FontWeight.normal, color: const Color(0xFFFFFFFF)),
-    labelMedium: defaultDarkTheme.textTheme.labelMedium!.copyWith(fontSize: 16, fontWeight: FontWeight.normal, color: const Color(0xFFFFFFFF)),
-    labelSmall: defaultDarkTheme.textTheme.labelSmall!.copyWith(fontSize: 14, fontWeight: FontWeight.normal, color: const Color(0xFFFFFFFF)),
+    labelLarge: defaultDarkTheme.textTheme.labelLarge!.copyWith(
+      fontSize: 18,
+      fontWeight: FontWeight.normal,
+      color: const Color(0xFFFFFFFF),
+    ),
+    labelMedium: defaultDarkTheme.textTheme.labelMedium!.copyWith(
+      fontSize: 16,
+      fontWeight: FontWeight.normal,
+      color: const Color(0xFFFFFFFF),
+    ),
+    labelSmall: defaultDarkTheme.textTheme.labelSmall!.copyWith(
+      fontSize: 14,
+      fontWeight: FontWeight.normal,
+      color: const Color(0xFFFFFFFF),
+    ),
 
     //* Titles
-    titleLarge: defaultDarkTheme.textTheme.titleLarge!.copyWith(fontSize: 20, fontWeight: FontWeight.w600, color: const Color(0xFFFFFFFF)),
-    titleMedium: defaultDarkTheme.textTheme.titleMedium!.copyWith(fontSize: 18, fontWeight: FontWeight.w500, color: const Color(0xFFFFFFFF)),
-    titleSmall: defaultDarkTheme.textTheme.titleSmall!.copyWith(fontSize: 16, fontWeight: FontWeight.w400, color: const Color(0xFFFFFFFF)),
+    titleLarge: defaultDarkTheme.textTheme.titleLarge!.copyWith(
+      fontSize: 20,
+      fontWeight: FontWeight.w600,
+      color: const Color(0xFFFFFFFF),
+    ),
+    titleMedium: defaultDarkTheme.textTheme.titleMedium!.copyWith(
+      fontSize: 18,
+      fontWeight: FontWeight.w500,
+      color: const Color(0xFFFFFFFF),
+    ),
+    titleSmall: defaultDarkTheme.textTheme.titleSmall!.copyWith(
+      fontSize: 16,
+      fontWeight: FontWeight.w400,
+      color: const Color(0xFFFFFFFF),
+    ),
   ),
 );

@@ -41,7 +41,8 @@ class BubblesRenderer extends StatefulWidget {
   State<BubblesRenderer> createState() => _BubblesRendererState();
 }
 
-class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderStateMixin, SignalsMixin {
+class _BubblesRendererState extends State<BubblesRenderer>
+    with TickerProviderStateMixin, SignalsMixin {
   final GlobalKey _heightKey = GlobalKey();
   final GlobalKey contextMenuKey = GlobalKey();
   final hovering = signal(false);
@@ -72,7 +73,8 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
     // This is needed for jump to message
     if (widget.index == widget.provider.messages.length + 1) {
       return Watch((ctx) {
-        final loading = widget.provider.newMessagesLoading.value && widget.provider.messages.isEmpty;
+        final loading =
+            widget.provider.newMessagesLoading.value && widget.provider.messages.isEmpty;
         return SizedBox(
           height: Get.height * widget.heightMultiplier,
           child: Visibility(
@@ -85,9 +87,17 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text("chat.welcome.title".tr, style: Get.theme.textTheme.headlineMedium, textAlign: TextAlign.center),
+                      Text(
+                        "chat.welcome.title".tr,
+                        style: Get.theme.textTheme.headlineMedium,
+                        textAlign: TextAlign.center,
+                      ),
                       verticalSpacing(sectionSpacing),
-                      Text("chat.welcome.desc".tr, style: Get.theme.textTheme.bodyMedium, textAlign: TextAlign.center),
+                      Text(
+                        "chat.welcome.desc".tr,
+                        style: Get.theme.textTheme.bodyMedium,
+                        textAlign: TextAlign.center,
+                      ),
                     ],
                   ),
                 ),
@@ -108,7 +118,9 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
 
     // Call the height callback (in case requested, for keeping the viewport up to date with the scroll)
     if (message.heightCallback && !message.heightReported) {
-      WidgetsBinding.instance.addPostFrameCallback((timestamp) => heightCallback(message, timestamp));
+      WidgetsBinding.instance.addPostFrameCallback(
+        (timestamp) => heightCallback(message, timestamp),
+      );
     }
 
     if (message.type == MessageType.system) {
@@ -230,7 +242,12 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
       message.initAnimation(this);
       return Animate(
         effects: [
-          ExpandEffect(alignment: Alignment.center, duration: 250.ms, curve: Curves.ease, axis: Axis.vertical),
+          ExpandEffect(
+            alignment: Alignment.center,
+            duration: 250.ms,
+            curve: Curves.ease,
+            axis: Axis.vertical,
+          ),
           FadeEffect(begin: 0, end: 1, duration: 500.ms),
         ],
         autoPlay: false,
@@ -242,7 +259,11 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
 
     if (message.heightCallback) {
       return Watch((ctx) {
-        return Align(alignment: Alignment.topCenter, heightFactor: message.canScroll.value ? 1 : 0, child: messageWidget);
+        return Align(
+          alignment: Alignment.topCenter,
+          heightFactor: message.canScroll.value ? 1 : 0,
+          child: messageWidget,
+        );
       });
     }
 
@@ -267,7 +288,12 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
                 padding: 4,
                 onTap: () {
                   Get.dialog(
-                    MessageOptionsWindow(data: ContextMenuData.fromKey(contextMenuKey), self: true, message: message, provider: widget.provider),
+                    MessageOptionsWindow(
+                      data: ContextMenuData.fromKey(contextMenuKey),
+                      self: true,
+                      message: message,
+                      provider: widget.provider,
+                    ),
                   );
                 },
                 icon: Icons.more_horiz,

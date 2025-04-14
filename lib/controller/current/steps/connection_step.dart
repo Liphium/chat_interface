@@ -9,7 +9,11 @@ class ConnectionSetup extends ConnectionStep {
 
   @override
   Future<SetupResponse> load() async {
-    final body = await postAuthorizedJSON("/node/connect", <String, dynamic>{"tag": appTag, "token": refreshToken, "extra": ""});
+    final body = await postAuthorizedJSON("/node/connect", <String, dynamic>{
+      "tag": appTag,
+      "token": refreshToken,
+      "extra": "",
+    });
 
     if (!body["success"]) {
       return SetupResponse(error: body["error"]);

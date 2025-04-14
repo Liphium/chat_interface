@@ -53,17 +53,28 @@ class _SidebarProfileState extends State<SidebarProfile> {
                       if (!SpaceController.connected.value) {
                         // Render an embed letting the user know he's in a call on another device
                         return Watch((ctx) {
-                          if (StatusController.ownContainer.value != null && StatusController.ownContainer.value is SpaceConnectionContainer) {
+                          if (StatusController.ownContainer.value != null &&
+                              StatusController.ownContainer.value is SpaceConnectionContainer) {
                             return Padding(
-                              padding: const EdgeInsets.symmetric(vertical: elementSpacing, horizontal: defaultSpacing),
+                              padding: const EdgeInsets.symmetric(
+                                vertical: elementSpacing,
+                                horizontal: defaultSpacing,
+                              ),
                               child: Row(
                                 children: [
                                   Icon(Icons.public, color: Get.theme.colorScheme.onPrimary),
                                   horizontalSpacing(defaultSpacing),
-                                  Text("spaces.sharing_other_device".tr, style: Get.theme.textTheme.bodyMedium),
+                                  Text(
+                                    "spaces.sharing_other_device".tr,
+                                    style: Get.theme.textTheme.bodyMedium,
+                                  ),
                                   const Spacer(),
                                   LoadingIconButton(
-                                    onTap: () => SpaceController.join(StatusController.ownContainer.value! as SpaceConnectionContainer),
+                                    onTap:
+                                        () => SpaceController.join(
+                                          StatusController.ownContainer.value!
+                                              as SpaceConnectionContainer,
+                                        ),
                                     icon: Icons.login,
                                     extra: defaultSpacing,
                                     iconSize: 25,
@@ -85,21 +96,35 @@ class _SidebarProfileState extends State<SidebarProfile> {
                           children: [
                             Material(
                               borderRadius: BorderRadius.circular(defaultSpacing),
-                              color: shown ? theme.colorScheme.inverseSurface : theme.colorScheme.primaryContainer,
+                              color:
+                                  shown
+                                      ? theme.colorScheme.inverseSurface
+                                      : theme.colorScheme.primaryContainer,
                               child: InkWell(
                                 onTap: () {
                                   SidebarController.openTab(SpaceSidebarTab());
                                 },
                                 splashColor: theme.hoverColor,
-                                hoverColor: shown ? theme.colorScheme.inverseSurface : theme.colorScheme.inverseSurface,
+                                hoverColor:
+                                    shown
+                                        ? theme.colorScheme.inverseSurface
+                                        : theme.colorScheme.inverseSurface,
                                 borderRadius: BorderRadius.circular(defaultSpacing),
                                 child: Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: elementSpacing, horizontal: defaultSpacing),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: elementSpacing,
+                                    horizontal: defaultSpacing,
+                                  ),
                                   child: Row(
                                     children: [
                                       Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [Icon(Icons.public, color: Get.theme.colorScheme.onPrimary)],
+                                        children: [
+                                          Icon(
+                                            Icons.public,
+                                            color: Get.theme.colorScheme.onPrimary,
+                                          ),
+                                        ],
                                       ),
                                       horizontalSpacing(defaultSpacing),
                                       const Spacer(),
@@ -127,12 +152,20 @@ class _SidebarProfileState extends State<SidebarProfile> {
                       borderRadius: BorderRadius.circular(defaultSpacing),
                       color: theme.colorScheme.primaryContainer,
                       child: InkWell(
-                        onTap: () => showModal(OwnProfile(position: ContextMenuData.fromKey(_profileKey, above: true))),
+                        onTap:
+                            () => showModal(
+                              OwnProfile(
+                                position: ContextMenuData.fromKey(_profileKey, above: true),
+                              ),
+                            ),
                         splashColor: theme.hoverColor.withAlpha(10),
                         borderRadius: BorderRadius.circular(defaultSpacing),
                         hoverColor: theme.colorScheme.inverseSurface,
                         child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: elementSpacing, vertical: elementSpacing),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: elementSpacing,
+                            vertical: elementSpacing,
+                          ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -142,7 +175,13 @@ class _SidebarProfileState extends State<SidebarProfile> {
                                   return Row(
                                     children: [
                                       horizontalSpacing(defaultSpacing),
-                                      SizedBox(width: 30, height: 30, child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary)),
+                                      SizedBox(
+                                        width: 30,
+                                        height: 30,
+                                        child: CircularProgressIndicator(
+                                          color: Get.theme.colorScheme.onPrimary,
+                                        ),
+                                      ),
                                       horizontalSpacing(defaultSpacing),
                                       Text("loading".tr, style: Get.textTheme.labelLarge),
                                     ],
@@ -176,7 +215,10 @@ class _SidebarProfileState extends State<SidebarProfile> {
                                                 child: SizedBox(
                                                   height: 20,
                                                   width: 20,
-                                                  child: CircularProgressIndicator(strokeWidth: 3.0, color: Get.theme.colorScheme.onPrimary),
+                                                  child: CircularProgressIndicator(
+                                                    strokeWidth: 3.0,
+                                                    color: Get.theme.colorScheme.onPrimary,
+                                                  ),
                                                 ),
                                               ),
                                             ),
@@ -198,7 +240,12 @@ class _SidebarProfileState extends State<SidebarProfile> {
                                                       ),
                                                     ),
                                                     horizontalSpacing(defaultSpacing),
-                                                    Watch((ctx) => StatusRenderer(status: StatusController.type.value, text: false)),
+                                                    Watch(
+                                                      (ctx) => StatusRenderer(
+                                                        status: StatusController.type.value,
+                                                        text: false,
+                                                      ),
+                                                    ),
                                                   ],
                                                 ),
 
@@ -251,10 +298,20 @@ class _SidebarProfileState extends State<SidebarProfile> {
                                             child: Container(
                                               width: 20,
                                               height: 20,
-                                              decoration: BoxDecoration(color: Get.theme.colorScheme.error, borderRadius: BorderRadius.circular(100)),
-                                              padding: const EdgeInsets.only(bottom: elementSpacing),
+                                              decoration: BoxDecoration(
+                                                color: Get.theme.colorScheme.error,
+                                                borderRadius: BorderRadius.circular(100),
+                                              ),
+                                              padding: const EdgeInsets.only(
+                                                bottom: elementSpacing,
+                                              ),
                                               child: Center(
-                                                child: Text(min(amount, 9).toString(), style: Get.textTheme.labelSmall!.copyWith(fontSize: 12)),
+                                                child: Text(
+                                                  min(amount, 9).toString(),
+                                                  style: Get.textTheme.labelSmall!.copyWith(
+                                                    fontSize: 12,
+                                                  ),
+                                                ),
                                               ),
                                             ),
                                           );

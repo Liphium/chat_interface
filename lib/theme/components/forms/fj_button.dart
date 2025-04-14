@@ -42,7 +42,12 @@ class FJElevatedLoadingButton extends StatelessWidget {
   final String label;
   final ReadonlySignal<bool>? loading;
 
-  const FJElevatedLoadingButton({super.key, required this.onTap, required this.label, this.loading});
+  const FJElevatedLoadingButton({
+    super.key,
+    required this.onTap,
+    required this.label,
+    this.loading,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -65,7 +70,10 @@ class FJElevatedLoadingButton extends StatelessWidget {
                         width: Get.theme.textTheme.labelLarge!.fontSize! + defaultSpacing,
                         child: Padding(
                           padding: const EdgeInsets.all(defaultSpacing * 0.25),
-                          child: CircularProgressIndicator(strokeWidth: 3.0, color: Get.theme.colorScheme.onPrimary),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 3.0,
+                            color: Get.theme.colorScheme.onPrimary,
+                          ),
                         ),
                       )
                       : Text(label, style: Get.theme.textTheme.labelLarge),
@@ -83,7 +91,13 @@ class FJElevatedLoadingButtonCustom extends StatelessWidget {
   final Widget child;
   final Signal<bool> loading;
 
-  const FJElevatedLoadingButtonCustom({super.key, required this.onTap, required this.child, required this.loading, this.builder});
+  const FJElevatedLoadingButtonCustom({
+    super.key,
+    required this.onTap,
+    required this.child,
+    required this.loading,
+    this.builder,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -98,7 +112,10 @@ class FJElevatedLoadingButtonCustom extends StatelessWidget {
                       width: Get.theme.textTheme.labelLarge!.fontSize! + defaultSpacing,
                       child: Padding(
                         padding: const EdgeInsets.all(defaultSpacing * 0.25),
-                        child: CircularProgressIndicator(strokeWidth: 3.0, color: Get.theme.colorScheme.onPrimary),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 3.0,
+                          color: Get.theme.colorScheme.onPrimary,
+                        ),
                       ),
                     )
                 : child,

@@ -31,7 +31,13 @@ enum SettingLabel {
   town("settings.tab.town", [
     SettingCategory("town", Icons.cottage, TownSettingsPage()),
     SettingCategory("accounts", Icons.person_search, AdminAccountsPage(), admin: true),
-    SettingCategory("tabletop", Icons.table_restaurant, TabletopSettingsPage(), mobile: false, web: false),
+    SettingCategory(
+      "tabletop",
+      Icons.table_restaurant,
+      TabletopSettingsPage(),
+      mobile: false,
+      web: false,
+    ),
     SettingCategory("files", Icons.folder, FileSettingsPage()),
   ]),
 
@@ -50,7 +56,9 @@ enum SettingLabel {
     //SettingCategory("call_app", Icons.cable, CallSettingsPage()),
   ]),
 
-  privacy("settings.tab.security", [SettingCategory("trusted_links", Icons.link, TrustedLinkSettingsPage())]);
+  privacy("settings.tab.security", [
+    SettingCategory("trusted_links", Icons.link, TrustedLinkSettingsPage()),
+  ]);
 
   final String _label;
   final List<SettingCategory> categories;
@@ -70,7 +78,15 @@ class SettingCategory {
   final bool displayTitle;
   final bool web;
 
-  const SettingCategory(this.label, this.icon, this.widget, {this.displayTitle = true, this.mobile = true, this.admin = false, this.web = true});
+  const SettingCategory(
+    this.label,
+    this.icon,
+    this.widget, {
+    this.displayTitle = true,
+    this.mobile = true,
+    this.admin = false,
+    this.web = true,
+  });
 }
 
 class Setting<T> {
@@ -87,7 +103,8 @@ class Setting<T> {
   }
 
   Future<bool> grabFromDb() async {
-    final val = await (db.select(db.setting)..where((tbl) => tbl.key.equals(label))).getSingleOrNull();
+    final val =
+        await (db.select(db.setting)..where((tbl) => tbl.key.equals(label))).getSingleOrNull();
     grabFrom((val ?? SettingData(key: label, value: stringify())).value);
     return true;
   }

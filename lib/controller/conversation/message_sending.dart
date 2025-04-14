@@ -6,7 +6,12 @@ class MessageSendHelper {
 
   /// Add a reply to the current message draft
   static void addReplyToCurrentDraft(Message message) {
-    currentDraft.value?.answer.value = AnswerData(message.id, message.senderAddress, message.content, message.attachments);
+    currentDraft.value?.answer.value = AnswerData(
+      message.id,
+      message.senderAddress,
+      message.content,
+      message.attachments,
+    );
   }
 
   /// Add a file to the current message draft
@@ -24,7 +29,12 @@ class MessageSendHelper {
     // Check if the file size is valid
     final size = await file.length();
     if (size > specialConstants[Constants.specialConstantMaxFileSize]! * 1000 * 1000) {
-      showErrorPopup("error", "file.too_large".trParams({"1": specialConstants[Constants.specialConstantMaxFileSize].toString()}));
+      showErrorPopup(
+        "error",
+        "file.too_large".trParams({
+          "1": specialConstants[Constants.specialConstantMaxFileSize].toString(),
+        }),
+      );
       return false;
     }
 
@@ -44,7 +54,12 @@ class AnswerData {
   AnswerData(this.id, this.senderAddress, this.content, this.attachments);
 
   /// Convert a message to the answer content for the reply container
-  static String answerContent(MessageType type, String content, List<String> attachments, {FriendController? controller}) {
+  static String answerContent(
+    MessageType type,
+    String content,
+    List<String> attachments, {
+    FriendController? controller,
+  }) {
     // Return different information based on every type
     switch (type) {
       case MessageType.text:
@@ -56,7 +71,11 @@ class AnswerData {
           if (attachments.first.isURL) {
             content = attachments.first;
           } else {
-            content = AttachmentController.fromJson(StorageType.cache, jsonDecode(attachments.first)).name;
+            content =
+                AttachmentController.fromJson(
+                  StorageType.cache,
+                  jsonDecode(attachments.first),
+                ).name;
           }
         }
         return content;

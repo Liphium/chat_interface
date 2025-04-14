@@ -69,7 +69,11 @@ class _ProfilePictureWindowState extends State<ProfilePictureWindow> {
       maxWidth: 450,
       child: Watch((ctx) {
         if (_image.value == null) {
-          return SizedBox(height: 100, width: 100, child: Center(child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary)));
+          return SizedBox(
+            height: 100,
+            width: 100,
+            child: Center(child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary)),
+          );
         }
 
         final scale = _scaleFactor.value;
@@ -86,7 +90,12 @@ class _ProfilePictureWindowState extends State<ProfilePictureWindow> {
                 child: SizedBox(
                   height: 300,
                   width: 300,
-                  child: RawImage(fit: BoxFit.none, scale: scale, image: _image.value, alignment: Alignment(offset.dx, offset.dy)),
+                  child: RawImage(
+                    fit: BoxFit.none,
+                    scale: scale,
+                    image: _image.value,
+                    alignment: Alignment(offset.dx, offset.dy),
+                  ),
                 ),
               ),
             ),
@@ -106,14 +115,24 @@ class _ProfilePictureWindowState extends State<ProfilePictureWindow> {
                   ),
                 ),
                 horizontalSpacing(defaultSpacing),
-                Text(((maxScale - _scaleFactor.value) + 0.5).toStringAsFixed(1), style: Get.theme.textTheme.bodyMedium),
+                Text(
+                  ((maxScale - _scaleFactor.value) + 0.5).toStringAsFixed(1),
+                  style: Get.theme.textTheme.bodyMedium,
+                ),
               ],
             ),
             Row(
               children: [
                 Text("x".tr, style: Get.theme.textTheme.labelMedium),
                 horizontalSpacing(defaultSpacing),
-                Expanded(child: FJSlider(value: _moveX.value, min: -1, max: 1, onChanged: (val) => _moveX.value = val)),
+                Expanded(
+                  child: FJSlider(
+                    value: _moveX.value,
+                    min: -1,
+                    max: 1,
+                    onChanged: (val) => _moveX.value = val,
+                  ),
+                ),
                 horizontalSpacing(defaultSpacing),
                 Text(_moveX.value.toStringAsFixed(1), style: Get.theme.textTheme.bodyMedium),
               ],
@@ -122,7 +141,14 @@ class _ProfilePictureWindowState extends State<ProfilePictureWindow> {
               children: [
                 Text("y".tr, style: Get.theme.textTheme.labelMedium),
                 horizontalSpacing(defaultSpacing),
-                Expanded(child: FJSlider(value: _moveY.value, min: -1, max: 1, onChanged: (val) => _moveY.value = val)),
+                Expanded(
+                  child: FJSlider(
+                    value: _moveY.value,
+                    min: -1,
+                    max: 1,
+                    onChanged: (val) => _moveY.value = val,
+                  ),
+                ),
                 horizontalSpacing(defaultSpacing),
                 Text(_moveY.value.toStringAsFixed(1), style: Get.theme.textTheme.bodyMedium),
               ],
@@ -141,11 +167,20 @@ class _ProfilePictureWindowState extends State<ProfilePictureWindow> {
                   SizedBox(
                     width: 500,
                     height: 500,
-                    child: RawImage(fit: BoxFit.none, scale: scale, image: _image.value!, alignment: Alignment(_moveX.value, _moveY.value)),
+                    child: RawImage(
+                      fit: BoxFit.none,
+                      scale: scale,
+                      image: _image.value!,
+                      alignment: Alignment(_moveX.value, _moveY.value),
+                    ),
                   ),
                 );
                 final cutFile = XFile("cut-${widget.file.name}");
-                final res = await ProfileHelper.uploadProfilePicture(cutFile, widget.file.name, bytes: image);
+                final res = await ProfileHelper.uploadProfilePicture(
+                  cutFile,
+                  widget.file.name,
+                  bytes: image,
+                );
                 if (!res) {
                   _uploading.value = false;
                   sendLog("kinda didn't work");

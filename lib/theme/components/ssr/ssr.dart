@@ -28,7 +28,12 @@ class SSR {
   final error = signal("");
   Map<String, dynamic>? suggestButton;
 
-  SSR({required this.startPath, required this.onSuccess, required this.onRender, this.doRequest = postJSON});
+  SSR({
+    required this.startPath,
+    required this.onSuccess,
+    required this.onRender,
+    this.doRequest = postJSON,
+  });
 
   /// Start the SSR flow (returns an error message or null if successful)
   Future<String?> start({Map<String, Widget>? extra}) async {
@@ -70,7 +75,11 @@ class SSR {
   }
 
   /// Handles the different SSR response types
-  Future<String?> handleSSRResponse(String basePath, Map<String, dynamic> json, {int redirects = 0}) async {
+  Future<String?> handleSSRResponse(
+    String basePath,
+    Map<String, dynamic> json, {
+    int redirects = 0,
+  }) async {
     switch (json["type"]) {
       case "redirect":
         if (json["token"] != null) {

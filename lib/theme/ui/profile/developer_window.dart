@@ -67,15 +67,25 @@ class _DeveloperWindowState extends State<DeveloperWindow> {
         children: [
           Text("Current instance: $currentInstance", style: Get.textTheme.bodyMedium),
           verticalSpacing(elementSpacing),
-          Text("Instance domain: ${connector.url ?? "Not connected"}", style: Get.textTheme.bodyMedium),
+          Text(
+            "Instance domain: ${connector.url ?? "Not connected"}",
+            style: Get.textTheme.bodyMedium,
+          ),
           verticalSpacing(elementSpacing),
-          Text("Current account: ${StatusController.ownAddress.encode()}", style: Get.textTheme.bodyMedium),
+          Text(
+            "Current account: ${StatusController.ownAddress.encode()}",
+            style: Get.textTheme.bodyMedium,
+          ),
           verticalSpacing(defaultSpacing),
           ProfileButton(
             icon: Icons.launch,
             label: 'Local database viewer',
             onTap: () async {
-              unawaited(Navigator.of(context).push(MaterialPageRoute(builder: (context) => DriftDbViewer(db))));
+              unawaited(
+                Navigator.of(
+                  context,
+                ).push(MaterialPageRoute(builder: (context) => DriftDbViewer(db))),
+              );
             },
           ),
           verticalSpacing(elementSpacing),
@@ -83,7 +93,11 @@ class _DeveloperWindowState extends State<DeveloperWindow> {
             icon: Icons.delete,
             label: "Delete all conversations (local)",
             onTap: () {
-              VaultVersioningService.storeOrUpdateVersion(VaultVersioningService.vaultTypeGeneral, Constants.vaultConversationTag, 0);
+              VaultVersioningService.storeOrUpdateVersion(
+                VaultVersioningService.vaultTypeGeneral,
+                Constants.vaultConversationTag,
+                0,
+              );
               db.conversation.deleteAll();
               db.member.deleteAll();
             },
@@ -93,36 +107,55 @@ class _DeveloperWindowState extends State<DeveloperWindow> {
             icon: Icons.delete,
             label: "Delete all friends (local)",
             onTap: () {
-              VaultVersioningService.storeOrUpdateVersion(VaultVersioningService.vaultTypeFriend, "", 0);
+              VaultVersioningService.storeOrUpdateVersion(
+                VaultVersioningService.vaultTypeFriend,
+                "",
+                0,
+              );
               db.friend.deleteAll();
             },
           ),
           verticalSpacing(elementSpacing),
-          ProfileButton(icon: Icons.delete, label: "Delete all messages (local)", onTap: () => db.message.deleteAll()),
+          ProfileButton(
+            icon: Icons.delete,
+            label: "Delete all messages (local)",
+            onTap: () => db.message.deleteAll(),
+          ),
           verticalSpacing(elementSpacing),
           ProfileButton(
             icon: Icons.delete,
             label: "Delete all library entries (local)",
             onTap: () {
-              VaultVersioningService.storeOrUpdateVersion(VaultVersioningService.vaultTypeGeneral, Constants.vaultLibraryTag, 0);
+              VaultVersioningService.storeOrUpdateVersion(
+                VaultVersioningService.vaultTypeGeneral,
+                Constants.vaultLibraryTag,
+                0,
+              );
               db.libraryEntry.deleteAll();
             },
           ),
           verticalSpacing(elementSpacing),
-          ProfileButton(icon: Icons.hardware, label: "Test remote actions", onTap: () => remoteActionTest(basePath), loading: _remoteActionTesting),
+          ProfileButton(
+            icon: Icons.hardware,
+            label: "Test remote actions",
+            onTap: () => remoteActionTest(basePath),
+            loading: _remoteActionTesting,
+          ),
           Column(
             children:
-                FriendController.friends.values.where((friend) => friend.id.server != basePath).map((friend) {
-                  return Padding(
-                    padding: const EdgeInsets.only(top: elementSpacing),
-                    child: ProfileButton(
-                      icon: Icons.hardware,
-                      label: "Test remote actions (${friend.id.server})",
-                      onTap: () => remoteActionTest(friend.id.server),
-                      loading: _remoteActionTesting,
-                    ),
-                  );
-                }).toList(),
+                FriendController.friends.values.where((friend) => friend.id.server != basePath).map(
+                  (friend) {
+                    return Padding(
+                      padding: const EdgeInsets.only(top: elementSpacing),
+                      child: ProfileButton(
+                        icon: Icons.hardware,
+                        label: "Test remote actions (${friend.id.server})",
+                        onTap: () => remoteActionTest(friend.id.server),
+                        loading: _remoteActionTesting,
+                      ),
+                    );
+                  },
+                ).toList(),
           ),
         ],
       ),

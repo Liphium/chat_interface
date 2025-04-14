@@ -57,7 +57,10 @@ class _UserAvatarState extends State<UserAvatar> {
                   style: Get.theme.textTheme.labelMedium!.copyWith(
                     fontSize: (widget.size ?? 45) * 0.5,
                     fontWeight: FontWeight.bold,
-                    color: widget.id == StatusController.ownAddress ? Get.theme.colorScheme.tertiary : Get.theme.colorScheme.onPrimary,
+                    color:
+                        widget.id == StatusController.ownAddress
+                            ? Get.theme.colorScheme.tertiary
+                            : Get.theme.colorScheme.onPrimary,
                   ),
                 ),
               ),
@@ -94,18 +97,32 @@ class UserRenderer extends StatelessWidget {
             children: [
               Row(
                 children: [
-                  Flexible(child: Text(friend.displayName.value, overflow: TextOverflow.ellipsis, style: Get.theme.textTheme.bodyMedium)),
+                  Flexible(
+                    child: Text(
+                      friend.displayName.value,
+                      overflow: TextOverflow.ellipsis,
+                      style: Get.theme.textTheme.bodyMedium,
+                    ),
+                  ),
                   if (friend.id.server != basePath)
                     Padding(
                       padding: const EdgeInsets.only(left: defaultSpacing),
                       child: Tooltip(
                         waitDuration: const Duration(milliseconds: 500),
                         message: "friends.different_town".trParams({"town": friend.id.server}),
-                        child: Icon(Icons.sensors, color: Get.theme.colorScheme.onPrimary, size: 21),
+                        child: Icon(
+                          Icons.sensors,
+                          color: Get.theme.colorScheme.onPrimary,
+                          size: 21,
+                        ),
                       ),
                     ),
                   horizontalSpacing(defaultSpacing),
-                  Watch((ctx) => StatusRenderer(status: own ? StatusController.type.value : friend!.statusType.value)),
+                  Watch(
+                    (ctx) => StatusRenderer(
+                      status: own ? StatusController.type.value : friend!.statusType.value,
+                    ),
+                  ),
                 ],
               ),
               Watch(

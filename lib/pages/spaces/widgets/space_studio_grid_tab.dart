@@ -46,7 +46,11 @@ class _SpaceStudioGridTabState extends State<SpaceStudioGridTab> {
         children: [
           // Base background layer with the profile picture
           Container(
-            decoration: BoxDecoration(color: theme.colorScheme.onInverseSurface, border: border, borderRadius: BorderRadius.circular(sectionSpacing)),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.onInverseSurface,
+              border: border,
+              borderRadius: BorderRadius.circular(sectionSpacing),
+            ),
             child: Center(child: UserAvatar(id: member.friend.id, size: 64)),
           ),
 

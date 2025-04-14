@@ -26,7 +26,13 @@ class AttachmentRenderer extends StatefulWidget {
   final ConversationMessageProvider? provider;
   final AttachmentContainer container;
 
-  const AttachmentRenderer({super.key, required this.container, required this.self, this.message, this.provider});
+  const AttachmentRenderer({
+    super.key,
+    required this.container,
+    required this.self,
+    this.message,
+    this.provider,
+  });
 
   @override
   State<AttachmentRenderer> createState() => _AttachmentRendererState();
@@ -57,7 +63,9 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
           return SizedBox(
             width: 60,
             height: 60,
-            child: CircularProgressIndicator(value: loadingProgress.expectedTotalBytes! / loadingProgress.cumulativeBytesLoaded),
+            child: CircularProgressIndicator(
+              value: loadingProgress.expectedTotalBytes! / loadingProgress.cumulativeBytesLoaded,
+            ),
           );
         },
         widget.container.url,
@@ -73,7 +81,10 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
         WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
           sendLog("NEW HEIGHT ${widget.message!.heightKey!.currentContext!.size!.height}");
           final currentHeight = widget.message!.heightKey!.currentContext!.size!.height;
-          widget.provider!.messageHeightChange(widget.message!, currentHeight - widget.message!.currentHeight!);
+          widget.provider!.messageHeightChange(
+            widget.message!,
+            currentHeight - widget.message!.currentHeight!,
+          );
         });
       });
       stream.addListener(listener);
@@ -118,13 +129,20 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
             padding: const EdgeInsets.all(defaultSpacing),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(defaultSpacing),
-              color: widget.self ? Get.theme.colorScheme.primary : Get.theme.colorScheme.primaryContainer,
+              color:
+                  widget.self
+                      ? Get.theme.colorScheme.primary
+                      : Get.theme.colorScheme.primaryContainer,
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.public_off, color: Get.theme.colorScheme.error, size: Get.theme.textTheme.bodyMedium!.fontSize! * 1.5),
+                Icon(
+                  Icons.public_off,
+                  color: Get.theme.colorScheme.error,
+                  size: Get.theme.textTheme.bodyMedium!.fontSize! * 1.5,
+                ),
                 horizontalSpacing(elementSpacing),
                 Flexible(child: Text("file.unsafe".trParams({"domain": domain}))),
                 horizontalSpacing(elementSpacing),
@@ -134,7 +152,10 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
                   padding: 4,
                   onTap: () async {
                     final result = await showConfirmPopup(
-                      ConfirmWindow(title: "file.images.trust.title".tr, text: "file.images.trust.description".trParams({"domain": domain})),
+                      ConfirmWindow(
+                        title: "file.images.trust.title".tr,
+                        text: "file.images.trust.description".trParams({"domain": domain}),
+                      ),
                     );
 
                     if (result) {
@@ -163,7 +184,10 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
                   borderRadius: BorderRadius.circular(defaultSpacing),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(defaultSpacing),
-                    child: ConstrainedBox(constraints: const BoxConstraints(maxHeight: 350), child: _networkImage),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxHeight: 350),
+                      child: _networkImage,
+                    ),
                   ),
                 ),
               ),
@@ -188,18 +212,30 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(getIconForFileName(widget.container.name), size: sectionSpacing * 2, color: Get.theme.colorScheme.onPrimary),
+          Icon(
+            getIconForFileName(widget.container.name),
+            size: sectionSpacing * 2,
+            color: Get.theme.colorScheme.onPrimary,
+          ),
           horizontalSpacing(defaultSpacing),
           Flexible(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Flexible(child: Text(widget.container.name, style: Get.theme.textTheme.labelMedium, overflow: TextOverflow.ellipsis)),
+                Flexible(
+                  child: Text(
+                    widget.container.name,
+                    style: Get.theme.textTheme.labelMedium,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
                 Flexible(
                   child: Watch(
                     (ctx) => Text(
-                      !widget.container.error.value ? formatFileSize(widget.container.size) : 'file.not_uploaded'.tr,
+                      !widget.container.error.value
+                          ? formatFileSize(widget.container.size)
+                          : 'file.not_uploaded'.tr,
                       style: Get.theme.textTheme.bodyMedium,
                     ),
                   ),
@@ -215,7 +251,10 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
               return SizedBox(
                 width: 30,
                 height: 30,
-                child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary, value: widget.container.percentage.value),
+                child: CircularProgressIndicator(
+                  color: Get.theme.colorScheme.onPrimary,
+                  value: widget.container.percentage.value,
+                ),
               );
             }
 

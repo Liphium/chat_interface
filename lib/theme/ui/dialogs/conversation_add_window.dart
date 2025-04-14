@@ -60,8 +60,11 @@ class ConversationAddWindow extends StatefulWidget {
     if (name!.isEmpty && friends.length > 1) {
       return "enter.name".tr;
     }
-    if (name.length > specialConstants[Constants.specialConstantMaxConversationNameLength]! && friends.length > 1) {
-      return "too.long".trParams({"limit": specialConstants["max_conversation_name_length"].toString()});
+    if (name.length > specialConstants[Constants.specialConstantMaxConversationNameLength]! &&
+        friends.length > 1) {
+      return "too.long".trParams({
+        "limit": specialConstants["max_conversation_name_length"].toString(),
+      });
     }
 
     // Open a group or direct message based on the amount of people in it
@@ -156,7 +159,10 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
         children: [
           //* Input
           Container(
-            decoration: BoxDecoration(color: theme.colorScheme.inverseSurface, borderRadius: BorderRadius.circular(defaultSpacing)),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.inverseSurface,
+              borderRadius: BorderRadius.circular(defaultSpacing),
+            ),
             padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
             child: Row(
               children: [
@@ -164,7 +170,11 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                 horizontalSpacing(defaultSpacing),
                 Expanded(
                   child: TextField(
-                    decoration: InputDecoration(border: InputBorder.none, hintText: 'search'.tr, hintStyle: Get.textTheme.bodyLarge),
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      hintText: 'search'.tr,
+                      hintStyle: Get.textTheme.bodyLarge,
+                    ),
                     cursorColor: theme.colorScheme.onPrimary,
                     style: theme.textTheme.labelLarge,
                     onChanged: (value) => _search.value = value,
@@ -176,7 +186,9 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                         final member = FriendController.friends.values.firstWhere(
                           (element) =>
                               (element.name.toLowerCase().contains(value.toLowerCase()) ||
-                                  element.displayName.value.toLowerCase().contains(value.toLowerCase())) &&
+                                  element.displayName.value.toLowerCase().contains(
+                                    value.toLowerCase(),
+                                  )) &&
                               element.id != StatusController.ownAddress,
                           orElse: () => Friend.unknown(LPHAddress.error()),
                         );
@@ -221,7 +233,9 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                     final search = _search.value;
                     if (search.isNotEmpty &&
                         !(friend.name.toLowerCase().contains(search.toLowerCase()) ||
-                            friend.displayName.value.toLowerCase().contains(search.toLowerCase()))) {
+                            friend.displayName.value.toLowerCase().contains(
+                              search.toLowerCase(),
+                            ))) {
                       return const SizedBox();
                     }
 
@@ -229,7 +243,10 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                       padding: const EdgeInsets.only(bottom: defaultSpacing),
                       child: Watch(
                         (ctx) => Material(
-                          color: _members.contains(friend) ? theme.colorScheme.primary : Colors.transparent,
+                          color:
+                              _members.contains(friend)
+                                  ? theme.colorScheme.primary
+                                  : Colors.transparent,
                           borderRadius: BorderRadius.circular(defaultSpacing),
                           child: InkWell(
                             borderRadius: BorderRadius.circular(defaultSpacing),
@@ -245,12 +262,20 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                               _length.value = _members.length;
                             },
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: elementSpacing, vertical: elementSpacing),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: elementSpacing,
+                                vertical: elementSpacing,
+                              ),
                               child: Row(
                                 children: [
                                   UserAvatar(id: friend.id, size: 35),
                                   horizontalSpacing(defaultSpacing),
-                                  Watch((ctx) => Text(friend.displayName.value, style: theme.textTheme.labelLarge)),
+                                  Watch(
+                                    (ctx) => Text(
+                                      friend.displayName.value,
+                                      style: theme.textTheme.labelLarge,
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
@@ -274,19 +299,31 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                   child: Watch(
                     (ctx) => Animate(
                       effects: [
-                        ExpandEffect(alignment: Alignment.topCenter, duration: 250.ms, curve: Curves.ease, axis: Axis.vertical),
+                        ExpandEffect(
+                          alignment: Alignment.topCenter,
+                          duration: 250.ms,
+                          curve: Curves.ease,
+                          axis: Axis.vertical,
+                        ),
                         FadeEffect(begin: 0, end: 1, duration: 250.ms),
                       ],
                       target: _length.value > 1 ? 1 : 0,
                       child: Padding(
                         padding: const EdgeInsets.only(bottom: defaultSpacing),
-                        child: FJTextField(controller: _controller, hintText: "conversations.name".tr),
+                        child: FJTextField(
+                          controller: _controller,
+                          hintText: "conversations.name".tr,
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
-              AnimatedErrorContainer(expand: true, padding: const EdgeInsets.only(bottom: defaultSpacing), message: _errorText),
+              AnimatedErrorContainer(
+                expand: true,
+                padding: const EdgeInsets.only(bottom: defaultSpacing),
+                message: _errorText,
+              ),
               FJElevatedLoadingButton(
                 onTap: () async {
                   _conversationLoading.value = true;
@@ -300,7 +337,10 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                     _conversationLoading.value = false;
                     return;
                   }
-                  final error = await ConversationAddWindow.createConversationAction(_members, _controller.text);
+                  final error = await ConversationAddWindow.createConversationAction(
+                    _members,
+                    _controller.text,
+                  );
                   if (error != null) {
                     _errorText.value = error;
                   } else {

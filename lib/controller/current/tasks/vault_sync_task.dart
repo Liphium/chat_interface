@@ -34,7 +34,10 @@ class VaultSyncTask extends SynchronizationTask {
     // Get the latest versions of all the targets
     Map<String, int> versionMap = {};
     for (var target in targets) {
-      versionMap[target.tag] = await VaultVersioningService.retrieveVersion(VaultVersioningService.vaultTypeGeneral, target.tag);
+      versionMap[target.tag] = await VaultVersioningService.retrieveVersion(
+        VaultVersioningService.vaultTypeGeneral,
+        target.tag,
+      );
     }
 
     // Synchronize using the endpoint from the server
@@ -80,7 +83,13 @@ class VaultSyncTask extends SynchronizationTask {
 
     // Save all the new versions
     for (var target in targets) {
-      unawaited(VaultVersioningService.storeOrUpdateVersion(VaultVersioningService.vaultTypeGeneral, target.tag, newVersions[target.tag]!));
+      unawaited(
+        VaultVersioningService.storeOrUpdateVersion(
+          VaultVersioningService.vaultTypeGeneral,
+          target.tag,
+          newVersions[target.tag]!,
+        ),
+      );
     }
 
     // Notify the vault targets about the changes
@@ -100,7 +109,13 @@ class VaultSyncTask extends SynchronizationTask {
 
     // Let the target process the new entry
     target.processEntries([], [entry]);
-    unawaited(VaultVersioningService.storeOrUpdateVersion(VaultVersioningService.vaultTypeGeneral, target.tag, version));
+    unawaited(
+      VaultVersioningService.storeOrUpdateVersion(
+        VaultVersioningService.vaultTypeGeneral,
+        target.tag,
+        version,
+      ),
+    );
   }
 
   /// Called by vault_actions when an entry is deleted
@@ -112,7 +127,13 @@ class VaultSyncTask extends SynchronizationTask {
 
     // Let the target process the deletion
     target.processEntries([id], []);
-    unawaited(VaultVersioningService.storeOrUpdateVersion(VaultVersioningService.vaultTypeGeneral, target.tag, version));
+    unawaited(
+      VaultVersioningService.storeOrUpdateVersion(
+        VaultVersioningService.vaultTypeGeneral,
+        target.tag,
+        version,
+      ),
+    );
   }
 
   @override
@@ -149,5 +170,6 @@ class VaultEntry {
       payload = json["payload"],
       updatedAt = json["updated_at"];
 
-  String decryptedPayload([SecureKey? key, Sodium? sodium]) => decryptSymmetric(payload, key ?? vaultKey, sodium);
+  String decryptedPayload([SecureKey? key, Sodium? sodium]) =>
+      decryptSymmetric(payload, key ?? vaultKey, sodium);
 }

@@ -15,7 +15,14 @@ class LibraryFavoriteButton extends StatefulWidget {
   final Function()? onEnter;
   final Function()? onExit;
 
-  const LibraryFavoriteButton({super.key, required this.child, required this.container, this.callback, this.onEnter, this.onExit});
+  const LibraryFavoriteButton({
+    super.key,
+    required this.child,
+    required this.container,
+    this.callback,
+    this.onEnter,
+    this.onExit,
+  });
 
   @override
   State<LibraryFavoriteButton> createState() => _LibraryFavoriteButtonState();
@@ -32,9 +39,13 @@ class _LibraryFavoriteButtonState extends State<LibraryFavoriteButton> with Sign
     final identifier = LibraryEntry.entryIdentifier(widget.container);
 
     // Check if there is an entry with this identifier
-    final dbEntry = await (db.libraryEntry.select()..where((tbl) => tbl.identifierHash.equals(identifier))).get();
+    final dbEntry =
+        await (db.libraryEntry.select()..where((tbl) => tbl.identifierHash.equals(identifier)))
+            .get();
     if (dbEntry.length > 1) {
-      sendLog("WARNING: hash collision with identifier of library entry, deleting all entries other than index 0");
+      sendLog(
+        "WARNING: hash collision with identifier of library entry, deleting all entries other than index 0",
+      );
       for (var entry in dbEntry.sublist(1)) {
         await LibraryManager.removeEntryFromLibrary(await LibraryEntry.fromData(entry));
       }
@@ -85,7 +96,9 @@ class _LibraryFavoriteButtonState extends State<LibraryFavoriteButton> with Sign
                           _bookmarked.value = false;
                         }
                       } else {
-                        final success = await LibraryManager.addContainerToLibrary(widget.container);
+                        final success = await LibraryManager.addContainerToLibrary(
+                          widget.container,
+                        );
                         if (success) {
                           _bookmarked.value = true;
                         }
@@ -96,7 +109,10 @@ class _LibraryFavoriteButtonState extends State<LibraryFavoriteButton> with Sign
                       child: Watch(
                         (ctx) => Icon(
                           _bookmarked.value ? Icons.bookmark : Icons.bookmark_outline,
-                          color: _bookmarked.value ? Get.theme.colorScheme.onPrimary : Get.theme.colorScheme.onSurface,
+                          color:
+                              _bookmarked.value
+                                  ? Get.theme.colorScheme.onPrimary
+                                  : Get.theme.colorScheme.onSurface,
                         ),
                       ),
                     ),

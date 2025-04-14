@@ -37,7 +37,8 @@ class SpaceMemberController {
         // Add the member to the list if they're not in it yet
         if (members[clientId] == null) {
           members[clientId] = SpaceMember(
-            FriendController.friends[address] ?? (address == StatusController.ownAddress ? Friend.me() : Friend.unknown(address)),
+            FriendController.friends[address] ??
+                (address == StatusController.ownAddress ? Friend.me() : Friend.unknown(address)),
             clientId,
           );
           members[clientId]!.verifySignature(member["sign"]);
@@ -109,7 +110,11 @@ class SpaceMember {
 
     // Verify the signature
     try {
-      final message = SpaceService.craftSignature(SpaceController.id.value!, id, friend.id.encode());
+      final message = SpaceService.craftSignature(
+        SpaceController.id.value!,
+        id,
+        friend.id.encode(),
+      );
       verified.value = checkSignature(signature, profile.signatureKey, message);
       sendLog("space member verified: ${verified.value}");
     } catch (e) {

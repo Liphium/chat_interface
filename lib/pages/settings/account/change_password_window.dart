@@ -42,24 +42,47 @@ class _ChangeNameWindowState extends State<ChangePasswordWindow> with SignalsMix
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("settings.authentication.change_password.dialog".tr, style: Get.theme.textTheme.bodyMedium),
+          Text(
+            "settings.authentication.change_password.dialog".tr,
+            style: Get.theme.textTheme.bodyMedium,
+          ),
           verticalSpacing(defaultSpacing),
 
           // Current password
-          Text("password.current".tr, textAlign: TextAlign.left, style: Get.theme.textTheme.labelMedium),
+          Text(
+            "password.current".tr,
+            textAlign: TextAlign.left,
+            style: Get.theme.textTheme.labelMedium,
+          ),
           verticalSpacing(elementSpacing),
-          FJTextField(hintText: 'placeholder.password'.tr, obscureText: true, controller: _currentPasswordController),
+          FJTextField(
+            hintText: 'placeholder.password'.tr,
+            obscureText: true,
+            controller: _currentPasswordController,
+          ),
           verticalSpacing(defaultSpacing),
 
           // Password
           Text("password".tr, textAlign: TextAlign.left, style: Get.theme.textTheme.labelMedium),
           verticalSpacing(elementSpacing),
-          FJTextField(hintText: 'placeholder.password'.tr, obscureText: true, controller: _passwordController),
+          FJTextField(
+            hintText: 'placeholder.password'.tr,
+            obscureText: true,
+            controller: _passwordController,
+          ),
           verticalSpacing(defaultSpacing),
-          FJTextField(hintText: 'placeholder.password'.tr, obscureText: true, controller: _confirmPasswordController),
+          FJTextField(
+            hintText: 'placeholder.password'.tr,
+            obscureText: true,
+            controller: _confirmPasswordController,
+          ),
 
           verticalSpacing(defaultSpacing),
-          AnimatedErrorContainer(message: _errorText, padding: const EdgeInsets.only(bottom: defaultSpacing), expand: true),
+          AnimatedErrorContainer(
+            message: _errorText,
+            padding: const EdgeInsets.only(bottom: defaultSpacing),
+            expand: true,
+          ),
           FJElevatedLoadingButtonCustom(
             loading: _loading,
             onTap: () async {

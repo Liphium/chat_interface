@@ -55,13 +55,18 @@ class _ConversationRenameWindowState extends State<ConversationRenameWindow> {
       return;
     }
     if (name.length > specialConstants[Constants.specialConstantMaxConversationNameLength]!) {
-      _errorText.value = "too.long".trParams({"limit": specialConstants["max_conversation_name_length"].toString()});
+      _errorText.value = "too.long".trParams({
+        "limit": specialConstants["max_conversation_name_length"].toString(),
+      });
       _loading.value = false;
       return;
     }
 
     // Change the data of the conversation
-    final error = await ConversationService.setData(widget.conversation, ConversationContainer(_titleController.text));
+    final error = await ConversationService.setData(
+      widget.conversation,
+      ConversationContainer(_titleController.text),
+    );
     if (error != null) {
       _errorText.value = error;
       _loading.value = false;
@@ -87,7 +92,11 @@ class _ConversationRenameWindowState extends State<ConversationRenameWindow> {
             onSubmitted: (t) => save(),
           ),
           verticalSpacing(defaultSpacing),
-          AnimatedErrorContainer(message: _errorText, padding: const EdgeInsets.only(bottom: defaultSpacing), expand: true),
+          AnimatedErrorContainer(
+            message: _errorText,
+            padding: const EdgeInsets.only(bottom: defaultSpacing),
+            expand: true,
+          ),
           FJElevatedLoadingButtonCustom(
             loading: _loading,
             onTap: () => save(),

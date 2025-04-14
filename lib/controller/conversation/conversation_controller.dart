@@ -18,7 +18,9 @@ import 'package:sodium_libs/sodium_libs.dart';
 
 class ConversationController {
   static final loaded = signal(false);
-  static final order = listSignal(<LPHAddress>[]); // List of conversation IDs in order of last updated
+  static final order = listSignal(
+    <LPHAddress>[],
+  ); // List of conversation IDs in order of last updated
   static final conversations = mapSignal(<LPHAddress, Conversation>{});
   int newConvs = 0;
 
@@ -33,7 +35,11 @@ class ConversationController {
   /// Update the last message send time of a conversation in the UI.
   ///
   /// For more explanation look at [ConversationService.updateLastMessage].
-  static void updateLastMessageTime(LPHAddress conversation, {bool increment = true, required int messageSendTime}) {
+  static void updateLastMessageTime(
+    LPHAddress conversation, {
+    bool increment = true,
+    required int messageSendTime,
+  }) {
     batch(() {
       // Make sure the conversation is at the top
       _insertToOrder(conversation);
@@ -49,18 +55,31 @@ class ConversationController {
   /// Called when a subscription is finished to make sure conversations are properly sorted and up to date.
   ///
   /// Called later for all conversations from other servers since they are streamed in after.
-  static Future<void> finishedLoading(String server, Map<String, dynamic> conversationInfo, List<dynamic> deleted, bool error) async {
+  static Future<void> finishedLoading(
+    String server,
+    Map<String, dynamic> conversationInfo,
+    List<dynamic> deleted,
+    bool error,
+  ) async {
     // Delete all the conversations that should be deleted
     for (var conversation in conversations.values) {
       if (deleted.contains(conversation.token.id.encode())) {
-        unawaited(ConversationService.delete(conversation.id, vaultId: conversation.vaultId, token: conversation.token));
+        unawaited(
+          ConversationService.delete(
+            conversation.id,
+            vaultId: conversation.vaultId,
+            token: conversation.token,
+          ),
+        );
       }
     }
 
     // Start a new batch to modify all the state at once
     batch(() {
       // Sort the conversations
-      order.sort((a, b) => conversations[b]!.updatedAt.value.compareTo(conversations[a]!.updatedAt.value));
+      order.sort(
+        (a, b) => conversations[b]!.updatedAt.value.compareTo(conversations[a]!.updatedAt.value),
+      );
 
       // Update all the conversations
       for (var conversation in conversations.values) {
@@ -129,7 +148,16 @@ class Conversation {
   final membersLoading = signal(false);
   final members = mapSignal(<LPHAddress, Member>{}); // Token ID -> Member
 
-  Conversation(this.id, this.vaultId, this.type, this.token, this.container, this.packedKey, this.lastVersion, int updatedAt) {
+  Conversation(
+    this.id,
+    this.vaultId,
+    this.type,
+    this.token,
+    this.container,
+    this.packedKey,
+    this.lastVersion,
+    int updatedAt,
+  ) {
     containerSub.value = container;
     this.updatedAt.value = updatedAt;
   }
@@ -199,7 +227,8 @@ class Conversation {
       (element) => element.address != StatusController.ownAddress,
       orElse: () => Member(LPHAddress.error(), LPHAddress.error(), MemberRole.user),
     );
-    return FriendController.friends[member.address] ?? Friend.unknown(LPHAddress("-", container.name));
+    return FriendController.friends[member.address] ??
+        Friend.unknown(LPHAddress("-", container.name));
   }
 
   /// Check if a conversation is broken (borked)
@@ -248,7 +277,11 @@ class Conversation {
     }
 
     // Delete the conversation
-    final error = await ConversationService.delete(id, vaultId: vaultId, token: leaveRequest ? token : null);
+    final error = await ConversationService.delete(
+      id,
+      vaultId: vaultId,
+      token: leaveRequest ? token : null,
+    );
     if (error != null) {
       showErrorPopup("error", error);
       sendLog("ERROR: Can't delete conversation: $error");

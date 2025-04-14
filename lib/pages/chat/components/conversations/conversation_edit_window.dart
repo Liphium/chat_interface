@@ -32,10 +32,16 @@ class _ConversationInfoWindowState extends State<ConversationInfoWindow> {
       title: [
         Row(
           children: [
-            Icon(widget.conversation.isGroup ? Icons.group : Icons.person, size: 30, color: Theme.of(context).colorScheme.onPrimary),
+            Icon(
+              widget.conversation.isGroup ? Icons.group : Icons.person,
+              size: 30,
+              color: Theme.of(context).colorScheme.onPrimary,
+            ),
             horizontalSpacing(defaultSpacing),
             Text(
-              widget.conversation.isGroup ? widget.conversation.containerSub.value.name : widget.conversation.dmName,
+              widget.conversation.isGroup
+                  ? widget.conversation.containerSub.value.name
+                  : widget.conversation.dmName,
               style: Theme.of(context).textTheme.titleMedium,
             ),
           ],

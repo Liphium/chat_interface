@@ -51,7 +51,12 @@ class WarpList extends StatelessWidget {
                       const Spacer(),
                       Visibility(
                         visible: warp.account.id != StatusController.ownAddress,
-                        child: LoadingIconButton(loading: warp.loading, onTap: () => WarpController.connectToWarp(warp), extra: 5, icon: Icons.add),
+                        child: LoadingIconButton(
+                          loading: warp.loading,
+                          onTap: () => WarpController.connectToWarp(warp),
+                          extra: 5,
+                          icon: Icons.add,
+                        ),
                       ),
                     ],
                   ),
@@ -75,8 +80,10 @@ class WarpList extends StatelessWidget {
                     UserAvatar(id: warp.account.id, size: 35),
                     horizontalSpacing(defaultSpacing),
                     Watch(
-                      (context) =>
-                          Text("warp.list.sharing".trParams({"name": warp.account.displayName.value}), style: Get.theme.textTheme.labelMedium),
+                      (context) => Text(
+                        "warp.list.sharing".trParams({"name": warp.account.displayName.value}),
+                        style: Get.theme.textTheme.labelMedium,
+                      ),
                     ),
                   ],
                 ),

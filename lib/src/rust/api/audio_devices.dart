@@ -24,10 +24,7 @@ class AudioInputDevice {
   final String name;
   final bool systemDefault;
 
-  const AudioInputDevice({
-    required this.name,
-    required this.systemDefault,
-  });
+  const AudioInputDevice({required this.name, required this.systemDefault});
 
   @override
   int get hashCode => name.hashCode ^ systemDefault.hashCode;
@@ -45,10 +42,7 @@ class AudioOuputDevice {
   final String name;
   final bool systemDefault;
 
-  const AudioOuputDevice({
-    required this.name,
-    required this.systemDefault,
-  });
+  const AudioOuputDevice({required this.name, required this.systemDefault});
 
   @override
   int get hashCode => name.hashCode ^ systemDefault.hashCode;

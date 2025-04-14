@@ -107,7 +107,9 @@ Future<void> newFriendRequest(String name, Function(String) success) async {
   await showConfirmPopup(
     ConfirmWindow(
       title: "request.confirm.title".tr,
-      text: "request.confirm.text".trParams(<String, String>{"username": "${profile.displayName} (${profile.name})"}),
+      text: "request.confirm.text".trParams(<String, String>{
+        "username": "${profile.displayName} (${profile.name})",
+      }),
       onConfirm: () async {
         await RequestsService.sendOrAcceptFriendRequest(profile!);
       },
@@ -144,12 +146,25 @@ class Request {
 
   /// Get a request from a stored payload in the database.
   factory Request.fromStoredPayload(String id, int updatedAt, Map<String, dynamic> json) {
-    return Request(LPHAddress.from(json["id"]), json["name"], json["display_name"], "", KeyStorage.fromJson(json), updatedAt);
+    return Request(
+      LPHAddress.from(json["id"]),
+      json["name"],
+      json["display_name"],
+      "",
+      KeyStorage.fromJson(json),
+      updatedAt,
+    );
   }
 
   /// Convert to a payload for the friends vault (on the server).
   String toStoredPayload(bool self) {
-    final reqPayload = <String, dynamic>{"rq": true, "id": id.encode(), "self": self, "name": name, "display_name": displayName};
+    final reqPayload = <String, dynamic>{
+      "rq": true,
+      "id": id.encode(),
+      "self": self,
+      "name": name,
+      "display_name": displayName,
+    };
     reqPayload.addAll(keyStorage.toJson());
 
     return jsonEncode(reqPayload);

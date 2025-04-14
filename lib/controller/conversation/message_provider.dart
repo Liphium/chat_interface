@@ -25,7 +25,8 @@ part 'message_sending.dart';
 
 abstract class MessageProvider {
   final messages = listSignal(<Message>[]);
-  final waitingMessages = <String>[]; // To prevent messages from being sent twice due to a race condition
+  final waitingMessages =
+      <String>[]; // To prevent messages from being sent twice due to a race condition
 
   //* Scroll
   static const newLoadOffset = 200;
@@ -43,7 +44,8 @@ abstract class MessageProvider {
     }
 
     // Check if there are any messages with similar ids to prevent adding the same message again
-    if (waitingMessages.any((msg) => msg == message.id) || messages.any((msg) => msg.id == message.id)) {
+    if (waitingMessages.any((msg) => msg == message.id) ||
+        messages.any((msg) => msg.id == message.id)) {
       return;
     }
     waitingMessages.add(message.id);
@@ -92,7 +94,9 @@ abstract class MessageProvider {
     if (controller == null) {
       return;
     }
-    if (controller!.position.pixels > controller!.position.maxScrollExtent - Get.height / 2 - newLoadOffset && !topReached) {
+    if (controller!.position.pixels >
+            controller!.position.maxScrollExtent - Get.height / 2 - newLoadOffset &&
+        !topReached) {
       var (topReached, error) = await loadNewMessagesTop();
       if (!error) {
         this.topReached = topReached;
@@ -153,7 +157,8 @@ abstract class MessageProvider {
       return false;
     }
     messagesLoadingTop = false;
-    newMessagesLoading.value = true; // We'll use the same loading as above to make sure this doesn't break anything
+    newMessagesLoading.value =
+        true; // We'll use the same loading as above to make sure this doesn't break anything
     final firstMessage = messages.first;
     final time = firstMessage.createdAt.millisecondsSinceEpoch;
 
@@ -173,7 +178,9 @@ abstract class MessageProvider {
     for (var message in loadedMessages) {
       message.heightCallback = true;
     }
-    loadedMessages.sort((a, b) => b.createdAt.compareTo(a.createdAt)); // Sort to prevent weird order
+    loadedMessages.sort(
+      (a, b) => b.createdAt.compareTo(a.createdAt),
+    ); // Sort to prevent weird order
     messages.insertAll(0, loadedMessages);
 
     newMessagesLoading.value = false;
@@ -233,7 +240,12 @@ abstract class MessageProvider {
   /// The files will be uploaded to the server automatically.
   ///
   /// Returns an error or null if successful.
-  Future<String?> sendTextMessageWithFiles(Signal<bool> loading, String message, List<UploadData> files, String answer) async {
+  Future<String?> sendTextMessageWithFiles(
+    Signal<bool> loading,
+    String message,
+    List<UploadData> files,
+    String answer,
+  ) async {
     if (loading.value) {
       return "error.message.loading";
     }
@@ -242,7 +254,11 @@ abstract class MessageProvider {
     // Upload files
     final attachments = <String>[];
     for (var file in files) {
-      final res = await AttachmentController.uploadFile(file, StorageType.temporary, Constants.fileAttachmentTag);
+      final res = await AttachmentController.uploadFile(
+        file,
+        StorageType.temporary,
+        Constants.fileAttachmentTag,
+      );
       if (res.container == null) {
         return res.message;
       }
@@ -257,7 +273,13 @@ abstract class MessageProvider {
   /// Send a message into the channel of the message provider.
   ///
   /// Returns an error or null if successful.
-  Future<String?> sendMessage(Signal<bool> loading, MessageType type, List<String> attachments, String message, String answer) async {
+  Future<String?> sendMessage(
+    Signal<bool> loading,
+    MessageType type,
+    List<String> attachments,
+    String message,
+    String answer,
+  ) async {
     // Check if there is a connection before doing this
     if (!ConnectionController.connected.value) {
       return "error.no_connection".tr;
@@ -306,7 +328,12 @@ abstract class MessageProvider {
 
     // Use the timestamp from the json (to prevent desynchronization and stuff)
     final (timeToken, stamp) = obj;
-    final content = Message.buildContentJson(content: message, type: type, attachments: attachments, answerId: answer);
+    final content = Message.buildContentJson(
+      content: message,
+      type: type,
+      attachments: attachments,
+      answerId: answer,
+    );
 
     // Encrypt message with signature
     final info = SymmetricSequencedInfo.builder(content, stamp).finish(encryptionKey());
@@ -415,12 +442,14 @@ class Message {
         if (!await container.existsLocally()) {
           final extension = container.id.split(".").last;
           if (FileSettings.imageTypes.contains(extension)) {
-            final download = SettingController.settings[FileSettings.autoDownloadImages]!.getValue();
+            final download =
+                SettingController.settings[FileSettings.autoDownloadImages]!.getValue();
             if (download) {
               await AttachmentController.downloadAttachment(container, ignoreLimit: false);
             }
           } else if (FileSettings.videoTypes.contains(extension)) {
-            final download = SettingController.settings[FileSettings.autoDownloadVideos]!.getValue();
+            final download =
+                SettingController.settings[FileSettings.autoDownloadVideos]!.getValue();
             if (download) {
               await AttachmentController.downloadAttachment(container, ignoreLimit: false);
             }
@@ -486,7 +515,12 @@ class Message {
   }
 
   /// Convert content to a message content json
-  static String buildContentJson({required String content, required MessageType type, required List<String> attachments, required String answerId}) {
+  static String buildContentJson({
+    required String content,
+    required MessageType type,
+    required List<String> attachments,
+    required String answerId,
+  }) {
     return jsonEncode(<String, dynamic>{
       "c": content,
       "t": type.index,
@@ -497,7 +531,12 @@ class Message {
 
   /// Convert current message to a content json
   String toContentJson() {
-    return buildContentJson(content: content, type: type, attachments: attachments, answerId: answer);
+    return buildContentJson(
+      content: content,
+      type: type,
+      attachments: attachments,
+      answerId: answer,
+    );
   }
 
   /// Verifies the signature of the message
@@ -516,7 +555,8 @@ class Message {
   void decryptSystemMessageAttachments(SecureKey key, Sodium sodium) {
     for (var i = 0; i < attachments.length; i++) {
       if (attachments[i].startsWith("a:")) {
-        attachments[i] = jsonDecode(decryptSymmetric(attachments[i].substring(2), key, sodium))["id"];
+        attachments[i] =
+            jsonDecode(decryptSymmetric(attachments[i].substring(2), key, sodium))["id"];
       }
     }
   }

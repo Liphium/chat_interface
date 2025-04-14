@@ -20,7 +20,10 @@ Future<String?> removeFromVault(String id) async {
 Future<(String?, String?)> addToVault(String tag, String payload) async {
   final encryptedPayload = encryptSymmetric(payload, vaultKey);
 
-  final json = await postAuthorizedJSON("/account/vault/add", <String, dynamic>{"tag": tag, "payload": encryptedPayload});
+  final json = await postAuthorizedJSON("/account/vault/add", <String, dynamic>{
+    "tag": tag,
+    "payload": encryptedPayload,
+  });
   if (!json["success"]) {
     return (json["error"] as String, null);
   }
@@ -39,7 +42,10 @@ Future<(String?, String?)> addToVault(String tag, String payload) async {
 Future<bool> updateVault(String tag, String id, String payload) async {
   final encryptedPayload = encryptSymmetric(payload, vaultKey);
 
-  final json = await postAuthorizedJSON("/account/vault/update", <String, dynamic>{"entry": id, "payload": encryptedPayload});
+  final json = await postAuthorizedJSON("/account/vault/update", <String, dynamic>{
+    "entry": id,
+    "payload": encryptedPayload,
+  });
   if (!json["success"]) {
     return false;
   }

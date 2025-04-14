@@ -50,7 +50,9 @@ class FJSlider extends StatelessWidget {
               onChangeEnd: onChangeEnd,
             ),
           ),
-          label != null ? Padding(padding: const EdgeInsets.only(left: defaultSpacing), child: Text(label!)) : const SizedBox(),
+          label != null
+              ? Padding(padding: const EdgeInsets.only(left: defaultSpacing), child: Text(label!))
+              : const SizedBox(),
         ],
       ),
     );
@@ -91,7 +93,9 @@ class _FJSliderWithInputState extends State<FJSliderWithInput> {
   @override
   void initState() {
     super.initState();
-    _controller.value = TextEditingValue(text: (widget.transformer?.call(widget.value) ?? widget.value).toStringAsFixed(0));
+    _controller.value = TextEditingValue(
+      text: (widget.transformer?.call(widget.value) ?? widget.value).toStringAsFixed(0),
+    );
   }
 
   @override
@@ -122,7 +126,9 @@ class _FJSliderWithInputState extends State<FJSliderWithInput> {
               max: widget.max,
               onChanged: (value) {
                 widget.onChanged!(value);
-                _controller.value = TextEditingValue(text: (widget.transformer?.call(value) ?? value).toStringAsFixed(0));
+                _controller.value = TextEditingValue(
+                  text: (widget.transformer?.call(value) ?? value).toStringAsFixed(0),
+                );
               },
               onChangeEnd: widget.onChangeEnd,
             ),

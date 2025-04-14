@@ -20,7 +20,8 @@ class MessageListener {
     cn.connector.listen("conv_msg", (event) async {
       sendLog("received one message");
       // Check if the conversation even exists on this account
-      final conversation = ConversationController.conversations[LPHAddress.from(event.data["msg"]["cv"])];
+      final conversation =
+          ConversationController.conversations[LPHAddress.from(event.data["msg"]["cv"])];
       if (conversation == null) {
         sendLog("WARNING: invalid message, conversation not found");
         return;
@@ -49,7 +50,11 @@ class MessageListener {
       }
 
       // Unpack all of the messages in an isolate
-      final messages = await unpackMessagesInIsolate(conversation, event.data["msgs"], includeSystemMessages: true);
+      final messages = await unpackMessagesInIsolate(
+        conversation,
+        event.data["msgs"],
+        includeSystemMessages: true,
+      );
 
       // Remove all messages with more than 5 attachments
       messages.removeWhere((msg) {
@@ -71,7 +76,10 @@ class MessageListener {
   /// Also verifies the signature (but that happens in the main isolate).
   ///
   /// For the future also: TODO: Unpack the signature in a different isolate
-  static Future<Message> unpackMessageInIsolate(Conversation conv, Map<String, dynamic> json) async {
+  static Future<Message> unpackMessageInIsolate(
+    Conversation conv,
+    Map<String, dynamic> json,
+  ) async {
     // Run an isolate to parse the message
     final copy = Conversation.copyWithoutKey(conv);
     final (message, info) = await sodiumLib.runIsolated((sodium, keys, pairs) {
@@ -101,17 +109,28 @@ class MessageListener {
   /// the signature is ran in the main isolate due to constraints with libsodium.
   ///
   /// For the future: TODO: Also process the signatures in the isolate by preloading profiles
-  static Future<List<Message>> unpackMessagesInIsolate(Conversation conversation, List<dynamic> json, {bool includeSystemMessages = false}) async {
+  static Future<List<Message>> unpackMessagesInIsolate(
+    Conversation conversation,
+    List<dynamic> json, {
+    bool includeSystemMessages = false,
+  }) async {
     // Unpack the messages in an isolate (in a separate thread yk)
     final copy = Conversation.copyWithoutKey(conversation);
     final loadedMessages = await sodiumLib.runIsolated((sodium, keys, pairs) async {
       // Process all messages
       final list = <(Message, SymmetricSequencedInfo?)>[];
       for (var msgJson in json) {
-        final (message, info) = messageFromJson(msgJson, conversation: copy, key: keys[0], sodium: sodium);
+        final (message, info) = messageFromJson(
+          msgJson,
+          conversation: copy,
+          key: keys[0],
+          sodium: sodium,
+        );
 
         // Don't render system messages that shouldn't be rendered (this is only for safety, should never actually happen)
-        if (message.type == MessageType.system && SystemMessages.messages[message.content]?.render == false && !includeSystemMessages) {
+        if (message.type == MessageType.system &&
+            SystemMessages.messages[message.content]?.render == false &&
+            !includeSystemMessages) {
           continue;
         }
 
@@ -140,7 +159,12 @@ class MessageListener {
   /// Load a message from json (from the server) and get the corresponding [SymmetricSequencedInfo] (only if no system message).
   ///
   /// **Doesn't verify the signature**
-  static (Message, SymmetricSequencedInfo?) messageFromJson(Map<String, dynamic> json, {Conversation? conversation, SecureKey? key, Sodium? sodium}) {
+  static (Message, SymmetricSequencedInfo?) messageFromJson(
+    Map<String, dynamic> json, {
+    Conversation? conversation,
+    SecureKey? key,
+    Sodium? sodium,
+  }) {
     // Convert to message
     conversation ??= ConversationController.conversations[json["cv"]]!;
     final senderAddress = LPHAddress.from(json["sr"]);

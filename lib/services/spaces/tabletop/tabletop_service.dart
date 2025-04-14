@@ -108,7 +108,15 @@ class TabletopService {
   }
 
   /// Create a new object
-  static TableObject newObject(TableObjectType type, String id, int order, Offset location, Size size, double rotation, String data) {
+  static TableObject newObject(
+    TableObjectType type,
+    String id,
+    int order,
+    Offset location,
+    Size size,
+    double rotation,
+    String data,
+  ) {
     TableObject object;
     switch (type) {
       case TableObjectType.text:

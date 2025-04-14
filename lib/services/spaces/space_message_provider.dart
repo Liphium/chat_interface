@@ -16,7 +16,9 @@ import 'package:sodium_libs/sodium_libs.dart';
 class SpacesMessageProvider extends MessageProvider {
   @override
   Future<Message?> loadMessageFromServer(String id, {bool init = true}) async {
-    final event = await SpaceConnection.spaceConnector!.sendActionAndWait(ServerAction("msg_get", id));
+    final event = await SpaceConnection.spaceConnector!.sendActionAndWait(
+      ServerAction("msg_get", id),
+    );
     if (event == null) {
       return null;
     }
@@ -27,7 +29,9 @@ class SpacesMessageProvider extends MessageProvider {
   @override
   Future<(List<Message>?, bool)> loadMessagesAfter(int time) async {
     // Load the messages from the server using the list_before endpoint
-    final event = await SpaceConnection.spaceConnector!.sendActionAndWait(ServerAction("msg_list_after", time));
+    final event = await SpaceConnection.spaceConnector!.sendActionAndWait(
+      ServerAction("msg_list_after", time),
+    );
     if (event == null) {
       sendLog("something went wrong");
       return (null, true);
@@ -54,7 +58,9 @@ class SpacesMessageProvider extends MessageProvider {
     sendLog("load messages before");
 
     // Load messages from the server
-    final event = await SpaceConnection.spaceConnector!.sendActionAndWait(ServerAction("msg_list_before", time));
+    final event = await SpaceConnection.spaceConnector!.sendActionAndWait(
+      ServerAction("msg_list_before", time),
+    );
     if (event == null) {
       sendLog("nothing");
       return (null, true);
@@ -78,7 +84,9 @@ class SpacesMessageProvider extends MessageProvider {
 
   @override
   Future<String?> deleteMessage(Message message) async {
-    final event = await SpaceConnection.spaceConnector!.sendActionAndWait(ServerAction("msg_delete", message.id));
+    final event = await SpaceConnection.spaceConnector!.sendActionAndWait(
+      ServerAction("msg_delete", message.id),
+    );
     if (event == null) {
       return "server.error".tr;
     }
@@ -107,10 +115,16 @@ class SpacesMessageProvider extends MessageProvider {
       // Process all messages
       final list = <(Message, SymmetricSequencedInfo?)>[];
       for (var msgJson in json) {
-        final (message, info) = messageFromJson(msgJson, key: keys[0], sodium: sodium, members: members);
+        final (message, info) = messageFromJson(
+          msgJson,
+          key: keys[0],
+          sodium: sodium,
+          members: members,
+        );
 
         // Don't render system messages that shouldn't be rendered (this is only for safety, should never actually happen)
-        if (message.type == MessageType.system && SystemMessages.messages[message.content]?.render == false) {
+        if (message.type == MessageType.system &&
+            SystemMessages.messages[message.content]?.render == false) {
           continue;
         }
 
@@ -144,7 +158,11 @@ class SpacesMessageProvider extends MessageProvider {
   /// For the future also: TODO: Unpack the signature in a different isolate
   static Future<Message> unpackMessageInIsolate(Map<String, dynamic> json) async {
     // Run an isolate to parse the message
-    final (message, info) = await _extractMessageIsolate(json, SpaceMemberController.memberIds, SpaceController.key!);
+    final (message, info) = await _extractMessageIsolate(
+      json,
+      SpaceMemberController.memberIds,
+      SpaceController.key!,
+    );
 
     // Verify the signature
     if (info != null) {
@@ -225,7 +243,9 @@ class SpacesMessageProvider extends MessageProvider {
 
   @override
   Future<(String, int)?> getTimestamp() async {
-    final event = await SpaceConnection.spaceConnector!.sendActionAndWait(ServerAction("msg_timestamp", {}));
+    final event = await SpaceConnection.spaceConnector!.sendActionAndWait(
+      ServerAction("msg_timestamp", {}),
+    );
     if (event == null) {
       return null;
     }
@@ -236,7 +256,9 @@ class SpacesMessageProvider extends MessageProvider {
 
   @override
   Future<String?> handleMessageSend(String timeToken, String data) async {
-    final event = await SpaceConnection.spaceConnector!.sendActionAndWait(ServerAction("msg_send", {"token": timeToken, "data": data}));
+    final event = await SpaceConnection.spaceConnector!.sendActionAndWait(
+      ServerAction("msg_send", {"token": timeToken, "data": data}),
+    );
 
     // Return a server error if the thing didn't work
     if (event == null) {

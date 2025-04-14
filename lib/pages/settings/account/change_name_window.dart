@@ -35,7 +35,9 @@ class _ChangeNameWindowState extends State<ChangeNameWindow> with SignalsMixin {
     _loading.value = true;
     _errorText.value = "";
 
-    final json = await postAuthorizedJSON("/account/settings/change_name", {"name": _usernameController.text});
+    final json = await postAuthorizedJSON("/account/settings/change_name", {
+      "name": _usernameController.text,
+    });
 
     if (!json["success"]) {
       _errorText.value = json["error"].toString().tr;
@@ -67,7 +69,11 @@ class _ChangeNameWindowState extends State<ChangeNameWindow> with SignalsMixin {
             onSubmitted: (t) => save(),
           ),
           verticalSpacing(defaultSpacing),
-          AnimatedErrorContainer(message: _errorText, padding: const EdgeInsets.only(bottom: defaultSpacing), expand: true),
+          AnimatedErrorContainer(
+            message: _errorText,
+            padding: const EdgeInsets.only(bottom: defaultSpacing),
+            expand: true,
+          ),
           FJElevatedLoadingButtonCustom(
             loading: _loading,
             onTap: () => save(),

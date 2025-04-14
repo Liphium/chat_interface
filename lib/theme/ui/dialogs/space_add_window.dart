@@ -78,7 +78,7 @@ class _ConversationAddWindowState extends State<SpaceAddWindow> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text("Public", style: Get.theme.textTheme.bodyMedium),
+              Text("shared".tr, style: Get.theme.textTheme.bodyMedium),
               Watch(
                 (ctx) => FJSwitch(
                   value: _public.value,

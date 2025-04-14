@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:signals/signals_flutter.dart';
 
 class ThemeManager {
-  static final currentTheme = signal(getThemeDataFromFactory(buildColorFactoryFromPreset(ThemeSettings.themePresets[0])));
+  static final currentTheme = signal(
+    getThemeDataFromFactory(buildColorFactoryFromPreset(ThemeSettings.themePresets[0])),
+  );
 
   static final brightness = signal(Brightness.dark);
 

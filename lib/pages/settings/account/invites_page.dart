@@ -78,7 +78,9 @@ class _InvitesPageState extends State<InvitesPage> with SignalsMixin {
             padding: const EdgeInsets.only(top: defaultSpacing),
             child: Padding(
               padding: const EdgeInsets.all(defaultSpacing),
-              child: Center(child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary)),
+              child: Center(
+                child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary),
+              ),
             ),
           );
         }
@@ -103,7 +105,12 @@ class _InvitesPageState extends State<InvitesPage> with SignalsMixin {
             if (StatusController.permissions.contains("admin"))
               Text("settings.invites.title.admin".tr, style: Get.theme.textTheme.headlineMedium)
             else
-              Watch((ctx) => Text("settings.invites.title".trParams({"count": count.value.toString()}), style: Get.theme.textTheme.headlineMedium)),
+              Watch(
+                (ctx) => Text(
+                  "settings.invites.title".trParams({"count": count.value.toString()}),
+                  style: Get.theme.textTheme.headlineMedium,
+                ),
+              ),
             verticalSpacing(defaultSpacing),
             Text("settings.invites.description".tr, style: Get.theme.textTheme.bodyMedium),
             verticalSpacing(defaultSpacing),
@@ -128,18 +135,31 @@ class _InvitesPageState extends State<InvitesPage> with SignalsMixin {
             verticalSpacing(defaultSpacing),
             Watch((ctx) {
               if (invites.isEmpty) {
-                return Text("settings.invites.history.empty".tr, style: Get.theme.textTheme.labelMedium);
+                return Text(
+                  "settings.invites.history.empty".tr,
+                  style: Get.theme.textTheme.labelMedium,
+                );
               }
 
               return Column(
                 children: [
                   for (final invite in invites)
                     Animate(
-                      effects: [ExpandEffect(alignment: Alignment.center, duration: 250.ms, curve: scaleAnimationCurve, axis: Axis.vertical)],
+                      effects: [
+                        ExpandEffect(
+                          alignment: Alignment.center,
+                          duration: 250.ms,
+                          curve: scaleAnimationCurve,
+                          axis: Axis.vertical,
+                        ),
+                      ],
                       child: Padding(
                         padding: const EdgeInsets.only(bottom: elementSpacing),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: elementSpacing, horizontal: defaultSpacing),
+                          padding: const EdgeInsets.symmetric(
+                            vertical: elementSpacing,
+                            horizontal: defaultSpacing,
+                          ),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(defaultSpacing),
                             color: Get.theme.colorScheme.primaryContainer,
@@ -152,7 +172,9 @@ class _InvitesPageState extends State<InvitesPage> with SignalsMixin {
                                   onEnter: (_) => hovering.value = invite,
                                   onExit: (_) => hovering.value = "",
                                   child: Animate(
-                                    effects: [BlurEffect(end: const Offset(5, 5), duration: 100.ms)],
+                                    effects: [
+                                      BlurEffect(end: const Offset(5, 5), duration: 100.ms),
+                                    ],
                                     onInit: (controller) {
                                       controller.value = 1.0;
                                     },

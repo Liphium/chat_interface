@@ -83,13 +83,17 @@ class _CallMessageRendererState extends State<BubblesSpaceMessageRenderer> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 // Avatar of the message sender with a tooltip to know their name
-                Tooltip(message: sender.displayName.value, child: UserAvatar(id: sender.id, size: 34)),
+                Tooltip(
+                  message: sender.displayName.value,
+                  child: UserAvatar(id: sender.id, size: 34),
+                ),
                 horizontalSpacing(defaultSpacing),
 
                 Flexible(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: widget.self ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                    crossAxisAlignment:
+                        widget.self ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                     children: [
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -101,7 +105,10 @@ class _CallMessageRendererState extends State<BubblesSpaceMessageRenderer> {
                               padding: const EdgeInsets.all(defaultSpacing),
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(defaultSpacing),
-                                color: widget.self ? Get.theme.colorScheme.primary : Get.theme.colorScheme.primaryContainer,
+                                color:
+                                    widget.self
+                                        ? Get.theme.colorScheme.primary
+                                        : Get.theme.colorScheme.primaryContainer,
                               ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -111,7 +118,12 @@ class _CallMessageRendererState extends State<BubblesSpaceMessageRenderer> {
                                     children: [
                                       Icon(Icons.public, color: Get.theme.colorScheme.onPrimary),
                                       horizontalSpacing(elementSpacing),
-                                      Flexible(child: Text("chat.space_invite".tr, style: Get.theme.textTheme.labelLarge)),
+                                      Flexible(
+                                        child: Text(
+                                          "chat.space_invite".tr,
+                                          style: Get.theme.textTheme.labelLarge,
+                                        ),
+                                      ),
                                     ],
                                   ),
 
@@ -124,7 +136,9 @@ class _CallMessageRendererState extends State<BubblesSpaceMessageRenderer> {
                                       clickable: true,
                                       pollNewData: true,
                                       background:
-                                          widget.self ? Get.theme.colorScheme.onPrimary.withOpacity(0.13) : Get.theme.colorScheme.inverseSurface,
+                                          widget.self
+                                              ? Get.theme.colorScheme.onPrimary.withOpacity(0.13)
+                                              : Get.theme.colorScheme.inverseSurface,
                                     ),
                                   ),
                                 ],
@@ -137,7 +151,10 @@ class _CallMessageRendererState extends State<BubblesSpaceMessageRenderer> {
                           Padding(
                             padding: const EdgeInsets.only(top: defaultSpacing),
                             child: SelectionContainer.disabled(
-                              child: Text(formatMessageTime(widget.message.createdAt), style: Get.theme.textTheme.bodySmall),
+                              child: Text(
+                                formatMessageTime(widget.message.createdAt),
+                                style: Get.theme.textTheme.bodySmall,
+                              ),
                             ),
                           ),
 
@@ -148,8 +165,13 @@ class _CallMessageRendererState extends State<BubblesSpaceMessageRenderer> {
                             return Visibility(
                               visible: !verified,
                               child: Padding(
-                                padding: const EdgeInsets.only(top: elementSpacing + elementSpacing / 4),
-                                child: Tooltip(message: "chat.not.signed".tr, child: const Icon(Icons.warning_rounded, color: Colors.amber)),
+                                padding: const EdgeInsets.only(
+                                  top: elementSpacing + elementSpacing / 4,
+                                ),
+                                child: Tooltip(
+                                  message: "chat.not.signed".tr,
+                                  child: const Icon(Icons.warning_rounded, color: Colors.amber),
+                                ),
                               ),
                             );
                           }),

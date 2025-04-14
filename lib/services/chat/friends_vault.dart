@@ -65,7 +65,9 @@ class FriendsVault {
     }
 
     // Call the related vault update event
-    await updateFromVaultUpdate(FriendVaultUpdate(version!, [], [friend.vaultId], [], [], [friend]));
+    await updateFromVaultUpdate(
+      FriendVaultUpdate(version!, [], [friend.vaultId], [], [], [friend]),
+    );
     return null;
   }
 
@@ -78,7 +80,10 @@ class FriendsVault {
     final payload = encryptSymmetric(data, vaultKey);
 
     // Add the friend to the vault
-    final json = await postAuthorizedJSON("/account/friends/update", <String, dynamic>{"id": id, "payload": payload});
+    final json = await postAuthorizedJSON("/account/friends/update", <String, dynamic>{
+      "id": id,
+      "payload": payload,
+    });
 
     // Check if there was an error
     if (!json["success"]) {
@@ -92,7 +97,9 @@ class FriendsVault {
   /// Returns an error if there was one.
   static Future<String?> remove(String vaultId) async {
     // Remove the friend from the server vault
-    final json = await postAuthorizedJSON("/account/friends/remove", <String, dynamic>{"id": vaultId});
+    final json = await postAuthorizedJSON("/account/friends/remove", <String, dynamic>{
+      "id": vaultId,
+    });
     if (!json["success"]) {
       return json["error"];
     }
@@ -127,7 +134,10 @@ class FriendsVault {
 
   /// Set a new receive date (for replay attack prevention)
   static Future<bool> setReceiveDate(String id, DateTime received) async {
-    final json = await postAuthorizedJSON("/account/friends/update_receive_date", {"id": id, "date": encryptDate(received)});
+    final json = await postAuthorizedJSON("/account/friends/update_receive_date", {
+      "id": id,
+      "date": encryptDate(received),
+    });
 
     if (!json["success"]) {
       sendLog("COULDN'T SAVE THE NEW RECEIVE DATE ${json["error"]}");
@@ -143,23 +153,33 @@ class FriendsVault {
   /// Refresh all friends and load them from the vault (also removes what's not on the server)
   static Future<String?> refreshFriendsVault() async {
     if (friendsVaultRefreshing.value) {
-      sendLog("COLLISION: Friends vault is already refreshing, this should be something worth looking into");
+      sendLog(
+        "COLLISION: Friends vault is already refreshing, this should be something worth looking into",
+      );
       return null;
     }
 
     // Get the latest version
-    final version = await VaultVersioningService.retrieveVersion(VaultVersioningService.vaultTypeFriend, "");
+    final version = await VaultVersioningService.retrieveVersion(
+      VaultVersioningService.vaultTypeFriend,
+      "",
+    );
 
     friendsVaultRefreshing.value = true;
     // Load friends from vault
-    final json = await postAuthorizedJSON("/account/friends/sync", <String, dynamic>{"version": version});
+    final json = await postAuthorizedJSON("/account/friends/sync", <String, dynamic>{
+      "version": version,
+    });
     if (!json["success"]) {
       friendsVaultRefreshing.value = false;
       return "friends.error".tr;
     }
 
     // Parse the JSON (in different isolate)
-    final res = await sodiumLib.runIsolated((sodium, keys, pairs) => _parseFriends(version, json, sodium, keys[0]), secureKeys: [vaultKey]);
+    final res = await sodiumLib.runIsolated(
+      (sodium, keys, pairs) => _parseFriends(version, json, sodium, keys[0]),
+      secureKeys: [vaultKey],
+    );
 
     // Update the local vault
     await updateFromVaultUpdate(res);
@@ -169,7 +189,12 @@ class FriendsVault {
   }
 
   /// Parse a response from the server vault sync to a friend vault update
-  static Future<FriendVaultUpdate> _parseFriends(int currentVersion, Map<String, dynamic> json, Sodium sodium, SecureKey key) async {
+  static Future<FriendVaultUpdate> _parseFriends(
+    int currentVersion,
+    Map<String, dynamic> json,
+    Sodium sodium,
+    SecureKey key,
+  ) async {
     final deleted = <String>[];
     final friendVaultIds = <String>[];
     final friends = <Friend>[];
@@ -206,13 +231,24 @@ class FriendsVault {
       }
     }
 
-    return FriendVaultUpdate(currentVersion, deleted, friendVaultIds, requests, requestsSent, friends);
+    return FriendVaultUpdate(
+      currentVersion,
+      deleted,
+      friendVaultIds,
+      requests,
+      requestsSent,
+      friends,
+    );
   }
 
   /// Update the local vault using a server friends vault update
   static Future<void> updateFromVaultUpdate(FriendVaultUpdate update) async {
     // Change the version to the one in the update
-    await VaultVersioningService.storeOrUpdateVersion(VaultVersioningService.vaultTypeFriend, "", update.newVersion);
+    await VaultVersioningService.storeOrUpdateVersion(
+      VaultVersioningService.vaultTypeFriend,
+      "",
+      update.newVersion,
+    );
 
     // Update the requests
     for (var request in update.requests) {
@@ -223,7 +259,10 @@ class FriendsVault {
 
     // Remove all requests and also the ones that aren't requests anymore (a friend could've been upgraded)
     if (update.deleted.isNotEmpty || update.friendVaultIds.isNotEmpty) {
-      RequestController.requests.removeWhere((item, rq) => update.deleted.contains(rq.vaultId) || update.friendVaultIds.contains(rq.vaultId));
+      RequestController.requests.removeWhere(
+        (item, rq) =>
+            update.deleted.contains(rq.vaultId) || update.friendVaultIds.contains(rq.vaultId),
+      );
     }
 
     for (var request in update.requestsSent) {
@@ -234,12 +273,17 @@ class FriendsVault {
 
     // Remove all requests and also the ones that aren't requests anymore (a friend could've been upgraded)
     if (update.deleted.isNotEmpty || update.friendVaultIds.isNotEmpty) {
-      RequestController.requestsSent.removeWhere((item, rq) => update.deleted.contains(rq.vaultId) || update.friendVaultIds.contains(rq.vaultId));
+      RequestController.requestsSent.removeWhere(
+        (item, rq) =>
+            update.deleted.contains(rq.vaultId) || update.friendVaultIds.contains(rq.vaultId),
+      );
     }
 
     // Delete all deleted requests from the database
     if (update.deleted.isNotEmpty || update.friendVaultIds.isNotEmpty) {
-      await db.request.deleteWhere((t) => t.vaultId.isIn(update.deleted) | t.vaultId.isIn(update.friendVaultIds));
+      await db.request.deleteWhere(
+        (t) => t.vaultId.isIn(update.deleted) | t.vaultId.isIn(update.friendVaultIds),
+      );
     }
 
     // Push friends
@@ -249,12 +293,16 @@ class FriendsVault {
       }
     }
     if (update.deleted.isNotEmpty) {
-      FriendController.friends.removeWhere((id, fr) => update.deleted.contains(fr.vaultId) && id != StatusController.ownAddress);
+      FriendController.friends.removeWhere(
+        (id, fr) => update.deleted.contains(fr.vaultId) && id != StatusController.ownAddress,
+      );
     }
 
     // Delete all deleted friends from the database
     if (update.deleted.isNotEmpty) {
-      await db.friend.deleteWhere((t) => t.vaultId.isIn(update.deleted)); // Remove the other ones that aren't there
+      await db.friend.deleteWhere(
+        (t) => t.vaultId.isIn(update.deleted),
+      ); // Remove the other ones that aren't there
     }
   }
 }
@@ -269,7 +317,14 @@ class FriendVaultUpdate {
   final List<Request> requestsSent;
   final List<Friend> friends;
 
-  FriendVaultUpdate(this.newVersion, this.deleted, this.friendVaultIds, this.requests, this.requestsSent, this.friends);
+  FriendVaultUpdate(
+    this.newVersion,
+    this.deleted,
+    this.friendVaultIds,
+    this.requests,
+    this.requestsSent,
+    this.friends,
+  );
 }
 
 /// Class for storing all keys for a friend
@@ -295,7 +350,12 @@ class KeyStorage {
       storedActionKey = json["sa"] ?? "";
 
   Map<String, dynamic> toJson() {
-    return {"pub": packagePublicKey(publicKey), "pf": profileKeyPacked, "sg": packagePublicKey(signatureKey), "sa": storedActionKey};
+    return {
+      "pub": packagePublicKey(publicKey),
+      "pf": profileKeyPacked,
+      "sg": packagePublicKey(signatureKey),
+      "sa": storedActionKey,
+    };
   }
 
   // Just so we don't break the API anywhere yk

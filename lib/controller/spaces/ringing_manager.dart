@@ -17,7 +17,10 @@ class RingingManager {
   static const ringtoneDuration = Duration(minutes: 1, seconds: 10);
 
   /// Start a ringing process based on a conversation and a space container
-  static Future<void> startRinging(Conversation conversation, SpaceConnectionContainer container) async {
+  static Future<void> startRinging(
+    Conversation conversation,
+    SpaceConnectionContainer container,
+  ) async {
     if (ringing || !await _canRing()) {
       return;
     }
@@ -66,15 +69,19 @@ class RingingManager {
     }
 
     // Only ring when the status is online or away
-    final doNotDisturb = StatusController.type.value == statusDoNotDisturb || StatusController.type.value == statusOffline;
-    if (doNotDisturb && !SettingController.settings[GeneralSettings.soundsDoNotDisturb]!.getValue()) {
+    final doNotDisturb =
+        StatusController.type.value == statusDoNotDisturb ||
+        StatusController.type.value == statusOffline;
+    if (doNotDisturb &&
+        !SettingController.settings[GeneralSettings.soundsDoNotDisturb]!.getValue()) {
       return false;
     }
 
     // Check if ring should only be played when Liphium is minimized
     final inTray = await windowManager.isVisible();
     final ignoreTray = SettingController.settings[GeneralSettings.ringIgnoreTray]!.getValue();
-    final playOnlyInTray = SettingController.settings[GeneralSettings.soundsOnlyWhenTray]!.getValue();
+    final playOnlyInTray =
+        SettingController.settings[GeneralSettings.soundsOnlyWhenTray]!.getValue();
     if (inTray && playOnlyInTray && !ignoreTray) {
       return false;
     }
@@ -90,14 +97,18 @@ class RingingManager {
     }
 
     // Check if it should play a sound when the status is do not disturb
-    final doNotDisturb = StatusController.type.value == statusDoNotDisturb || StatusController.type.value == statusOffline;
-    if (doNotDisturb && !SettingController.settings[GeneralSettings.soundsDoNotDisturb]!.getValue()) {
+    final doNotDisturb =
+        StatusController.type.value == statusDoNotDisturb ||
+        StatusController.type.value == statusOffline;
+    if (doNotDisturb &&
+        !SettingController.settings[GeneralSettings.soundsDoNotDisturb]!.getValue()) {
       return false;
     }
 
     // Check if notification sound should only be played when in tray
     final inTray = await windowManager.isVisible();
-    final playOnlyInTray = SettingController.settings[GeneralSettings.soundsOnlyWhenTray]!.getValue();
+    final playOnlyInTray =
+        SettingController.settings[GeneralSettings.soundsOnlyWhenTray]!.getValue();
     if (inTray && playOnlyInTray) {
       return false;
     }

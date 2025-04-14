@@ -24,7 +24,11 @@ class _AuthenticationSettingsPageState extends State<AuthenticationSettingsPage>
           Text("settings.authentication.first_factor".tr, style: Get.theme.textTheme.labelLarge),
           verticalSpacing(defaultSpacing),
 
-          buildChangeContainer(Icons.password, "password", () => showModal(const ChangePasswordWindow())),
+          buildChangeContainer(
+            Icons.password,
+            "password",
+            () => showModal(const ChangePasswordWindow()),
+          ),
           verticalSpacing(defaultSpacing),
 
           buildChangeContainer(Icons.hub, "sso", () => showModal(const ChangePasswordWindow())),
@@ -34,7 +38,11 @@ class _AuthenticationSettingsPageState extends State<AuthenticationSettingsPage>
           Text("settings.authentication.second_factor".tr, style: Get.theme.textTheme.labelLarge),
           verticalSpacing(defaultSpacing),
 
-          buildChangeContainer(Icons.qr_code, "totp", () => showModal(const ChangePasswordWindow())),
+          buildChangeContainer(
+            Icons.qr_code,
+            "totp",
+            () => showModal(const ChangePasswordWindow()),
+          ),
           verticalSpacing(defaultSpacing),
 
           buildChangeContainer(Icons.mail, "email", () => showModal(const ChangePasswordWindow())),
@@ -46,7 +54,10 @@ class _AuthenticationSettingsPageState extends State<AuthenticationSettingsPage>
 
   Widget buildChangeContainer(IconData icon, String name, Function() change) {
     return Container(
-      decoration: BoxDecoration(color: Get.theme.colorScheme.onInverseSurface, borderRadius: BorderRadius.circular(sectionSpacing)),
+      decoration: BoxDecoration(
+        color: Get.theme.colorScheme.onInverseSurface,
+        borderRadius: BorderRadius.circular(sectionSpacing),
+      ),
       padding: const EdgeInsets.all(sectionSpacing),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -59,16 +70,26 @@ class _AuthenticationSettingsPageState extends State<AuthenticationSettingsPage>
                   children: [
                     Icon(icon, color: Get.theme.colorScheme.onPrimary),
                     horizontalSpacing(defaultSpacing),
-                    Text("settings.authentication.$name".tr, style: Get.theme.textTheme.labelMedium),
+                    Text(
+                      "settings.authentication.$name".tr,
+                      style: Get.theme.textTheme.labelMedium,
+                    ),
                   ],
                 ),
                 verticalSpacing(elementSpacing),
-                Text("settings.authentication.$name.desc".tr, style: Get.theme.textTheme.bodyMedium),
+                Text(
+                  "settings.authentication.$name.desc".tr,
+                  style: Get.theme.textTheme.bodyMedium,
+                ),
               ],
             ),
           ),
           horizontalSpacing(defaultSpacing),
-          FJElevatedButton(smallCorners: true, onTap: change, child: Text("change".tr, style: Get.theme.textTheme.labelMedium)),
+          FJElevatedButton(
+            smallCorners: true,
+            onTap: change,
+            child: Text("change".tr, style: Get.theme.textTheme.labelMedium),
+          ),
         ],
       ),
     );

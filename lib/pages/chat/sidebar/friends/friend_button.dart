@@ -36,7 +36,10 @@ class _FriendButtonState extends State<FriendButton> {
 
           //* Friend info
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: defaultSpacing, vertical: defaultSpacing * 0.5),
+            padding: const EdgeInsets.symmetric(
+              horizontal: defaultSpacing,
+              vertical: defaultSpacing * 0.5,
+            ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -49,7 +52,9 @@ class _FriendButtonState extends State<FriendButton> {
                       Padding(
                         padding: const EdgeInsets.only(left: defaultSpacing),
                         child: Tooltip(
-                          message: "friends.different_town".trParams({"town": widget.friend.id.server}),
+                          message: "friends.different_town".trParams({
+                            "town": widget.friend.id.server,
+                          }),
                           child: Icon(Icons.sensors, color: Get.theme.colorScheme.onPrimary),
                         ),
                       ),
@@ -61,12 +66,17 @@ class _FriendButtonState extends State<FriendButton> {
                   // If connected to a Space, add a button to send them an invite
                   if (SpaceController.connected.value) {
                     return IconButton(
-                      icon: Icon(Icons.forward_to_inbox, color: Theme.of(context).colorScheme.onPrimary),
+                      icon: Icon(
+                        Icons.forward_to_inbox,
+                        color: Theme.of(context).colorScheme.onPrimary,
+                      ),
                       onPressed: () {
                         // Check if there even is a conversation with the guy
-                        final conversation = ConversationController.conversations.values.toList().firstWhereOrNull(
-                          (c) => c.members.values.any((m) => m.address == widget.friend.id),
-                        );
+                        final conversation = ConversationController.conversations.values
+                            .toList()
+                            .firstWhereOrNull(
+                              (c) => c.members.values.any((m) => m.address == widget.friend.id),
+                            );
                         if (conversation == null) {
                           showErrorPopup("error", "profile.conversation_not_found".tr);
                           return;
@@ -84,9 +94,11 @@ class _FriendButtonState extends State<FriendButton> {
                     icon: Icon(Icons.rocket_launch, color: Theme.of(context).colorScheme.onPrimary),
                     onPressed: () {
                       // Check if there even is a conversation with the guy
-                      final conversation = ConversationController.conversations.values.toList().firstWhereOrNull(
-                        (c) => c.members.values.any((m) => m.address == widget.friend.id),
-                      );
+                      final conversation = ConversationController.conversations.values
+                          .toList()
+                          .firstWhereOrNull(
+                            (c) => c.members.values.any((m) => m.address == widget.friend.id),
+                          );
                       if (conversation == null) {
                         showErrorPopup("error", "profile.conversation_not_found".tr);
                         return;

@@ -17,7 +17,12 @@ class ListSelectionSetting extends StatefulWidget {
   final List<SelectableItem> items;
   final Function(SelectableItem)? callback;
 
-  const ListSelectionSetting({super.key, required this.setting, required this.items, this.callback});
+  const ListSelectionSetting({
+    super.key,
+    required this.setting,
+    required this.items,
+    this.callback,
+  });
 
   @override
   State<ListSelectionSetting> createState() => _ListSelectionSettingState();
@@ -43,7 +48,13 @@ class ListSelection extends StatefulWidget {
   final Function(SelectableItem, int) callback;
   final bool secondary;
 
-  const ListSelection({super.key, required this.selected, required this.items, required this.callback, this.secondary = false});
+  const ListSelection({
+    super.key,
+    required this.selected,
+    required this.items,
+    required this.callback,
+    this.secondary = false,
+  });
 
   @override
   State<ListSelection> createState() => _ListSelectionState();
@@ -70,7 +81,9 @@ class _ListSelectionState extends State<ListSelection> {
               color:
                   widget.selected.value == index
                       ? Get.theme.colorScheme.primary
-                      : (widget.secondary ? Get.theme.colorScheme.inverseSurface : Get.theme.colorScheme.onInverseSurface),
+                      : (widget.secondary
+                          ? Get.theme.colorScheme.inverseSurface
+                          : Get.theme.colorScheme.onInverseSurface),
               borderRadius: radius,
               child: InkWell(
                 borderRadius: radius,
@@ -86,7 +99,9 @@ class _ListSelectionState extends State<ListSelection> {
                       Flexible(
                         child: Text(
                           widget.items[index].label.tr,
-                          style: Get.theme.textTheme.bodyMedium!.copyWith(color: Get.theme.colorScheme.onSurface),
+                          style: Get.theme.textTheme.bodyMedium!.copyWith(
+                            color: Get.theme.colorScheme.onSurface,
+                          ),
                         ),
                       ),
                       horizontalSpacing(defaultSpacing),
@@ -94,7 +109,10 @@ class _ListSelectionState extends State<ListSelection> {
                         LayoutBuilder(
                           builder: (context, constraints) {
                             if (isMobileMode()) {
-                              return Tooltip(message: "settings.experimental".tr, child: Icon(Icons.science, color: Get.theme.colorScheme.error));
+                              return Tooltip(
+                                message: "settings.experimental".tr,
+                                child: Icon(Icons.science, color: Get.theme.colorScheme.error),
+                              );
                             }
 
                             return Container(
@@ -111,7 +129,9 @@ class _ListSelectionState extends State<ListSelection> {
                                   Flexible(
                                     child: Text(
                                       "settings.experimental".tr,
-                                      style: Get.theme.textTheme.bodyMedium!.copyWith(color: Get.theme.colorScheme.error),
+                                      style: Get.theme.textTheme.bodyMedium!.copyWith(
+                                        color: Get.theme.colorScheme.error,
+                                      ),
                                       overflow: TextOverflow.clip,
                                     ),
                                   ),

@@ -11,7 +11,15 @@ class ProfileButton extends StatefulWidget {
   final Color? iconColor;
   final Signal<bool>? loading;
 
-  const ProfileButton({super.key, required this.icon, required this.label, required this.onTap, this.loading, this.color, this.iconColor});
+  const ProfileButton({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.loading,
+    this.color,
+    this.iconColor,
+  });
 
   @override
   State<ProfileButton> createState() => _ProfileButtonState();
@@ -55,10 +63,17 @@ class _ProfileButtonState extends State<ProfileButton> with SignalsMixin {
                           height: 25,
                           child: Padding(
                             padding: const EdgeInsets.all(defaultSpacing * 0.25),
-                            child: CircularProgressIndicator(strokeWidth: 2, color: widget.iconColor ?? theme.colorScheme.onPrimary),
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: widget.iconColor ?? theme.colorScheme.onPrimary,
+                            ),
                           ),
                         )
-                        : Icon(widget.icon, size: 25, color: widget.iconColor ?? theme.colorScheme.onPrimary),
+                        : Icon(
+                          widget.icon,
+                          size: 25,
+                          color: widget.iconColor ?? theme.colorScheme.onPrimary,
+                        ),
               ),
 
               //* Label

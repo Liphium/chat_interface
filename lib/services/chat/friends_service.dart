@@ -29,7 +29,10 @@ class FriendsService {
 
     // Send the deletion stored action in case necessary
     if (removeAction) {
-      final error = await sendAuthenticatedStoredAction(friend, authenticatedStoredAction("fr_rem", {}));
+      final error = await sendAuthenticatedStoredAction(
+        friend,
+        authenticatedStoredAction("fr_rem", {}),
+      );
       if (error != null) {
         return error;
       }
@@ -38,7 +41,8 @@ class FriendsService {
     // Leave direct message conversations with the guy in them
     var toRemove = <LPHAddress>[];
     for (var conversation in ConversationController.conversations.values) {
-      if (conversation.members.values.any((mem) => mem.address == friend.id) && conversation.type == dbe.ConversationType.directMessage) {
+      if (conversation.members.values.any((mem) => mem.address == friend.id) &&
+          conversation.type == dbe.ConversationType.directMessage) {
         toRemove.add(conversation.id);
       }
     }

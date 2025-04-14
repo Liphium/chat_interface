@@ -16,7 +16,11 @@ class _TownsquarePageState extends State<TownsquarePage> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
-        children: [const TownsquareBar(), horizontalSpacing(defaultSpacing), const SizedBox(width: 700, child: Placeholder())],
+        children: [
+          const TownsquareBar(),
+          horizontalSpacing(defaultSpacing),
+          const SizedBox(width: 700, child: Placeholder()),
+        ],
       ),
     );
   }

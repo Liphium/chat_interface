@@ -124,7 +124,13 @@ class _LibraryTabState extends State<LibraryTab> {
               borderRadius: BorderRadius.circular(defaultSpacing),
               onTap: () {
                 //* Send message with the library element
-                widget.provider.sendMessage(signal(false), MessageType.text, [entry.container!.toAttachment()], "", "");
+                widget.provider.sendMessage(
+                  signal(false),
+                  MessageType.text,
+                  [entry.container!.toAttachment()],
+                  "",
+                  "",
+                );
                 Get.back();
               },
               child: ClipRRect(
@@ -134,7 +140,11 @@ class _LibraryTabState extends State<LibraryTab> {
                     return LibraryFavoriteButton(
                       callback: () => _entryList.removeAt(index),
                       container: entry.container!,
-                      child: SizedBox(width: constraints.biggest.width, height: constraints.biggest.height, child: image),
+                      child: SizedBox(
+                        width: constraints.biggest.width,
+                        height: constraints.biggest.height,
+                        child: image,
+                      ),
                     );
                   },
                 ),

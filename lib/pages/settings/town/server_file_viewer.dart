@@ -130,7 +130,12 @@ class _ConversationsPageState extends State<ServerFileViewer> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Watch((ctx) => Text("settings.file.uploaded.title".trParams({"count": _totalCount.value.toString()}), style: Get.theme.textTheme.labelLarge)),
+        Watch(
+          (ctx) => Text(
+            "settings.file.uploaded.title".trParams({"count": _totalCount.value.toString()}),
+            style: Get.theme.textTheme.labelLarge,
+          ),
+        ),
         verticalSpacing(defaultSpacing),
         Watch((ctx) => Text(_storageLine.value, style: Get.theme.textTheme.bodyMedium)),
         verticalSpacing(defaultSpacing),
@@ -149,7 +154,12 @@ class _ConversationsPageState extends State<ServerFileViewer> {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              LPHPageSwitcher(loading: _pageLoading, currentPage: _currentPage, count: _totalCount, page: (page) => goToPage(page)),
+              LPHPageSwitcher(
+                loading: _pageLoading,
+                currentPage: _currentPage,
+                count: _totalCount,
+                page: (page) => goToPage(page),
+              ),
               verticalSpacing(defaultSpacing),
               ListView.builder(
                 itemCount: _files.length,
@@ -162,8 +172,17 @@ class _ConversationsPageState extends State<ServerFileViewer> {
                     (ctx) => Animate(
                       key: ValueKey(file.id),
                       effects: [
-                        ReverseExpandEffect(axis: Axis.vertical, curve: const ElasticOutCurve(2.0), duration: 1000.ms),
-                        ScaleEffect(begin: const Offset(1, 1), end: const Offset(0, 0), curve: Curves.ease, duration: 1000.ms),
+                        ReverseExpandEffect(
+                          axis: Axis.vertical,
+                          curve: const ElasticOutCurve(2.0),
+                          duration: 1000.ms,
+                        ),
+                        ScaleEffect(
+                          begin: const Offset(1, 1),
+                          end: const Offset(0, 0),
+                          curve: Curves.ease,
+                          duration: 1000.ms,
+                        ),
                         FadeEffect(begin: 1, end: 0, duration: 1000.ms),
                       ],
                       onInit: (controller) => controller.value = file.deleted.value ? 1 : 0,
@@ -174,7 +193,10 @@ class _ConversationsPageState extends State<ServerFileViewer> {
                           color: Get.theme.colorScheme.onInverseSurface,
                           borderRadius: BorderRadius.circular(10),
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: defaultSpacing, vertical: defaultSpacing),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: defaultSpacing,
+                              vertical: defaultSpacing,
+                            ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -192,7 +214,10 @@ class _ConversationsPageState extends State<ServerFileViewer> {
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             Text(file.name, style: Get.theme.textTheme.labelMedium),
-                                            Text(formatFileSize(file.size), style: Get.theme.textTheme.bodyMedium),
+                                            Text(
+                                              formatFileSize(file.size),
+                                              style: Get.theme.textTheme.bodyMedium,
+                                            ),
                                           ],
                                         ),
                                       ),
@@ -203,9 +228,16 @@ class _ConversationsPageState extends State<ServerFileViewer> {
                                 //* File actions
                                 Row(
                                   children: [
-                                    Icon(file.path == null ? Icons.cloud_off : Icons.cloud_done, color: Get.theme.colorScheme.onPrimary),
+                                    Icon(
+                                      file.path == null ? Icons.cloud_off : Icons.cloud_done,
+                                      color: Get.theme.colorScheme.onPrimary,
+                                    ),
                                     horizontalSpacing(defaultSpacing + elementSpacing),
-                                    if (file.path != null) IconButton(onPressed: () => OpenFile.open(file.path!), icon: const Icon(Icons.launch)),
+                                    if (file.path != null)
+                                      IconButton(
+                                        onPressed: () => OpenFile.open(file.path!),
+                                        icon: const Icon(Icons.launch),
+                                      ),
                                     LoadingIconButton(
                                       loading: file.deleteLoading,
                                       onTap: () async {
@@ -215,11 +247,12 @@ class _ConversationsPageState extends State<ServerFileViewer> {
                                         file.deleteLoading.value = true;
 
                                         // Make a request to the server
-                                        final success = await AttachmentController.deleteFileFromPath(
-                                          file.id,
-                                          file.path != null ? XFile(file.path!) : null,
-                                          popup: true,
-                                        );
+                                        final success =
+                                            await AttachmentController.deleteFileFromPath(
+                                              file.id,
+                                              file.path != null ? XFile(file.path!) : null,
+                                              popup: true,
+                                            );
                                         if (!success) {
                                           file.path = null;
                                         }
@@ -240,7 +273,12 @@ class _ConversationsPageState extends State<ServerFileViewer> {
                   );
                 },
               ),
-              LPHPageSwitcher(loading: _pageLoading, currentPage: _currentPage, count: _totalCount, page: (page) => goToPage(page)),
+              LPHPageSwitcher(
+                loading: _pageLoading,
+                currentPage: _currentPage,
+                count: _totalCount,
+                page: (page) => goToPage(page),
+              ),
               verticalSpacing(defaultSpacing),
             ],
           );
@@ -264,12 +302,27 @@ class FileContainer {
   final deleteLoading = signal(false);
   final deleted = signal(false);
 
-  FileContainer(this.id, this.name, this.type, this.key, this.account, this.size, this.tag, this.system, this.createdAt);
+  FileContainer(
+    this.id,
+    this.name,
+    this.type,
+    this.key,
+    this.account,
+    this.size,
+    this.tag,
+    this.system,
+    this.createdAt,
+  );
 
   // Deserialize from JSON
   factory FileContainer.fromJson(Map<String, dynamic> json, KeyPair key, [Sodium? sodium]) {
     // Get the name and stuff
-    final packagedKey = decryptAsymmetricAnonymous(key.publicKey, key.secretKey, json["key"], sodium);
+    final packagedKey = decryptAsymmetricAnonymous(
+      key.publicKey,
+      key.secretKey,
+      json["key"],
+      sodium,
+    );
     final name = decryptSymmetric(json["name"], unpackageSymmetricKey(packagedKey, sodium), sodium);
 
     return FileContainer(

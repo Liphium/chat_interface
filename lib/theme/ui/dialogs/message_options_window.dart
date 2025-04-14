@@ -28,7 +28,14 @@ class MessageOptionsWindow extends StatefulWidget {
   final MessageProvider? provider;
   final List<ProfileButton>? extra;
 
-  const MessageOptionsWindow({super.key, required this.data, required this.self, required this.message, required this.provider, this.extra});
+  const MessageOptionsWindow({
+    super.key,
+    required this.data,
+    required this.self,
+    required this.message,
+    required this.provider,
+    this.extra,
+  });
 
   @override
   State<MessageOptionsWindow> createState() => _ConversationAddWindowState();
@@ -57,7 +64,8 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
         children: [
           // Add extra context menu buttons (copy, etc. (if passed in))
           if (widget.extra != null)
-            for (var button in widget.extra!) Padding(padding: const EdgeInsets.only(bottom: elementSpacing), child: button),
+            for (var button in widget.extra!)
+              Padding(padding: const EdgeInsets.only(bottom: elementSpacing), child: button),
           if (widget.extra != null) verticalSpacing(elementSpacing),
 
           // Render the message info in case there is a message provider
@@ -69,7 +77,9 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
                 label: "message.info".tr,
                 onTap: () {
                   Get.back();
-                  Get.dialog(MessageInfoWindow(message: widget.message, provider: widget.provider!));
+                  Get.dialog(
+                    MessageInfoWindow(message: widget.message, provider: widget.provider!),
+                  );
                 },
               ),
             ),
@@ -89,7 +99,8 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
             ),
 
           // Only show the save to button in case there is an attachment
-          if (widget.message.attachmentsRenderer.length == 1 && widget.message.attachmentsRenderer[0].downloaded.value)
+          if (widget.message.attachmentsRenderer.length == 1 &&
+              widget.message.attachmentsRenderer[0].downloaded.value)
             Padding(
               padding: const EdgeInsets.only(bottom: elementSpacing),
               child: ProfileButton(
@@ -117,7 +128,8 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
             ),
 
           // Only show the open button in case there is an attachment
-          if (widget.message.attachmentsRenderer.length == 1 && widget.message.attachmentsRenderer[0].downloaded.value)
+          if (widget.message.attachmentsRenderer.length == 1 &&
+              widget.message.attachmentsRenderer[0].downloaded.value)
             Padding(
               padding: const EdgeInsets.only(bottom: elementSpacing),
               child: ProfileButton(
@@ -139,7 +151,9 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
             ),
 
           // Only show the copy button in case it is an attachment (and no mobile cause doesn't work there)
-          if (widget.message.attachmentsRenderer.length == 1 && widget.message.attachmentsRenderer[0].downloaded.value && isDesktopPlatform())
+          if (widget.message.attachmentsRenderer.length == 1 &&
+              widget.message.attachmentsRenderer[0].downloaded.value &&
+              isDesktopPlatform())
             Padding(
               padding: const EdgeInsets.only(bottom: elementSpacing),
               child: ProfileButton(
@@ -193,7 +207,8 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
                   _messageDeletionLoading.value = true;
 
                   // Check if the message is sent by the current user to ask for file deletions
-                  if (StatusController.ownAddress == widget.message.senderAddress && widget.message.attachments.isNotEmpty) {
+                  if (StatusController.ownAddress == widget.message.senderAddress &&
+                      widget.message.attachments.isNotEmpty) {
                     await showConfirmPopup(
                       ConfirmWindow(
                         title: "message.delete.attachments".tr,
@@ -205,7 +220,11 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
                             final path = await AttachmentController.getFilePathFor(json["i"]);
 
                             // Delete the file (also locally in case needed)
-                            await AttachmentController.deleteFileFromPath(json["i"], path == null ? null : XFile(path), popup: true);
+                            await AttachmentController.deleteFileFromPath(
+                              json["i"],
+                              path == null ? null : XFile(path),
+                              popup: true,
+                            );
                           }
                         },
                       ),

@@ -66,7 +66,9 @@ Future<bool> processStoredAction(Map<String, dynamic> action) async {
     // Check if the sequence number (date) is higher than the last received
     final lastReceived = await FriendsVault.lastReceiveDate(sender.vaultId);
     if (lastReceived == null) {
-      sendLog("ERROR: couldn't retrieve the last received date of sender for authenticated stored action");
+      sendLog(
+        "ERROR: couldn't retrieve the last received date of sender for authenticated stored action",
+      );
       return false;
     }
     if (extracted.seq <= lastReceived.millisecondsSinceEpoch) {
@@ -81,9 +83,14 @@ Future<bool> processStoredAction(Map<String, dynamic> action) async {
     }
 
     // Update the last receive date to the latest sequence number
-    final result = await FriendsVault.setReceiveDate(sender.vaultId, DateTime.fromMillisecondsSinceEpoch(extracted.seq));
+    final result = await FriendsVault.setReceiveDate(
+      sender.vaultId,
+      DateTime.fromMillisecondsSinceEpoch(extracted.seq),
+    );
     if (!result) {
-      sendLog("WARNING: the last receive date couldn't be updated, this might cause future replay attacks, ignoring for now");
+      sendLog(
+        "WARNING: the last receive date couldn't be updated, this might cause future replay attacks, ignoring for now",
+      );
       return false;
     }
 
@@ -102,7 +109,11 @@ Future<bool> processStoredAction(Map<String, dynamic> action) async {
   }
 
   // Handle normal stored actions
-  final payload = decryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, asymmetricKeyPair.secretKey, action["payload"]);
+  final payload = decryptAsymmetricAnonymous(
+    asymmetricKeyPair.publicKey,
+    asymmetricKeyPair.secretKey,
+    action["payload"],
+  );
   if (payload == "") {
     return true;
   }

@@ -45,7 +45,12 @@ class Connector {
   final _responders = <String, Function(Event)?>{};
   final _responseTo = <String, String>{};
 
-  Future<bool> connect(String url, String token, {bool restart = true, Function(bool)? onDone}) async {
+  Future<bool> connect(
+    String url,
+    String token, {
+    bool restart = true,
+    Function(bool)? onDone,
+  }) async {
     this.url = url;
 
     // Generate an AES key for the connection
@@ -145,7 +150,9 @@ class Connector {
         }
 
         // Add it to the after setup queue (in case it is an after setup handler)
-        if (_afterSetup[event.name] == true && !SetupManager.setupFinished && !ConnectionController.connected.value) {
+        if (_afterSetup[event.name] == true &&
+            !SetupManager.setupFinished &&
+            !ConnectionController.connected.value) {
           _afterSetupQueue.add(event);
           return;
         }
@@ -198,7 +205,9 @@ class Connector {
   void listen(String event, Function(Event) handler, {afterSetup = false}) {
     // Make sure no handler is registered for the claimed action "res" (for handling responses)
     if (event == "res") {
-      sendLog("You can't register an event handler for 'res'. This is already used by the system to handle responses.");
+      sendLog(
+        "You can't register an event handler for 'res'. This is already used by the system to handle responses.",
+      );
       SystemNavigator.pop();
     }
 
@@ -264,7 +273,9 @@ class Connector {
 
         // Attach an error handler to make sure the error is logged when the server doesn't respond
         _responders[responseId] = (event) {
-          sendLog("Event ${event.name} received even though there was an error with this previously.");
+          sendLog(
+            "Event ${event.name} received even though there was an error with this previously.",
+          );
         };
 
         sendLog("Response to ${action.action} timed out");
@@ -282,7 +293,10 @@ Connector connector = Connector();
 Future<bool> startConnection(String node, String connectionToken) async {
   sendLog(node);
   if (connector.initialized) return false;
-  final res = await connector.connect(isHttps ? "wss://$node/gateway" : "ws://$node/gateway", connectionToken);
+  final res = await connector.connect(
+    isHttps ? "wss://$node/gateway" : "ws://$node/gateway",
+    connectionToken,
+  );
   if (!res) {
     return false;
   }

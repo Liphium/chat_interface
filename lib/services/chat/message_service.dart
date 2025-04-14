@@ -31,7 +31,10 @@ class MessageService {
     final parts = await sodiumLib.runIsolated((sodium, keys, pairs) async {
       final list = <(String, String)>[];
       for (var message in messages) {
-        list.add((dbEncrypted(message.toContentJson(), sodium, keys[0]), dbEncrypted(message.senderAddress.encode(), sodium, keys[0])));
+        list.add((
+          dbEncrypted(message.toContentJson(), sodium, keys[0]),
+          dbEncrypted(message.senderAddress.encode(), sodium, keys[0]),
+        ));
       }
 
       return list;
@@ -64,7 +67,12 @@ class MessageService {
   ///
   /// Also handles system messages.
   /// Set [simple] to [true] in case you want to avoid any extra stuff other than adding to cache and database.
-  static Future<bool> storeMessage(Message message, Conversation conversation, {bool simple = false, (String, String)? part}) async {
+  static Future<bool> storeMessage(
+    Message message,
+    Conversation conversation, {
+    bool simple = false,
+    (String, String)? part,
+  }) async {
     // Get the current provider
     final provider = SidebarController.getCurrentProvider();
 
@@ -90,7 +98,10 @@ class MessageService {
       if ((provider?.conversation.id ?? "hi") == conversation.id) {
         SystemMessages.messages[message.content]?.handle(message, provider!);
       } else {
-        SystemMessages.messages[message.content]?.handle(message, ConversationMessageProvider(conversation));
+        SystemMessages.messages[message.content]?.handle(
+          message,
+          ConversationMessageProvider(conversation),
+        );
       }
 
       // Check if message should be stored
@@ -118,7 +129,11 @@ class MessageService {
   /// Store a message in the database.
   ///
   /// The part tuple is provided by [storeMessages] to not encrypt the data twice.
-  static void _storeInLocalDatabase(Conversation conversation, Message message, {(String, String)? part}) {
+  static void _storeInLocalDatabase(
+    Conversation conversation,
+    Message message, {
+    (String, String)? part,
+  }) {
     db
         .into(db.message)
         .insertOnConflictUpdate(

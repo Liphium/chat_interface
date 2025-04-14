@@ -47,11 +47,17 @@ class MobileMessageBar extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(conversation.isGroup ? Icons.group : Icons.person, size: 30, color: Theme.of(context).colorScheme.onPrimary),
+                      Icon(
+                        conversation.isGroup ? Icons.group : Icons.person,
+                        size: 30,
+                        color: Theme.of(context).colorScheme.onPrimary,
+                      ),
                       horizontalSpacing(elementSpacing),
                       Flexible(
                         child: Text(
-                          conversation.isGroup ? conversation.containerSub.value.name : conversation.dmName,
+                          conversation.isGroup
+                              ? conversation.containerSub.value.name
+                              : conversation.dmName,
                           style: Theme.of(context).textTheme.titleMedium,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -66,7 +72,12 @@ class MobileMessageBar extends StatelessWidget {
                 icon: Icons.more_vert,
                 iconSize: 27,
                 onTap:
-                    () => showModal(ConversationInfoMobile(conversation: conversation, position: const ContextMenuData(Offset(0, 0), false, false))),
+                    () => showModal(
+                      ConversationInfoMobile(
+                        conversation: conversation,
+                        position: const ContextMenuData(Offset(0, 0), false, false),
+                      ),
+                    ),
               ),
             ],
           ),

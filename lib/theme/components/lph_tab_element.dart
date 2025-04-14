@@ -32,7 +32,10 @@ class _LPHTabElementState extends State<LPHTabElement> {
     // Measure all the texts
     int count = 0;
     for (var tab in widget.tabs) {
-      final textPainter = TextPainter(text: TextSpan(text: tab, style: Get.textTheme.titleMedium), textDirection: TextDirection.ltr);
+      final textPainter = TextPainter(
+        text: TextSpan(text: tab, style: Get.textTheme.titleMedium),
+        textDirection: TextDirection.ltr,
+      );
       textPainter.layout();
       _tabWidth[count] = textPainter.size.width + defaultSpacing * 2;
       count++;
@@ -72,7 +75,12 @@ class _LPHTabElementState extends State<LPHTabElement> {
               left: left,
               width: _tabWidth[_selected.value],
               height: Get.textTheme.titleMedium!.fontSize! * 1.5 + elementSpacing * 2,
-              child: Container(decoration: BoxDecoration(color: Get.theme.colorScheme.primary, borderRadius: BorderRadius.circular(defaultSpacing))),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Get.theme.colorScheme.primary,
+                  borderRadius: BorderRadius.circular(defaultSpacing),
+                ),
+              ),
             );
           },
         ),
@@ -92,11 +100,16 @@ class _LPHTabElementState extends State<LPHTabElement> {
                   },
                   borderRadius: BorderRadius.circular(defaultSpacing),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: defaultSpacing, vertical: elementSpacing),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: defaultSpacing,
+                      vertical: elementSpacing,
+                    ),
                     child: Watch(
                       (context) => Text(
                         widget.tabs[index],
-                        style: Get.textTheme.titleMedium!.copyWith(color: _selected.value == index ? Colors.white : Colors.white),
+                        style: Get.textTheme.titleMedium!.copyWith(
+                          color: _selected.value == index ? Colors.white : Colors.white,
+                        ),
                       ),
                     ),
                   ),

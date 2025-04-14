@@ -103,7 +103,9 @@ class _SpaceRectangleState extends State<SpaceRectangle> {
                                       child: LPHTabElement(
                                         tabs: SpaceTabType.values.map((e) => e.name.tr).toList(),
                                         onTabSwitch: (el) {
-                                          final type = SpaceTabType.values.firstWhereOrNull((t) => t.name.tr == el);
+                                          final type = SpaceTabType.values.firstWhereOrNull(
+                                            (t) => t.name.tr == el,
+                                          );
                                           if (type == null) {
                                             return;
                                           }
@@ -155,7 +157,12 @@ class _SpaceRectangleState extends State<SpaceRectangle> {
                 Watch(
                   (context) => Animate(
                     effects: [
-                      ExpandEffect(curve: Curves.easeInOut, duration: 250.ms, axis: Axis.horizontal, alignment: Alignment.centerLeft),
+                      ExpandEffect(
+                        curve: Curves.easeInOut,
+                        duration: 250.ms,
+                        axis: Axis.horizontal,
+                        alignment: Alignment.centerLeft,
+                      ),
                       FadeEffect(duration: 250.ms),
                     ],
                     onInit: (ac) => ac.value = SpaceController.chatOpen.value ? 1 : 0,
@@ -172,7 +179,9 @@ class _SpaceRectangleState extends State<SpaceRectangle> {
                               child: LPHTabElement(
                                 tabs: SpaceSidebarTabType.values.map((e) => e.name.tr).toList(),
                                 onTabSwitch: (el) {
-                                  final type = SpaceSidebarTabType.values.firstWhereOrNull((t) => t.name.tr == el);
+                                  final type = SpaceSidebarTabType.values.firstWhereOrNull(
+                                    (t) => t.name.tr == el,
+                                  );
                                   if (type == null) {
                                     return;
                                   }
@@ -182,7 +191,11 @@ class _SpaceRectangleState extends State<SpaceRectangle> {
                               ),
                             ),
                           ),
-                          Expanded(child: Watch((context) => _sidebarTabs[SpaceController.sidebarTabType.value])),
+                          Expanded(
+                            child: Watch(
+                              (context) => _sidebarTabs[SpaceController.sidebarTabType.value],
+                            ),
+                          ),
                         ],
                       ),
                     ),

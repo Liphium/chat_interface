@@ -1,7 +1,7 @@
 import 'package:chat_interface/pages/settings/town/file_settings.dart';
 import 'package:drift/drift.dart';
 
-enum ConversationType { directMessage, group }
+enum ConversationType { directMessage, group, square }
 
 @TableIndex(name: "idx_conversation_updated", columns: {#updatedAt})
 class Conversation extends Table {
@@ -128,7 +128,8 @@ class UnknownProfile extends Table {
   TextColumn get name => text()();
   TextColumn get displayName => text()();
   TextColumn get keys => text()();
-  DateTimeColumn get lastFetched => dateTime().withDefault(Constant(DateTime.fromMillisecondsSinceEpoch(0)))();
+  DateTimeColumn get lastFetched =>
+      dateTime().withDefault(Constant(DateTime.fromMillisecondsSinceEpoch(0)))();
 
   @override
   Set<Column> get primaryKey => {id};

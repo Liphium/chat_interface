@@ -22,13 +22,25 @@ class SpaceService {
   /// Connect to a space using its connection container
   static Future<String?> connectToSpace(String domain, String spaceId, SecureKey key) async {
     // Ask the server for a join token
-    final spaceJson = await postAddress("${nodeProtocol()}$domain", "/enc/join", {"id": spaceId}, noApiVersion: true, checkProtocol: false);
+    final spaceJson = await postAddress(
+      "${nodeProtocol()}$domain",
+      "/enc/join",
+      {"id": spaceId},
+      noApiVersion: true,
+      checkProtocol: false,
+    );
     if (!spaceJson["success"]) {
       return spaceJson["error"];
     }
 
     // Connect to the space
-    final error = await _connectToRoom(domain, spaceJson["token"], spaceJson["client"], spaceId, key);
+    final error = await _connectToRoom(
+      domain,
+      spaceJson["token"],
+      spaceJson["client"],
+      spaceId,
+      key,
+    );
     if (error != null) {
       return error;
     }
@@ -62,7 +74,13 @@ class SpaceService {
 
     // Connect to the space
     final key = randomSymmetricKey();
-    final error = await _connectToRoom(json["domain"], spaceJson["token"], spaceJson["client"], spaceJson["space"], key);
+    final error = await _connectToRoom(
+      json["domain"],
+      spaceJson["token"],
+      spaceJson["client"],
+      spaceJson["space"],
+      key,
+    );
     if (error != null) {
       return (null, error);
     }
@@ -73,7 +91,13 @@ class SpaceService {
   }
 
   /// Returns an error if there was one
-  static Future<String?> _connectToRoom(String server, String token, String clientId, String spaceId, SecureKey key) async {
+  static Future<String?> _connectToRoom(
+    String server,
+    String token,
+    String clientId,
+    String spaceId,
+    SecureKey key,
+  ) async {
     // Connect to space node
     final result = await SpaceConnection.createSpaceConnection(server, token);
     sendLog("COULD CONNECT TO SPACE NODE");
@@ -93,7 +117,10 @@ class SpaceService {
     final event = await SpaceConnection.spaceConnector!.sendActionAndWait(
       msg.ServerAction("setup", {
         "data": encryptSymmetric(StatusController.ownAddress.encode(), key),
-        "signature": signMessage(signatureKeyPair.secretKey, craftSignature(spaceId, clientId, StatusController.ownAddress.encode())),
+        "signature": signMessage(
+          signatureKeyPair.secretKey,
+          craftSignature(spaceId, clientId, StatusController.ownAddress.encode()),
+        ),
       }),
     );
     if (event == null) {

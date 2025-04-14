@@ -47,7 +47,10 @@ class ConversationMembers extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: defaultSpacing + elementSpacing),
                   child: Watch(
-                    (ctx) => Text('chat.members'.trParams({"count": conversation.members.length.toString()}), style: Get.theme.textTheme.titleMedium),
+                    (ctx) => Text(
+                      'chat.members'.trParams({"count": conversation.members.length.toString()}),
+                      style: Get.theme.textTheme.titleMedium,
+                    ),
                   ),
                 ),
                 LoadingIconButton(
@@ -77,7 +80,8 @@ class ConversationMembers extends StatelessWidget {
                           onTap: () {
                             final friend = FriendController.friends[member.address];
                             if (StatusController.ownAddress != member.address) {
-                              final RenderBox box = listKey.currentContext?.findRenderObject() as RenderBox;
+                              final RenderBox box =
+                                  listKey.currentContext?.findRenderObject() as RenderBox;
                               Get.dialog(
                                 Profile(
                                   position: box.localToGlobal(box.size.bottomLeft(Offset.zero)),
@@ -86,7 +90,8 @@ class ConversationMembers extends StatelessWidget {
                                   actions: (friend) {
                                     return [
                                           //* Promotion actions
-                                          if (ownRole.higherOrEqual(MemberRole.moderator) && member.role == MemberRole.user)
+                                          if (ownRole.higherOrEqual(MemberRole.moderator) &&
+                                              member.role == MemberRole.user)
                                             ProfileAction(
                                               icon: Icons.add_moderator,
                                               label: "chat.make_moderator".tr,
@@ -101,7 +106,8 @@ class ConversationMembers extends StatelessWidget {
                                                 loading.value = false;
                                               },
                                             )
-                                          else if (ownRole == MemberRole.admin && member.role == MemberRole.moderator)
+                                          else if (ownRole == MemberRole.admin &&
+                                              member.role == MemberRole.moderator)
                                             ProfileAction(
                                               icon: Icons.add_moderator,
                                               label: "chat.make_admin".tr,
@@ -118,7 +124,8 @@ class ConversationMembers extends StatelessWidget {
                                             ),
 
                                           //* Demotion actions
-                                          if (ownRole.higherOrEqual(MemberRole.moderator) && member.role == MemberRole.moderator)
+                                          if (ownRole.higherOrEqual(MemberRole.moderator) &&
+                                              member.role == MemberRole.moderator)
                                             ProfileAction(
                                               icon: Icons.remove_moderator,
                                               label: "chat.remove_moderator".tr,
@@ -133,7 +140,8 @@ class ConversationMembers extends StatelessWidget {
                                                 loading.value = false;
                                               },
                                             )
-                                          else if (ownRole == MemberRole.admin && member.role.higherOrEqual(MemberRole.moderator))
+                                          else if (ownRole == MemberRole.admin &&
+                                              member.role.higherOrEqual(MemberRole.moderator))
                                             ProfileAction(
                                               icon: Icons.remove_moderator,
                                               label: "chat.remove_admin".tr,
@@ -150,7 +158,8 @@ class ConversationMembers extends StatelessWidget {
                                             ),
 
                                           //* Removal actions
-                                          if (ownRole.higherOrEqual(MemberRole.moderator) && member.role.lowerThan(ownRole))
+                                          if (ownRole.higherOrEqual(MemberRole.moderator) &&
+                                              member.role.lowerThan(ownRole))
                                             ProfileAction(
                                               icon: Icons.person_remove,
                                               label: "chat.remove_member".tr,
@@ -185,10 +194,16 @@ class ConversationMembers extends StatelessWidget {
                                   Padding(
                                     padding: const EdgeInsets.only(left: defaultSpacing),
                                     child: Tooltip(
-                                      message: member.role == MemberRole.admin ? "chat.admin".tr : "chat.moderator".tr,
+                                      message:
+                                          member.role == MemberRole.admin
+                                              ? "chat.admin".tr
+                                              : "chat.moderator".tr,
                                       child: Icon(
                                         Icons.shield,
-                                        color: member.role == MemberRole.admin ? Get.theme.colorScheme.error : Get.theme.colorScheme.onPrimary,
+                                        color:
+                                            member.role == MemberRole.admin
+                                                ? Get.theme.colorScheme.error
+                                                : Get.theme.colorScheme.onPrimary,
                                       ),
                                     ),
                                   ),

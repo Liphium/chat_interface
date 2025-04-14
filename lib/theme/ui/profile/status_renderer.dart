@@ -19,8 +19,14 @@ class StatusRenderer extends StatelessWidget {
     }
 
     return Container(
-      decoration: BoxDecoration(color: color.withAlpha(100), borderRadius: BorderRadius.circular(50)),
-      padding: EdgeInsets.symmetric(horizontal: elementSpacing, vertical: text ? elementSpacing * 0.5 : elementSpacing),
+      decoration: BoxDecoration(
+        color: color.withAlpha(100),
+        borderRadius: BorderRadius.circular(50),
+      ),
+      padding: EdgeInsets.symmetric(
+        horizontal: elementSpacing,
+        vertical: text ? elementSpacing * 0.5 : elementSpacing,
+      ),
       child: Row(
         children: [
           Icon(icon, color: color, size: 13),

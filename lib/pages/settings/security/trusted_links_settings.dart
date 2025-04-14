@@ -108,8 +108,14 @@ class _TrustedLinkSettingsPageState extends State<TrustedLinkSettingsPage> {
                 return Padding(
                   padding: const EdgeInsets.only(bottom: elementSpacing),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: defaultSpacing, vertical: elementSpacing),
-                    decoration: BoxDecoration(color: Get.theme.colorScheme.onInverseSurface, borderRadius: BorderRadius.circular(defaultSpacing)),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: defaultSpacing,
+                      vertical: elementSpacing,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Get.theme.colorScheme.onInverseSurface,
+                      borderRadius: BorderRadius.circular(defaultSpacing),
+                    ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -118,13 +124,20 @@ class _TrustedLinkSettingsPageState extends State<TrustedLinkSettingsPage> {
                             children: [
                               Icon(Icons.done_all, color: Get.theme.colorScheme.onPrimary),
                               horizontalSpacing(defaultSpacing),
-                              Flexible(child: Text(_trusted[index].domain, style: Get.theme.textTheme.labelMedium)),
+                              Flexible(
+                                child: Text(
+                                  _trusted[index].domain,
+                                  style: Get.theme.textTheme.labelMedium,
+                                ),
+                              ),
                             ],
                           ),
                         ),
                         IconButton(
                           onPressed: () {
-                            db.trustedLink.deleteWhere((tbl) => tbl.domain.equals(_trusted[index].domain));
+                            db.trustedLink.deleteWhere(
+                              (tbl) => tbl.domain.equals(_trusted[index].domain),
+                            );
                             _trusted.removeAt(index);
                           },
                           icon: const Icon(Icons.delete),

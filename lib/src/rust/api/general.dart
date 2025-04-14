@@ -6,5 +6,4 @@
 import '../frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-Stream<String> createLogStream() =>
-    RustLib.instance.api.crateApiGeneralCreateLogStream();
+Stream<String> createLogStream() => RustLib.instance.api.crateApiGeneralCreateLogStream();

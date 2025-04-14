@@ -26,7 +26,12 @@ class _ChatPageState extends State<ChatPageMobile> {
   final _selected = signal(0);
 
   // All tabs that can be selected
-  final _tabs = <int, Widget>{0: const ConversationListMobile(), 1: const OwnProfileMobile(), 2: const FriendsPage(), 3: const SettingsTabMobile()};
+  final _tabs = <int, Widget>{
+    0: const ConversationListMobile(),
+    1: const OwnProfileMobile(),
+    2: const FriendsPage(),
+    3: const SettingsTabMobile(),
+  };
 
   @override
   void initState() {
@@ -65,17 +70,41 @@ class _ChatPageState extends State<ChatPageMobile> {
                       top: false,
                       bottom: false,
                       child: AnimatedErrorContainer(
-                        padding: const EdgeInsets.only(bottom: defaultSpacing * 1.5, right: defaultSpacing, left: defaultSpacing),
+                        padding: const EdgeInsets.only(
+                          bottom: defaultSpacing * 1.5,
+                          right: defaultSpacing,
+                          left: defaultSpacing,
+                        ),
                         message: ConnectionController.error,
                       ),
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        SidebarIconButton(onTap: () => _selected.value = 0, icon: Icons.chat_bubble, index: 0, selected: _selected),
-                        SidebarIconButton(onTap: () => _selected.value = 1, icon: Icons.public, index: 1, selected: _selected),
-                        SidebarIconButton(onTap: () => _selected.value = 2, icon: Icons.group, index: 2, selected: _selected),
-                        SidebarIconButton(onTap: () => _selected.value = 3, icon: Icons.settings, index: 3, selected: _selected),
+                        SidebarIconButton(
+                          onTap: () => _selected.value = 0,
+                          icon: Icons.chat_bubble,
+                          index: 0,
+                          selected: _selected,
+                        ),
+                        SidebarIconButton(
+                          onTap: () => _selected.value = 1,
+                          icon: Icons.public,
+                          index: 1,
+                          selected: _selected,
+                        ),
+                        SidebarIconButton(
+                          onTap: () => _selected.value = 2,
+                          icon: Icons.group,
+                          index: 2,
+                          selected: _selected,
+                        ),
+                        SidebarIconButton(
+                          onTap: () => _selected.value = 3,
+                          icon: Icons.settings,
+                          index: 3,
+                          selected: _selected,
+                        ),
                       ],
                     ),
                   ],
