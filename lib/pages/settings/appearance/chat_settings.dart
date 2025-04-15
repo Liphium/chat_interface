@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class ChatSettings {
-  static final dotAmount = Setting<double>("appearance.chat.dot_amount", 2);
+  static final dotAmount = Setting<double>("appearance.chat.dot_amount", 3);
   static const String chatTheme = "appearance.chat.theme";
 
   static final chatThemes = <SelectableItem>[
