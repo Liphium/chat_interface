@@ -71,6 +71,12 @@ class ErrorTranslations extends Translations {
           'You have reached the maximum amount of @amount conversations. Please delete old ones to create more.',
       'conversations.name.length':
           'The conversation name you specified is longer than allowed. Please use less than @length characters.',
+      'conversations.name_needed': 'Please specify a name for this conversation.',
+      'conversations.too_many_members': 'This conversation allows a maximum of @amount members.',
+      'squares.name_needed': 'Please specify a name for this Square.',
+      'squares.name.length':
+          'The Square name you specified is longer than allowed. Please use less than @length characters.',
+      'squares.too_many_members': 'This Square allows a maximum of @amount members.',
       'conversation.delete_error':
           'You can\'t delete this conversation yet. Please try again later.',
       'error.not_delete_conversation':

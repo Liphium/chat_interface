@@ -185,6 +185,7 @@ class ConversationService extends VaultTarget {
     final body = await postNodeJSON("/conversations/open", <String, dynamic>{
       "accountData": ownMemberContainer,
       "members": memberContainers.values.toList(),
+      "type": type.index,
       "data": encryptedData,
     });
     if (!body["success"]) {

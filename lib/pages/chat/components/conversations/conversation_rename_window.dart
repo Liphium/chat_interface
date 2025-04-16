@@ -55,8 +55,8 @@ class _ConversationRenameWindowState extends State<ConversationRenameWindow> {
       return;
     }
     if (name.length > specialConstants[Constants.specialConstantMaxConversationNameLength]!) {
-      _errorText.value = "too.long".trParams({
-        "limit": specialConstants["max_conversation_name_length"].toString(),
+      _errorText.value = "conversations.name.length".trParams({
+        "length": specialConstants["max_conversation_name_length"].toString(),
       });
       _loading.value = false;
       return;

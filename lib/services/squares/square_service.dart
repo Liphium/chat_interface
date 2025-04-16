@@ -1,23 +1,18 @@
+import 'package:chat_interface/controller/account/friend_controller.dart';
+import 'package:chat_interface/database/database_entities.dart' as model;
 import 'package:chat_interface/services/chat/conversation_service.dart';
+import 'package:chat_interface/services/squares/square_container.dart';
 
-class SquareContainer extends ConversationContainer {
-  List<Topic> topics;
-
-  SquareContainer(super.name, this.topics);
-
-  @override
-  Map<String, dynamic> toJson() {
-    final json = super.toJson();
-    json["topics"] = topics.map((t) => t.toJson()).toList();
-    return json;
+class SquareService {
+  /// Create a new square.
+  ///
+  /// Returns an error if there was one.
+  static Future<String?> openSquare(List<Friend> friends, String name) async {
+    // Create the conversation for the square
+    return ConversationService.openConversation(
+      model.ConversationType.square,
+      friends,
+      SquareContainer(name, []),
+    );
   }
-}
-
-class Topic {
-  final String id;
-  final String name;
-
-  Topic(this.id, this.name);
-
-  Map<String, dynamic> toJson() => {"id": id, "name": name};
 }

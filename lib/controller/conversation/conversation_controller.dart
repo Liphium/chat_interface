@@ -210,7 +210,7 @@ class Conversation {
     members[member.tokenId] = member;
   }
 
-  bool get isGroup => type == model.ConversationType.group;
+  bool get isGroup => type == model.ConversationType.group || type == model.ConversationType.square;
 
   /// Only works for direct messages
   String get dmName {

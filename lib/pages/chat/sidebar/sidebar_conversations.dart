@@ -4,6 +4,7 @@ import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/sidebar_controller.dart';
+import 'package:chat_interface/database/database_entities.dart' as model;
 import 'package:chat_interface/services/chat/conversation_member.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/services/chat/conversation_message_provider.dart';
@@ -136,15 +137,18 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   // Conversation info
-                                  if (conversation.isGroup)
+                                  if (conversation.type == model.ConversationType.group)
                                     renderGroup(title, conversation, provider)
+                                  else if (conversation.type == model.ConversationType.square)
+                                    renderSquare(title, conversation, provider)
                                   else
                                     renderDirectMessage(friend, title, conversation, provider),
 
                                   Watch((ctx) {
                                     final notifications = conversation.notificationCount.value;
                                     if (hover.value) {
-                                      return IconButton(
+                                      // A remove button to leave the current conversation
+                                      final removeButton = IconButton(
                                         onPressed:
                                             () => showConfirmPopup(
                                               ConfirmWindow(
@@ -156,6 +160,19 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                                             ),
                                         icon: const Icon(Icons.close),
                                       );
+
+                                      // Also show a create topic button in case this is a square
+                                      if (conversation.type == model.ConversationType.square) {
+                                        return Row(
+                                          children: [
+                                            IconButton(onPressed: () {}, icon: Icon(Icons.add)),
+                                            horizontalSpacing(elementSpacing),
+                                            removeButton,
+                                          ],
+                                        );
+                                      }
+
+                                      return removeButton;
                                     }
 
                                     return Visibility(
@@ -310,6 +327,77 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: elementSpacing * 0.5),
             child: Icon(Icons.group, size: 35, color: Get.theme.colorScheme.onPrimary),
+          ),
+          horizontalSpacing(defaultSpacing * 0.75),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Render the title of the group
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        conversation.containerSub.value.name,
+                        style:
+                            provider?.conversation == conversation
+                                ? Get.theme.textTheme.labelMedium
+                                : Get.theme.textTheme.bodyMedium,
+                        textHeightBehavior: noTextHeight,
+                      ),
+                    ),
+
+                    // Render remote indicator (in case needed)
+                    if (conversation.id.server != basePath)
+                      Padding(
+                        padding: const EdgeInsets.only(left: defaultSpacing),
+                        child: Tooltip(
+                          waitDuration: const Duration(milliseconds: 500),
+                          message: "conversations.different_town".trParams({
+                            "town": conversation.id.server,
+                          }),
+                          child: Icon(
+                            Icons.sensors,
+                            color: Get.theme.colorScheme.onPrimary,
+                            size: 21,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+
+                verticalSpacing(elementSpacing * 0.5),
+
+                // Render the amount of members of the conversation
+                Text(
+                  "chat.members".trParams(<String, String>{
+                    "count": conversation.members.length.toString(),
+                  }),
+                  style: Get.textTheme.bodySmall,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Render a square preview for the sidebar
+  Widget renderSquare(
+    String title,
+    Conversation conversation,
+    ConversationMessageProvider? provider,
+  ) {
+    return Expanded(
+      child: Row(
+        children: [
+          // Render a square icon
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: elementSpacing * 0.5),
+            child: Icon(Icons.public, size: 35, color: Get.theme.colorScheme.onPrimary),
           ),
           horizontalSpacing(defaultSpacing * 0.75),
           Expanded(

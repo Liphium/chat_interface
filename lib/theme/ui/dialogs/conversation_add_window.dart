@@ -52,18 +52,20 @@ class ConversationAddWindow extends StatefulWidget {
       return "choose.members".tr;
     }
     if (friends.length > specialConstants[Constants.specialConstantMaxConversationMembers]!) {
-      return "choose.members".tr;
+      return "conversations.too_many_members".trParams({
+        "amount": specialConstants[Constants.specialConstantMaxConversationMembers]!.toString(),
+      });
     }
     if (name == null && friends.length > 1) {
-      return "enter.name".tr;
+      return "conversations.name_needed".tr;
     }
     if (name!.isEmpty && friends.length > 1) {
-      return "enter.name".tr;
+      return "conversations.name_needed".tr;
     }
     if (name.length > specialConstants[Constants.specialConstantMaxConversationNameLength]! &&
         friends.length > 1) {
-      return "too.long".trParams({
-        "limit": specialConstants["max_conversation_name_length"].toString(),
+      return "conversations.name.length".trParams({
+        "length": specialConstants["max_conversation_name_length"].toString(),
       });
     }
 

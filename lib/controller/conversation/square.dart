@@ -1,7 +1,7 @@
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/database/database_entities.dart' as model;
 import 'package:chat_interface/services/chat/conversation_service.dart';
-import 'package:chat_interface/services/squares/square_service.dart';
+import 'package:chat_interface/services/squares/square_container.dart';
 import 'package:chat_interface/util/web.dart';
 
 class Square extends Conversation {

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
+import 'package:chat_interface/services/squares/square_service.dart';
 import 'package:chat_interface/theme/components/forms/fj_button.dart';
 import 'package:chat_interface/theme/components/forms/fj_textfield.dart';
 import 'package:chat_interface/theme/ui/dialogs/conversation_add_window.dart';
@@ -38,23 +39,22 @@ class SquareAddWindow extends StatefulWidget {
   /// Create a square using a list of friends.
   static Future<String?> createSquareAction(List<Friend> friends, String name) async {
     // Make sure the selection is valid
-    if (friends.isEmpty) {
-      return "choose.members".tr;
-    }
     if (friends.length > specialConstants[Constants.specialConstantMaxConversationMembers]!) {
-      return "choose.members".tr;
+      return "squares.too_many_members".trParams({
+        "amount": specialConstants[Constants.specialConstantMaxConversationMembers]!.toString(),
+      });
     }
     if (name.isEmpty) {
-      return "enter.name".tr;
+      return "squares.name_needed".tr;
     }
     if (name.length > specialConstants[Constants.specialConstantMaxConversationNameLength]!) {
-      return "too.long".trParams({
-        "limit": specialConstants["max_conversation_name_length"].toString(),
+      return "squares.name.length".trParams({
+        "length": specialConstants["max_conversation_name_length"].toString(),
       });
     }
 
-    // TODO: Create square
-    return null;
+    // Create the square
+    return SquareService.openSquare(friends, name);
   }
 }
 

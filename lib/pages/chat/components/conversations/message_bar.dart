@@ -110,7 +110,7 @@ class _MessageBarState extends State<MessageBar> {
                       child: Row(
                         children: [
                           Icon(
-                            widget.conversation.isGroup ? Icons.group : Icons.person,
+                            getIconForConversation(),
                             size: 30,
                             color: Theme.of(context).colorScheme.onPrimary,
                           ),
@@ -302,6 +302,17 @@ class _MessageBarState extends State<MessageBar> {
         ),
       ),
     );
+  }
+
+  IconData getIconForConversation() {
+    switch (widget.conversation.type) {
+      case model.ConversationType.directMessage:
+        return Icons.person;
+      case model.ConversationType.group:
+        return Icons.people;
+      case model.ConversationType.square:
+        return Icons.public;
+    }
   }
 }
 
