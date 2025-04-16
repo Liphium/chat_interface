@@ -86,14 +86,10 @@ class ConversationAddWindow extends StatefulWidget {
 class _ConversationAddWindowState extends State<ConversationAddWindow> {
   // State
   final _members = listSignal(<Friend>[]);
-  final _length = signal(0);
+  late final _length = computed(() => _members.length);
   final _conversationLoading = signal(false);
   final _errorText = signal("");
   final _search = signal("");
-
-  // Input
-  final _searchFocusNode = FocusNode();
-  final _searchController = TextEditingController();
   final _controller = TextEditingController();
 
   @override
@@ -103,16 +99,11 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
         _members.add(friend);
       }
     }
-    if (!isMobileMode()) {
-      _searchFocusNode.requestFocus();
-    }
     super.initState();
   }
 
   @override
   void dispose() {
-    _searchFocusNode.dispose();
-    _searchController.dispose();
     _controller.dispose();
     _members.dispose();
     _length.dispose();
@@ -124,170 +115,28 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
 
   @override
   Widget build(BuildContext context) {
-    ThemeData theme = Theme.of(context);
+    final theme = Theme.of(context);
 
     if (FriendController.friends.length == 1) {
       return SlidingWindowBase(
-        title: [Text(widget.title.tr, style: Get.theme.textTheme.labelLarge)],
+        title: [Text(widget.title.tr, style: theme.textTheme.labelLarge)],
         position: widget.position,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text("no.friends".tr, style: theme.textTheme.bodyMedium),
-            verticalSpacing(defaultSpacing),
-            FJElevatedButton(
-              onTap: () {
-                Get.back();
-                showModal(const FriendsPage());
-              },
-              child: Center(child: Text("open.friends".tr, style: theme.textTheme.labelLarge)),
-            ),
-          ],
-        ),
+        child: NoFriendsMessage(),
       );
     }
 
     return SlidingWindowBase(
       position: widget.position,
       title: [
-        Text(widget.title.tr, style: Get.theme.textTheme.labelLarge),
+        Text(widget.title.tr, style: theme.textTheme.labelLarge),
         const Spacer(),
-        Watch((ctx) => Text("${_members.length}/100", style: Get.theme.textTheme.bodyLarge)),
+        Watch((ctx) => Text("${_members.length}/100", style: theme.textTheme.bodyLarge)),
       ],
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          //* Input
-          Container(
-            decoration: BoxDecoration(
-              color: theme.colorScheme.inverseSurface,
-              borderRadius: BorderRadius.circular(defaultSpacing),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-            child: Row(
-              children: [
-                Icon(Icons.search, size: 25, color: theme.colorScheme.onPrimary),
-                horizontalSpacing(defaultSpacing),
-                Expanded(
-                  child: TextField(
-                    decoration: InputDecoration(
-                      border: InputBorder.none,
-                      hintText: 'search'.tr,
-                      hintStyle: Get.textTheme.bodyLarge,
-                    ),
-                    cursorColor: theme.colorScheme.onPrimary,
-                    style: theme.textTheme.labelLarge,
-                    onChanged: (value) => _search.value = value,
-                    focusNode: _searchFocusNode,
-                    controller: _searchController,
-                    onSubmitted: (value) {
-                      // Make the first friend that matches the search the selected one
-                      if (FriendController.friends.isNotEmpty) {
-                        final member = FriendController.friends.values.firstWhere(
-                          (element) =>
-                              (element.name.toLowerCase().contains(value.toLowerCase()) ||
-                                  element.displayName.value.toLowerCase().contains(
-                                    value.toLowerCase(),
-                                  )) &&
-                              element.id != StatusController.ownAddress,
-                          orElse: () => Friend.unknown(LPHAddress.error()),
-                        );
-                        if (member.id.id != "-") {
-                          if (_members.contains(member)) {
-                            _members.remove(member);
-                          } else if (member.id != StatusController.ownAddress) {
-                            _members.add(member);
-                          }
-                        }
-                        _length.value = _members.length;
-
-                        _search.value = "";
-                        _searchController.clear();
-                        if (!isMobileMode()) {
-                          _searchFocusNode.requestFocus();
-                        }
-                      }
-                    },
-                    maxLines: 1,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxHeight: 300),
-            child: Watch(
-              (ctx) => ListView.builder(
-                itemCount: FriendController.friends.length,
-                shrinkWrap: true,
-                padding: const EdgeInsets.only(top: defaultSpacing),
-                itemBuilder: (context, index) {
-                  Friend friend = FriendController.friends.values.elementAt(index);
-
-                  if (friend.id == StatusController.ownAddress) {
-                    return const SizedBox();
-                  }
-
-                  return Watch((ctx) {
-                    final search = _search.value;
-                    if (search.isNotEmpty &&
-                        !(friend.name.toLowerCase().contains(search.toLowerCase()) ||
-                            friend.displayName.value.toLowerCase().contains(
-                              search.toLowerCase(),
-                            ))) {
-                      return const SizedBox();
-                    }
-
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: defaultSpacing),
-                      child: Watch(
-                        (ctx) => Material(
-                          color:
-                              _members.contains(friend)
-                                  ? theme.colorScheme.primary
-                                  : Colors.transparent,
-                          borderRadius: BorderRadius.circular(defaultSpacing),
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(defaultSpacing),
-                            onTap: () {
-                              if (widget.initial != null && widget.initial!.contains(friend)) {
-                                return;
-                              }
-                              if (_members.contains(friend)) {
-                                _members.remove(friend);
-                              } else {
-                                _members.add(friend);
-                              }
-                              _length.value = _members.length;
-                            },
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: elementSpacing,
-                                vertical: elementSpacing,
-                              ),
-                              child: Row(
-                                children: [
-                                  UserAvatar(id: friend.id, size: 35),
-                                  horizontalSpacing(defaultSpacing),
-                                  Watch(
-                                    (ctx) => Text(
-                                      friend.displayName.value,
-                                      style: theme.textTheme.labelLarge,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    );
-                  });
-                },
-              ),
-            ),
-          ),
+          // Friend selector for the members of the conversation
+          FriendSelector(signal: _members, initial: widget.initial),
 
           //* Create conversation button
           Column(
@@ -355,6 +204,201 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
           ),
         ],
       ),
+    );
+  }
+}
+
+class NoFriendsMessage extends StatelessWidget {
+  const NoFriendsMessage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text("no.friends".tr, style: theme.textTheme.bodyMedium),
+        verticalSpacing(defaultSpacing),
+        FJElevatedButton(
+          onTap: () {
+            Get.back();
+            showModal(const FriendsPage());
+          },
+          child: Center(child: Text("open.friends".tr, style: theme.textTheme.labelLarge)),
+        ),
+      ],
+    );
+  }
+}
+
+class FriendSelector extends StatefulWidget {
+  final List<Friend>? initial;
+  final ListSignal<Friend> signal;
+
+  const FriendSelector({super.key, required this.signal, this.initial});
+
+  @override
+  State<FriendSelector> createState() => _FriendSelectorState();
+}
+
+class _FriendSelectorState extends State<FriendSelector> {
+  // Input
+  final _search = signal("");
+  final _searchFocusNode = FocusNode();
+  final _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    if (!isMobileMode()) {
+      _searchFocusNode.requestFocus();
+    }
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _searchFocusNode.dispose();
+    _searchController.dispose();
+    _search.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Search input
+        Container(
+          decoration: BoxDecoration(
+            color: theme.colorScheme.inverseSurface,
+            borderRadius: BorderRadius.circular(defaultSpacing),
+          ),
+          padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
+          child: Row(
+            children: [
+              Icon(Icons.search, size: 25, color: theme.colorScheme.onPrimary),
+              horizontalSpacing(defaultSpacing),
+              Expanded(
+                child: TextField(
+                  decoration: InputDecoration(
+                    border: InputBorder.none,
+                    hintText: 'search'.tr,
+                    hintStyle: Get.textTheme.bodyLarge,
+                  ),
+                  cursorColor: theme.colorScheme.onPrimary,
+                  style: theme.textTheme.labelLarge,
+                  onChanged: (value) => _search.value = value,
+                  focusNode: _searchFocusNode,
+                  controller: _searchController,
+                  onSubmitted: (value) {
+                    // Make the first friend that matches the search the selected one
+                    if (FriendController.friends.isNotEmpty) {
+                      final member = FriendController.friends.values.firstWhere(
+                        (element) =>
+                            (element.name.toLowerCase().contains(value.toLowerCase()) ||
+                                element.displayName.value.toLowerCase().contains(
+                                  value.toLowerCase(),
+                                )) &&
+                            element.id != StatusController.ownAddress,
+                        orElse: () => Friend.unknown(LPHAddress.error()),
+                      );
+                      if (member.id.id != "-") {
+                        if (widget.signal.contains(member)) {
+                          widget.signal.remove(member);
+                        } else if (member.id != StatusController.ownAddress) {
+                          widget.signal.add(member);
+                        }
+                      }
+
+                      _search.value = "";
+                      _searchController.clear();
+                      if (!isMobileMode()) {
+                        _searchFocusNode.requestFocus();
+                      }
+                    }
+                  },
+                  maxLines: 1,
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        ConstrainedBox(
+          constraints: const BoxConstraints(maxHeight: 300),
+          child: Watch(
+            (ctx) => ListView.builder(
+              itemCount: FriendController.friends.length,
+              shrinkWrap: true,
+              padding: const EdgeInsets.only(top: defaultSpacing),
+              itemBuilder: (context, index) {
+                Friend friend = FriendController.friends.values.elementAt(index);
+
+                if (friend.id == StatusController.ownAddress) {
+                  return const SizedBox();
+                }
+
+                return Watch((ctx) {
+                  final search = _search.value;
+                  if (search.isNotEmpty &&
+                      !(friend.name.toLowerCase().contains(search.toLowerCase()) ||
+                          friend.displayName.value.toLowerCase().contains(search.toLowerCase()))) {
+                    return const SizedBox();
+                  }
+
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: defaultSpacing),
+                    child: Watch(
+                      (ctx) => Material(
+                        color:
+                            widget.signal.contains(friend)
+                                ? theme.colorScheme.primary
+                                : Colors.transparent,
+                        borderRadius: BorderRadius.circular(defaultSpacing),
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(defaultSpacing),
+                          onTap: () {
+                            if (widget.initial != null && widget.initial!.contains(friend)) {
+                              return;
+                            }
+                            if (widget.signal.contains(friend)) {
+                              widget.signal.remove(friend);
+                            } else {
+                              widget.signal.add(friend);
+                            }
+                          },
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: elementSpacing,
+                              vertical: elementSpacing,
+                            ),
+                            child: Row(
+                              children: [
+                                UserAvatar(id: friend.id, size: 35),
+                                horizontalSpacing(defaultSpacing),
+                                Watch(
+                                  (ctx) => Text(
+                                    friend.displayName.value,
+                                    style: theme.textTheme.labelLarge,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                });
+              },
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -1,3 +1,4 @@
+import 'package:chat_interface/pages/chat/components/squares/square_add_window.dart';
 import 'package:chat_interface/pages/settings/appearance/chat_settings.dart';
 import 'package:chat_interface/pages/status/setup/smooth_dialog.dart';
 import 'package:chat_interface/theme/ui/dialogs/conversation_add_window.dart';
@@ -38,7 +39,7 @@ class _UniversalCreateWindowState extends State<UniversalCreateWindow>
       icon: Icons.public,
       title: "square".tr,
       description: "square.desc".tr,
-      build: () => ConversationAddWindow(position: null, title: "squares.create"),
+      build: () => SquareAddWindow(position: null),
     ),
     _CreateData(
       icon: Icons.chat,
