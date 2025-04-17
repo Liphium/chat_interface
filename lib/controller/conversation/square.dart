@@ -1,5 +1,9 @@
+import 'dart:convert';
+
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
+import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/database/database_entities.dart' as model;
+import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/services/chat/conversation_service.dart';
 import 'package:chat_interface/services/squares/square_container.dart';
 import 'package:chat_interface/util/web.dart';
@@ -22,6 +26,30 @@ class Square extends Conversation {
         packedKey,
         lastVersion,
         updatedAt,
+      );
+
+  @override
+  Square.fromJson(Map<String, dynamic> json, String vaultId)
+    : this(
+        LPHAddress.from(json["id"]),
+        vaultId,
+        ConversationToken.fromJson(json["token"]),
+        SquareContainer.fromJson(json["data"]),
+        json["key"],
+        0, // Just ignore it for now
+        json["update"] ?? DateTime.now().millisecondsSinceEpoch,
+      );
+
+  @override
+  Square.fromData(ConversationData data)
+    : this(
+        LPHAddress.from(data.id),
+        fromDbEncrypted(data.vaultId),
+        ConversationToken.fromJson(jsonDecode(fromDbEncrypted(data.token))),
+        SquareContainer.fromJson(jsonDecode(fromDbEncrypted(data.data))),
+        fromDbEncrypted(data.key),
+        data.lastVersion.toInt(),
+        data.updatedAt.toInt(),
       );
 
   @override

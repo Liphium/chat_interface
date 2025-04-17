@@ -299,7 +299,7 @@ class ConversationMessageProvider extends MessageProvider {
     // Send message to the server with conversation token as authentication
     final json = await postNodeJSON("/conversations/message/send", <String, dynamic>{
       "token": conversation.token.toMap(),
-      "data": {"token": timeToken, "data": data},
+      "data": {"token": timeToken, "data": data, "extra": extra},
     });
 
     if (!json["success"]) {

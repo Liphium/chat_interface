@@ -169,8 +169,8 @@ class Conversation {
         ConversationToken.fromJson(json["token"]),
         ConversationContainer.fromJson(json["data"]),
         json["key"],
-        json["update"] ?? DateTime.now().millisecondsSinceEpoch,
         0, // This shouldn't matter, just makes sure the data is fetched
+        json["update"] ?? DateTime.now().millisecondsSinceEpoch,
       );
   Conversation.fromData(ConversationData data)
     : this(

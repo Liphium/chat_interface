@@ -348,7 +348,6 @@ class ContextMenuData {
               ? Offset(position.dx, position.dy)
               : Offset(position.dx + widgetDimensions.width + defaultSpacing, position.dy);
     }
-    sendLog(fromLeft);
 
     return ContextMenuData(position, fromTop, fromLeft);
   }

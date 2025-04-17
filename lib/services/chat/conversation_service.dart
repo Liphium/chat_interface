@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/sidebar_controller.dart';
+import 'package:chat_interface/controller/conversation/square.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/controller/current/steps/key_step.dart';
 import 'package:chat_interface/controller/current/tasks/vault_sync_task.dart';
@@ -90,7 +91,16 @@ class ConversationService extends VaultTarget {
           ..orderBy([(u) => drift.OrderingTerm.asc(u.updatedAt)])).get();
     await batch(() async {
       for (var conversation in conversations) {
-        final conv = Conversation.fromData(conversation);
+        // Make sure to handle the different types properly
+        Conversation conv;
+        switch (conversation.type) {
+          case model.ConversationType.square:
+            conv = Square.fromData(conversation);
+          default:
+            conv = Conversation.fromData(conversation);
+        }
+
+        // Load the members and add
         await ConversationService.loadMembers(conv);
         ConversationController.add(conv);
       }
@@ -101,7 +111,16 @@ class ConversationService extends VaultTarget {
   Future<void> processEntries(List<String> deleted, List<VaultEntry> newEntries) async {
     // Add all the new conversations to the vault
     for (var entry in newEntries) {
-      final conv = Conversation.fromJson(jsonDecode(entry.payload), entry.id);
+      // Make sure to handle both squares and conversations properly
+      final json = jsonDecode(entry.payload);
+      Conversation conv;
+      if (json["type"] == model.ConversationType.square.index) {
+        conv = Square.fromJson(json, entry.id);
+      } else {
+        conv = Conversation.fromJson(json, entry.id);
+      }
+
+      // Add to the controller in case not there yet
       if (ConversationController.conversations[conv.id] == null) {
         await ConversationService.insertFromVault(conv);
       }

@@ -3,6 +3,7 @@ import 'package:chat_interface/controller/conversation/conversation_controller.d
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/controller/conversation/sidebar_controller.dart';
+import 'package:chat_interface/controller/conversation/square.dart';
 import 'package:chat_interface/controller/conversation/zap_share_controller.dart';
 import 'package:chat_interface/controller/spaces/space_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
@@ -17,6 +18,7 @@ import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/conversation_add_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/constants.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -101,6 +103,7 @@ class _MessageBarState extends State<MessageBar> {
                           position: ContextMenuData.fromKey(_infoKey, below: true),
                         ),
                       );
+                      sendLog("is square: ${widget.conversation is Square}");
                     },
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
