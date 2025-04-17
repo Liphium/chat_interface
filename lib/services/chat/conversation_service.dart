@@ -572,4 +572,12 @@ class ConversationService extends VaultTarget {
 
     return null;
   }
+
+  /// Append an extra id to the conversation id (for message retrieval in sub channels)
+  static String withExtra(String convId, String extra) {
+    if (extra == "") {
+      return convId;
+    }
+    return "${convId}_$extra";
+  }
 }

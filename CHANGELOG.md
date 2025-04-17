@@ -4,6 +4,17 @@
 
 ## Currently in dev
 
+### Major changes
+
+- Compatability with protocol v8
+- Added voice calling in Spaces using Lightwire, our own audio engine
+- Added connecting to Studio, our WebRTC implementation, in Spaces
+- Added a new conversation type called Square
+  - Multiple conversations (called Topics) can be created inside of them
+  - Spaces created inside of it will be displayed in the sidebar
+
+### Minor changes and fixes
+
 - Fixed that you couldn't invite people to a Space
 - Fixed same addresses sometimes not being recognized
 - Rewrote the entire code using new state management for a better structure
@@ -23,6 +34,8 @@
 - Fixed member and search sidebar both being open when searching in group chats
 - Fixed search not being scoped to individual conversations (and basically unusable)
 - You can now choose how many dots appear
+- All creation buttons are now in one menu in the sidebar
+- Added a right click context menu in the sidebar
 
 ## 0.6.0
 

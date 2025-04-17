@@ -5,6 +5,7 @@ import 'package:chat_interface/controller/conversation/system_messages.dart';
 import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/instance_setup.dart';
+import 'package:chat_interface/services/chat/conversation_service.dart';
 import 'package:chat_interface/services/connection/chat/message_listener.dart';
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/util/logging_framework.dart';
@@ -16,14 +17,19 @@ import 'package:sodium_libs/sodium_libs.dart';
 /// A message provider that loads messages from a conversation.
 class ConversationMessageProvider extends MessageProvider {
   final Conversation conversation;
-  ConversationMessageProvider(this.conversation);
+  final String extra;
+  ConversationMessageProvider(this.conversation, {this.extra = ""});
 
   @override
   Future<(List<Message>?, bool)> loadMessagesBefore(int time) async {
     // Load messages from the local database
     final messageQuery =
         db.select(db.message)
-          ..where((tbl) => tbl.conversation.equals(conversation.id.encode()))
+          ..where(
+            (tbl) => tbl.conversation.equals(
+              ConversationService.withExtra(conversation.id.encode(), extra),
+            ),
+          )
           ..where((tbl) => tbl.createdAt.isSmallerThanValue(BigInt.from(time)))
           ..orderBy([(u) => OrderingTerm.desc(u.createdAt)])
           ..limit(10);
@@ -40,7 +46,7 @@ class ConversationMessageProvider extends MessageProvider {
       // Load messages from the server
       final json = await postNodeJSON("/conversations/message/list_before", {
         "token": conversation.token.toMap(),
-        "data": time,
+        "data": {"extra": extra, "before": time},
       });
 
       // Check if there was an error
@@ -73,7 +79,11 @@ class ConversationMessageProvider extends MessageProvider {
     // Load messages from the local database
     final messageQuery =
         db.select(db.message)
-          ..where((tbl) => tbl.conversation.equals(conversation.id.encode()))
+          ..where(
+            (tbl) => tbl.conversation.equals(
+              ConversationService.withExtra(conversation.id.encode(), extra),
+            ),
+          )
           ..where((tbl) => tbl.createdAt.isBiggerThanValue(BigInt.from(time)))
           ..orderBy([(u) => OrderingTerm.asc(u.createdAt)])
           ..limit(10);
@@ -90,7 +100,7 @@ class ConversationMessageProvider extends MessageProvider {
       // Load the messages from the server
       final json = await postNodeJSON("/conversations/message/list_after", {
         "token": conversation.token.toMap(),
-        "data": time,
+        "data": {"extra": extra, "after": time},
       });
 
       // Check if there was an error
@@ -125,7 +135,11 @@ class ConversationMessageProvider extends MessageProvider {
     // Load messages from the local database
     final messageQuery =
         db.select(db.message)
-          ..where((tbl) => tbl.conversation.equals(conversation.id.encode()))
+          ..where(
+            (tbl) => tbl.conversation.equals(
+              ConversationService.withExtra(conversation.id.encode(), extra),
+            ),
+          )
           ..where((tbl) => tbl.id.equals(id))
           ..limit(1);
     final message = await messageQuery.getSingleOrNull();

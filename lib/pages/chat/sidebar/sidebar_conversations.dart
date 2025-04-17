@@ -5,11 +5,13 @@ import 'package:chat_interface/controller/conversation/conversation_controller.d
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/sidebar_controller.dart';
 import 'package:chat_interface/database/database_entities.dart' as model;
+import 'package:chat_interface/pages/chat/components/conversations/conversation_edit_window.dart';
 import 'package:chat_interface/services/chat/conversation_member.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/services/chat/conversation_message_provider.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
+import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
 import 'package:chat_interface/util/dispose_hook.dart';
 import 'package:chat_interface/util/logging_framework.dart';
@@ -128,6 +130,14 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                             onTap: () {
                               if (provider?.conversation == conversation && !isMobileMode()) return;
                               MessageController.openConversation(conversation);
+                            },
+                            onSecondaryTapDown: (details) {
+                              showModal(
+                                ConversationInfoWindow(
+                                  conversation: conversation,
+                                  position: ContextMenuData.fromPosition(details.globalPosition),
+                                ),
+                              );
                             },
 
                             // Conversation item content
