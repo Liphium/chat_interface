@@ -114,73 +114,66 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                 return const SizedBox();
               }
 
-              // Create all the signals for the item
-              final hover = signal(false);
-              Signal<bool>? topicsShown;
-              if (conversation.type == model.ConversationType.square) {
-                topicsShown = signal(false);
-              }
+              return SignalHook(
+                value: false,
+                builder:
+                    (hover) => Padding(
+                      padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
+                      child: Watch((ctx) {
+                        final provider = SidebarController.getCurrentProviderReactive();
 
-              return DisposeHook(
-                dispose: () {
-                  hover.dispose();
-                  topicsShown?.dispose();
-                },
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
-                  child: Watch((ctx) {
-                    final provider = SidebarController.getCurrentProviderReactive();
+                        return Column(
+                          children: [
+                            Material(
+                              borderRadius: BorderRadius.circular(defaultSpacing),
+                              color:
+                                  provider?.conversation == conversation && !isMobileMode()
+                                      ? Get.theme.colorScheme.onSurface.withAlpha(20)
+                                      : Colors.transparent,
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(defaultSpacing),
+                                hoverColor: Get.theme.hoverColor,
+                                splashColor: Get.theme.hoverColor,
+                                onHover: (value) {
+                                  hover.value = value;
+                                },
 
-                    return Column(
-                      children: [
-                        Material(
-                          borderRadius: BorderRadius.circular(defaultSpacing),
-                          color:
-                              provider?.conversation == conversation && !isMobileMode()
-                                  ? Get.theme.colorScheme.onSurface.withAlpha(20)
-                                  : Colors.transparent,
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(defaultSpacing),
-                            hoverColor: Get.theme.hoverColor,
-                            splashColor: Get.theme.hoverColor,
-                            onHover: (value) {
-                              hover.value = value;
-                            },
+                                // When conversation is tapped (open conversation)
+                                onTap: () {
+                                  if (provider?.conversation == conversation && !isMobileMode()) {
+                                    return;
+                                  }
+                                  MessageController.openConversation(conversation);
+                                },
+                                onSecondaryTapDown: (details) {
+                                  showModal(
+                                    ConversationInfoWindow(
+                                      conversation: conversation,
+                                      position: ContextMenuData.fromPosition(
+                                        details.globalPosition,
+                                      ),
+                                    ),
+                                  );
+                                },
 
-                            // When conversation is tapped (open conversation)
-                            onTap: () {
-                              if (provider?.conversation == conversation && !isMobileMode()) {
-                                return;
-                              }
-                              MessageController.openConversation(conversation);
-                            },
-                            onSecondaryTapDown: (details) {
-                              showModal(
-                                ConversationInfoWindow(
-                                  conversation: conversation,
-                                  position: ContextMenuData.fromPosition(details.globalPosition),
+                                // Conversation item content
+                                child: renderConversationItem(
+                                  conversation,
+                                  title,
+                                  provider,
+                                  friend,
+                                  hover,
                                 ),
-                              );
-                            },
-
-                            // Conversation item content
-                            child: renderConversationItem(
-                              conversation,
-                              title,
-                              provider,
-                              friend,
-                              hover,
+                              ),
                             ),
-                          ),
-                        ),
 
-                        // Render the topic list in case open and square
-                        if (conversation is Square && provider?.conversation.id == conversation.id)
-                          renderTopics(conversation),
-                      ],
-                    );
-                  }),
-                ),
+                            // Render the topic list in case open and square
+                            if (conversation.type == model.ConversationType.square)
+                              renderTopics(conversation as Square),
+                          ],
+                        );
+                      }),
+                    ),
               );
             });
           },
@@ -193,6 +186,12 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
   Widget renderTopics(Square square) {
     final container = square.container as SquareContainer;
     return Watch((ctx) {
+      // Only render when the topics are shown
+      if (!square.topicsShown.value) {
+        return SizedBox();
+      }
+
+      // Render the actual topic list
       return ListView.builder(
         shrinkWrap: true,
         itemCount: min(container.topics.length, 5),
@@ -236,8 +235,22 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
 
             final notifications = conversation.notificationCount.value;
             if (hover.value) {
-              // A remove button to leave the current conversation
-              final removeButton = IconButton(
+              // Show the create topic button in case it's a square
+              if (conversation.type == model.ConversationType.square) {
+                return Row(
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        showModal(TopicAddWindow(square: conversation as Square));
+                      },
+                      icon: Icon(Icons.add),
+                    ),
+                  ],
+                );
+              }
+
+              // Show a remove button to leave the current conversation for all other types
+              return IconButton(
                 onPressed:
                     () => showConfirmPopup(
                       ConfirmWindow(
@@ -249,24 +262,6 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                     ),
                 icon: const Icon(Icons.close),
               );
-
-              // Also show a create topic button in case this is a square
-              if (conversation.type == model.ConversationType.square) {
-                return Row(
-                  children: [
-                    IconButton(
-                      onPressed: () {
-                        showModal(TopicAddWindow(square: conversation as Square));
-                      },
-                      icon: Icon(Icons.add),
-                    ),
-                    horizontalSpacing(elementSpacing),
-                    removeButton,
-                  ],
-                );
-              }
-
-              return removeButton;
             }
 
             return Visibility(
@@ -285,6 +280,22 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
               ),
             );
           }),
+
+          // Show a collapse/expand topics button when it's a square
+          if (conversation is Square)
+            Padding(
+              padding: EdgeInsets.only(left: elementSpacing),
+              child: Watch(
+                (ctx) => IconButton(
+                  onPressed: () {
+                    conversation.topicsShown.value = !conversation.topicsShown.peek();
+                  },
+                  icon: Icon(
+                    conversation.topicsShown.value ? Icons.expand_less : Icons.expand_more,
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );

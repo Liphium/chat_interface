@@ -7,8 +7,11 @@ import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/services/chat/conversation_service.dart';
 import 'package:chat_interface/services/squares/square_container.dart';
 import 'package:chat_interface/util/web.dart';
+import 'package:signals/signals_flutter.dart';
 
 class Square extends Conversation {
+  final topicsShown = signal(false);
+
   Square(
     LPHAddress id,
     String vaultId,
