@@ -14,6 +14,7 @@ import 'package:chat_interface/services/chat/conversation_member.dart';
 import 'package:chat_interface/services/connection/chat/stored_actions_listener.dart';
 import 'package:chat_interface/services/connection/connection.dart';
 import 'package:chat_interface/services/connection/messaging.dart';
+import 'package:chat_interface/services/squares/square_container.dart';
 import 'package:chat_interface/util/constants.dart';
 import 'package:chat_interface/util/encryption/hash.dart';
 import 'package:chat_interface/util/encryption/signatures.dart';
@@ -68,12 +69,10 @@ class ConversationContainer {
   ConversationContainer(this.name);
   ConversationContainer.fromJson(Map<String, dynamic> json) : name = json["name"];
 
-  ConversationContainer.decrypt(String cipherText, SecureKey key) {
-    final json = jsonDecode(decryptSymmetric(cipherText, key));
-    name = json["name"];
+  factory ConversationContainer.decrypt(String cipherText, SecureKey key) {
+    return ConversationContainer.fromJson(jsonDecode(decryptSymmetric(cipherText, key)));
   }
-  String encrypted(SecureKey key) =>
-      encryptSymmetric(jsonEncode(<String, dynamic>{"name": name}), key);
+  String encrypted(SecureKey key) => encryptSymmetric(jsonEncode(toJson()), key);
 
   Map<String, dynamic> toJson() => <String, dynamic>{"name": name};
 }
@@ -469,7 +468,11 @@ class ConversationService extends VaultTarget {
     conversation.lastVersion = json["version"];
 
     // Update the container
-    conversation.container = ConversationContainer.decrypt(json["data"], conversation.key);
+    if (conversation.type == model.ConversationType.square) {
+      conversation.container = SquareContainer.decrypt(json["data"], conversation.key);
+    } else {
+      conversation.container = ConversationContainer.decrypt(json["data"], conversation.key);
+    }
 
     // Update the members
     final members = <LPHAddress, Member>{};

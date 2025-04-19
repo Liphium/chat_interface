@@ -4,11 +4,15 @@ import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/sidebar_controller.dart';
+import 'package:chat_interface/controller/conversation/square.dart';
+import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/database/database_entities.dart' as model;
 import 'package:chat_interface/pages/chat/components/conversations/conversation_edit_window.dart';
+import 'package:chat_interface/pages/chat/components/squares/topic_add_window.dart';
 import 'package:chat_interface/services/chat/conversation_member.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/services/chat/conversation_message_provider.dart';
+import 'package:chat_interface/services/squares/square_container.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
@@ -88,31 +92,48 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
 
             // Hover menu
             return Watch(key: ValueKey(conversation.id), (ctx) {
-              var title =
-                  conversation.isGroup || friend == null
-                      ? conversation.containerSub.value.name
-                      : conversation.dmName;
+              // Determine the title of the conversation based on the type
+              String title;
+              if (conversation.isGroup || friend == null) {
+                title = conversation.containerSub.value.name;
+              } else {
+                title = conversation.dmName;
+              }
+
+              // Make sure to mark the conversation as archived in case the friend doesn't exist
               if (friend == null && !conversation.isGroup) {
                 title = ".$title";
               }
 
+              // Handle when hidden by search
               if (_query.value != "") {
                 if (!title.toLowerCase().startsWith(_query.value.toLowerCase())) {
-                  return const SizedBox.shrink();
+                  return const SizedBox();
                 }
               } else if (friend == null && !conversation.isGroup) {
-                return const SizedBox.shrink();
+                return const SizedBox();
               }
 
-              return SignalHook(
-                value: false,
-                builder:
-                    (hover) => Padding(
-                      padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
-                      child: Watch((ctx) {
-                        final provider = SidebarController.getCurrentProviderReactive();
+              // Create all the signals for the item
+              final hover = signal(false);
+              Signal<bool>? topicsShown;
+              if (conversation.type == model.ConversationType.square) {
+                topicsShown = signal(false);
+              }
 
-                        return Material(
+              return DisposeHook(
+                dispose: () {
+                  hover.dispose();
+                  topicsShown?.dispose();
+                },
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
+                  child: Watch((ctx) {
+                    final provider = SidebarController.getCurrentProviderReactive();
+
+                    return Column(
+                      children: [
+                        Material(
                           borderRadius: BorderRadius.circular(defaultSpacing),
                           color:
                               provider?.conversation == conversation && !isMobileMode()
@@ -128,7 +149,9 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
 
                             // When conversation is tapped (open conversation)
                             onTap: () {
-                              if (provider?.conversation == conversation && !isMobileMode()) return;
+                              if (provider?.conversation == conversation && !isMobileMode()) {
+                                return;
+                              }
                               MessageController.openConversation(conversation);
                             },
                             onSecondaryTapDown: (details) {
@@ -141,87 +164,130 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                             },
 
                             // Conversation item content
-                            child: Padding(
-                              padding: const EdgeInsets.all(elementSpacing2),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  // Conversation info
-                                  if (conversation.type == model.ConversationType.group)
-                                    renderGroup(title, conversation, provider)
-                                  else if (conversation.type == model.ConversationType.square)
-                                    renderSquare(title, conversation, provider)
-                                  else
-                                    renderDirectMessage(friend, title, conversation, provider),
-
-                                  Watch((ctx) {
-                                    final notifications = conversation.notificationCount.value;
-                                    if (hover.value) {
-                                      // A remove button to leave the current conversation
-                                      final removeButton = IconButton(
-                                        onPressed:
-                                            () => showConfirmPopup(
-                                              ConfirmWindow(
-                                                title: "conversations.leave".tr,
-                                                text: "conversations.leave.text".tr,
-                                                onConfirm: () => conversation.delete(),
-                                                onDecline: () => {},
-                                              ),
-                                            ),
-                                        icon: const Icon(Icons.close),
-                                      );
-
-                                      // Also show a create topic button in case this is a square
-                                      if (conversation.type == model.ConversationType.square) {
-                                        return Row(
-                                          children: [
-                                            IconButton(onPressed: () {}, icon: Icon(Icons.add)),
-                                            horizontalSpacing(elementSpacing),
-                                            removeButton,
-                                          ],
-                                        );
-                                      }
-
-                                      return removeButton;
-                                    }
-
-                                    return Visibility(
-                                      visible: notifications > 0,
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: Get.theme.colorScheme.error,
-                                        ),
-                                        child: Padding(
-                                          padding: const EdgeInsets.only(
-                                            left: 5,
-                                            right: 5,
-                                            top: 2,
-                                            bottom: 3,
-                                          ),
-                                          child: Center(
-                                            child: Text(
-                                              min(notifications, 99).toString(),
-                                              style: Get.textTheme.labelSmall,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  }),
-                                ],
-                              ),
+                            child: renderConversationItem(
+                              conversation,
+                              title,
+                              provider,
+                              friend,
+                              hover,
                             ),
                           ),
-                        );
-                      }),
-                    ),
+                        ),
+
+                        // Render the topic list in case open and square
+                        if (conversation is Square && provider?.conversation.id == conversation.id)
+                          renderTopics(conversation),
+                      ],
+                    );
+                  }),
+                ),
               );
             });
           },
         ),
       );
     });
+  }
+
+  /// Render all of the topics of a square
+  Widget renderTopics(Square square) {
+    final container = square.container as SquareContainer;
+    return Watch((ctx) {
+      return ListView.builder(
+        shrinkWrap: true,
+        itemCount: min(container.topics.length, 5),
+        itemBuilder: (context, index) {
+          final topic = container.topics[index];
+          return Padding(
+            padding: const EdgeInsets.only(top: elementSpacing),
+            child: Text(topic.name),
+          );
+        },
+      );
+    });
+  }
+
+  /// Render the item for one conversation in the list
+  Padding renderConversationItem(
+    Conversation conversation,
+    String title,
+    ConversationMessageProvider? provider,
+    Friend? friend,
+    Signal<bool> hover,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.all(elementSpacing2),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Conversation info
+          if (conversation.type == model.ConversationType.group)
+            renderGroup(title, conversation, provider)
+          else if (conversation.type == model.ConversationType.square)
+            renderSquare(title, conversation, provider)
+          else
+            renderDirectMessage(friend, title, conversation, provider),
+
+          Watch((ctx) {
+            // Make sure the user is actually connected
+            if (!ConnectionController.connected.value) {
+              return const SizedBox();
+            }
+
+            final notifications = conversation.notificationCount.value;
+            if (hover.value) {
+              // A remove button to leave the current conversation
+              final removeButton = IconButton(
+                onPressed:
+                    () => showConfirmPopup(
+                      ConfirmWindow(
+                        title: "conversations.leave".tr,
+                        text: "conversations.leave.text".tr,
+                        onConfirm: () => conversation.delete(),
+                        onDecline: () => {},
+                      ),
+                    ),
+                icon: const Icon(Icons.close),
+              );
+
+              // Also show a create topic button in case this is a square
+              if (conversation.type == model.ConversationType.square) {
+                return Row(
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        showModal(TopicAddWindow(square: conversation as Square));
+                      },
+                      icon: Icon(Icons.add),
+                    ),
+                    horizontalSpacing(elementSpacing),
+                    removeButton,
+                  ],
+                );
+              }
+
+              return removeButton;
+            }
+
+            return Visibility(
+              visible: notifications > 0,
+              child: Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Get.theme.colorScheme.error,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 5, right: 5, top: 2, bottom: 3),
+                  child: Center(
+                    child: Text(min(notifications, 99).toString(), style: Get.textTheme.labelSmall),
+                  ),
+                ),
+              ),
+            );
+          }),
+        ],
+      ),
+    );
   }
 
   /// Render a direct message preview for the sidebar
@@ -231,8 +297,6 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
     Conversation conversation,
     ConversationMessageProvider? provider,
   ) {
-    // Get the friend associated
-
     return Expanded(
       child: Row(
         children: [

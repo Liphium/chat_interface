@@ -131,6 +131,7 @@ class _SquareAddWindowState extends State<SquareAddWindow> {
                   padding: const EdgeInsets.only(bottom: defaultSpacing),
                   child: FJTextField(
                     controller: _controller,
+                    maxLength: specialConstants[Constants.specialConstantMaxConversationNameLength],
                     hintText: "squares.name.placeholder".tr,
                   ),
                 ),

@@ -163,6 +163,8 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                         padding: const EdgeInsets.only(bottom: defaultSpacing),
                         child: FJTextField(
                           controller: _controller,
+                          maxLength:
+                              specialConstants[Constants.specialConstantMaxConversationNameLength],
                           hintText: "conversations.name".tr,
                         ),
                       ),

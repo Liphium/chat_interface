@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:chat_interface/services/chat/conversation_service.dart';
-import 'package:chat_interface/util/logging_framework.dart';
+import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
+import 'package:sodium_libs/sodium_libs.dart';
 
 class SquareContainer extends ConversationContainer {
   late List<Topic> topics;
@@ -9,11 +12,21 @@ class SquareContainer extends ConversationContainer {
   @override
   SquareContainer.fromJson(Map<String, dynamic> json) : super(json["name"]) {
     topics = [];
-    sendLog(json["topics"]);
-    if (json["topics"] == null || json["topics"].isEmpty) {
-      return;
+    if (json["topics"] != null) {
+      for (var topic in json["topics"]) {
+        topics.add(Topic.fromJson(topic));
+      }
     }
-    topics.addAll(json["topics"].map((t) => Topic.fromJson(t)).toList());
+  }
+
+  @override
+  factory SquareContainer.decrypt(String cipherText, SecureKey key) {
+    return SquareContainer.fromJson(jsonDecode(decryptSymmetric(cipherText, key)));
+  }
+
+  @override
+  String encrypted(SecureKey key) {
+    return encryptSymmetric(jsonEncode(toJson()), key);
   }
 
   @override

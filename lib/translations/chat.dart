@@ -176,11 +176,11 @@ class ChatPageTranslations extends Translations {
       'chat.space.loading': 'Loading space..',
       'chat.space.leave': 'Do you really want to leave your current space?',
 
-      // Townsquare
-      'townsquare.connection_error':
-          "Couldn't connect to Townsquare. Please contact the admins of your instance about this or try again later.",
-      'townsquare.connecting': "Connecting..",
-      "townsquare.viewing": "@count/@total on the square",
+      // Squares
+      'squares.topics.create': 'Create topic',
+      'squares.topics.name.placeholder': 'Some chat',
+      'squares.topics.too_many':
+          'We currently only allow a maximum of 5 topics to be created. Please delete old ones to make space for new ones.',
     },
 
     //* German
