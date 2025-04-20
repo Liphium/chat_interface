@@ -68,15 +68,6 @@ flutter:
     - family: Roboto Mono
       fonts:
         - asset: assets/RobotoMono.ttf
-    - family: Roboto
-      fonts:
-        - asset: assets/Roboto-Regular.ttf
-    - family: Open Sans
-      fonts:
-        - asset: assets/OpenSans.ttf
-    - family: Emoji
-      fonts:
-        - asset: assets/NotoColorEmoji-Regular.ttf
 
   assets:
     - assets/

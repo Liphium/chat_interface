@@ -14,23 +14,27 @@ import 'package:chat_interface/services/chat/conversation_service.dart';
 
 class MessageService {
   /// Store all of the messages in the list in the local database and cache.
+  /// The string next to the message in the list is its extra id.
   ///
   /// This method doesn't play a sound because it's only used for synchronization.
-  static Future<bool> storeMessages(List<Message> messages, Conversation conversation) async {
+  static Future<bool> storeMessages(
+    List<(Message, String)> messages,
+    Conversation conversation,
+  ) async {
     if (messages.isEmpty) {
       return false;
     }
 
     // Sort all the messages to prevent failing system messages
     messages.sort((a, b) {
-      return a.createdAt.compareTo(b.createdAt);
+      return a.$1.createdAt.compareTo(b.$1.createdAt);
     });
 
     // Encrypt everything for local database storage
     final copied = Conversation.copyWithoutKey(conversation);
     final parts = await sodiumLib.runIsolated((sodium, keys, pairs) async {
       final list = <(String, String)>[];
-      for (var message in messages) {
+      for (var (message, _) in messages) {
         list.add((
           dbEncrypted(message.toContentJson(), sodium, keys[0]),
           dbEncrypted(message.senderAddress.encode(), sodium, keys[0]),
@@ -42,8 +46,8 @@ class MessageService {
 
     // Store all the messages in the local database
     int index = 0;
-    for (var message in messages) {
-      await storeMessage(message, copied, simple: true, part: parts[index]);
+    for (var (message, extra) in messages) {
+      await storeMessage(message, copied, extra: extra, simple: true, part: parts[index]);
       index++;
     }
 
@@ -52,11 +56,11 @@ class MessageService {
     ConversationService.updateLastMessage(
       conversation.id,
       increment: (provider?.conversation.id ?? "hi") != conversation.id,
-      messageSendTime: messages.last.createdAt.millisecondsSinceEpoch,
+      messageSendTime: messages.last.$1.createdAt.millisecondsSinceEpoch,
     );
 
     // Tell the server about the new read state in case the messages have been received properly
-    if (provider != null && provider.conversation.token.id != messages.last.senderToken) {
+    if (provider != null && provider.conversation.token.id != messages.last.$1.senderToken) {
       await ConversationService.overwriteRead(provider.conversation);
     }
 
@@ -70,6 +74,7 @@ class MessageService {
   static Future<bool> storeMessage(
     Message message,
     Conversation conversation, {
+    String extra = "",
     bool simple = false,
     (String, String)? part,
   }) async {
@@ -107,11 +112,11 @@ class MessageService {
       // Check if message should be stored
       if (SystemMessages.messages[message.content]?.store ?? false) {
         // Store message in local database
-        _storeInLocalDatabase(conversation, message, part: part);
+        _storeInLocalDatabase(conversation, message, extra: extra, part: part);
       }
     } else {
       // Store message in local database
-      _storeInLocalDatabase(conversation, message, part: part);
+      _storeInLocalDatabase(conversation, message, extra: extra, part: part);
     }
 
     // On call message type, ring using the message TODO: Reintroduce the ringtone in Spaces
@@ -132,6 +137,7 @@ class MessageService {
   static void _storeInLocalDatabase(
     Conversation conversation,
     Message message, {
+    required String extra,
     (String, String)? part,
   }) {
     db
@@ -143,10 +149,16 @@ class MessageService {
             senderToken: message.senderToken.encode(),
             senderAddress: part?.$2 ?? dbEncrypted(message.senderAddress.encode()),
             createdAt: BigInt.from(message.createdAt.millisecondsSinceEpoch),
-            conversation: conversation.id.encode(),
+            conversation: ConversationService.withExtra(conversation.id.encode(), extra),
             edited: message.edited,
             verified: message.verified.value,
           ),
         );
+  }
+
+  /// Split a conversation id into the id of the conversation and the extra identifier
+  static (String, String) intoIdAndExtra(String convId) {
+    final args = convId.split("_");
+    return (args[0], args.length == 1 ? "" : args[1]);
   }
 }

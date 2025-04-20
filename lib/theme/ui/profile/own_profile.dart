@@ -103,7 +103,7 @@ class _ProfileState extends State<OwnProfile> {
           ),
           verticalSpacing(defaultSpacing),
 
-          // Show a
+          // Show a button for stopping sharing the current space
           Watch((ctx) {
             if (StatusController.ownContainer.value != null) {
               return Padding(

@@ -29,20 +29,6 @@ class MessageController {
   /// Changes the tab in the sidebar in case on desktop.
   static Future<void> openConversation(Conversation conversation, {String extra = ""}) async {
     final provider = ConversationMessageProvider(conversation, extra: extra);
-
-    if (isMobileMode()) {
-      // On mobile transition to the page
-      unawaited(Get.to(MessagesPageMobile(provider: provider)));
-    } else {
-      // On desktop select the conversation in the sidebar
-      SidebarController.openTab(ConversationSidebarTab(provider));
-
-      // Open the member sidebar in case desired
-      if (SettingController.settings[AppSettings.showGroupMembers]!.getValue() as bool &&
-          conversation.isGroup) {
-        SidebarController.setRightSidebar(ConversationMembersRightSidebar(conversation));
-      }
-    }
     if (conversation.notificationCount.value != 0) {
       // Send new read state to the server
       await ConversationService.overwriteRead(conversation);
@@ -53,6 +39,21 @@ class MessageController {
 
     // Show the messages once they are fully loaded
     loaded.value = true;
+
+    // Open page or provider (here to prevent flicker)
+    if (isMobileMode()) {
+      // On mobile transition to the page
+      unawaited(Get.to(MessagesPageMobile(provider: provider)));
+    } else {
+      // Open the sidebar tab
+      SidebarController.openTab(ConversationSidebarTab(provider));
+
+      // Open the member sidebar in case desired
+      if (SettingController.settings[AppSettings.showGroupMembers]!.getValue() as bool &&
+          conversation.isGroup) {
+        SidebarController.setRightSidebar(ConversationMembersRightSidebar(conversation));
+      }
+    }
   }
 
   /// Restore the right sidebar to how it was before another sidebar was opened.

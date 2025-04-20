@@ -84,7 +84,7 @@ class _MessageFeedState extends State<MessageFeed> {
                               }
 
                               return MessageList(
-                                key: ValueKey(provider.conversation.id),
+                                key: ValueKey(provider.getKey("ml")),
                                 provider: provider,
                                 overwritePadding: isMobileMode() ? defaultSpacing : sectionSpacing,
                               );
@@ -95,7 +95,7 @@ class _MessageFeedState extends State<MessageFeed> {
                         // Animated loading indicator
                         Align(
                           alignment: Alignment.topCenter,
-                          child: Watch(key: ValueKey(provider.conversation.id), (ctx) {
+                          child: Watch(key: ValueKey(provider.getKey("loading")), (ctx) {
                             return Visibility(
                               visible: provider.newMessagesLoading.value,
                               child: Padding(

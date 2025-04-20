@@ -18,10 +18,9 @@ class MessageListener {
   static void setupMessageListener() {
     // Listen for one message
     cn.connector.listen("conv_msg", (event) async {
-      sendLog("received one message");
       // Check if the conversation even exists on this account
-      final conversation =
-          ConversationController.conversations[LPHAddress.from(event.data["msg"]["cv"])];
+      final (convId, extra) = MessageService.intoIdAndExtra(event.data["msg"]["cv"]);
+      final conversation = ConversationController.conversations[LPHAddress.from(convId)];
       if (conversation == null) {
         sendLog("WARNING: invalid message, conversation not found");
         return;
@@ -37,7 +36,7 @@ class MessageListener {
       }
 
       // Tell the controller about the message in a different isolate
-      unawaited(MessageService.storeMessage(message, conversation));
+      unawaited(MessageService.storeMessage(message, conversation, extra: extra));
     });
 
     // Listen for multiple messages (mp stands for multiple)
@@ -58,7 +57,7 @@ class MessageListener {
 
       // Remove all messages with more than 5 attachments
       messages.removeWhere((msg) {
-        if (msg.attachments.length > 5) {
+        if (msg.$1.attachments.length > 5) {
           sendLog("WARNING: invalid message received, dropping it (attachments > 5)");
           return true;
         }
@@ -109,7 +108,7 @@ class MessageListener {
   /// the signature is ran in the main isolate due to constraints with libsodium.
   ///
   /// For the future: TODO: Also process the signatures in the isolate by preloading profiles
-  static Future<List<Message>> unpackMessagesInIsolate(
+  static Future<List<(Message, String)>> unpackMessagesInIsolate(
     Conversation conversation,
     List<dynamic> json, {
     bool includeSystemMessages = false,
@@ -118,7 +117,7 @@ class MessageListener {
     final copy = Conversation.copyWithoutKey(conversation);
     final loadedMessages = await sodiumLib.runIsolated((sodium, keys, pairs) async {
       // Process all messages
-      final list = <(Message, SymmetricSequencedInfo?)>[];
+      final list = <(Message, String, SymmetricSequencedInfo?)>[];
       for (var msgJson in json) {
         final (message, info) = messageFromJson(
           msgJson,
@@ -139,7 +138,7 @@ class MessageListener {
           message.decryptSystemMessageAttachments(keys[0], sodium);
         }
 
-        list.add((message, info));
+        list.add((message, msgJson["cv"], info));
       }
 
       // Return the list to the main isolate
@@ -147,13 +146,13 @@ class MessageListener {
     }, secureKeys: [conversation.key]);
 
     // Verify the signature of all messages
-    for (var (msg, info) in loadedMessages) {
+    for (var (msg, _, info) in loadedMessages) {
       if (info != null) {
         await msg.verifySignature(info);
       }
     }
 
-    return loadedMessages.map((tuple) => tuple.$1).toList();
+    return loadedMessages.map((tuple) => (tuple.$1, tuple.$2)).toList();
   }
 
   /// Load a message from json (from the server) and get the corresponding [SymmetricSequencedInfo] (only if no system message).

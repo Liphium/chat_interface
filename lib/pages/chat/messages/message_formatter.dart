@@ -30,7 +30,7 @@ class TextEvaluator {
 
     // Run all the automatons
     var prevChar = "";
-    for (int i = 0; i < text.length; i++) {
+    for (int i = 0; i < text.characters.length; i++) {
       final char = text.characters.elementAt(i);
       for (var automaton in automatons) {
         automaton.run(i, prevChar, char);

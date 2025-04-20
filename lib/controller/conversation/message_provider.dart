@@ -34,14 +34,16 @@ abstract class MessageProvider {
   AutoScrollController? controller;
 
   Future<void> addMessageToBottom(Message message, {bool animation = true}) async {
-    // Reset the time of the message at the bottom
-    lastMessage = null;
+    // Update the
+    lastMessage = message.createdAt.millisecondsSinceEpoch;
 
     // Make sure the message is fit for the bottom
     if (messages.isNotEmpty && message.createdAt.isBefore(messages[0].createdAt)) {
       sendLog("TODO: Reload the message list");
       return;
     }
+
+    sendLog("adding message with id ${message.id}");
 
     // Check if there are any messages with similar ids to prevent adding the same message again
     if (waitingMessages.any((msg) => msg == message.id) ||
@@ -101,7 +103,7 @@ abstract class MessageProvider {
       if (!error) {
         this.topReached = topReached;
       }
-    } else if (controller!.position.pixels <= newLoadOffset) {
+    } else if (controller!.position.pixels <= newLoadOffset && controller!.position.pixels != 0) {
       unawaited(loadNewMessagesBottom());
     }
   }
@@ -157,9 +159,9 @@ abstract class MessageProvider {
       return false;
     }
     messagesLoadingTop = false;
-    newMessagesLoading.value =
-        true; // We'll use the same loading as above to make sure this doesn't break anything
+    newMessagesLoading.value = true; // Same loading state as above to not break anything
     final firstMessage = messages.first;
+    sendLog("called listbottom");
     final time = firstMessage.createdAt.millisecondsSinceEpoch;
 
     // Make sure we're not requesting the same messages again

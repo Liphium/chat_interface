@@ -58,6 +58,7 @@ class _MessageInputState extends State<MessageInput> {
   final GlobalKey _libraryKey = GlobalKey();
   // final GlobalKey _emojiKey = GlobalKey();
   final _emojiSuggestions = listSignal<Emoji>([]);
+  final _emojiRegex = RegExp(":(.*?)\\s|:(.*\$)|");
 
   // For a little hack to prevent the answers from disappearing instantly
   LPHAddress? _previousAccount;
@@ -92,15 +93,14 @@ class _MessageInputState extends State<MessageInput> {
       _emojiSuggestions.clear();
 
       // Search for emojis
-      final regex = RegExp(":(.*?)\\s|:(.*\$)|");
       final cursorPos = _message.selection.start;
-      for (var match in regex.allMatches(_message.text)) {
+      for (var match in _emojiRegex.allMatches(_message.text)) {
         // Check if the cursor is inside of the current emoji
         if (match.start < cursorPos && match.end >= cursorPos) {
           final query = _message.text.substring(match.start + 1, cursorPos);
           if (query.length >= 2) {
             sendLog("current emoji query: $query");
-            _emojiSuggestions.value = UnicodeEmojis.search(query, limit: 20);
+            _emojiSuggestions.value = UnicodeEmojis.search(query, limit: 10);
           }
         }
       }
@@ -161,20 +161,18 @@ class _MessageInputState extends State<MessageInput> {
   /// Replace the emoji selector in the input with an emoji
   void doEmojiSuggestion(String emoji) {
     // Search for emojis
-    final regex = RegExp(":(.*?)\\s|:(.*\$)|");
     final cursorPos = _message.selection.start;
-    for (var match in regex.allMatches(_message.text)) {
+    for (var match in _emojiRegex.allMatches(_message.text)) {
       // Check if the cursor is inside of the current emoji
       if (match.start < cursorPos && match.end >= cursorPos) {
         final query = _message.text.substring(match.start + 1, cursorPos);
         if (query.length >= 2) {
-          _emojiSuggestions.value = UnicodeEmojis.search(query, limit: 20);
           _message.text =
               "${_message.text.substring(0, match.start)}$emoji ${_message.text.substring(cursorPos, _message.text.length)}";
           _emojiSuggestions.clear();
           _inputFocus.requestFocus();
           // Change the selection to the calculated offset
-          final newOffset = cursorPos - query.length + 3;
+          final newOffset = cursorPos - query.length + 2;
           _message.selection = _message.selection.copyWith(
             baseOffset: newOffset,
             extentOffset: newOffset,

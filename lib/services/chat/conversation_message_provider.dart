@@ -20,6 +20,9 @@ class ConversationMessageProvider extends MessageProvider {
   final String extra;
   ConversationMessageProvider(this.conversation, {this.extra = ""});
 
+  /// Generate a new value key related to this conversation and extra.
+  String getKey(String identifier) => "${conversation.id.encode()}-$extra-$identifier";
+
   @override
   Future<(List<Message>?, bool)> loadMessagesBefore(int time) async {
     // Load messages from the local database
@@ -60,10 +63,11 @@ class ConversationMessageProvider extends MessageProvider {
         return (null, false);
       }
       // Unpack the messages in an isolate
-      final messages = await MessageListener.unpackMessagesInIsolate(
-        conversation,
-        json["messages"],
-      );
+      final messages =
+          (await MessageListener.unpackMessagesInIsolate(
+            conversation,
+            json["messages"],
+          )).map((msg) => msg.$1).toList();
 
       // Prepare messages for
       await initAttachmentsForMessages(messages);
@@ -88,42 +92,6 @@ class ConversationMessageProvider extends MessageProvider {
           ..orderBy([(u) => OrderingTerm.asc(u.createdAt)])
           ..limit(10);
     final messages = await messageQuery.get();
-
-    // If there are no messages, check if there are some on the server
-    if (messages.isEmpty) {
-      // Check if the user is even connected to the server (to make sure offline retrieval works)
-      if (!ConnectionController.connected.value) {
-        // Act like the bottom has been reached
-        return (null, false);
-      }
-
-      // Load the messages from the server
-      final json = await postNodeJSON("/conversations/message/list_after", {
-        "token": conversation.token.toMap(),
-        "data": {"extra": extra, "after": time},
-      });
-
-      // Check if there was an error
-      if (!json["success"]) {
-        conversation.error.value = json["error"];
-        return (null, true);
-      }
-
-      // Check if the bottom has been reached
-      if (json["messages"] == null || json["messages"].isEmpty) {
-        return (null, false);
-      }
-
-      // Unpack the messages in an isolate
-      final messages = await MessageListener.unpackMessagesInIsolate(
-        conversation,
-        json["messages"],
-      );
-
-      // Prepare messages for
-      await initAttachmentsForMessages(messages);
-      return (messages, false);
-    }
 
     // Process the messages in a seperate isolate
     return (await _processMessages(messages), false);
