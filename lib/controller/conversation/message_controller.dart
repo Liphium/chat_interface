@@ -27,8 +27,8 @@ class MessageController {
   ///
   /// Transitions to a new page on mobile.
   /// Changes the tab in the sidebar in case on desktop.
-  static Future<void> openConversation(Conversation conversation) async {
-    final provider = ConversationMessageProvider(conversation);
+  static Future<void> openConversation(Conversation conversation, {String extra = ""}) async {
+    final provider = ConversationMessageProvider(conversation, extra: extra);
 
     if (isMobileMode()) {
       // On mobile transition to the page

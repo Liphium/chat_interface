@@ -54,6 +54,8 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Watch((ctx) {
       return FadingEdgeScrollView.fromScrollView(
         child: ListView.builder(
@@ -127,7 +129,9 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                             Material(
                               borderRadius: BorderRadius.circular(defaultSpacing),
                               color:
-                                  provider?.conversation == conversation && !isMobileMode()
+                                  provider?.conversation == conversation &&
+                                          provider?.extra == "" &&
+                                          !isMobileMode()
                                       ? Get.theme.colorScheme.onSurface.withAlpha(20)
                                       : Colors.transparent,
                               child: InkWell(
@@ -140,7 +144,10 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
 
                                 // When conversation is tapped (open conversation)
                                 onTap: () {
-                                  if (provider?.conversation == conversation && !isMobileMode()) {
+                                  // Make sure to not open the conversation again
+                                  if (provider?.conversation == conversation &&
+                                      provider?.extra == "" &&
+                                      !isMobileMode()) {
                                     return;
                                   }
                                   MessageController.openConversation(conversation);
@@ -169,7 +176,7 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
 
                             // Render the topic list in case open and square
                             if (conversation.type == model.ConversationType.square)
-                              renderTopics(conversation as Square),
+                              renderTopics(conversation as Square, theme),
                           ],
                         );
                       }),
@@ -183,27 +190,79 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
   }
 
   /// Render all of the topics of a square
-  Widget renderTopics(Square square) {
+  Widget renderTopics(Square square, ThemeData theme) {
     final container = square.container as SquareContainer;
-    return Watch((ctx) {
-      // Only render when the topics are shown
-      if (!square.topicsShown.value) {
-        return SizedBox();
-      }
+    return Padding(
+      padding: const EdgeInsets.only(left: sectionSpacing),
+      child: Watch((ctx) {
+        // Only render when the topics are shown
+        if (!square.topicsShown.value) {
+          return SizedBox();
+        }
 
-      // Render the actual topic list
-      return ListView.builder(
-        shrinkWrap: true,
-        itemCount: min(container.topics.length, 5),
-        itemBuilder: (context, index) {
-          final topic = container.topics[index];
-          return Padding(
-            padding: const EdgeInsets.only(top: elementSpacing),
-            child: Text(topic.name),
-          );
-        },
-      );
-    });
+        // Render the actual topic list
+        return ListView.builder(
+          shrinkWrap: true,
+          itemCount: min(container.topics.length, 5),
+          itemBuilder: (context, index) {
+            final topic = container.topics[index];
+            return Padding(
+              padding: const EdgeInsets.only(top: elementSpacing),
+              child: Watch(
+                (ctx) => Material(
+                  borderRadius: BorderRadius.circular(defaultSpacing),
+                  color:
+                      (SidebarController.getCurrentProviderReactive()?.extra ?? "") == topic.id
+                          ? Get.theme.colorScheme.onSurface.withAlpha(20)
+                          : Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(defaultSpacing),
+                    hoverColor: Get.theme.hoverColor,
+                    splashColor: Get.theme.hoverColor,
+
+                    // When conversation is tapped (open conversation)
+                    onTap: () {
+                      // Make sure to not open when already open on desktop
+                      if ((SidebarController.getCurrentProvider()?.extra ?? "") == topic.id &&
+                          !isMobileMode()) {
+                        return;
+                      }
+                      MessageController.openConversation(square, extra: topic.id);
+                    },
+                    onSecondaryTapDown: (details) {
+                      // TODO: Open topic context menu
+                      sendLog("TO-DO: topic context menu here");
+                    },
+
+                    // Conversation item content
+                    child: Padding(
+                      padding: const EdgeInsets.all(elementSpacing2),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.numbers),
+                          horizontalSpacing(elementSpacing2),
+                          Flexible(
+                            child: Text(
+                              topic.name,
+                              style:
+                                  (SidebarController.getCurrentProviderReactive()?.extra ?? "") ==
+                                          topic.id
+                                      ? theme.textTheme.labelMedium
+                                      : theme.textTheme.bodyMedium,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      }),
+    );
   }
 
   /// Render the item for one conversation in the list
@@ -496,7 +555,7 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                       child: Text(
                         conversation.containerSub.value.name,
                         style:
-                            provider?.conversation == conversation
+                            provider?.conversation == conversation && provider?.extra == ""
                                 ? Get.theme.textTheme.labelMedium
                                 : Get.theme.textTheme.bodyMedium,
                         textHeightBehavior: noTextHeight,
