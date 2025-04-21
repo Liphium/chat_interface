@@ -238,7 +238,7 @@ class ConversationMessageProvider extends MessageProvider {
 
   @override
   Future<bool> deleteMessageFromClient(String id) async {
-    messages.removeWhere((element) => element.id == id);
+    messages.remove(id);
     await db.message.deleteWhere((tbl) => tbl.id.equals(id));
     return true;
   }

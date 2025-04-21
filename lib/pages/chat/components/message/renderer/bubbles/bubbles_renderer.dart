@@ -13,6 +13,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
+import 'package:lorien_chat_list/lorien_chat_list.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:signals/signals_flutter.dart';
 
@@ -21,6 +22,7 @@ class BubblesRenderer extends StatefulWidget {
   final MessageProvider provider;
   final AutoScrollController controller;
   final double heightMultiplier;
+  final ChatListItemProperties properties;
 
   // Design of the bubbles
   final bool mobileLayout;
@@ -28,6 +30,7 @@ class BubblesRenderer extends StatefulWidget {
   const BubblesRenderer({
     super.key,
     required this.controller,
+    required this.properties,
     required this.provider,
     required this.message,
     this.mobileLayout = false,
@@ -40,7 +43,6 @@ class BubblesRenderer extends StatefulWidget {
 
 class _BubblesRendererState extends State<BubblesRenderer>
     with TickerProviderStateMixin, SignalsMixin {
-  final GlobalKey _heightKey = GlobalKey();
   final GlobalKey contextMenuKey = GlobalKey();
   final hovering = signal(false);
   Message? _message;
@@ -57,22 +59,28 @@ class _BubblesRendererState extends State<BubblesRenderer>
     //* Chat bubbles
     final message = widget.message;
 
-    if (message.type == MessageType.system) {
-      return BubblesSystemMessageRenderer(message: message, provider: widget.provider);
-    }
-    final sender = FriendController.friends[message.senderAddress];
-    final self = message.senderAddress == StatusController.ownAddress;
-
-    bool last = false;
+    // Evaluate whether we need a heading
+    bool last = widget.properties.isAtTopEdge;
     bool newHeading = false;
-    if (widget.index != widget.provider.messages.length) {
-      final lastMessage = widget.provider.messages[widget.index];
-
+    final nextMessage = widget.provider.getNextMessageId(widget.properties.index);
+    if (nextMessage != null && widget.provider.messages[nextMessage] != null) {
       // Check if the last message was a day before the current one
-      if (lastMessage.createdAt.day != message.createdAt.day) {
+      if (widget.provider.messages[nextMessage]!.createdAt.day != message.createdAt.day) {
         newHeading = true;
       }
     }
+
+    if (message.type == MessageType.system) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (newHeading || last) renderHeightTag(message),
+          BubblesSystemMessageRenderer(message: message, provider: widget.provider),
+        ],
+      );
+    }
+    final sender = FriendController.friends[message.senderAddress];
+    final self = message.senderAddress == StatusController.ownAddress;
 
     final Widget renderer;
     switch (message.type) {
@@ -122,86 +130,56 @@ class _BubblesRendererState extends State<BubblesRenderer>
     message.highlightAnimation ??= AnimationController(vsync: this);
     message.highlightCallback?.call();
     message.highlightCallback = null;
-    final messageWidget = AutoScrollTag(
-      index: widget.index,
+
+    return AutoScrollTag(
+      index: widget.properties.index,
       key: ValueKey("${message.id}-tag"),
       controller: widget.controller,
-      child: SizedBox(
-        key: _heightKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (newHeading || widget.index == widget.provider.messages.length)
-              Padding(
-                padding: const EdgeInsets.only(top: sectionSpacing, bottom: defaultSpacing),
-                child: Text(formatDay(message.createdAt), style: Get.theme.textTheme.bodyMedium),
-              ),
-            MouseRegion(
-              onEnter: (event) {
-                hovering.value = true;
-                MessageController.hoveredMessage = message;
-              },
-              onHover: (event) {
-                if (hovering.value) {
-                  return;
-                }
-                hovering.value = true;
-              },
-              onExit: (event) {
-                hovering.value = false;
-                MessageController.hoveredMessage = null;
-              },
-              child: Row(
-                textDirection: self ? TextDirection.rtl : TextDirection.ltr,
-                children: [
-                  Flexible(
-                    child: Animate(
-                      controller: message.highlightAnimation,
-                      effects: [ShimmerEffect(duration: 1000.ms, curve: Curves.ease)],
-                      target: 0,
-                      child: renderer,
-                    ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (newHeading || last) renderHeightTag(message),
+          MouseRegion(
+            onEnter: (event) {
+              hovering.value = true;
+              MessageController.hoveredMessage = message;
+            },
+            onHover: (event) {
+              if (hovering.value) {
+                return;
+              }
+              hovering.value = true;
+            },
+            onExit: (event) {
+              hovering.value = false;
+              MessageController.hoveredMessage = null;
+            },
+            child: Row(
+              textDirection: self ? TextDirection.rtl : TextDirection.ltr,
+              children: [
+                Flexible(
+                  child: Animate(
+                    controller: message.highlightAnimation,
+                    effects: [ShimmerEffect(duration: 1000.ms, curve: Curves.ease)],
+                    target: 0,
+                    child: renderer,
                   ),
-                  if (!widget.mobileLayout) renderOverlay(self, message),
-                  if (widget.mobileLayout && !GetPlatform.isMobile) renderOverlay(self, message),
-                ],
-              ),
+                ),
+                if (!widget.mobileLayout) renderOverlay(self, message),
+                if (widget.mobileLayout && !GetPlatform.isMobile) renderOverlay(self, message),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
+  }
 
-    if (message.playAnimation) {
-      message.initAnimation(this);
-      return Animate(
-        effects: [
-          ExpandEffect(
-            alignment: Alignment.center,
-            duration: 250.ms,
-            curve: Curves.ease,
-            axis: Axis.vertical,
-          ),
-          FadeEffect(begin: 0, end: 1, duration: 500.ms),
-        ],
-        autoPlay: false,
-        controller: message.controller!,
-        onComplete: (controller) => message.playAnimation = false,
-        child: messageWidget,
-      );
-    }
-
-    if (message.heightCallback) {
-      return Watch((ctx) {
-        return Align(
-          alignment: Alignment.topCenter,
-          heightFactor: message.canScroll.value ? 1 : 0,
-          child: messageWidget,
-        );
-      });
-    }
-
-    return messageWidget;
+  Widget renderHeightTag(Message message) {
+    return Padding(
+      padding: const EdgeInsets.only(top: sectionSpacing, bottom: defaultSpacing),
+      child: Text(formatDay(message.createdAt), style: Get.theme.textTheme.bodyMedium),
+    );
   }
 
   Widget renderOverlay(bool self, Message message) {

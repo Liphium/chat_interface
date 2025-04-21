@@ -11,7 +11,6 @@ import 'package:chat_interface/theme/components/file_renderer.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/image_preview_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -77,15 +76,6 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
           return;
         }
         _loading.value = false;
-        sendLog("current height ${widget.message!.currentHeight}");
-        WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-          sendLog("NEW HEIGHT ${widget.message!.heightKey!.currentContext!.size!.height}");
-          final currentHeight = widget.message!.heightKey!.currentContext!.size!.height;
-          widget.provider!.messageHeightChange(
-            widget.message!,
-            currentHeight - widget.message!.currentHeight!,
-          );
-        });
       });
       stream.addListener(listener);
     } else if (widget.container.attachmentType == AttachmentContainerType.remoteImage) {

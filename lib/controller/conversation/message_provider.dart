@@ -33,42 +33,79 @@ abstract class MessageProvider {
   static const newLoadOffset = 200;
   bool topReached = false;
   AutoScrollController? _scrollController;
-  ChatListController<String>? _listController;
+  ChatListController<String> listController = ChatListController<String>(initialItems: []);
 
   /// Helper method to get the newest message
   String? getNewestMessage() {
-    if (_listController == null) {
-      return null;
-    }
-    if (_listController!.newItems.isNotEmpty) {
-      return _listController!.newItems.last;
-    }
-    return _listController!.oldItems.firstOrNull;
+    return getMessageIdAfter(_getOrderedList(), 0, 1);
   }
 
   /// Helper method to get the oldest message
   String? getOldestMessage() {
-    if (_listController == null) {
-      return null;
+    return getMessageIdAfter(_getOrderedList(), listController.itemsCount - 1, -1);
+  }
+
+  /// Helper function to make sure the message returned actually exists
+  String? getMessageIdAfter(List<String> list, int index, int direction) {
+    while (messages[list[index]] == null) {
+      index += direction;
     }
-    if (_listController!.oldItems.isNotEmpty) {
-      return _listController!.oldItems.first;
+    return list[index];
+  }
+
+  /// Helper method to get the index
+  int? getIndexOf(String messageId) {
+    // Determine the index of the message
+    int index = 0;
+    for (var id in _getOrderedList()) {
+      if (id == messageId) {
+        break;
+      }
+      index++;
     }
-    return _listController!.newItems.firstOrNull;
+
+    return index;
+  }
+
+  /// Returns the ID of the message immediately before the one at [index], or null if out of bounds.
+  String? getPreviousMessageId(int index) {
+    final allIds = _getOrderedList();
+    if (index <= 0 || index >= allIds.length) return null;
+
+    return getMessageIdAfter(allIds, index - 1, -1);
+  }
+
+  /// Returns the ID of the message immediately next to the one at [index], or null if out of bounds.
+  String? getNextMessageId(int index) {
+    final allIds = _getOrderedList();
+    if (index < 0 || index >= allIds.length - 1) return null;
+
+    return getMessageIdAfter(allIds, index + 1, 1);
+  }
+
+  /// Helper function to get the complete list
+  List<String> _getOrderedList() {
+    return listController.newItems.reversed.toList() + listController.oldItems;
   }
 
   Future<void> addMessageToBottom(Message message, {bool animation = true}) async {
-    // Update the
+    // Update the last message date
     lastMessage = message.createdAt.millisecondsSinceEpoch;
 
     // Make sure the message is fit for the bottom
-    final lastAdded = messages[getNewestMessage()]!;
-    if (messages.isNotEmpty && lastAdded.createdAt.isBefore(message.createdAt)) {
-      sendLog("TODO: Reload the message list");
-      return;
+    final lastAdded = messages[getNewestMessage()];
+    if (messages.isNotEmpty && lastAdded != null) {
+      if (lastAdded.createdAt.isAfter(message.createdAt)) {
+        sendLog("TODO: Reload the message list ${lastAdded.content}");
+        return;
+      }
     }
 
-    sendLog("adding message with id ${message.id}");
+    sendLog(
+      "last added: ${lastAdded?.content}, most old: ${messages[getOldestMessage()!]?.content}",
+    );
+
+    sendLog("adding message with id ${message.id} ${messages[message.id]?.content}");
 
     // Check if there are any messages with similar ids to prevent adding the same message again
     if (waitingMessages.any((msg) => msg == message.id) || messages[message.id] != null) {
@@ -78,40 +115,30 @@ abstract class MessageProvider {
 
     // Initialize all message data
     await message.initAttachments(this);
-    waitingMessages.remove(message.id); // Remove after cause then it is added
 
     // Only load the message, if scrolled near enough to the bottom
     if (_scrollController!.position.pixels <= newLoadOffset) {
       messages[message.id] = message;
-      _listController!.addToBottom(message.id);
-      return;
+      listController.addToBottom(message.id);
     }
+
+    // Remove after cause then it is added
+    waitingMessages.remove(message.id);
   }
 
-  void newControllers(AutoScrollController newScroll, ChatListController<String> newChatList) {
+  void newControllers(AutoScrollController newScroll) {
     if (_scrollController != null) {
       _scrollController!.removeListener(checkCurrentScrollHeight);
     }
     _scrollController = newScroll;
     _scrollController!.addListener(checkCurrentScrollHeight);
-    _listController = newChatList;
   }
 
   /// Runs on every scroll to check if new messages should be loaded
   Future<void> checkCurrentScrollHeight() async {
-    // Get.height is in there because there is a little bit of buffer above
-    if (_listController == null) {
-      return;
-    }
-    if (_scrollController!.position.pixels >
-            _scrollController!.position.maxScrollExtent - Get.height / 2 - newLoadOffset &&
-        !topReached) {
-      var (topReached, error) = await loadNewMessagesTop();
-      if (!error) {
-        this.topReached = topReached;
-      }
-    } else if (_scrollController!.position.pixels <= newLoadOffset &&
-        _scrollController!.position.pixels != 0) {
+    if (_scrollController!.position.pixels <= newLoadOffset &&
+        _scrollController!.position.pixels != 0 &&
+        !listController.shouldScrollToBottom) {
       unawaited(loadNewMessagesBottom());
     }
   }
@@ -155,8 +182,8 @@ abstract class MessageProvider {
       for (var msg in loadedMessages) {
         messages[msg.id] = msg;
       }
+      listController.addRangeToTop(loadedMessages.map((m) => m.id).toList());
     });
-    // TODO: Interact with list controller
 
     sendLog("success ${newMessagesLoading.value} $hashCode");
 
@@ -174,7 +201,6 @@ abstract class MessageProvider {
     messagesLoadingTop = false;
     newMessagesLoading.value = true; // Same loading state as above to not break anything
     final firstMessage = messages[getNewestMessage()]!;
-    sendLog("called listbottom");
     final time = firstMessage.createdAt.millisecondsSinceEpoch;
 
     // Make sure we're not requesting the same messages again
@@ -183,6 +209,8 @@ abstract class MessageProvider {
       return true;
     }
     lastMessage = time;
+
+    sendLog("loading bottom with ${firstMessage.content}");
 
     // Process the messages
     final (loadedMessages, error) = await loadMessagesAfter(time);
@@ -196,7 +224,12 @@ abstract class MessageProvider {
     loadedMessages.sort(
       (a, b) => b.createdAt.compareTo(a.createdAt),
     ); // Sort to prevent weird order
-    messages.insertAll(0, loadedMessages);
+    batch(() {
+      for (var msg in loadedMessages) {
+        messages[msg.id] = msg;
+      }
+      listController.addRangeToBottom(loadedMessages.map((m) => m.id).toList());
+    });
 
     newMessagesLoading.value = false;
     return true;
@@ -208,9 +241,9 @@ abstract class MessageProvider {
   /// the complete feed in that case.
   Future<bool> scrollToMessage(String id) async {
     // Check if message is already on screen
-    var message = messages.firstWhereOrNull((msg) => msg.id == id);
+    var message = messages[id];
     if (message != null) {
-      unawaited(controller!.scrollToIndex(messages.indexOf(message) + 1));
+      unawaited(_scrollController!.scrollToIndex(getIndexOf(message.id)!));
       if (message.highlightAnimation == null) {
         // If the message is not yet rendered do it through a callback
         message.highlightCallback = () {
@@ -235,7 +268,8 @@ abstract class MessageProvider {
 
     // Add the message to the feed and remove all the others
     messages.clear();
-    messages.add(message);
+    listController.addToTop(message.id);
+    messages[message.id] = message;
 
     // Highlight the message
     message.highlightCallback = () {
