@@ -9,7 +9,6 @@ import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/bu
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/message_options_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -18,8 +17,7 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:signals/signals_flutter.dart';
 
 class BubblesRenderer extends StatefulWidget {
-  final int index;
-  final Message? message;
+  final Message message;
   final MessageProvider provider;
   final AutoScrollController controller;
   final double heightMultiplier;
@@ -29,10 +27,9 @@ class BubblesRenderer extends StatefulWidget {
 
   const BubblesRenderer({
     super.key,
-    required this.index,
     required this.controller,
     required this.provider,
-    this.message,
+    required this.message,
     this.mobileLayout = false,
     this.heightMultiplier = 1.0,
   });
@@ -55,73 +52,10 @@ class _BubblesRendererState extends State<BubblesRenderer>
     super.dispose();
   }
 
-  /// Called when the height should be reported back to the message controller
-  void heightCallback(Message message, Duration timeStamp) {
-    if (_heightKey.currentContext == null) {
-      sendLog("couldn't find height, this message has been disposed");
-      return;
-    }
-
-    // Report the actual height to the controller to scroll up the viewport
-    message.heightReported = true;
-    message.heightKey = _heightKey;
-    widget.provider.messageHeightCallback(message, _heightKey.currentContext!.size!.height);
-  }
-
   @override
   Widget build(BuildContext context) {
-    // This is needed for jump to message
-    if (widget.index == widget.provider.messages.length + 1) {
-      return Watch((ctx) {
-        final loading =
-            widget.provider.newMessagesLoading.value && widget.provider.messages.isEmpty;
-        return SizedBox(
-          height: Get.height * widget.heightMultiplier,
-          child: Visibility(
-            visible: !loading,
-            child: Center(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: 500),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: sectionSpacing),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        "chat.welcome.title".tr,
-                        style: Get.theme.textTheme.headlineMedium,
-                        textAlign: TextAlign.center,
-                      ),
-                      verticalSpacing(sectionSpacing),
-                      Text(
-                        "chat.welcome.desc".tr,
-                        style: Get.theme.textTheme.bodyMedium,
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
-      });
-    }
-
-    // Just for spacing above the input and a loading indicator
-    if (widget.index == 0 && widget.message == null) {
-      return verticalSpacing(defaultSpacing);
-    }
-
     //* Chat bubbles
-    final message = widget.message ?? widget.provider.messages[widget.index - 1];
-
-    // Call the height callback (in case requested, for keeping the viewport up to date with the scroll)
-    if (message.heightCallback && !message.heightReported) {
-      WidgetsBinding.instance.addPostFrameCallback(
-        (timestamp) => heightCallback(message, timestamp),
-      );
-    }
+    final message = widget.message;
 
     if (message.type == MessageType.system) {
       return BubblesSystemMessageRenderer(message: message, provider: widget.provider);

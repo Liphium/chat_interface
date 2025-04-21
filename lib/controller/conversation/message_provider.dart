@@ -16,6 +16,7 @@ import 'package:chat_interface/util/web.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lorien_chat_list/chat_list_controller.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:signals/signals_flutter.dart';
 import 'package:sodium_libs/sodium_libs.dart';
@@ -24,21 +25,45 @@ import 'package:sodium_libs/sodium_libs.dart';
 part 'message_sending.dart';
 
 abstract class MessageProvider {
-  final messages = listSignal(<Message>[]);
+  final messages = mapSignal(<String, Message>{});
   final waitingMessages =
       <String>[]; // To prevent messages from being sent twice due to a race condition
 
   //* Scroll
   static const newLoadOffset = 200;
   bool topReached = false;
-  AutoScrollController? controller;
+  AutoScrollController? _scrollController;
+  ChatListController<String>? _listController;
+
+  /// Helper method to get the newest message
+  String? getNewestMessage() {
+    if (_listController == null) {
+      return null;
+    }
+    if (_listController!.newItems.isNotEmpty) {
+      return _listController!.newItems.last;
+    }
+    return _listController!.oldItems.firstOrNull;
+  }
+
+  /// Helper method to get the oldest message
+  String? getOldestMessage() {
+    if (_listController == null) {
+      return null;
+    }
+    if (_listController!.oldItems.isNotEmpty) {
+      return _listController!.oldItems.first;
+    }
+    return _listController!.newItems.firstOrNull;
+  }
 
   Future<void> addMessageToBottom(Message message, {bool animation = true}) async {
     // Update the
     lastMessage = message.createdAt.millisecondsSinceEpoch;
 
     // Make sure the message is fit for the bottom
-    if (messages.isNotEmpty && message.createdAt.isBefore(messages[0].createdAt)) {
+    final lastAdded = messages[getNewestMessage()]!;
+    if (messages.isNotEmpty && lastAdded.createdAt.isBefore(message.createdAt)) {
       sendLog("TODO: Reload the message list");
       return;
     }
@@ -46,8 +71,7 @@ abstract class MessageProvider {
     sendLog("adding message with id ${message.id}");
 
     // Check if there are any messages with similar ids to prevent adding the same message again
-    if (waitingMessages.any((msg) => msg == message.id) ||
-        messages.any((msg) => msg.id == message.id)) {
+    if (waitingMessages.any((msg) => msg == message.id) || messages[message.id] != null) {
       return;
     }
     waitingMessages.add(message.id);
@@ -57,53 +81,37 @@ abstract class MessageProvider {
     waitingMessages.remove(message.id); // Remove after cause then it is added
 
     // Only load the message, if scrolled near enough to the bottom
-    if (controller!.position.pixels <= newLoadOffset) {
-      if (controller!.position.pixels == 0) {
-        message.playAnimation = true;
-        messages.insert(0, message);
-        return;
-      }
-
-      message.heightCallback = true;
-      messages.insert(0, message);
+    if (_scrollController!.position.pixels <= newLoadOffset) {
+      messages[message.id] = message;
+      _listController!.addToBottom(message.id);
       return;
     }
   }
 
-  void messageHeightCallback(Message message, double height) {
-    message.canScroll.value = true;
-    message.currentHeight = height;
-    controller!.jumpTo(controller!.position.pixels + height);
-  }
-
-  void messageHeightChange(Message message, double extraHeight) {
-    if (message.heightKey != null) {
-      controller!.jumpTo(controller!.position.pixels + extraHeight);
+  void newControllers(AutoScrollController newScroll, ChatListController<String> newChatList) {
+    if (_scrollController != null) {
+      _scrollController!.removeListener(checkCurrentScrollHeight);
     }
-  }
-
-  void newScrollController(AutoScrollController newController) {
-    if (controller != null) {
-      controller!.removeListener(checkCurrentScrollHeight);
-    }
-    controller = newController;
-    controller!.addListener(checkCurrentScrollHeight);
+    _scrollController = newScroll;
+    _scrollController!.addListener(checkCurrentScrollHeight);
+    _listController = newChatList;
   }
 
   /// Runs on every scroll to check if new messages should be loaded
   Future<void> checkCurrentScrollHeight() async {
     // Get.height is in there because there is a little bit of buffer above
-    if (controller == null) {
+    if (_listController == null) {
       return;
     }
-    if (controller!.position.pixels >
-            controller!.position.maxScrollExtent - Get.height / 2 - newLoadOffset &&
+    if (_scrollController!.position.pixels >
+            _scrollController!.position.maxScrollExtent - Get.height / 2 - newLoadOffset &&
         !topReached) {
       var (topReached, error) = await loadNewMessagesTop();
       if (!error) {
         this.topReached = topReached;
       }
-    } else if (controller!.position.pixels <= newLoadOffset && controller!.position.pixels != 0) {
+    } else if (_scrollController!.position.pixels <= newLoadOffset &&
+        _scrollController!.position.pixels != 0) {
       unawaited(loadNewMessagesBottom());
     }
   }
@@ -127,7 +135,7 @@ abstract class MessageProvider {
     }
     messagesLoadingTop = true;
     newMessagesLoading.value = true;
-    date ??= messages.last.createdAt.millisecondsSinceEpoch;
+    date ??= messages[getOldestMessage()]!.createdAt.millisecondsSinceEpoch;
 
     sendLog("do request");
 
@@ -143,7 +151,12 @@ abstract class MessageProvider {
       sendLog("no messages");
       return (true, false);
     }
-    messages.addAll(loadedMessages);
+    batch(() {
+      for (var msg in loadedMessages) {
+        messages[msg.id] = msg;
+      }
+    });
+    // TODO: Interact with list controller
 
     sendLog("success ${newMessagesLoading.value} $hashCode");
 
@@ -160,7 +173,7 @@ abstract class MessageProvider {
     }
     messagesLoadingTop = false;
     newMessagesLoading.value = true; // Same loading state as above to not break anything
-    final firstMessage = messages.first;
+    final firstMessage = messages[getNewestMessage()]!;
     sendLog("called listbottom");
     final time = firstMessage.createdAt.millisecondsSinceEpoch;
 

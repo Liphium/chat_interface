@@ -2,8 +2,8 @@ import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/bubbles_renderer.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
+import 'package:lorien_chat_list/lorien_chat_list.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
-import 'package:signals/signals_flutter.dart';
 
 class MessageList extends StatefulWidget {
   final MessageProvider provider;
@@ -23,10 +23,20 @@ class MessageList extends StatefulWidget {
 
 class _MessageListState extends State<MessageList> {
   final _scrollController = AutoScrollController();
+  late final _chatListController = ChatListController<int>(initialItems: getIndecies());
+
+  List<int> getIndecies() {
+    final list = <int>[];
+    int index = 0;
+    for(var _ in widget.provider.messages) {
+      list.add(index);
+    }
+    return list;
+  }
 
   @override
   void initState() {
-    widget.provider.newScrollController(_scrollController);
+    widget.provider.newControllers(_scrollController, _chatListController);
     super.initState();
   }
 
@@ -38,35 +48,31 @@ class _MessageListState extends State<MessageList> {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        return Watch((ctx) {
-          return ScrollConfiguration(
-            behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal:
-                    widget.overwritePadding ??
-                    (constraints.maxWidth <= 800 ? defaultSpacing : sectionSpacing),
-              ),
-              child: ListView.builder(
-                itemCount: widget.provider.messages.length + 2,
-                reverse: true,
+        return Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal:
+                widget.overwritePadding ??
+                (constraints.maxWidth <= 800 ? defaultSpacing : sectionSpacing),
+          ),
+          child: ChatList(
+            scrollController: _scrollController,
+            controller: ,
+            ,
+            addAutomaticKeepAlives: false,
+            addRepaintBoundaries: false,
+            physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+            itemBuilder: (index, itemDetails) {
+              return BubblesRenderer(
+                index: index as int,
+                message: ,
                 controller: _scrollController,
-                addAutomaticKeepAlives: false,
-                addRepaintBoundaries: false,
-                physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-                itemBuilder: (context, index) {
-                  return BubblesRenderer(
-                    index: index,
-                    controller: _scrollController,
-                    provider: widget.provider,
-                    mobileLayout: constraints.maxWidth <= 800,
-                    heightMultiplier: widget.heightMultiplier,
-                  );
-                },
-              ),
-            ),
-          );
-        });
+                provider: widget.provider,
+                mobileLayout: constraints.maxWidth <= 800,
+                heightMultiplier: widget.heightMultiplier,
+              );
+            },
+          ),
+        );
       },
     );
   }
