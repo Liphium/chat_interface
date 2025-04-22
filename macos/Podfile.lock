@@ -23,7 +23,7 @@ PODS:
     - FlutterMacOS
   - screen_retriever_macos (0.0.1):
     - FlutterMacOS
-  - "sodium_libs (3.4.4+1)":
+  - "sodium_libs (3.4.3+2)":
     - Flutter
     - FlutterMacOS
   - sqlite3 (3.49.1):
@@ -32,8 +32,6 @@ PODS:
   - sqlite3/dbstatvtab (3.49.1):
     - sqlite3/common
   - sqlite3/fts5 (3.49.1):
-    - sqlite3/common
-  - sqlite3/math (3.49.1):
     - sqlite3/common
   - sqlite3/perf-threadsafe (3.49.1):
     - sqlite3/common
@@ -45,7 +43,6 @@ PODS:
     - sqlite3 (~> 3.49.1)
     - sqlite3/dbstatvtab
     - sqlite3/fts5
-    - sqlite3/math
     - sqlite3/perf-threadsafe
     - sqlite3/rtree
   - tray_manager (0.0.1):
@@ -125,9 +122,9 @@ SPEC CHECKSUMS:
   pasteboard: 9b69dba6fedbb04866be632205d532fe2f6b1d99
   path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
   screen_retriever_macos: 776e0fa5d42c6163d2bf772d22478df4b302b161
-  sodium_libs: 9c524e39df929b36eec955c4f25058af55935c75
+  sodium_libs: 7f895e4528eaa251d8e93a38237bc990cc3c73ce
   sqlite3: fc1400008a9b3525f5914ed715a5d1af0b8f4983
-  sqlite3_flutter_libs: 487032b9008b28de37c72a3aa66849ef3745f3e6
+  sqlite3_flutter_libs: cc304edcb8e1d8c595d1b08c7aeb46a47691d9db
   tray_manager: 9064e219c56d75c476e46b9a21182087930baf90
   url_launcher_macos: c82c93949963e55b228a30115bd219499a6fe404
   WebRTC-SDK: 79942c006ea64f6fb48d7da8a4786dfc820bc1db
