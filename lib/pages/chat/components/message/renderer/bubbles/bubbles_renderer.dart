@@ -56,10 +56,10 @@ class _BubblesRendererState extends State<BubblesRenderer>
 
   @override
   Widget build(BuildContext context) {
-    //* Chat bubbles
     final message = widget.message;
 
     // Evaluate whether we need a heading
+    bool lastMessage = false;
     bool last = widget.properties.isAtTopEdge;
     bool newHeading = false;
     final nextMessage = widget.provider.getNextMessageId(widget.properties.index);
@@ -67,6 +67,8 @@ class _BubblesRendererState extends State<BubblesRenderer>
       // Check if the last message was a day before the current one
       if (widget.provider.messages[nextMessage]!.createdAt.day != message.createdAt.day) {
         newHeading = true;
+      } else {
+        lastMessage = true;
       }
     }
 
@@ -91,7 +93,7 @@ class _BubblesRendererState extends State<BubblesRenderer>
           provider: widget.provider,
           senderAddress: message.senderAddress,
           self: self,
-          last: last,
+          last: lastMessage,
           sender: self ? Friend.me() : sender,
           mobileLayout: widget.mobileLayout,
         );
@@ -102,7 +104,7 @@ class _BubblesRendererState extends State<BubblesRenderer>
           message: message,
           provider: widget.provider,
           self: self,
-          last: last,
+          last: lastMessage,
           sender: self ? Friend.me() : sender,
           mobileLayout: widget.mobileLayout,
         );

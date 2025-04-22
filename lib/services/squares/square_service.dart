@@ -32,7 +32,7 @@ class SquareService {
     }
 
     // Generate a new container for the square
-    final newContainer = SquareContainer(current.name, current.topics);
+    final newContainer = SquareContainer(current.name, [...current.topics]);
     String topicId = randomString(8);
     while (newContainer.topics.any((t) => t.id == topicId)) {
       topicId = randomString(8);
