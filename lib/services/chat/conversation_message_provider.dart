@@ -28,28 +28,25 @@ class ConversationMessageProvider extends MessageProvider {
     // Load messages from the local database
     final messageQuery =
         db.select(db.message)
-          ..where(
-            (tbl) => tbl.conversation.equals(
-              ConversationService.withExtra(conversation.id.encode(), extra),
-            ),
-          )
+          ..where((tbl) => tbl.conversation.equals(ConversationService.withExtra(conversation.id.encode(), extra)))
           ..where((tbl) => tbl.createdAt.isSmallerThanValue(BigInt.from(time)))
           ..orderBy([(u) => OrderingTerm.desc(u.createdAt)])
-          ..limit(10);
-    final messages = await messageQuery.get();
+          ..limit(30);
+    final loadedMessages = await messageQuery.get();
+    var processed = await _processMessages(loadedMessages);
 
-    // If there are no messages, check for them on the server
-    if (messages.isEmpty) {
+    // If there aren't enough messages, load more from the server
+    if (loadedMessages.length != 30) {
       // Check if the user is even connected to the server (to make sure offline retrieval works)
       if (!ConnectionController.connected.value) {
         // Act like the top has been reached
-        return (null, false);
+        return (processed, false);
       }
 
       // Load messages from the server
       final json = await postNodeJSON("/conversations/message/list_before", {
         "token": conversation.token.toMap(),
-        "data": {"extra": extra, "before": time},
+        "data": {"extra": extra, "before": loadedMessages.isEmpty ? time : loadedMessages.last.createdAt.toInt()},
       });
 
       // Check if there was an error
@@ -60,22 +57,21 @@ class ConversationMessageProvider extends MessageProvider {
 
       // Check if the top has been reached
       if (json["messages"] == null || json["messages"].isEmpty) {
-        return (null, false);
+        return (processed, false);
       }
       // Unpack the messages in an isolate
-      final messages =
-          (await MessageListener.unpackMessagesInIsolate(
-            conversation,
-            json["messages"],
-          )).map((msg) => msg.$1).toList();
+      final messagesFromServer =
+          (await MessageListener.unpackMessagesInIsolate(conversation, json["messages"])).map((msg) => msg.$1).toList();
 
-      // Prepare messages for
-      await initAttachmentsForMessages(messages);
-      return (messages, false);
+      sendLog(messagesFromServer.length);
+
+      // Prepare and add to the messages from the client
+      await initAttachmentsForMessages(messagesFromServer);
+      processed += messagesFromServer;
     }
 
     // Process the messages in a seperate isolate
-    return (await _processMessages(messages), false);
+    return (processed, false);
   }
 
   @override
@@ -83,11 +79,7 @@ class ConversationMessageProvider extends MessageProvider {
     // Load messages from the local database
     final messageQuery =
         db.select(db.message)
-          ..where(
-            (tbl) => tbl.conversation.equals(
-              ConversationService.withExtra(conversation.id.encode(), extra),
-            ),
-          )
+          ..where((tbl) => tbl.conversation.equals(ConversationService.withExtra(conversation.id.encode(), extra)))
           ..where((tbl) => tbl.createdAt.isBiggerThanValue(BigInt.from(time)))
           ..orderBy([(u) => OrderingTerm.asc(u.createdAt)])
           ..limit(10);
@@ -103,11 +95,7 @@ class ConversationMessageProvider extends MessageProvider {
     // Load messages from the local database
     final messageQuery =
         db.select(db.message)
-          ..where(
-            (tbl) => tbl.conversation.equals(
-              ConversationService.withExtra(conversation.id.encode(), extra),
-            ),
-          )
+          ..where((tbl) => tbl.conversation.equals(ConversationService.withExtra(conversation.id.encode(), extra)))
           ..where((tbl) => tbl.id.equals(id))
           ..limit(1);
     final message = await messageQuery.getSingleOrNull();
@@ -119,10 +107,7 @@ class ConversationMessageProvider extends MessageProvider {
       }
 
       // Get the message from the server
-      final json = await postNodeJSON("/conversations/message/get", {
-        "token": conversation.token.toMap(),
-        "data": id,
-      });
+      final json = await postNodeJSON("/conversations/message/get", {"token": conversation.token.toMap(), "data": id});
 
       // Check if there is an error
       if (!json["success"]) {
@@ -158,8 +143,7 @@ class ConversationMessageProvider extends MessageProvider {
       final (message, _) = decryptFromLocalDatabase(data, databaseKey);
 
       // Don't render system messages that shouldn't be rendered (this is only for safety, should never actually happen)
-      if (message.type == MessageType.system &&
-          SystemMessages.messages[message.content]?.render == false) {
+      if (message.type == MessageType.system && SystemMessages.messages[message.content]?.render == false) {
         continue;
       }
 
@@ -183,11 +167,7 @@ class ConversationMessageProvider extends MessageProvider {
   /// Decrypt a message from the local database.
   ///
   /// Returns message and conversation found in the local database.
-  static (Message, String) decryptFromLocalDatabase(
-    MessageData data,
-    SecureKey key, {
-    Sodium? sodium,
-  }) {
+  static (Message, String) decryptFromLocalDatabase(MessageData data, SecureKey key, {Sodium? sodium}) {
     // Create a new base message
     final message = Message(
       id: data.id,
@@ -224,10 +204,7 @@ class ConversationMessageProvider extends MessageProvider {
     }
 
     // Send a request to the server
-    final json = await postNodeJSON("/conversations/message/delete", {
-      "token": token.toMap(),
-      "data": message.id,
-    });
+    final json = await postNodeJSON("/conversations/message/delete", {"token": token.toMap(), "data": message.id});
 
     if (!json["success"]) {
       return json["error"];
@@ -251,9 +228,7 @@ class ConversationMessageProvider extends MessageProvider {
   @override
   Future<(String, int)?> getTimestamp() async {
     // Grab a new timestamp from the server
-    var json = await postNodeJSON("/conversations/timestamp", {
-      "token": conversation.token.toMap(),
-    });
+    var json = await postNodeJSON("/conversations/timestamp", {"token": conversation.token.toMap()});
     if (!json["success"]) {
       return null;
     }

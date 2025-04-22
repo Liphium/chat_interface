@@ -144,8 +144,7 @@ class _ProfileState extends State<OwnProfile> {
                   return Padding(
                     padding: const EdgeInsets.only(bottom: elementSpacing),
                     child: Material(
-                      color:
-                          selected ? theme.colorScheme.primary : theme.colorScheme.inverseSurface,
+                      color: selected ? theme.colorScheme.primary : theme.colorScheme.inverseSurface,
                       borderRadius: BorderRadius.circular(defaultSpacing),
                       child: InkWell(
                         borderRadius: BorderRadius.circular(defaultSpacing),
@@ -167,10 +166,7 @@ class _ProfileState extends State<OwnProfile> {
                               Text(
                                 "status.${index.toString()}".tr,
                                 style: theme.textTheme.bodyMedium!.copyWith(
-                                  color:
-                                      selected
-                                          ? theme.colorScheme.onSurface
-                                          : theme.colorScheme.surface,
+                                  color: selected ? theme.colorScheme.onSurface : theme.colorScheme.surface,
                                 ),
                                 textHeightBehavior: noTextHeight,
                               ),
@@ -201,9 +197,7 @@ class _ProfileState extends State<OwnProfile> {
                     (ctx) => Visibility(
                       visible: _edit.value,
                       replacement: Text(
-                        StatusController.status.value == ""
-                            ? 'status.message.add'.tr
-                            : StatusController.status.value,
+                        StatusController.status.value == "" ? 'status.message.add'.tr : StatusController.status.value,
                         style: theme.textTheme.bodyMedium,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -217,9 +211,7 @@ class _ProfileState extends State<OwnProfile> {
                           hintStyle: theme.textTheme.bodyMedium!,
                           hintText: 'status.message'.tr,
                         ),
-                        style: theme.textTheme.bodyMedium!.copyWith(
-                          color: theme.colorScheme.onSurface,
-                        ),
+                        style: theme.textTheme.bodyMedium!.copyWith(color: theme.colorScheme.onSurface),
 
                         // Save status
                         onEditingComplete: () async {
@@ -292,11 +284,7 @@ class _ProfileState extends State<OwnProfile> {
           verticalSpacing(elementSpacing),
 
           // Friends page
-          ProfileButton(
-            icon: Icons.group,
-            label: 'profile.friends'.tr,
-            onTap: () => showModal(const FriendsPage()),
-          ),
+          ProfileButton(icon: Icons.group, label: 'profile.friends'.tr, onTap: () => showModal(const FriendsPage())),
           verticalSpacing(elementSpacing),
 
           // For debug only database viewer
@@ -308,11 +296,7 @@ class _ProfileState extends State<OwnProfile> {
                 label: 'profile.test'.tr,
                 onTap: () async {
                   _testLoading.value = true;
-                  unawaited(
-                    Navigator.of(
-                      context,
-                    ).push(MaterialPageRoute(builder: (context) => DriftDbViewer(db))),
-                  );
+                  unawaited(Navigator.of(context).push(MaterialPageRoute(builder: (context) => DriftDbViewer(db))));
                   _testLoading.value = false;
                 },
                 loading: _testLoading,
@@ -334,11 +318,7 @@ class _ProfileState extends State<OwnProfile> {
             ),
 
           // Help & resources button
-          ProfileButton(
-            icon: Icons.launch,
-            label: 'help'.tr,
-            onTap: () => launchUrlString(Constants.docsBase),
-          ),
+          ProfileButton(icon: Icons.launch, label: 'help'.tr, onTap: () => launchUrlString(Constants.docsBase)),
         ],
       ),
     );

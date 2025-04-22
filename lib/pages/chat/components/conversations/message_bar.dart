@@ -80,10 +80,7 @@ class _MessageBarState extends State<MessageBar> {
                 Watch(
                   (ctx) => LoadingIconButton(
                     onTap: () => SidebarController.toggleSidebar(),
-                    icon:
-                        SidebarController.hideSidebar.value
-                            ? Icons.arrow_forward
-                            : Icons.arrow_back,
+                    icon: SidebarController.hideSidebar.value ? Icons.arrow_forward : Icons.arrow_back,
                   ),
                 ),
                 horizontalSpacing(elementSpacing),
@@ -106,17 +103,10 @@ class _MessageBarState extends State<MessageBar> {
                       sendLog("is square: ${widget.conversation is Square}");
                     },
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: elementSpacing,
-                        horizontal: defaultSpacing,
-                      ),
+                      padding: const EdgeInsets.symmetric(vertical: elementSpacing, horizontal: defaultSpacing),
                       child: Row(
                         children: [
-                          Icon(
-                            getIconForConversation(),
-                            size: 30,
-                            color: Theme.of(context).colorScheme.onPrimary,
-                          ),
+                          Icon(getIconForConversation(), size: 30, color: Theme.of(context).colorScheme.onPrimary),
                           horizontalSpacing(defaultSpacing),
                           Text(
                             widget.conversation.isGroup
@@ -158,10 +148,7 @@ class _MessageBarState extends State<MessageBar> {
                                     ContextMenuData.fromKey(_zapShareKey, below: true),
                                   );
                                 },
-                                icon: Icon(
-                                  Icons.electric_bolt,
-                                  color: Get.theme.colorScheme.onPrimary,
-                                ),
+                                icon: Icon(Icons.electric_bolt, color: Get.theme.colorScheme.onPrimary),
                                 tooltip: "chat.zapshare".tr,
                               ),
                               IgnorePointer(
@@ -177,9 +164,7 @@ class _MessageBarState extends State<MessageBar> {
                                                 ? null
                                                 : ZapShareController.progress.value.clamp(0, 1),
                                         strokeWidth: 3,
-                                        valueColor: AlwaysStoppedAnimation<Color>(
-                                          Get.theme.colorScheme.onPrimary,
-                                        ),
+                                        valueColor: AlwaysStoppedAnimation<Color>(Get.theme.colorScheme.onPrimary),
                                       ),
                                     ),
                                   ),
@@ -218,11 +203,7 @@ class _MessageBarState extends State<MessageBar> {
                           ),
 
                         // Give the user the ability to add people to a conversation
-                        if (!error)
-                          ConversationAddButton(
-                            conversation: widget.conversation,
-                            loading: additionLoading,
-                          ),
+                        if (!error) ConversationAddButton(conversation: widget.conversation, loading: additionLoading),
 
                         Visibility(
                           visible: widget.conversation.isGroup,
@@ -232,24 +213,20 @@ class _MessageBarState extends State<MessageBar> {
                               icon: Icon(
                                 Icons.group,
                                 color:
-                                    SidebarController
-                                                .rightSidebar[SidebarController.getCurrentKey()]
+                                    SidebarController.rightSidebar[SidebarController.getCurrentKey()]
                                             is ConversationMembersRightSidebar
                                         ? Theme.of(context).colorScheme.onPrimary
                                         : Theme.of(context).colorScheme.onSurface,
                               ),
                               onPressed: () {
-                                if (SidebarController
-                                        .rightSidebar[SidebarController.getCurrentKey()]
+                                if (SidebarController.rightSidebar[SidebarController.getCurrentKey()]
                                     is ConversationMembersRightSidebar) {
                                   // Hide the sidebar in case it is currently there
-                                  SettingController.settings[AppSettings.showGroupMembers]!
-                                      .setValue(false);
+                                  SettingController.settings[AppSettings.showGroupMembers]!.setValue(false);
                                   SidebarController.setRightSidebar(null);
                                 } else {
                                   // Show the sidebar
-                                  SettingController.settings[AppSettings.showGroupMembers]!
-                                      .setValue(true);
+                                  SettingController.settings[AppSettings.showGroupMembers]!.setValue(true);
                                   SidebarController.setRightSidebar(
                                     ConversationMembersRightSidebar(widget.conversation),
                                   );
@@ -342,9 +319,7 @@ class _ConversationAddButtonState extends State<ConversationAddButton> {
       onTap: () {
         // Calculate position of the window
         final RenderBox box = _groupAddKey.currentContext?.findRenderObject() as RenderBox;
-        final Offset globalPos = box.localToGlobal(
-          box.size.bottomRight(const Offset(0, elementSpacing)),
-        );
+        final Offset globalPos = box.localToGlobal(box.size.bottomRight(const Offset(0, elementSpacing)));
         final windowWidth = Get.mediaQuery.size.width;
         final position = Offset(windowWidth - globalPos.dx, globalPos.dy);
 
@@ -379,10 +354,7 @@ class _ConversationAddButtonState extends State<ConversationAddButton> {
 
                 // Add the people to the conversation
                 for (var friend in finalList) {
-                  final error = await ConversationService.addToConversation(
-                    widget.conversation,
-                    friend,
-                  );
+                  final error = await ConversationService.addToConversation(widget.conversation, friend);
                   if (error != null) {
                     showErrorPopup("error", error);
                     return null;

@@ -77,18 +77,13 @@ class _TownSettingsPageState extends State<TownSettingsPage> {
                     children: [
                       Text("settings.town.address".tr, style: Get.theme.textTheme.labelMedium),
                       verticalSpacing(elementSpacing),
-                      Text(
-                        "settings.town.address.desc".trParams(),
-                        style: Get.theme.textTheme.bodyMedium,
-                      ),
+                      Text("settings.town.address.desc".trParams(), style: Get.theme.textTheme.bodyMedium),
                     ],
                   ),
                 ),
                 FJElevatedButton(
                   onTap: () async {
-                    await Clipboard.setData(
-                      ClipboardData(text: StatusController.ownAddress.encode()),
-                    );
+                    await Clipboard.setData(ClipboardData(text: StatusController.ownAddress.encode()));
                     showSuccessPopup("success", "settings.town.address.copied".tr);
                   },
                   child: Text("copy".tr, style: Get.textTheme.labelMedium),

@@ -26,8 +26,7 @@ class DeckObject extends TableObject {
   final width = AnimatedDouble(500);
   final height = AnimatedDouble(500);
 
-  DeckObject(String id, int order, Offset location, Size size)
-    : super(id, order, location, size, TableObjectType.deck);
+  DeckObject(String id, int order, Offset location, Size size) : super(id, order, location, size, TableObjectType.deck);
 
   factory DeckObject.createFromDeck(Offset location, TabletopDeck deck) {
     final obj = DeckObject("", 0, location, const Size(500, 500));
@@ -284,18 +283,13 @@ class _DeckSelectionWindowState extends State<DeckObjectCreationWindow> with Sig
               itemBuilder: (context, index) {
                 final deck = _decks[index];
                 return Padding(
-                  padding:
-                      index == 0
-                          ? const EdgeInsets.all(0)
-                          : const EdgeInsets.only(top: defaultSpacing),
+                  padding: index == 0 ? const EdgeInsets.all(0) : const EdgeInsets.only(top: defaultSpacing),
                   child: Material(
                     color: Get.theme.colorScheme.inverseSurface,
                     borderRadius: BorderRadius.circular(defaultSpacing),
                     child: InkWell(
                       onTap: () {
-                        if (deck.cards.peek().any(
-                          (card) => card.width == null || card.height == null,
-                        )) {
+                        if (deck.cards.peek().any((card) => card.width == null || card.height == null)) {
                           showErrorPopup("error", "tabletop.object.deck.incompatible".tr);
                           return;
                         }
@@ -315,9 +309,7 @@ class _DeckSelectionWindowState extends State<DeckObjectCreationWindow> with Sig
                                 verticalSpacing(elementSpacing),
                                 Watch(
                                   (context) => Text(
-                                    "decks.cards".trParams({
-                                      "count": deck.cards.value.length.toString(),
-                                    }),
+                                    "decks.cards".trParams({"count": deck.cards.value.length.toString()}),
                                     style: Get.theme.textTheme.bodyMedium,
                                   ),
                                 ),

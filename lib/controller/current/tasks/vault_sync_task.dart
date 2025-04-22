@@ -15,7 +15,7 @@ import 'package:sodium_libs/sodium_libs.dart';
 part 'vault_actions.dart';
 
 class VaultSyncTask extends SynchronizationTask {
-  VaultSyncTask() : super("loading.vault", const Duration(seconds: 30));
+  VaultSyncTask() : super("loading.vault");
 
   // All vault targets (everything that needs sync from the server vault)
   final List<VaultTarget> targets = [ConversationService(), LibraryManager()];
@@ -24,7 +24,7 @@ class VaultSyncTask extends SynchronizationTask {
   Future<String?> init() async {
     // Initialize all vault targets
     for (var target in targets) {
-      target.init();
+      await target.init();
     }
     return null;
   }
@@ -110,11 +110,7 @@ class VaultSyncTask extends SynchronizationTask {
     // Let the target process the new entry
     target.processEntries([], [entry]);
     unawaited(
-      VaultVersioningService.storeOrUpdateVersion(
-        VaultVersioningService.vaultTypeGeneral,
-        target.tag,
-        version,
-      ),
+      VaultVersioningService.storeOrUpdateVersion(VaultVersioningService.vaultTypeGeneral, target.tag, version),
     );
   }
 
@@ -128,11 +124,7 @@ class VaultSyncTask extends SynchronizationTask {
     // Let the target process the deletion
     target.processEntries([id], []);
     unawaited(
-      VaultVersioningService.storeOrUpdateVersion(
-        VaultVersioningService.vaultTypeGeneral,
-        target.tag,
-        version,
-      ),
+      VaultVersioningService.storeOrUpdateVersion(VaultVersioningService.vaultTypeGeneral, target.tag, version),
     );
   }
 
@@ -146,7 +138,7 @@ abstract class VaultTarget {
   VaultTarget(this.tag);
 
   /// Called on intialization by the vault sync task
-  void init() {}
+  Future<void> init() async {}
 
   /// Called when the vault is refreshed with the new entries and the deleted ones
   void processEntries(List<String> deleted, List<VaultEntry> newEntries);
@@ -170,6 +162,5 @@ class VaultEntry {
       payload = json["payload"],
       updatedAt = json["updated_at"];
 
-  String decryptedPayload([SecureKey? key, Sodium? sodium]) =>
-      decryptSymmetric(payload, key ?? vaultKey, sodium);
+  String decryptedPayload([SecureKey? key, Sodium? sodium]) => decryptSymmetric(payload, key ?? vaultKey, sodium);
 }

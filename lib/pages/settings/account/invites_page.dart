@@ -78,9 +78,7 @@ class _InvitesPageState extends State<InvitesPage> with SignalsMixin {
             padding: const EdgeInsets.only(top: defaultSpacing),
             child: Padding(
               padding: const EdgeInsets.all(defaultSpacing),
-              child: Center(
-                child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary),
-              ),
+              child: Center(child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary)),
             ),
           );
         }
@@ -135,10 +133,7 @@ class _InvitesPageState extends State<InvitesPage> with SignalsMixin {
             verticalSpacing(defaultSpacing),
             Watch((ctx) {
               if (invites.isEmpty) {
-                return Text(
-                  "settings.invites.history.empty".tr,
-                  style: Get.theme.textTheme.labelMedium,
-                );
+                return Text("settings.invites.history.empty".tr, style: Get.theme.textTheme.labelMedium);
               }
 
               return Column(
@@ -156,10 +151,7 @@ class _InvitesPageState extends State<InvitesPage> with SignalsMixin {
                       child: Padding(
                         padding: const EdgeInsets.only(bottom: elementSpacing),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            vertical: elementSpacing,
-                            horizontal: defaultSpacing,
-                          ),
+                          padding: const EdgeInsets.symmetric(vertical: elementSpacing, horizontal: defaultSpacing),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(defaultSpacing),
                             color: Get.theme.colorScheme.primaryContainer,
@@ -172,9 +164,7 @@ class _InvitesPageState extends State<InvitesPage> with SignalsMixin {
                                   onEnter: (_) => hovering.value = invite,
                                   onExit: (_) => hovering.value = "",
                                   child: Animate(
-                                    effects: [
-                                      BlurEffect(end: const Offset(5, 5), duration: 100.ms),
-                                    ],
+                                    effects: [BlurEffect(end: const Offset(5, 5), duration: 100.ms)],
                                     onInit: (controller) {
                                       controller.value = 1.0;
                                     },

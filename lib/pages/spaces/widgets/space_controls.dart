@@ -24,9 +24,7 @@ class SpaceControls extends StatefulWidget {
 }
 
 class _SpaceControlsState extends State<SpaceControls> {
-  final GlobalKey _tabletopKey = GlobalKey(),
-      _microphoneKey = GlobalKey(),
-      _outputDeviceKey = GlobalKey();
+  final GlobalKey _tabletopKey = GlobalKey(), _microphoneKey = GlobalKey(), _outputDeviceKey = GlobalKey();
   StreamSubscription<dynamic>? _subscription;
 
   @override
@@ -47,11 +45,7 @@ class _SpaceControlsState extends State<SpaceControls> {
     return Center(
       heightFactor: 1,
       child: Padding(
-        padding: const EdgeInsets.only(
-          right: sectionSpacing,
-          left: sectionSpacing,
-          bottom: sectionSpacing,
-        ),
+        padding: const EdgeInsets.only(right: sectionSpacing, left: sectionSpacing, bottom: sectionSpacing),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
@@ -85,14 +79,8 @@ class _SpaceControlsState extends State<SpaceControls> {
                           FadeEffect(duration: 250.ms),
                           ScaleEffect(duration: 250.ms, curve: Curves.ease),
                         ],
-                        onInit:
-                            (ac) =>
-                                ac.value =
-                                    SpaceController.currentTab.value == SpaceTabType.table.index
-                                        ? 1
-                                        : 0,
-                        target:
-                            SpaceController.currentTab.value == SpaceTabType.table.index ? 1 : 0,
+                        onInit: (ac) => ac.value = SpaceController.currentTab.value == SpaceTabType.table.index ? 1 : 0,
+                        target: SpaceController.currentTab.value == SpaceTabType.table.index ? 1 : 0,
                         child: Padding(
                           padding: const EdgeInsets.only(right: defaultSpacing),
                           child: LoadingIconButton(
@@ -102,9 +90,7 @@ class _SpaceControlsState extends State<SpaceControls> {
                             loading: TabletopController.loading,
                             onTap: () {
                               Get.dialog(
-                                TabletopRotateWindow(
-                                  data: ContextMenuData.fromKey(_tabletopKey, above: true),
-                                ),
+                                TabletopRotateWindow(data: ContextMenuData.fromKey(_tabletopKey, above: true)),
                               );
                             },
                             icon: Icons.crop_rotate,
@@ -119,10 +105,7 @@ class _SpaceControlsState extends State<SpaceControls> {
                       background: true,
                       padding: defaultSpacing,
                       onTap: () => SpaceController.toggleFullScreen(),
-                      icon:
-                          SpaceController.fullScreen.value
-                              ? Icons.fullscreen_exit
-                              : Icons.fullscreen,
+                      icon: SpaceController.fullScreen.value ? Icons.fullscreen_exit : Icons.fullscreen,
                       iconSize: 28,
                     ),
 
@@ -190,10 +173,7 @@ class _SpaceControlsState extends State<SpaceControls> {
                                   ),
                                 );
                               },
-                              icon:
-                                  StudioController.audioDeafened.value
-                                      ? Icons.headset_off
-                                      : Icons.headset,
+                              icon: StudioController.audioDeafened.value ? Icons.headset_off : Icons.headset,
                               iconSize: 28,
                             ),
                           ),

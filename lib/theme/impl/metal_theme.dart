@@ -58,10 +58,7 @@ final ThemeData darkMetalTheme = defaultDarkTheme.copyWith(
     onSurface: Color(0xFFFFFFFF),
   ),
   tooltipTheme: TooltipThemeData(
-    decoration: BoxDecoration(
-      color: const Color(0xFF171717),
-      borderRadius: BorderRadius.circular(defaultSpacing),
-    ),
+    decoration: BoxDecoration(color: const Color(0xFF171717), borderRadius: BorderRadius.circular(defaultSpacing)),
     textStyle: defaultDarkTheme.textTheme.labelMedium!.copyWith(
       fontSize: 16,
       fontWeight: FontWeight.normal,

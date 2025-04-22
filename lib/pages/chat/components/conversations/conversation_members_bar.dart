@@ -80,8 +80,7 @@ class ConversationMembers extends StatelessWidget {
                           onTap: () {
                             final friend = FriendController.friends[member.address];
                             if (StatusController.ownAddress != member.address) {
-                              final RenderBox box =
-                                  listKey.currentContext?.findRenderObject() as RenderBox;
+                              final RenderBox box = listKey.currentContext?.findRenderObject() as RenderBox;
                               Get.dialog(
                                 Profile(
                                   position: box.localToGlobal(box.size.bottomLeft(Offset.zero)),
@@ -106,8 +105,7 @@ class ConversationMembers extends StatelessWidget {
                                                 loading.value = false;
                                               },
                                             )
-                                          else if (ownRole == MemberRole.admin &&
-                                              member.role == MemberRole.moderator)
+                                          else if (ownRole == MemberRole.admin && member.role == MemberRole.moderator)
                                             ProfileAction(
                                               icon: Icons.add_moderator,
                                               label: "chat.make_admin".tr,
@@ -194,10 +192,7 @@ class ConversationMembers extends StatelessWidget {
                                   Padding(
                                     padding: const EdgeInsets.only(left: defaultSpacing),
                                     child: Tooltip(
-                                      message:
-                                          member.role == MemberRole.admin
-                                              ? "chat.admin".tr
-                                              : "chat.moderator".tr,
+                                      message: member.role == MemberRole.admin ? "chat.admin".tr : "chat.moderator".tr,
                                       child: Icon(
                                         Icons.shield,
                                         color:

@@ -110,11 +110,7 @@ class SpaceMember {
 
     // Verify the signature
     try {
-      final message = SpaceService.craftSignature(
-        SpaceController.id.value!,
-        id,
-        friend.id.encode(),
-      );
+      final message = SpaceService.craftSignature(SpaceController.id.value!, id, friend.id.encode());
       verified.value = checkSignature(signature, profile.signatureKey, message);
       sendLog("space member verified: ${verified.value}");
     } catch (e) {

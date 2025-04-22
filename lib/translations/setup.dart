@@ -44,8 +44,7 @@ class SetupTranslations extends Translations {
       'register.login': 'Login instead',
       'input.email': 'Your email, please',
       'login.next': 'Next step',
-      'login.register_reminder':
-          'Don\'t have an account? There is a register button below the next button.',
+      'login.register_reminder': 'Don\'t have an account? There is a register button below the next button.',
       'login.no_account': 'Register an account',
       'input.password': 'Your password, please',
       'login.forgot': 'Reset your password',

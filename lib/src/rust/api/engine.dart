@@ -6,8 +6,7 @@
 import '../frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-Future<LightwireEngine> createLightwireEngine() =>
-    RustLib.instance.api.crateApiEngineCreateLightwireEngine();
+Future<LightwireEngine> createLightwireEngine() => RustLib.instance.api.crateApiEngineCreateLightwireEngine();
 
 Stream<(Uint8List?, double?, bool?)> startPacketStream({required LightwireEngine engine}) =>
     RustLib.instance.api.crateApiEngineStartPacketStream(engine: engine);
@@ -33,11 +32,8 @@ Future<void> setAutomaticDetection({required LightwireEngine engine, required bo
 Future<void> setTalkingAmplitude({required LightwireEngine engine, required double amplitude}) =>
     RustLib.instance.api.crateApiEngineSetTalkingAmplitude(engine: engine, amplitude: amplitude);
 
-Future<void> handlePacket({
-  required LightwireEngine engine,
-  required String id,
-  required List<int> packet,
-}) => RustLib.instance.api.crateApiEngineHandlePacket(engine: engine, id: id, packet: packet);
+Future<void> handlePacket({required LightwireEngine engine, required String id, required List<int> packet}) =>
+    RustLib.instance.api.crateApiEngineHandlePacket(engine: engine, id: id, packet: packet);
 
 Future<void> stopEngine({required LightwireEngine engine}) =>
     RustLib.instance.api.crateApiEngineStopEngine(engine: engine);
@@ -54,6 +50,5 @@ class LightwireEngine {
 
   @override
   bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is LightwireEngine && runtimeType == other.runtimeType && id == other.id;
+      identical(this, other) || other is LightwireEngine && runtimeType == other.runtimeType && id == other.id;
 }

@@ -131,8 +131,7 @@ class InventoryObject extends TableObject {
 
       // Tell the controller about the hover state
       if (ownInventory) {
-        final hovered =
-            rect.contains(TabletopController.mousePos) && TabletopController.heldObject == null;
+        final hovered = rect.contains(TabletopController.mousePos) && TabletopController.heldObject == null;
         if (hovered && !TabletopController.hoveringObjects.contains(object)) {
           TabletopController.hoveringObjects.insert(0, object);
         } else if (!hovered && TabletopController.hoveringObjects.contains(object)) {
@@ -192,9 +191,7 @@ class InventoryObject extends TableObject {
     });
 
     // Remove all cards that are not in the new data
-    _cards.removeWhere(
-      (c) => !cardList.any((o) => o["i"] == c.container?.id && o["u"] == c.container?.url),
-    );
+    _cards.removeWhere((c) => !cardList.any((o) => o["i"] == c.container?.id && o["u"] == c.container?.url));
 
     // Go through all cards and unpack them (only works in main thread cause sodium)
     int index = -1;
@@ -293,10 +290,7 @@ class _InventoryObjectWindowState extends State<InventoryObjectWindow> {
               object.sendAdd();
             },
             child: Center(
-              child: Text(
-                (widget.object != null ? "edit" : "create").tr,
-                style: Get.theme.textTheme.labelLarge,
-              ),
+              child: Text((widget.object != null ? "edit" : "create").tr, style: Get.theme.textTheme.labelLarge),
             ),
           ),
         ],

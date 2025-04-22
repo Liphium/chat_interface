@@ -37,9 +37,7 @@ class LogManager {
     }
 
     // Set the logging directory
-    loggingDirectory = Directory(
-      path.join((await getApplicationSupportDirectory()).path, "logs_$currentInstance"),
-    );
+    loggingDirectory = Directory(path.join((await getApplicationSupportDirectory()).path, "logs_$currentInstance"));
     await loggingDirectory!.create();
 
     // Initialize the newest log file
@@ -59,11 +57,7 @@ class LogManager {
     if (currentLogFile == null) {
       return false;
     }
-    currentLogFile!.writeAsStringSync(
-      "${DateTime.now().toUtc()}: $line\n",
-      mode: FileMode.append,
-      flush: true,
-    );
+    currentLogFile!.writeAsStringSync("${DateTime.now().toUtc()}: $line\n", mode: FileMode.append, flush: true);
     return true;
   }
 

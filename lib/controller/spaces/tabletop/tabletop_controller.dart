@@ -139,11 +139,7 @@ class TabletopController {
     // Send mouse position if available
     if (_lastMousePos != mousePos && !disableCursorSending.value) {
       SpaceConnection.spaceConnector!.sendAction(
-        ServerAction("tc_move", <String, dynamic>{
-          "x": mousePos.dx,
-          "y": mousePos.dy,
-          "c": TabletopSettings.getHue(),
-        }),
+        ServerAction("tc_move", <String, dynamic>{"x": mousePos.dx, "y": mousePos.dy, "c": TabletopSettings.getHue()}),
       );
     }
 
@@ -250,12 +246,7 @@ class TabletopController {
         ordersToRemove.add(order);
         continue;
       }
-      final rect = Rect.fromLTWH(
-        object.location.dx,
-        object.location.dy,
-        object.size.width,
-        object.size.height,
-      );
+      final rect = Rect.fromLTWH(object.location.dx, object.location.dy, object.size.width, object.size.height);
       if (rect.contains(location) && !typesFound.contains(object.type)) {
         objectsFound.add(object);
         typesFound.add(object.type);
@@ -386,8 +377,7 @@ class AnimatedDouble {
   // Get an interpolated value
   double value(DateTime now) {
     final timeDifference = now.millisecondsSinceEpoch - _start.millisecondsSinceEpoch;
-    return lastValue +
-        (_value - lastValue) * curve.transform(clampDouble(timeDifference / duration, 0, 1));
+    return lastValue + (_value - lastValue) * curve.transform(clampDouble(timeDifference / duration, 0, 1));
   }
 
   get realValue => _value;

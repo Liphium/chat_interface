@@ -17,12 +17,7 @@ class ListSelectionSetting extends StatefulWidget {
   final List<SelectableItem> items;
   final Function(SelectableItem)? callback;
 
-  const ListSelectionSetting({
-    super.key,
-    required this.setting,
-    required this.items,
-    this.callback,
-  });
+  const ListSelectionSetting({super.key, required this.setting, required this.items, this.callback});
 
   @override
   State<ListSelectionSetting> createState() => _ListSelectionSettingState();
@@ -99,9 +94,7 @@ class _ListSelectionState extends State<ListSelection> {
                       Flexible(
                         child: Text(
                           widget.items[index].label.tr,
-                          style: Get.theme.textTheme.bodyMedium!.copyWith(
-                            color: Get.theme.colorScheme.onSurface,
-                          ),
+                          style: Get.theme.textTheme.bodyMedium!.copyWith(color: Get.theme.colorScheme.onSurface),
                         ),
                       ),
                       horizontalSpacing(defaultSpacing),

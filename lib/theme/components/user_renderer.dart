@@ -110,19 +110,11 @@ class UserRenderer extends StatelessWidget {
                       child: Tooltip(
                         waitDuration: const Duration(milliseconds: 500),
                         message: "friends.different_town".trParams({"town": friend.id.server}),
-                        child: Icon(
-                          Icons.sensors,
-                          color: Get.theme.colorScheme.onPrimary,
-                          size: 21,
-                        ),
+                        child: Icon(Icons.sensors, color: Get.theme.colorScheme.onPrimary, size: 21),
                       ),
                     ),
                   horizontalSpacing(defaultSpacing),
-                  Watch(
-                    (ctx) => StatusRenderer(
-                      status: own ? StatusController.type.value : friend!.statusType.value,
-                    ),
-                  ),
+                  Watch((ctx) => StatusRenderer(status: own ? StatusController.type.value : friend!.statusType.value)),
                 ],
               ),
               Watch(

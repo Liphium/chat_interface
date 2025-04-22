@@ -22,9 +22,7 @@ class SettingsSetup extends Setup {
 
     // Set current language
     await Get.updateLocale(
-      GeneralSettings
-          .languages[SettingController.settings[GeneralSettings.language]!.getValue()]
-          .locale,
+      GeneralSettings.languages[SettingController.settings[GeneralSettings.language]!.getValue()].locale,
     );
 
     // Changes the color theme

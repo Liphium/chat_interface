@@ -96,8 +96,7 @@ class LPHAddress {
       identical(this, other) ||
       other is LPHAddress &&
           runtimeType == other.runtimeType &&
-          TrustedLinkHelper.extractDomain(server) ==
-              TrustedLinkHelper.extractDomain(other.server) &&
+          TrustedLinkHelper.extractDomain(server) == TrustedLinkHelper.extractDomain(other.server) &&
           id == other.id;
 
   // So it works properly with HashMaps
@@ -155,14 +154,7 @@ Future<Map<String, dynamic>> postJSON(
   String? token,
   bool checkProtocol = true,
 }) {
-  return postAddress(
-    basePath,
-    path,
-    body,
-    defaultError: defaultError,
-    token: token,
-    checkProtocol: checkProtocol,
-  );
+  return postAddress(basePath, path, body, defaultError: defaultError, token: token, checkProtocol: checkProtocol);
 }
 
 /// Post request to any server (with Through Cloudflare Protection)
@@ -235,11 +227,7 @@ Future<Map<String, dynamic>> postAddress(
 }
 
 // Post request to node-backend with any token (new)
-Future<Map<String, dynamic>> postAuthJSON(
-  String path,
-  Map<String, dynamic> body,
-  String token,
-) async {
+Future<Map<String, dynamic>> postAuthJSON(String path, Map<String, dynamic> body, String token) async {
   return postJSON(path, body, token: token);
 }
 
@@ -284,11 +272,7 @@ Future<Map<String, dynamic>> postAny(
   String defaultError = "server.error",
 }) async {
   try {
-    final res = await dio.post(
-      url,
-      data: jsonEncode(body),
-      options: d.Options(validateStatus: (status) => true),
-    );
+    final res = await dio.post(url, data: jsonEncode(body), options: d.Options(validateStatus: (status) => true));
     if (res.statusCode != 200) {
       return <String, dynamic>{"success": false, "error": defaultError.tr};
     }

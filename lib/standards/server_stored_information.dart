@@ -52,8 +52,7 @@ class AsymmetricSequencedInfo {
   }
 
   /// Returns the actual thing that can be sent around
-  String finish(Uint8List publicKey) =>
-      "$seq:$signature:${encryptAsymmetricAnonymous(publicKey, text)}";
+  String finish(Uint8List publicKey) => "$seq:$signature:${encryptAsymmetricAnonymous(publicKey, text)}";
 
   /// Untransform time encrypted info using secret keys
   factory AsymmetricSequencedInfo.extract(String transformed) {
@@ -72,11 +71,7 @@ class AsymmetricSequencedInfo {
 
     // Get all the rest
     final signature = args[1];
-    final decryptedText = decryptAsymmetricAnonymous(
-      asymmetricKeyPair.publicKey,
-      asymmetricKeyPair.secretKey,
-      args[2],
-    );
+    final decryptedText = decryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, asymmetricKeyPair.secretKey, args[2]);
     return AsymmetricSequencedInfo(seq, signature, decryptedText);
   }
 
@@ -104,8 +99,7 @@ class SymmetricSequencedInfo {
   }
 
   /// Returns the actual thing that can be sent around
-  String finish(SecureKey key, {Sodium? sodium}) =>
-      "$seq:$signature:${encryptSymmetric(text, key, sodium)}";
+  String finish(SecureKey key, {Sodium? sodium}) => "$seq:$signature:${encryptSymmetric(text, key, sodium)}";
 
   /// Untransform time encrypted info using the secret key
   factory SymmetricSequencedInfo.extract(String transformed, SecureKey key, [Sodium? sodium]) {

@@ -28,9 +28,7 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   RustStreamSink<(Uint8List?, double?, bool?)>
-  dco_decode_StreamSink_record_opt_list_prim_u_8_strict_opt_box_autoadd_f_32_opt_box_autoadd_bool_Sse(
-    dynamic raw,
-  );
+  dco_decode_StreamSink_record_opt_list_prim_u_8_strict_opt_box_autoadd_f_32_opt_box_autoadd_bool_Sse(dynamic raw);
 
   @protected
   String dco_decode_String(dynamic raw);
@@ -81,8 +79,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   Uint8List? dco_decode_opt_list_prim_u_8_strict(dynamic raw);
 
   @protected
-  (Uint8List?, double?, bool?)
-  dco_decode_record_opt_list_prim_u_8_strict_opt_box_autoadd_f_32_opt_box_autoadd_bool(dynamic raw);
+  (Uint8List?, double?, bool?) dco_decode_record_opt_list_prim_u_8_strict_opt_box_autoadd_f_32_opt_box_autoadd_bool(
+    dynamic raw,
+  );
 
   @protected
   int dco_decode_u_32(dynamic raw);
@@ -154,8 +153,7 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   Uint8List? sse_decode_opt_list_prim_u_8_strict(SseDeserializer deserializer);
 
   @protected
-  (Uint8List?, double?, bool?)
-  sse_decode_record_opt_list_prim_u_8_strict_opt_box_autoadd_f_32_opt_box_autoadd_bool(
+  (Uint8List?, double?, bool?) sse_decode_record_opt_list_prim_u_8_strict_opt_box_autoadd_f_32_opt_box_autoadd_bool(
     SseDeserializer deserializer,
   );
 
@@ -178,8 +176,7 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_StreamSink_String_Sse(RustStreamSink<String> self, SseSerializer serializer);
 
   @protected
-  void
-  sse_encode_StreamSink_record_opt_list_prim_u_8_strict_opt_box_autoadd_f_32_opt_box_autoadd_bool_Sse(
+  void sse_encode_StreamSink_record_opt_list_prim_u_8_strict_opt_box_autoadd_f_32_opt_box_autoadd_bool_Sse(
     RustStreamSink<(Uint8List?, double?, bool?)> self,
     SseSerializer serializer,
   );
@@ -254,8 +251,7 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 // Section: wire_class
 
 class RustLibWire implements BaseWire {
-  factory RustLibWire.fromExternalLibrary(ExternalLibrary lib) =>
-      RustLibWire(lib.ffiDynamicLibrary);
+  factory RustLibWire.fromExternalLibrary(ExternalLibrary lib) => RustLibWire(lib.ffiDynamicLibrary);
 
   /// Holds the symbol lookup function.
   final ffi.Pointer<T> Function<T extends ffi.NativeType>(String symbolName) _lookup;

@@ -49,18 +49,12 @@ class ConversationRingingWindowState extends State<ConversationRingingWindow> {
                   ),
                   verticalSpacing(elementSpacing),
                   Text(
-                    widget.conversation.isGroup
-                        ? widget.conversation.container.name
-                        : widget.conversation.dmName,
+                    widget.conversation.isGroup ? widget.conversation.container.name : widget.conversation.dmName,
                     style: Get.textTheme.headlineMedium,
                     textHeightBehavior: noTextHeight,
                   ),
                   verticalSpacing(elementSpacing),
-                  Text(
-                    "spaces.calling".tr,
-                    style: Get.textTheme.bodyLarge,
-                    textHeightBehavior: noTextHeight,
-                  ),
+                  Text("spaces.calling".tr, style: Get.textTheme.bodyLarge, textHeightBehavior: noTextHeight),
                   verticalSpacing(sectionSpacing),
                   Row(
                     mainAxisSize: MainAxisSize.min,

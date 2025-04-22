@@ -58,9 +58,7 @@ class _OwnProfileMobileState extends State<OwnProfileMobile> {
                       SizedBox(
                         width: 60,
                         height: 60,
-                        child: Stack(
-                          children: [UserAvatar(id: StatusController.ownAddress, size: 60)],
-                        ),
+                        child: Stack(children: [UserAvatar(id: StatusController.ownAddress, size: 60)]),
                       ),
                       horizontalSpacing(sectionSpacing),
                       Expanded(
@@ -153,8 +151,7 @@ class _OwnProfileMobileState extends State<OwnProfileMobile> {
                   return Padding(
                     padding: const EdgeInsets.only(bottom: defaultSpacing),
                     child: Material(
-                      color:
-                          selected ? theme.colorScheme.primary : theme.colorScheme.inverseSurface,
+                      color: selected ? theme.colorScheme.primary : theme.colorScheme.inverseSurface,
                       borderRadius: BorderRadius.circular(defaultSpacing),
                       child: InkWell(
                         borderRadius: BorderRadius.circular(defaultSpacing),
@@ -176,10 +173,7 @@ class _OwnProfileMobileState extends State<OwnProfileMobile> {
                               Text(
                                 "status.${index.toString()}".tr,
                                 style: theme.textTheme.bodyMedium!.copyWith(
-                                  color:
-                                      selected
-                                          ? theme.colorScheme.onSurface
-                                          : theme.colorScheme.surface,
+                                  color: selected ? theme.colorScheme.onSurface : theme.colorScheme.surface,
                                 ),
                                 textHeightBehavior: noTextHeight,
                               ),

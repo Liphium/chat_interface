@@ -1,6 +1,5 @@
 import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/bubbles_renderer.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:lorien_chat_list/lorien_chat_list.dart';
@@ -12,12 +11,7 @@ class MessageList extends StatefulWidget {
   final double? overwritePadding;
   final double heightMultiplier;
 
-  const MessageList({
-    super.key,
-    required this.provider,
-    this.overwritePadding,
-    this.heightMultiplier = 1,
-  });
+  const MessageList({super.key, required this.provider, this.overwritePadding, this.heightMultiplier = 1});
 
   @override
   State<MessageList> createState() => _MessageListState();
@@ -44,17 +38,14 @@ class _MessageListState extends State<MessageList> {
         builder: (context, constraints) {
           return Padding(
             padding: EdgeInsets.symmetric(
-              horizontal:
-                  widget.overwritePadding ??
-                  (constraints.maxWidth <= 800 ? defaultSpacing : sectionSpacing),
+              horizontal: widget.overwritePadding ?? (constraints.maxWidth <= 800 ? defaultSpacing : sectionSpacing),
             ),
             child: ChatList(
               scrollController: _scrollController,
               controller: widget.provider.listController,
+              loadingMoreWidget: SizedBox(),
               onLoadMoreCallback: () async {
-                sendLog("loading messages..");
                 var (topReached, error) = await widget.provider.loadNewMessagesTop();
-                sendLog("messages loaded with $topReached");
                 if (!error) {
                   return topReached;
                 }

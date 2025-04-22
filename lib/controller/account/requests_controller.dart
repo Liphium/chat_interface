@@ -107,9 +107,7 @@ Future<void> newFriendRequest(String name, Function(String) success) async {
   await showConfirmPopup(
     ConfirmWindow(
       title: "request.confirm.title".tr,
-      text: "request.confirm.text".trParams(<String, String>{
-        "username": "${profile.displayName} (${profile.name})",
-      }),
+      text: "request.confirm.text".trParams(<String, String>{"username": "${profile.displayName} (${profile.name})"}),
       onConfirm: () async {
         await RequestsService.sendOrAcceptFriendRequest(profile!);
       },

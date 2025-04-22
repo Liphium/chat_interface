@@ -51,10 +51,7 @@ class InfoContainer extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.all(defaultSpacing),
-      decoration: BoxDecoration(
-        color: theme.colorScheme.primary,
-        borderRadius: BorderRadius.circular(defaultSpacing),
-      ),
+      decoration: BoxDecoration(color: theme.colorScheme.primary, borderRadius: BorderRadius.circular(defaultSpacing)),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -123,12 +120,7 @@ class _AnimatedContainerBaseState extends State<_AnimatedContainerBase> with Sig
   Widget build(BuildContext context) {
     return Animate(
       effects: [
-        ScaleEffect(
-          duration: 250.ms,
-          curve: Curves.ease,
-          begin: const Offset(1.1, 1.1),
-          end: const Offset(1.0, 1.0),
-        ),
+        ScaleEffect(duration: 250.ms, curve: Curves.ease, begin: const Offset(1.1, 1.1), end: const Offset(1.0, 1.0)),
       ],
       onInit: (controller) => this.controller = controller,
       child: Animate(
@@ -149,9 +141,7 @@ class _AnimatedContainerBaseState extends State<_AnimatedContainerBase> with Sig
               children: [
                 Icon(Icons.error, color: Theme.of(context).colorScheme.error),
                 horizontalSpacing(defaultSpacing),
-                Flexible(
-                  child: Text(_message.value, style: Theme.of(context).textTheme.labelMedium),
-                ),
+                Flexible(child: Text(_message.value, style: Theme.of(context).textTheme.labelMedium)),
               ],
             ),
           ),
@@ -167,12 +157,7 @@ class AnimatedErrorContainer extends StatelessWidget {
   final EdgeInsets padding;
   final bool expand;
 
-  const AnimatedErrorContainer({
-    super.key,
-    required this.padding,
-    required this.message,
-    this.expand = false,
-  });
+  const AnimatedErrorContainer({super.key, required this.padding, required this.message, this.expand = false});
 
   @override
   Widget build(BuildContext context) {
@@ -194,12 +179,7 @@ class AnimatedInfoContainer extends StatelessWidget {
   final EdgeInsets padding;
   final bool expand;
 
-  const AnimatedInfoContainer({
-    super.key,
-    required this.padding,
-    required this.message,
-    this.expand = false,
-  });
+  const AnimatedInfoContainer({super.key, required this.padding, required this.message, this.expand = false});
 
   @override
   Widget build(BuildContext context) {

@@ -48,8 +48,7 @@ class TabletopSettings {
 
   /// Initialize the cursor hue to make sure it's actually randomized by default
   static Future<void> initSettings() async {
-    final val =
-        await (db.setting.select()..where((tbl) => tbl.key.equals(cursorHue))).getSingleOrNull();
+    final val = await (db.setting.select()..where((tbl) => tbl.key.equals(cursorHue))).getSingleOrNull();
     if (val == null) {
       await SettingController.settings[cursorHue]!.setValue(Random().nextDouble());
     }
@@ -170,10 +169,7 @@ class _TabletopGeneralTabState extends State<TabletopGeneralTab> {
                       ),
                     ),
                   ),
-                  Align(
-                    alignment: Alignment.center,
-                    child: UserAvatar(id: StatusController.ownAddress, size: 40),
-                  ),
+                  Align(alignment: Alignment.center, child: UserAvatar(id: StatusController.ownAddress, size: 40)),
                   Align(
                     alignment: Alignment.bottomRight,
                     child: Watch(
@@ -259,9 +255,7 @@ class _TabletopDeckTabState extends State<TabletopDeckTab> {
       }
 
       if (_error.value) {
-        return Center(
-          child: ErrorContainer(message: "settings.tabletop.decks.error".tr, expand: true),
-        );
+        return Center(child: ErrorContainer(message: "settings.tabletop.decks.error".tr, expand: true));
       }
 
       return Column(
@@ -472,18 +466,12 @@ class _DeckCreationWindowState extends State<DeckCreationWindow> {
                     width: Get.theme.textTheme.labelLarge!.fontSize! + defaultSpacing,
                     child: Padding(
                       padding: const EdgeInsets.all(defaultSpacing * 0.25),
-                      child: CircularProgressIndicator(
-                        strokeWidth: 3.0,
-                        color: Get.theme.colorScheme.onPrimary,
-                      ),
+                      child: CircularProgressIndicator(strokeWidth: 3.0, color: Get.theme.colorScheme.onPrimary),
                     ),
                   ),
                 ),
             child: Center(
-              child: Text(
-                widget.deck == null ? "create".tr : "save".tr,
-                style: Get.theme.textTheme.labelLarge,
-              ),
+              child: Text(widget.deck == null ? "create".tr : "save".tr, style: Get.theme.textTheme.labelLarge),
             ),
           ),
         ],
@@ -529,9 +517,7 @@ class _DeckCardsWindowState extends State<DeckCardsWindow> {
               FJElevatedButton(
                 onTap: () async {
                   final result = await openFiles(
-                    acceptedTypeGroups: [
-                      const XTypeGroup(label: "Image", extensions: FileSettings.staticImageTypes),
-                    ],
+                    acceptedTypeGroups: [const XTypeGroup(label: "Image", extensions: FileSettings.staticImageTypes)],
                   );
                   if (result.isEmpty) {
                     return;
@@ -539,24 +525,18 @@ class _DeckCardsWindowState extends State<DeckCardsWindow> {
 
                   // Check files
                   for (var file in result) {
-                    if (await file.length() >
-                        specialConstants[Constants.specialConstantMaxFileSize]!) {
+                    if (await file.length() > specialConstants[Constants.specialConstantMaxFileSize]!) {
                       showErrorPopup(
                         "error",
                         "file.too_large".trParams({
-                          "1": formatFileSize(
-                            specialConstants[Constants.specialConstantMaxFileSize]!,
-                          ),
+                          "1": formatFileSize(specialConstants[Constants.specialConstantMaxFileSize]!),
                         }),
                       );
                       return;
                     }
                   }
 
-                  final response = await Get.dialog(
-                    CardsUploadWindow(files: result),
-                    barrierDismissible: false,
-                  );
+                  final response = await Get.dialog(CardsUploadWindow(files: result), barrierDismissible: false);
                   if (response.isEmpty) {
                     showErrorPopupTranslated("error", "app.error".tr);
                     return;
@@ -598,9 +578,7 @@ class _DeckCardsWindowState extends State<DeckCardsWindow> {
 
                 return SingleChildScrollView(
                   child: GridView.builder(
-                    gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                      maxCrossAxisExtent: 200,
-                    ),
+                    gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 200),
                     itemCount: widget.deck.cards.value.length,
                     shrinkWrap: true,
                     itemBuilder: (context, index) {
@@ -763,10 +741,7 @@ class _CardsUploadWindowState extends State<CardsUploadWindow> with SignalsMixin
         mainAxisSize: MainAxisSize.min,
         children: [
           Text(
-            "file.uploading".trParams({
-              "index": (_current.value).toString(),
-              "total": widget.files.length.toString(),
-            }),
+            "file.uploading".trParams({"index": (_current.value).toString(), "total": widget.files.length.toString()}),
             style: Get.theme.textTheme.titleLarge,
           ),
           verticalSpacing(sectionSpacing),

@@ -90,10 +90,7 @@ class SettingSelectionMobile extends StatelessWidget {
                                     ),
                                   ),
                                   horizontalSpacing(defaultSpacing),
-                                  Icon(
-                                    Icons.arrow_forward,
-                                    size: Get.theme.textTheme.titleLarge!.fontSize! * 1.5,
-                                  ),
+                                  Icon(Icons.arrow_forward, size: Get.theme.textTheme.titleLarge!.fontSize! * 1.5),
                                 ],
                               ),
                             ),

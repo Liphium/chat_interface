@@ -124,13 +124,7 @@ class _LibraryTabState extends State<LibraryTab> {
               borderRadius: BorderRadius.circular(defaultSpacing),
               onTap: () {
                 //* Send message with the library element
-                widget.provider.sendMessage(
-                  signal(false),
-                  MessageType.text,
-                  [entry.container!.toAttachment()],
-                  "",
-                  "",
-                );
+                widget.provider.sendMessage(signal(false), MessageType.text, [entry.container!.toAttachment()], "", "");
                 Get.back();
               },
               child: ClipRRect(

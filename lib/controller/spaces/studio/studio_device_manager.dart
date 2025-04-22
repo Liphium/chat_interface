@@ -60,9 +60,7 @@ class StudioDeviceManager {
     if (outputDevices.disposed) {
       return;
     }
-    final newList = <SelectableItem>[
-      SelectableItem("Default (${defaultDevice.name})", Icons.speaker),
-    ];
+    final newList = <SelectableItem>[SelectableItem("Default (${defaultDevice.name})", Icons.speaker)];
 
     // Add all the other devices
     for (var device in await libdevices.getOutputDevices()) {
@@ -82,9 +80,7 @@ class StudioDeviceManager {
     if (microphones.disposed) {
       return;
     }
-    final newList = <SelectableItem>[
-      SelectableItem("Default (${defaultMicrophone.name})", Icons.mic),
-    ];
+    final newList = <SelectableItem>[SelectableItem("Default (${defaultMicrophone.name})", Icons.mic)];
 
     // Add all the other microphones
     for (var mic in await libdevices.getInputDevices()) {

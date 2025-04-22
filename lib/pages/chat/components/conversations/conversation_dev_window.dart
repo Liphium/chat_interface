@@ -22,10 +22,8 @@ class _ConversationAddWindowState extends State<ConversationDevWindow> {
 
   @override
   Widget build(BuildContext context) {
-    final readDate = DateTime.fromMillisecondsSinceEpoch(widget.conversation.readAt.value.toInt());
-    final updateDate = DateTime.fromMillisecondsSinceEpoch(
-      widget.conversation.updatedAt.value.toInt(),
-    );
+    final readDate = DateTime.fromMillisecondsSinceEpoch(widget.conversation.readAt.toInt());
+    final updateDate = DateTime.fromMillisecondsSinceEpoch(widget.conversation.updatedAt.toInt());
     sendLog(widget.conversation.lastVersion);
 
     return DialogBase(
@@ -69,16 +67,12 @@ class _ConversationAddWindowState extends State<ConversationDevWindow> {
           ),
           verticalSpacing(elementSpacing),
           Text(
-            "conversation.info.members".trParams({
-              "count": widget.conversation.members.length.toString(),
-            }),
+            "conversation.info.members".trParams({"count": widget.conversation.members.length.toString()}),
             style: Get.textTheme.bodyMedium,
           ),
           verticalSpacing(elementSpacing),
           Text(
-            "conversation.info.version".trParams({
-              "version": widget.conversation.lastVersion.toString(),
-            }),
+            "conversation.info.version".trParams({"version": widget.conversation.lastVersion.toString()}),
             style: Get.textTheme.bodyMedium,
           ),
           verticalSpacing(defaultSpacing),
@@ -96,9 +90,7 @@ class _ConversationAddWindowState extends State<ConversationDevWindow> {
             label: "conversation.info.copy_token".tr,
             onTap: () {
               Clipboard.setData(
-                ClipboardData(
-                  text: "${widget.conversation.token.id}:${widget.conversation.token.token}",
-                ),
+                ClipboardData(text: "${widget.conversation.token.id}:${widget.conversation.token.token}"),
               );
               Get.back();
             },

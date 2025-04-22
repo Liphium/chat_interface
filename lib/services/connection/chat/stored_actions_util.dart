@@ -25,10 +25,7 @@ Future<String?> sendAuthenticatedStoredAction(Friend friend, Map<String, dynamic
 
   // Send the authenticated stored action
   final keys = await friend.getKeys();
-  final json = await postAddress(friend.id.server, "/account/stored_actions/send_auth", <
-    String,
-    dynamic
-  >{
+  final json = await postAddress(friend.id.server, "/account/stored_actions/send_auth", <String, dynamic>{
     "account": friend.id.id,
     // actual data (safe from replay attacks thanks to sequence numbers and the sender saving the last receive time)
     "payload": AsymmetricSequencedInfo.builder(

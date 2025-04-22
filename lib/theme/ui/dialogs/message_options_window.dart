@@ -77,9 +77,7 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
                 label: "message.info".tr,
                 onTap: () {
                   Get.back();
-                  Get.dialog(
-                    MessageInfoWindow(message: widget.message, provider: widget.provider!),
-                  );
+                  Get.dialog(MessageInfoWindow(message: widget.message, provider: widget.provider!));
                 },
               ),
             ),
@@ -99,8 +97,7 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
             ),
 
           // Only show the save to button in case there is an attachment
-          if (widget.message.attachmentsRenderer.length == 1 &&
-              widget.message.attachmentsRenderer[0].downloaded.value)
+          if (widget.message.attachmentsRenderer.length == 1 && widget.message.attachmentsRenderer[0].downloaded.value)
             Padding(
               padding: const EdgeInsets.only(bottom: elementSpacing),
               child: ProfileButton(
@@ -128,8 +125,7 @@ class _ConversationAddWindowState extends State<MessageOptionsWindow> {
             ),
 
           // Only show the open button in case there is an attachment
-          if (widget.message.attachmentsRenderer.length == 1 &&
-              widget.message.attachmentsRenderer[0].downloaded.value)
+          if (widget.message.attachmentsRenderer.length == 1 && widget.message.attachmentsRenderer[0].downloaded.value)
             Padding(
               padding: const EdgeInsets.only(bottom: elementSpacing),
               child: ProfileButton(

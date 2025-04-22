@@ -47,10 +47,7 @@ class DataSettingsPage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
-                        "settings.data.profile_picture.requirements".tr,
-                        style: Get.theme.textTheme.bodyMedium,
-                      ),
+                      Text("settings.data.profile_picture.requirements".tr, style: Get.theme.textTheme.bodyMedium),
                       verticalSpacing(defaultSpacing),
                       Row(
                         children: [
@@ -63,19 +60,13 @@ class DataSettingsPage extends StatelessWidget {
                               }
                               final size = await result.length();
                               if (size > 10 * 1000 * 1000) {
-                                showErrorPopup(
-                                  "error".tr,
-                                  "settings.data.profile_picture.requirements".tr,
-                                );
+                                showErrorPopup("error".tr, "settings.data.profile_picture.requirements".tr);
                                 return;
                               }
 
                               final fileType = result.path.split(".").last;
                               if (!["jpeg", "jpg", "png"].contains(fileType)) {
-                                showErrorPopup(
-                                  "error".tr,
-                                  "settings.data.profile_picture.requirements".tr,
-                                );
+                                showErrorPopup("error".tr, "settings.data.profile_picture.requirements".tr);
                                 return;
                               }
 
@@ -134,10 +125,7 @@ class DataSettingsPage extends StatelessWidget {
                     children: [
                       Text("settings.data.key_requests".tr, style: Get.theme.textTheme.labelMedium),
                       verticalSpacing(elementSpacing),
-                      Text(
-                        "settings.data.key_requests.description".tr,
-                        style: Get.theme.textTheme.bodyMedium,
-                      ),
+                      Text("settings.data.key_requests.description".tr, style: Get.theme.textTheme.bodyMedium),
                     ],
                   ),
                 ),
@@ -169,12 +157,8 @@ class DataSettingsPage extends StatelessWidget {
                     verticalSpacing(elementSpacing),
                     Watch(
                       (ctx) => Text(
-                        StatusController.displayName.value.toLowerCase() ==
-                                StatusController.name.value.toLowerCase()
-                            ? List.generate(
-                              StatusController.name.value.length,
-                              (index) => "*",
-                            ).join("")
+                        StatusController.displayName.value.toLowerCase() == StatusController.name.value.toLowerCase()
+                            ? List.generate(StatusController.name.value.length, (index) => "*").join("")
                             : StatusController.displayName.value,
                         style: Get.theme.textTheme.bodyMedium,
                       ),
@@ -319,10 +303,7 @@ class DataSettingsPage extends StatelessWidget {
               children: [
                 Icon(Icons.delete, color: Get.theme.colorScheme.error),
                 horizontalSpacing(defaultSpacing),
-                Text(
-                  "settings.data.danger_zone.delete_account".tr,
-                  style: Get.theme.textTheme.labelMedium,
-                ),
+                Text("settings.data.danger_zone.delete_account".tr, style: Get.theme.textTheme.labelMedium),
               ],
             ),
           ),

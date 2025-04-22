@@ -131,24 +131,15 @@ class _MessageSearchSidebarState extends State<MessageSearchSidebar> {
                         children: [
                           if (newHeading || index == 0)
                             Padding(
-                              padding: const EdgeInsets.only(
-                                top: defaultSpacing,
-                                bottom: defaultSpacing,
-                              ),
-                              child: Text(
-                                formatDay(message.createdAt),
-                                style: Get.theme.textTheme.labelMedium,
-                              ),
+                              padding: const EdgeInsets.only(top: defaultSpacing, bottom: defaultSpacing),
+                              child: Text(formatDay(message.createdAt), style: Get.theme.textTheme.labelMedium),
                             ),
                           Material(
                             borderRadius: BorderRadius.circular(defaultSpacing),
                             color: Get.theme.colorScheme.inverseSurface,
                             child: InkWell(
                               borderRadius: BorderRadius.circular(defaultSpacing),
-                              onTap:
-                                  () => SidebarController.getCurrentProvider()!.scrollToMessage(
-                                    message.id,
-                                  ),
+                              onTap: () => SidebarController.getCurrentProvider()!.scrollToMessage(message.id),
                               child: Padding(
                                 padding: const EdgeInsets.all(defaultSpacing),
                                 child: MaterialMessageRenderer(
@@ -161,8 +152,7 @@ class _MessageSearchSidebarState extends State<MessageSearchSidebar> {
                               ),
                             ),
                           ),
-                          if (index == widget.query.results.length - 1)
-                            verticalSpacing(elementSpacing),
+                          if (index == widget.query.results.length - 1) verticalSpacing(elementSpacing),
                         ],
                       ),
                     );

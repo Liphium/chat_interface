@@ -11,12 +11,7 @@ KeyPair generateAsymmetricKeyPair([Sodium? sd]) {
 }
 
 /// Encrypts a message (secret key is the key of the sender and public key is the key of the receiver)
-String encryptAsymmetricAuth(
-  Uint8List publicKey,
-  SecureKey secureKey,
-  String message, [
-  Sodium? sd,
-]) {
+String encryptAsymmetricAuth(Uint8List publicKey, SecureKey secureKey, String message, [Sodium? sd]) {
   final Sodium sodium = sd ?? sodiumLib;
   final plainTextBytes = message.toCharArray().unsignedView();
   final nonce = sodium.randombytes.buf(sodium.crypto.secretBox.nonceBytes);
@@ -38,12 +33,7 @@ class DecryptionResult {
 }
 
 /// Decrypts a message (secret key is the key of the receiver and public key is the key of the sender)
-DecryptionResult decryptAsymmetricAuth(
-  Uint8List publicKey,
-  SecureKey secretKey,
-  String message, [
-  Sodium? sd,
-]) {
+DecryptionResult decryptAsymmetricAuth(Uint8List publicKey, SecureKey secretKey, String message, [Sodium? sd]) {
   final Sodium sodium = sd ?? sodiumLib;
   final cipherText = base64Decode(message);
   final nonce = cipherText.sublist(0, sodium.crypto.secretBox.nonceBytes);
@@ -89,22 +79,13 @@ String encryptAsymmetricAnonymous(Uint8List publicKey, String message, [Sodium? 
 
 /// For friend requests and other stored actions (that shouldn't be identifiable).
 /// Secret key is your secret key and public key would also be your public key.
-String decryptAsymmetricAnonymous(
-  Uint8List publicKey,
-  SecureKey secretKey,
-  String message, [
-  Sodium? sd,
-]) {
+String decryptAsymmetricAnonymous(Uint8List publicKey, SecureKey secretKey, String message, [Sodium? sd]) {
   final Sodium sodium = sd ?? sodiumLib;
   final cipherText = base64Decode(message);
   var decrypted = "";
   try {
     decrypted = utf8.decode(
-      sodium.crypto.box.sealOpen(
-        cipherText: cipherText,
-        publicKey: publicKey,
-        secretKey: secretKey,
-      ),
+      sodium.crypto.box.sealOpen(cipherText: cipherText, publicKey: publicKey, secretKey: secretKey),
     );
   } catch (e) {
     sendLog("WARNING: couldn't decrypt message");
@@ -132,8 +113,5 @@ bool verifySignature(Uint8List publicKey, String signature, String message, [Sod
 */
 
 KeyPair toKeyPair(String publicKey, String privateKey, [Sodium? sd]) {
-  return KeyPair(
-    publicKey: unpackagePublicKey(publicKey),
-    secretKey: unpackagePrivateKey(privateKey, sd),
-  );
+  return KeyPair(publicKey: unpackagePublicKey(publicKey), secretKey: unpackagePrivateKey(privateKey, sd));
 }

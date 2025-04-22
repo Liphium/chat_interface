@@ -13,11 +13,7 @@ class SquareService {
   /// Returns an error if there was one.
   static Future<String?> openSquare(List<Friend> friends, String name) async {
     // Create the conversation for the square
-    return ConversationService.openConversation(
-      model.ConversationType.square,
-      friends,
-      SquareContainer(name, []),
-    );
+    return ConversationService.openConversation(model.ConversationType.square, friends, SquareContainer(name, []));
   }
 
   /// Add a topic to a square.

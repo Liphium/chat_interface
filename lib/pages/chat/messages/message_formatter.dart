@@ -10,12 +10,7 @@ class TextEvaluator {
   /// Optionally provide a text style for the formatting patterns.
   ///
   /// Returns a list of text spans that are formatted properly.
-  List<TextSpan> evaluate(
-    String text,
-    TextStyle startStyle, {
-    TextStyle? pattern,
-    bool skipPatterns = false,
-  }) {
+  List<TextSpan> evaluate(String text, TextStyle startStyle, {TextStyle? pattern, bool skipPatterns = false}) {
     // Reset the state of the automatons
     for (var automaton in automatons) {
       /*
@@ -168,12 +163,7 @@ class MessageFormatter {
   /// Build a text span from a text by parsing the formatting patterns in it.
   TextSpan build(String text) {
     return TextSpan(
-      children: evaluator.evaluate(
-        text,
-        normalStyle,
-        pattern: formattedStyle,
-        skipPatterns: formattedStyle == null,
-      ),
+      children: evaluator.evaluate(text, normalStyle, pattern: formattedStyle, skipPatterns: formattedStyle == null),
       style: normalStyle,
     );
   }
@@ -188,11 +178,7 @@ class FormattedTextEditingController extends TextEditingController {
   }
 
   @override
-  TextSpan buildTextSpan({
-    required BuildContext context,
-    TextStyle? style,
-    required bool withComposing,
-  }) {
+  TextSpan buildTextSpan({required BuildContext context, TextStyle? style, required bool withComposing}) {
     return formatter.build(text);
   }
 }

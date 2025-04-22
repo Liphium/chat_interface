@@ -42,10 +42,7 @@ class _SpaceInfoTabState extends State<SpaceInfoTab> {
                   if (StudioController.connectionError.value != "") {
                     return Padding(
                       padding: const EdgeInsets.only(top: sectionSpacing),
-                      child: Text(
-                        StudioController.connectionError.value,
-                        style: theme.textTheme.labelMedium,
-                      ),
+                      child: Text(StudioController.connectionError.value, style: theme.textTheme.labelMedium),
                     );
                   }
 

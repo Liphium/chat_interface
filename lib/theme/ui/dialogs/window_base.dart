@@ -62,11 +62,7 @@ class DialogBase extends StatelessWidget {
         top: true,
         right: true,
         left: true,
-        padding: EdgeInsets.only(
-          top: defaultSpacing * 1.5,
-          right: defaultSpacing * 1.5,
-          left: defaultSpacing * 1.5,
-        ),
+        padding: EdgeInsets.only(top: defaultSpacing * 1.5, right: defaultSpacing * 1.5, left: defaultSpacing * 1.5),
         child: child,
       );
     }
@@ -216,11 +212,7 @@ class SlidingWindowBase extends StatelessWidget {
                   padding: EdgeInsets.all(padding),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Row(children: title),
-                      if (title.isNotEmpty) verticalSpacing(defaultSpacing),
-                      child,
-                    ],
+                    children: [Row(children: title), if (title.isNotEmpty) verticalSpacing(defaultSpacing), child],
                   ),
                 ),
               ),
@@ -299,12 +291,7 @@ class ContextMenuData {
   const ContextMenuData(this.start, this.fromTop, this.fromLeft);
 
   // Compute the position of the context menu based on a widget it should be next to
-  factory ContextMenuData.fromKey(
-    GlobalKey key, {
-    bool above = false,
-    bool right = false,
-    bool below = false,
-  }) {
+  factory ContextMenuData.fromKey(GlobalKey key, {bool above = false, bool right = false, bool below = false}) {
     final RenderBox renderBox = key.currentContext!.findRenderObject() as RenderBox;
     var position = renderBox.localToGlobal(Offset.zero);
     final widgetDimensions = renderBox.size;
@@ -317,10 +304,7 @@ class ContextMenuData {
       if (above) {
         position = Offset(position.dx, screenDimensions.height - position.dy + defaultSpacing);
       } else {
-        position = Offset(
-          position.dx,
-          screenDimensions.height - position.dy - widgetDimensions.height,
-        );
+        position = Offset(position.dx, screenDimensions.height - position.dy - widgetDimensions.height);
       }
     } else {
       fromTop = true;
@@ -334,10 +318,7 @@ class ContextMenuData {
     if (position.dx > screenDimensions.width - 350 || right) {
       fromLeft = false;
       if (above || below) {
-        position = Offset(
-          screenDimensions.width - position.dx - widgetDimensions.width,
-          position.dy,
-        );
+        position = Offset(screenDimensions.width - position.dx - widgetDimensions.width, position.dy);
       } else {
         position = Offset(screenDimensions.width - position.dx + defaultSpacing, position.dy);
       }

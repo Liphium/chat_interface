@@ -16,12 +16,8 @@ class SystemMessages {
       translation: (msg, provider) {
         if (provider is ConversationMessageProvider) {
           return "chat.rank_change.${msg.attachments[0]}->${msg.attachments[1]}".trParams({
-            "name":
-                FriendController.getFriend(LPHAddress.from(msg.attachments[2])).displayName.value,
-            "sender":
-                FriendController.getFriend(
-                  LPHAddress.from(msg.attachments[3]),
-                ).displayName.value, // NZJNP232RS5g
+            "name": FriendController.getFriend(LPHAddress.from(msg.attachments[2])).displayName.value,
+            "sender": FriendController.getFriend(LPHAddress.from(msg.attachments[3])).displayName.value, // NZJNP232RS5g
           });
         }
 
@@ -41,8 +37,7 @@ class SystemMessages {
       translation: (msg, provider) {
         if (provider is ConversationMessageProvider) {
           return "chat.token_change".trParams({
-            "name":
-                FriendController.getFriend(LPHAddress.from(msg.attachments[0])).displayName.value,
+            "name": FriendController.getFriend(LPHAddress.from(msg.attachments[0])).displayName.value,
           });
         }
 
@@ -62,8 +57,7 @@ class SystemMessages {
       translation: (msg, provider) {
         if (provider is ConversationMessageProvider) {
           return "chat.member_join".trParams({
-            "name":
-                FriendController.getFriend(LPHAddress.from(msg.attachments[0])).displayName.value,
+            "name": FriendController.getFriend(LPHAddress.from(msg.attachments[0])).displayName.value,
           });
         }
 
@@ -83,10 +77,8 @@ class SystemMessages {
       translation: (msg, provider) {
         if (provider is ConversationMessageProvider) {
           return "chat.member_invite".trParams({
-            "invitor":
-                FriendController.getFriend(LPHAddress.from(msg.attachments[0])).displayName.value,
-            "name":
-                FriendController.getFriend(LPHAddress.from(msg.attachments[1])).displayName.value,
+            "invitor": FriendController.getFriend(LPHAddress.from(msg.attachments[0])).displayName.value,
+            "name": FriendController.getFriend(LPHAddress.from(msg.attachments[1])).displayName.value,
           });
         }
 
@@ -106,8 +98,7 @@ class SystemMessages {
       translation: (msg, provider) {
         if (provider is ConversationMessageProvider) {
           return "chat.member_leave".trParams({
-            "name":
-                FriendController.getFriend(LPHAddress.from(msg.attachments[0])).displayName.value,
+            "name": FriendController.getFriend(LPHAddress.from(msg.attachments[0])).displayName.value,
           });
         }
         return "not.supported".tr;
@@ -126,10 +117,8 @@ class SystemMessages {
       translation: (msg, provider) {
         if (provider is ConversationMessageProvider) {
           return "chat.kick".trParams({
-            "issuer":
-                FriendController.getFriend(LPHAddress.from(msg.attachments[0])).displayName.value,
-            "name":
-                FriendController.getFriend(LPHAddress.from(msg.attachments[1])).displayName.value,
+            "issuer": FriendController.getFriend(LPHAddress.from(msg.attachments[0])).displayName.value,
+            "name": FriendController.getFriend(LPHAddress.from(msg.attachments[1])).displayName.value,
           });
         }
         return "not.supported".tr;
@@ -148,8 +137,7 @@ class SystemMessages {
       translation: (msg, provider) {
         if (provider is ConversationMessageProvider) {
           return "chat.new_admin".trParams({
-            "name":
-                FriendController.getFriend(LPHAddress.from(msg.attachments[0])).displayName.value,
+            "name": FriendController.getFriend(LPHAddress.from(msg.attachments[0])).displayName.value,
           });
         }
 
@@ -169,8 +157,7 @@ class SystemMessages {
       translation: (msg, provider) {
         if (provider is ConversationMessageProvider) {
           return "conv.edit_data".trParams({
-            "name":
-                FriendController.getFriend(LPHAddress.from(msg.attachments[0])).displayName.value,
+            "name": FriendController.getFriend(LPHAddress.from(msg.attachments[0])).displayName.value,
           });
         }
 
@@ -228,13 +215,7 @@ class SystemMessage {
   final String Function(Message, MessageProvider) translation;
   final Function(Message, MessageProvider)? handler;
 
-  SystemMessage(
-    this.icon, {
-    this.handler,
-    required this.translation,
-    this.render = true,
-    this.store = true,
-  });
+  SystemMessage(this.icon, {this.handler, required this.translation, this.render = true, this.store = true});
 
   void handle(Message message, MessageProvider provider) {
     handler?.call(message, provider);

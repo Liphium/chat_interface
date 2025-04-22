@@ -110,9 +110,7 @@ class _TownAdminSettingsState extends State<TownAdminSettings> {
               padding: const EdgeInsets.only(top: defaultSpacing),
               child: Padding(
                 padding: const EdgeInsets.all(defaultSpacing),
-                child: Center(
-                  child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary),
-                ),
+                child: Center(child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary)),
               ),
             );
           }
@@ -123,10 +121,7 @@ class _TownAdminSettingsState extends State<TownAdminSettings> {
           }
 
           // Render the tab overview
-          return LPHTabElement(
-            tabs: _categories.map((c) => c.name).toList(),
-            onTabSwitch: (tab) => fetchSettings(tab),
-          );
+          return LPHTabElement(tabs: _categories.map((c) => c.name).toList(), onTabSwitch: (tab) => fetchSettings(tab));
         }),
         verticalSpacing(defaultSpacing),
         Watch((ctx) {
@@ -207,10 +202,7 @@ class _TownAdminSettingsState extends State<TownAdminSettings> {
                 );
               }
 
-              return Padding(
-                padding: const EdgeInsets.only(bottom: defaultSpacing),
-                child: settingsWidget,
-              );
+              return Padding(padding: const EdgeInsets.only(bottom: defaultSpacing), child: settingsWidget);
             }),
           );
         }),

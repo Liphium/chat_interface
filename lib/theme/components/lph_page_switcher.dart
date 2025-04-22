@@ -48,10 +48,7 @@ class LPHPageSwitcher extends StatelessWidget {
         const Spacer(),
         Watch(
           (ctx) => Text(
-            "page_switcher".trParams({
-              "count": (currentPage.value + 1).toString(),
-              "max": getMaxPage().toString(),
-            }),
+            "page_switcher".trParams({"count": (currentPage.value + 1).toString(), "max": getMaxPage().toString()}),
             style: Get.textTheme.labelLarge,
           ),
         ),

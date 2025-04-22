@@ -62,10 +62,7 @@ class _RequestButtonState extends State<RequestButton> with SignalsMixin {
 
         //* Request item content
         child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: defaultSpacing,
-            vertical: defaultSpacing * 0.5,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: defaultSpacing, vertical: defaultSpacing * 0.5),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -78,9 +75,7 @@ class _RequestButtonState extends State<RequestButton> with SignalsMixin {
                     Padding(
                       padding: const EdgeInsets.only(left: defaultSpacing),
                       child: Tooltip(
-                        message: "friends.different_town".trParams({
-                          "town": widget.request.id.server,
-                        }),
+                        message: "friends.different_town".trParams({"town": widget.request.id.server}),
                         child: Icon(Icons.sensors, color: Get.theme.colorScheme.onPrimary),
                       ),
                     ),

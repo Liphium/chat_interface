@@ -116,9 +116,7 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
                 if (TabletopController.hoveringObjects.isNotEmpty) {
                   Get.dialog(
                     ObjectContextMenu(
-                      data: ContextMenuData.fromPosition(
-                        Offset(event.position.dx, event.position.dy),
-                      ),
+                      data: ContextMenuData.fromPosition(Offset(event.position.dx, event.position.dy)),
                       object: TabletopController.hoveringObjects.first,
                     ),
                   );
@@ -146,11 +144,7 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
               final added = event.localPosition + event.delta;
 
               // Make sure the mouse isn't anywhere out of bounds
-              if (added.dx <= 0 ||
-                  added.dy <= 0 ||
-                  event.localPosition.dx <= 0 ||
-                  event.localPosition.dy <= 0)
-                return;
+              if (added.dx <= 0 || added.dy <= 0 || event.localPosition.dx <= 0 || event.localPosition.dy <= 0) return;
 
               // Move the canvas when the mouse wheel is pressed
               if (event.buttons == 4) {
@@ -169,8 +163,7 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
 
               // Move the currently held object when the mouse is clicked
               if (event.buttons == 1) {
-                if (TabletopController.hoveringObjects.isNotEmpty &&
-                    !TabletopController.cancelledHolding) {
+                if (TabletopController.hoveringObjects.isNotEmpty && !TabletopController.cancelledHolding) {
                   // If there is a held object, move it, if not, add a new held object from the hovering objects list
                   if (TabletopController.heldObject != null) {
                     // Move the object
@@ -216,17 +209,11 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
 
               final obj = TabletopController.heldObject;
               if (obj != null && obj is CardObject) {
-                if (TabletopController.inventory != null &&
-                    TabletopController.inventory?.inventoryHoverIndex != -1) {
+                if (TabletopController.inventory != null && TabletopController.inventory?.inventoryHoverIndex != -1) {
                   obj.intoInventory(index: TabletopController.inventory?.inventoryHoverIndex);
-                } else if (TabletopController.hoveringObjects.any(
-                  (element) => element is DeckObject,
-                )) {
+                } else if (TabletopController.hoveringObjects.any((element) => element is DeckObject)) {
                   final deck =
-                      TabletopController.hoveringObjects.firstWhere(
-                            (element) => element is DeckObject,
-                          )
-                          as DeckObject;
+                      TabletopController.hoveringObjects.firstWhere((element) => element is DeckObject) as DeckObject;
                   deck.addCard(obj);
                 }
               }
@@ -242,8 +229,7 @@ class _TabletopViewState extends State<TabletopView> with SingleTickerProviderSt
                 }
                 if (TabletopController.canvasZoom + scrollDelta > 5) return;
 
-                final zoomFactor =
-                    (TabletopController.canvasZoom + scrollDelta) / TabletopController.canvasZoom;
+                final zoomFactor = (TabletopController.canvasZoom + scrollDelta) / TabletopController.canvasZoom;
                 final focalPoint = TabletopView.localToWorldPos(
                   event.localPosition,
                   TabletopController.canvasZoom,

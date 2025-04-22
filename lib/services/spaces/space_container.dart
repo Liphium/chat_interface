@@ -19,8 +19,7 @@ class SpaceConnectionContainer extends ShareContainer {
   Timer? _timer;
   bool get cancelled => _timer == null;
 
-  SpaceConnectionContainer(this.node, this.roomId, this.key, Friend? sender)
-    : super(sender, ShareType.space);
+  SpaceConnectionContainer(this.node, this.roomId, this.key, Friend? sender) : super(sender, ShareType.space);
   SpaceConnectionContainer.fromJson(Map<String, dynamic> json, [Friend? sender])
     : this(json["node"], json["id"], unpackageSymmetricKey(json["key"]), sender);
 
@@ -29,8 +28,7 @@ class SpaceConnectionContainer extends ShareContainer {
     return {"node": node, "id": roomId, "key": packageSymmetricKey(key)};
   }
 
-  String toInviteJson() =>
-      jsonEncode({"node": node, "id": roomId, "key": packageSymmetricKey(key)});
+  String toInviteJson() => jsonEncode({"node": node, "id": roomId, "key": packageSymmetricKey(key)});
 
   @override
   void onDrop() {
@@ -102,9 +100,7 @@ class SpaceInfo {
 
   SpaceInfo.fromJson(SpaceConnectionContainer container, Map<String, dynamic> json) {
     start = DateTime.fromMillisecondsSinceEpoch(json["start"]);
-    members = List<LPHAddress>.from(
-      json["members"].map((e) => LPHAddress.from(decryptSymmetric(e, container.key))),
-    );
+    members = List<LPHAddress>.from(json["members"].map((e) => LPHAddress.from(decryptSymmetric(e, container.key))));
     exists = true;
 
     for (var member in members) {

@@ -14,11 +14,7 @@ class UpgradeWindow extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            "Upgrade to a better Liphium.",
-            style: Get.textTheme.headlineMedium,
-            textAlign: TextAlign.center,
-          ),
+          Text("Upgrade to a better Liphium.", style: Get.textTheme.headlineMedium, textAlign: TextAlign.center),
           verticalSpacing(sectionSpacing),
           Text(
             "Liphium Web has a lot of limitations. If you want a better experience, Liphium is available as a native app on all major platforms.",

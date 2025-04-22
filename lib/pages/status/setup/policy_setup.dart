@@ -90,11 +90,7 @@ class _PolicyAcceptPageState extends State<PolicyAcceptPage> with SignalsMixin {
         verticalSpacing(sectionSpacing),
         Text("setup.policy.text".tr, style: Get.textTheme.bodyMedium),
         verticalSpacing(sectionSpacing),
-        AnimatedErrorContainer(
-          padding: const EdgeInsets.only(bottom: defaultSpacing),
-          message: _error,
-          expand: true,
-        ),
+        AnimatedErrorContainer(padding: const EdgeInsets.only(bottom: defaultSpacing), message: _error, expand: true),
         FJElevatedButton(
           onTap: () async {
             const url = "https://liphium.com/legal/terms";
@@ -107,13 +103,7 @@ class _PolicyAcceptPageState extends State<PolicyAcceptPage> with SignalsMixin {
             }
             _error.value = "setup.policy.error".tr;
           },
-          child: Center(
-            child: Text(
-              "View agreements",
-              style: Get.textTheme.labelLarge,
-              textAlign: TextAlign.center,
-            ),
-          ),
+          child: Center(child: Text("View agreements", style: Get.textTheme.labelLarge, textAlign: TextAlign.center)),
         ),
         Animate(
           effects: [

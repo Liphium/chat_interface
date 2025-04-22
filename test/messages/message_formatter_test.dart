@@ -87,11 +87,7 @@ void main() {
 
       test("should skip bold and italic formatting patterns", () {
         TextEvaluator eval = TextEvaluator();
-        final spans = eval.evaluate(
-          "***hello world***",
-          TextStyle(fontSize: 14),
-          skipPatterns: true,
-        );
+        final spans = eval.evaluate("***hello world***", TextStyle(fontSize: 14), skipPatterns: true);
 
         expect(spans.length, equals(1));
         expect(spans[0].text, equals("hello world"));
@@ -213,10 +209,7 @@ void main() {
 
       test("should handle all formatting types together", () {
         TextEvaluator eval = TextEvaluator();
-        final spans = eval.evaluate(
-          "**bold** *italic* ~~strike~~ __underline__",
-          TextStyle(fontSize: 14),
-        );
+        final spans = eval.evaluate("**bold** *italic* ~~strike~~ __underline__", TextStyle(fontSize: 14));
 
         expect(spans.length, equals(15));
         expect(spans[1].text, equals("bold"));
@@ -258,11 +251,7 @@ void main() {
 
       test("should skip patterns in nested", () {
         TextEvaluator eval = TextEvaluator();
-        final spans = eval.evaluate(
-          "**__underline inside__**",
-          TextStyle(fontSize: 14),
-          skipPatterns: true,
-        );
+        final spans = eval.evaluate("**__underline inside__**", TextStyle(fontSize: 14), skipPatterns: true);
 
         expect(spans.length, equals(1));
         expect(spans[0].text, equals("underline inside"));
@@ -272,11 +261,7 @@ void main() {
 
       test("should skip patterns in nested 2", () {
         TextEvaluator eval = TextEvaluator();
-        final spans = eval.evaluate(
-          "__**underline inside**__",
-          TextStyle(fontSize: 14),
-          skipPatterns: true,
-        );
+        final spans = eval.evaluate("__**underline inside**__", TextStyle(fontSize: 14), skipPatterns: true);
 
         sendLog(spans);
 
@@ -288,10 +273,7 @@ void main() {
 
       test("should nest strikethrough inside underline", () {
         TextEvaluator eval = TextEvaluator();
-        final spans = eval.evaluate(
-          "__underline ~~strikethrough inside~~ underline__",
-          TextStyle(fontSize: 14),
-        );
+        final spans = eval.evaluate("__underline ~~strikethrough inside~~ underline__", TextStyle(fontSize: 14));
 
         expect(spans.length, equals(7));
         expect(spans[1].text, equals("underline "));
@@ -321,10 +303,7 @@ void main() {
 
       test("should handle complex nesting with multiple formats", () {
         TextEvaluator eval = TextEvaluator();
-        final spans = eval.evaluate(
-          "**bold ~~strike __underline__ strike~~ bold**",
-          TextStyle(fontSize: 14),
-        );
+        final spans = eval.evaluate("**bold ~~strike __underline__ strike~~ bold**", TextStyle(fontSize: 14));
 
         expect(spans.length, equals(11));
         expect(spans[1].text, equals("bold "));

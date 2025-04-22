@@ -83,17 +83,13 @@ class _CallMessageRendererState extends State<BubblesSpaceMessageRenderer> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 // Avatar of the message sender with a tooltip to know their name
-                Tooltip(
-                  message: sender.displayName.value,
-                  child: UserAvatar(id: sender.id, size: 34),
-                ),
+                Tooltip(message: sender.displayName.value, child: UserAvatar(id: sender.id, size: 34)),
                 horizontalSpacing(defaultSpacing),
 
                 Flexible(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment:
-                        widget.self ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                    crossAxisAlignment: widget.self ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                     children: [
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -119,10 +115,7 @@ class _CallMessageRendererState extends State<BubblesSpaceMessageRenderer> {
                                       Icon(Icons.public, color: Get.theme.colorScheme.onPrimary),
                                       horizontalSpacing(elementSpacing),
                                       Flexible(
-                                        child: Text(
-                                          "chat.space_invite".tr,
-                                          style: Get.theme.textTheme.labelLarge,
-                                        ),
+                                        child: Text("chat.space_invite".tr, style: Get.theme.textTheme.labelLarge),
                                       ),
                                     ],
                                   ),
@@ -165,9 +158,7 @@ class _CallMessageRendererState extends State<BubblesSpaceMessageRenderer> {
                             return Visibility(
                               visible: !verified,
                               child: Padding(
-                                padding: const EdgeInsets.only(
-                                  top: elementSpacing + elementSpacing / 4,
-                                ),
+                                padding: const EdgeInsets.only(top: elementSpacing + elementSpacing / 4),
                                 child: Tooltip(
                                   message: "chat.not.signed".tr,
                                   child: const Icon(Icons.warning_rounded, color: Colors.amber),

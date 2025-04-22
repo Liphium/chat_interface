@@ -12,16 +12,16 @@ import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/web.dart';
+import 'package:collection/collection.dart';
 import 'package:get/get.dart';
 import 'package:signals/signals_flutter.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
 class ConversationController {
   static final loaded = signal(false);
-  static final order = listSignal(
-    <LPHAddress>[],
-  ); // List of conversation IDs in order of last updated
+  static final order = listSignal(<LPHAddress>[]); // List of conversation IDs in order of last updated
   static final conversations = mapSignal(<LPHAddress, Conversation>{});
+  static final notificationMap = mapSignal<String, int>({});
   int newConvs = 0;
 
   /// Add a conversation to the cache.
@@ -36,20 +36,24 @@ class ConversationController {
   ///
   /// For more explanation look at [ConversationService.updateLastMessage].
   static void updateLastMessageTime(
-    LPHAddress conversation, {
-    bool increment = true,
+    LPHAddress conversation,
+    int notificationCount, {
+    String extra = "",
     required int messageSendTime,
   }) {
     batch(() {
       // Make sure the conversation is at the top
       _insertToOrder(conversation);
 
-      // Update the cache
-      conversations[conversation]!.updatedAt.value = DateTime.now().millisecondsSinceEpoch;
-      if (increment && conversations[conversation]!.readAt.value < messageSendTime) {
-        conversations[conversation]!.notificationCount.value += 1;
-      }
+      // Update the notification count and updated at time of the conversation
+      notificationMap[ConversationService.withExtra(conversation.encode(), extra)] = notificationCount;
+      conversations[conversation]?.updatedAt = messageSendTime;
     });
+  }
+
+  /// Reset the notification count for a message.
+  static void resetNotificationCount(LPHAddress conversation, {String extra = ""}) {
+    notificationMap[ConversationService.withExtra(conversation.encode(), extra)] = 0;
   }
 
   /// Called when a subscription is finished to make sure conversations are properly sorted and up to date.
@@ -65,22 +69,13 @@ class ConversationController {
     for (var conversation in conversations.values) {
       if (deleted.contains(conversation.token.id.encode())) {
         unawaited(
-          ConversationService.delete(
-            conversation.id,
-            vaultId: conversation.vaultId,
-            token: conversation.token,
-          ),
+          ConversationService.delete(conversation.id, vaultId: conversation.vaultId, token: conversation.token),
         );
       }
     }
 
     // Start a new batch to modify all the state at once
     batch(() {
-      // Sort the conversations
-      order.sort(
-        (a, b) => conversations[b]!.updatedAt.value.compareTo(conversations[a]!.updatedAt.value),
-      );
-
       // Update all the conversations
       for (var conversation in conversations.values) {
         if (!isSameServer(conversation.id.server, server)) {
@@ -91,7 +86,7 @@ class ConversationController {
         final info = (conversationInfo[conversation.id.encode()] ?? {}) as Map<dynamic, dynamic>;
         final version = (info["v"] ?? 0) as int;
         conversation.notificationCount.value = (info["n"] ?? 0) as int;
-        conversation.readAt.value = (info["r"] ?? 0) as int;
+        conversation.readAt = (info["r"] ?? 0) as int;
 
         // Set an error if there is one
         if (error) {
@@ -108,14 +103,33 @@ class ConversationController {
     });
   }
 
-  /// Insert a conversation into the ordered list of conversations.
-  ///
-  /// If it already exists it will be added at the top of the order.
+  /// Insert a conversation into the ordered list of conversations (performance could be improved using binary search).
   static void _insertToOrder(LPHAddress id) {
     batch(() {
-      order.remove(id);
-      order.insert(0, id);
+      // Try to remove it from the ordered list
+      var index = _findBinarySearch(id);
+      if (index != -1) {
+        order.removeAt(index);
+      }
+
+      // Dirty insert the conversation
+      final readAt = conversations[id]!.readAt;
+      index = 0;
+      for (var id in order) {
+        if (readAt > conversations[id]!.readAt) {
+          break;
+        }
+        index++;
+      }
+      order.insert(index, id);
     });
+  }
+
+  /// Find a conversation id in the sorted order list using binary search.
+  ///
+  /// Returns -1 in case the thing wasn't found.
+  static int _findBinarySearch(LPHAddress id) {
+    return order.binarySearchBy(id, (conv) => conversations[conv]!.updatedAt);
   }
 
   /// Remove a conversation from the cache.
@@ -132,8 +146,8 @@ class Conversation {
   final ConversationToken token;
   ConversationContainer container;
   int lastVersion;
-  final updatedAt = signal(0);
-  final readAt = signal(0);
+  int updatedAt = 0;
+  int readAt = 0;
   final notificationCount = signal(0);
   final containerSub = signal(ConversationContainer("")); // Data subscription
   final error = signal<String?>(null);
@@ -156,10 +170,9 @@ class Conversation {
     this.container,
     this.packedKey,
     this.lastVersion,
-    int updatedAt,
+    this.updatedAt,
   ) {
     containerSub.value = container;
-    this.updatedAt.value = updatedAt;
   }
   Conversation.fromJson(Map<String, dynamic> json, String vaultId)
     : this(
@@ -170,7 +183,7 @@ class Conversation {
         ConversationContainer.fromJson(json["data"]),
         json["key"],
         0, // This shouldn't matter, just makes sure the data is fetched
-        json["update"] ?? DateTime.now().millisecondsSinceEpoch,
+        0,
       );
   Conversation.fromData(ConversationData data)
     : this(
@@ -196,8 +209,8 @@ class Conversation {
       conversation.token,
       conversation.container,
       "",
-      conversation.updatedAt.value,
       conversation.lastVersion,
+      conversation.updatedAt,
     );
 
     // Copy all the members
@@ -227,8 +240,7 @@ class Conversation {
       (element) => element.address != StatusController.ownAddress,
       orElse: () => Member(LPHAddress.error(), LPHAddress.error(), MemberRole.user),
     );
-    return FriendController.friends[member.address] ??
-        Friend.unknown(LPHAddress("-", container.name));
+    return FriendController.friends[member.address] ?? Friend.unknown(LPHAddress("-", container.name));
   }
 
   /// Check if a conversation is broken (borked)
@@ -251,8 +263,8 @@ class Conversation {
       token: dbEncrypted(token.toJson()),
       key: dbEncrypted(packageSymmetricKey(key)),
       lastVersion: BigInt.from(lastVersion),
-      updatedAt: BigInt.from(updatedAt.value),
-      readAt: BigInt.from(readAt.value),
+      updatedAt: BigInt.from(updatedAt),
+      readAt: BigInt.from(readAt),
     );
   }
 
@@ -261,7 +273,6 @@ class Conversation {
     "type": type.index,
     "token": token.toMap(),
     "key": packageSymmetricKey(key),
-    "update": updatedAt.value.toInt(),
     "data": container.toJson(),
   });
 
@@ -277,11 +288,7 @@ class Conversation {
     }
 
     // Delete the conversation
-    final error = await ConversationService.delete(
-      id,
-      vaultId: vaultId,
-      token: leaveRequest ? token : null,
-    );
+    final error = await ConversationService.delete(id, vaultId: vaultId, token: leaveRequest ? token : null);
     if (error != null) {
       showErrorPopup("error", error);
       sendLog("ERROR: Can't delete conversation: $error");

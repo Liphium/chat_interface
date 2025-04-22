@@ -19,10 +19,7 @@ class _DurationRendererState extends State<DurationRenderer> with SignalsMixin {
   @override
   Widget build(BuildContext context) {
     _current.value = DateTime.now().difference(widget.start);
-    Timer.periodic(
-      const Duration(seconds: 1),
-      (timer) => _current.value = DateTime.now().difference(widget.start),
-    );
+    Timer.periodic(const Duration(seconds: 1), (timer) => _current.value = DateTime.now().difference(widget.start));
 
     final duration = _current.value;
     final hours = duration.inHours;
@@ -35,9 +32,6 @@ class _DurationRendererState extends State<DurationRenderer> with SignalsMixin {
         style: widget.style,
       );
     }
-    return Text(
-      "${minutes.toString().padLeft(2, "0")}:${seconds.toString().padLeft(2, "0")}",
-      style: widget.style,
-    );
+    return Text("${minutes.toString().padLeft(2, "0")}:${seconds.toString().padLeft(2, "0")}", style: widget.style);
   }
 }

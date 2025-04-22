@@ -147,8 +147,7 @@ class _BubblesLiveshareMessageRendererState extends State<BubblesLiveshareMessag
                 Flexible(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment:
-                        widget.self ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                    crossAxisAlignment: widget.self ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                     children: [
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -171,16 +170,10 @@ class _BubblesLiveshareMessageRendererState extends State<BubblesLiveshareMessag
                                   Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Icon(
-                                        Icons.electric_bolt,
-                                        color: Get.theme.colorScheme.onPrimary,
-                                      ),
+                                      Icon(Icons.electric_bolt, color: Get.theme.colorScheme.onPrimary),
                                       horizontalSpacing(elementSpacing),
                                       Flexible(
-                                        child: Text(
-                                          "chat.zapshare_request".tr,
-                                          style: Get.theme.textTheme.labelLarge,
-                                        ),
+                                        child: Text("chat.zapshare_request".tr, style: Get.theme.textTheme.labelLarge),
                                       ),
                                     ],
                                   ),
@@ -212,9 +205,7 @@ class _BubblesLiveshareMessageRendererState extends State<BubblesLiveshareMessag
                             return Visibility(
                               visible: !verified,
                               child: Padding(
-                                padding: const EdgeInsets.only(
-                                  top: elementSpacing + elementSpacing / 4,
-                                ),
+                                padding: const EdgeInsets.only(top: elementSpacing + elementSpacing / 4),
                                 child: Tooltip(
                                   message: "chat.not.signed".tr,
                                   child: const Icon(Icons.warning_rounded, color: Colors.amber),
@@ -239,10 +230,7 @@ class _BubblesLiveshareMessageRendererState extends State<BubblesLiveshareMessag
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(defaultSpacing),
-        color:
-            widget.self
-                ? Get.theme.colorScheme.onPrimary.withAlpha(40)
-                : Get.theme.colorScheme.inverseSurface,
+        color: widget.self ? Get.theme.colorScheme.onPrimary.withAlpha(40) : Get.theme.colorScheme.inverseSurface,
       ),
       padding: const EdgeInsets.symmetric(vertical: defaultSpacing, horizontal: defaultSpacing),
       child: Row(
@@ -292,8 +280,7 @@ class _BubblesLiveshareMessageRendererState extends State<BubblesLiveshareMessag
             }
 
             final convProvider = widget.provider as ConversationMessageProvider;
-            if (_available.value &&
-                ZapShareController.currentConversation.value == convProvider.conversation.id) {
+            if (_available.value && ZapShareController.currentConversation.value == convProvider.conversation.id) {
               return SizedBox(
                 width: 30,
                 height: 30,

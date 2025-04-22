@@ -111,20 +111,14 @@ class SpaceController {
       return;
     }
 
-    unawaited(
-      provider.sendMessage(signal(false), MessageType.call, [], container!.toInviteJson(), ""),
-    );
+    unawaited(provider.sendMessage(signal(false), MessageType.call, [], container!.toInviteJson(), ""));
   }
 
   static Future<void> join(SpaceConnectionContainer container) async {
     spaceLoading.value = true;
 
     // Connect to a Space
-    final error = await SpaceService.connectToSpace(
-      container.node,
-      container.roomId,
-      container.key,
-    );
+    final error = await SpaceService.connectToSpace(container.node, container.roomId, container.key);
     spaceLoading.value = false;
     if (error != null) {
       showErrorPopup("error", error);

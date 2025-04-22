@@ -20,16 +20,7 @@ class Square extends Conversation {
     String packedKey,
     int lastVersion,
     int updatedAt,
-  ) : super(
-        id,
-        vaultId,
-        model.ConversationType.square,
-        token,
-        container,
-        packedKey,
-        lastVersion,
-        updatedAt,
-      );
+  ) : super(id, vaultId, model.ConversationType.square, token, container, packedKey, lastVersion, updatedAt);
 
   @override
   Square.fromJson(Map<String, dynamic> json, String vaultId)
@@ -63,8 +54,8 @@ class Square extends Conversation {
       square.token,
       square.container as SquareContainer,
       "",
-      square.updatedAt.value,
       square.lastVersion,
+      square.updatedAt,
     );
 
     // Copy all the members

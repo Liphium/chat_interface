@@ -103,9 +103,7 @@ class _SpaceRectangleState extends State<SpaceRectangle> {
                                       child: LPHTabElement(
                                         tabs: SpaceTabType.values.map((e) => e.name.tr).toList(),
                                         onTabSwitch: (el) {
-                                          final type = SpaceTabType.values.firstWhereOrNull(
-                                            (t) => t.name.tr == el,
-                                          );
+                                          final type = SpaceTabType.values.firstWhereOrNull((t) => t.name.tr == el);
                                           if (type == null) {
                                             return;
                                           }
@@ -179,9 +177,7 @@ class _SpaceRectangleState extends State<SpaceRectangle> {
                               child: LPHTabElement(
                                 tabs: SpaceSidebarTabType.values.map((e) => e.name.tr).toList(),
                                 onTabSwitch: (el) {
-                                  final type = SpaceSidebarTabType.values.firstWhereOrNull(
-                                    (t) => t.name.tr == el,
-                                  );
+                                  final type = SpaceSidebarTabType.values.firstWhereOrNull((t) => t.name.tr == el);
                                   if (type == null) {
                                     return;
                                   }
@@ -191,11 +187,7 @@ class _SpaceRectangleState extends State<SpaceRectangle> {
                               ),
                             ),
                           ),
-                          Expanded(
-                            child: Watch(
-                              (context) => _sidebarTabs[SpaceController.sidebarTabType.value],
-                            ),
-                          ),
+                          Expanded(child: Watch((context) => _sidebarTabs[SpaceController.sidebarTabType.value])),
                         ],
                       ),
                     ),

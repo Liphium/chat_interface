@@ -66,29 +66,18 @@ class _AudioAttachmentPlayerState extends State<AudioAttachmentPlayer> with Sign
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      Icons.library_music,
-                      size: sectionSpacing * 2,
-                      color: Get.theme.colorScheme.onPrimary,
-                    ),
+                    Icon(Icons.library_music, size: sectionSpacing * 2, color: Get.theme.colorScheme.onPrimary),
                     horizontalSpacing(defaultSpacing),
                     Flexible(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Flexible(
-                            child: Text(
-                              widget.container.name,
-                              style: Get.theme.textTheme.labelMedium,
-                            ),
-                          ),
+                          Flexible(child: Text(widget.container.name, style: Get.theme.textTheme.labelMedium)),
                           Flexible(
                             child: Watch(
                               (ctx) => Text(
-                                !widget.container.error.value
-                                    ? formatFileSize(1000)
-                                    : 'file.not_uploaded'.tr,
+                                !widget.container.error.value ? formatFileSize(1000) : 'file.not_uploaded'.tr,
                                 style: Get.theme.textTheme.bodyMedium,
                               ),
                             ),
@@ -182,11 +171,7 @@ class _AudioAttachmentPlayerState extends State<AudioAttachmentPlayer> with Sign
                   child: GestureDetector(
                     onTap: () {
                       final percentage = (_hoverPosition.value! / constraints.maxWidth);
-                      _player.seek(
-                        Duration(
-                          milliseconds: (_currentMax.value!.inMilliseconds * percentage).toInt(),
-                        ),
-                      );
+                      _player.seek(Duration(milliseconds: (_currentMax.value!.inMilliseconds * percentage).toInt()));
                     },
                     child: Stack(
                       children: [
@@ -204,8 +189,7 @@ class _AudioAttachmentPlayerState extends State<AudioAttachmentPlayer> with Sign
                             width:
                                 constraints.maxWidth *
                                 (_hoverPosition.value == null
-                                        ? (_currentDuration.value!.inMilliseconds /
-                                            _currentMax.value!.inMilliseconds)
+                                        ? (_currentDuration.value!.inMilliseconds / _currentMax.value!.inMilliseconds)
                                         : (_hoverPosition.value! / constraints.maxWidth))
                                     .clamp(0, 1),
                             decoration: BoxDecoration(

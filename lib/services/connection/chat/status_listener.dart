@@ -23,18 +23,13 @@ void setupStatusListener() {
 
     // Get dm with friend
     final dm = ConversationController.conversations.values.firstWhere(
-      (element) =>
-          element.members.length == 2 &&
-          element.members.values.any((element) => element.address == friend.id),
+      (element) => element.members.length == 2 && element.members.values.any((element) => element.address == friend.id),
     );
 
     sendLog("sending status answer");
     await postNodeJSON("/conversations/answer_status", {
       "token": dm.token.toMap(),
-      "data": {
-        "status": StatusController.statusPacket(),
-        "data": StatusController.sharedContentPacket(),
-      },
+      "data": {"status": StatusController.statusPacket(), "data": StatusController.sharedContentPacket()},
     });
   }, afterSetup: true);
 
@@ -119,11 +114,7 @@ Future<Friend?> handleStatus(Event event, bool own) async {
 }
 
 /// Turn the shared data from a status into a share container (returns container (if existent) and if it has changed)
-(ShareContainer?, bool) _dataToContainer(
-  ShareContainer? existing,
-  String data,
-  SecureKey profileKey,
-) {
+(ShareContainer?, bool) _dataToContainer(ShareContainer? existing, String data, SecureKey profileKey) {
   if (data != "") {
     final sharedJson = decryptSymmetric(data, profileKey);
     final shared = jsonDecode(sharedJson) as Map<String, dynamic>;

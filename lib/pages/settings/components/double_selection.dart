@@ -59,8 +59,7 @@ class _ListSelectionSettingState extends State<DoubleSelectionSetting> {
         ),
         Watch((ctx) {
           final value = _current.value;
-          final roundedCurrent =
-              widget.rounded ? value.toStringAsFixed(0) : value.toStringAsFixed(1);
+          final roundedCurrent = widget.rounded ? value.toStringAsFixed(0) : value.toStringAsFixed(1);
           return Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [

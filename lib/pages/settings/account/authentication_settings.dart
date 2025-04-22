@@ -24,11 +24,7 @@ class _AuthenticationSettingsPageState extends State<AuthenticationSettingsPage>
           Text("settings.authentication.first_factor".tr, style: Get.theme.textTheme.labelLarge),
           verticalSpacing(defaultSpacing),
 
-          buildChangeContainer(
-            Icons.password,
-            "password",
-            () => showModal(const ChangePasswordWindow()),
-          ),
+          buildChangeContainer(Icons.password, "password", () => showModal(const ChangePasswordWindow())),
           verticalSpacing(defaultSpacing),
 
           buildChangeContainer(Icons.hub, "sso", () => showModal(const ChangePasswordWindow())),
@@ -38,11 +34,7 @@ class _AuthenticationSettingsPageState extends State<AuthenticationSettingsPage>
           Text("settings.authentication.second_factor".tr, style: Get.theme.textTheme.labelLarge),
           verticalSpacing(defaultSpacing),
 
-          buildChangeContainer(
-            Icons.qr_code,
-            "totp",
-            () => showModal(const ChangePasswordWindow()),
-          ),
+          buildChangeContainer(Icons.qr_code, "totp", () => showModal(const ChangePasswordWindow())),
           verticalSpacing(defaultSpacing),
 
           buildChangeContainer(Icons.mail, "email", () => showModal(const ChangePasswordWindow())),
@@ -70,17 +62,11 @@ class _AuthenticationSettingsPageState extends State<AuthenticationSettingsPage>
                   children: [
                     Icon(icon, color: Get.theme.colorScheme.onPrimary),
                     horizontalSpacing(defaultSpacing),
-                    Text(
-                      "settings.authentication.$name".tr,
-                      style: Get.theme.textTheme.labelMedium,
-                    ),
+                    Text("settings.authentication.$name".tr, style: Get.theme.textTheme.labelMedium),
                   ],
                 ),
                 verticalSpacing(elementSpacing),
-                Text(
-                  "settings.authentication.$name.desc".tr,
-                  style: Get.theme.textTheme.bodyMedium,
-                ),
+                Text("settings.authentication.$name.desc".tr, style: Get.theme.textTheme.bodyMedium),
               ],
             ),
           ),

@@ -28,12 +28,7 @@ class ZapShareWindow extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      Watch(
-                        (ctx) => Text(
-                          "${ZapShareController.step.value} ",
-                          style: Get.theme.textTheme.labelLarge,
-                        ),
-                      ),
+                      Watch((ctx) => Text("${ZapShareController.step.value} ", style: Get.theme.textTheme.labelLarge)),
                       Watch(
                         (ctx) => Text(
                           "(${ZapShareController.currentPart.value}/${ZapShareController.endPart})",
@@ -63,8 +58,7 @@ class ZapShareWindow extends StatelessWidget {
               Watch(
                 (ctx) => CircularProgressIndicator(
                   backgroundColor: Get.theme.colorScheme.primary,
-                  value:
-                      ZapShareController.waiting.value ? null : ZapShareController.progress.value,
+                  value: ZapShareController.waiting.value ? null : ZapShareController.progress.value,
                   valueColor: AlwaysStoppedAnimation<Color>(Get.theme.colorScheme.onPrimary),
                 ),
               ),

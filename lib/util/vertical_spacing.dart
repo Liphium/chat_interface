@@ -4,10 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
-const noTextHeight = TextHeightBehavior(
-  applyHeightToFirstAscent: false,
-  applyHeightToLastDescent: false,
-);
+const noTextHeight = TextHeightBehavior(applyHeightToFirstAscent: false, applyHeightToLastDescent: false);
 
 Widget verticalSpacing(double height) {
   return SizedBox(height: height);
@@ -20,9 +17,7 @@ Widget horizontalSpacing(double width) {
 String getRandomString(int length) {
   const chars = 'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz1234567890';
   final random = Random();
-  return String.fromCharCodes(
-    List.generate(length, (index) => chars.codeUnitAt(random.nextInt(chars.length))),
-  );
+  return String.fromCharCodes(List.generate(length, (index) => chars.codeUnitAt(random.nextInt(chars.length))));
 }
 
 bool isMobileMode() {
@@ -52,10 +47,7 @@ Future<T?>? showModal<T>(Widget widget, {mobileSliding = false}) async {
       builder: (context) {
         return LayoutBuilder(
           builder: (context, constraints) {
-            return Padding(
-              padding: EdgeInsets.only(bottom: Get.mediaQuery.viewInsets.bottom),
-              child: widget,
-            );
+            return Padding(padding: EdgeInsets.only(bottom: Get.mediaQuery.viewInsets.bottom), child: widget);
           },
         );
       },
@@ -117,25 +109,19 @@ String formatGeneralTime(DateTime time) {
 }
 
 class ExpandEffect extends CustomEffect {
-  ExpandEffect({
-    super.curve,
-    super.duration,
-    Axis? axis,
-    Alignment? alignment,
-    double? customHeightFactor,
-    super.delay,
-  }) : super(
-         builder: (context, value, child) {
-           return ClipRect(
-             child: Align(
-               alignment: alignment ?? Alignment.topCenter,
-               heightFactor: customHeightFactor ?? (axis == Axis.vertical ? max(value, 0.0) : null),
-               widthFactor: axis == Axis.horizontal ? max(value, 0.0) : null,
-               child: child,
-             ),
-           );
-         },
-       );
+  ExpandEffect({super.curve, super.duration, Axis? axis, Alignment? alignment, double? customHeightFactor, super.delay})
+    : super(
+        builder: (context, value, child) {
+          return ClipRect(
+            child: Align(
+              alignment: alignment ?? Alignment.topCenter,
+              heightFactor: customHeightFactor ?? (axis == Axis.vertical ? max(value, 0.0) : null),
+              widthFactor: axis == Axis.horizontal ? max(value, 0.0) : null,
+              child: child,
+            ),
+          );
+        },
+      );
 }
 
 class ReverseExpandEffect extends CustomEffect {

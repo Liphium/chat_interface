@@ -72,10 +72,7 @@ class ImagePreviewWindow extends StatelessWidget {
         Positioned(
           top: 0,
           right: 0,
-          child: IconButton(
-            icon: const Icon(Icons.close),
-            onPressed: () => Navigator.of(context).pop(),
-          ),
+          child: IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.of(context).pop()),
         ),
       ],
     );

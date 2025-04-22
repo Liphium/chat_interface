@@ -31,11 +31,7 @@ class _ColorPreviewState extends State<ColorPreview> {
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.only(
-                  top: sectionSpacing,
-                  right: sectionSpacing,
-                  left: sectionSpacing,
-                ),
+                padding: const EdgeInsets.only(top: sectionSpacing, right: sectionSpacing, left: sectionSpacing),
                 child: Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(defaultSpacing),
@@ -47,9 +43,7 @@ class _ColorPreviewState extends State<ColorPreview> {
                     children: [
                       Icon(Icons.color_lens, color: colors.getPrimary(), size: 40),
                       horizontalSpacing(defaultSpacing),
-                      Expanded(
-                        child: Text("theme.primary".tr, style: Get.theme.textTheme.labelLarge),
-                      ),
+                      Expanded(child: Text("theme.primary".tr, style: Get.theme.textTheme.labelLarge)),
                     ],
                   ),
                 ),
@@ -67,9 +61,7 @@ class _ColorPreviewState extends State<ColorPreview> {
                     children: [
                       Icon(Icons.color_lens, color: colors.getSecondary(), size: 40),
                       horizontalSpacing(defaultSpacing),
-                      Expanded(
-                        child: Text("theme.secondary".tr, style: Get.theme.textTheme.labelLarge),
-                      ),
+                      Expanded(child: Text("theme.secondary".tr, style: Get.theme.textTheme.labelLarge)),
                     ],
                   ),
                 ),
@@ -86,12 +78,7 @@ class _ColorPreviewState extends State<ColorPreview> {
                   children: [
                     Icon(Icons.person, color: colors.getPrimary(), size: 40),
                     horizontalSpacing(defaultSpacing),
-                    Expanded(
-                      child: Text(
-                        StatusController.name.value,
-                        style: Get.theme.textTheme.labelLarge,
-                      ),
-                    ),
+                    Expanded(child: Text(StatusController.name.value, style: Get.theme.textTheme.labelLarge)),
                   ],
                 ),
               ),

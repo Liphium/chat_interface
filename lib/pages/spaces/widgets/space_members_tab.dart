@@ -39,8 +39,7 @@ class _SpaceMembersTabState extends State<SpaceMembersTab> {
                   child: InkWell(
                     onTap: () {
                       if (StatusController.ownAddress != member.friend.id) {
-                        final RenderBox box =
-                            listKey.currentContext?.findRenderObject() as RenderBox;
+                        final RenderBox box = listKey.currentContext?.findRenderObject() as RenderBox;
                         Get.dialog(
                           Profile(
                             position: box.localToGlobal(box.size.bottomLeft(Offset.zero)),
@@ -64,10 +63,7 @@ class _SpaceMembersTabState extends State<SpaceMembersTab> {
                                 padding: const EdgeInsets.only(right: defaultSpacing),
                                 child: Tooltip(
                                   message: "spaces.member.not_verified".tr,
-                                  child: Icon(
-                                    Icons.warning,
-                                    color: Get.theme.colorScheme.secondaryContainer,
-                                  ),
+                                  child: Icon(Icons.warning, color: Get.theme.colorScheme.secondaryContainer),
                                 ),
                               ),
                             ),

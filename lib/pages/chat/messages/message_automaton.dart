@@ -19,17 +19,11 @@ enum TextFormattingType {
         return base.copyWith(fontStyle: FontStyle.italic);
       case TextFormattingType.underline:
         return base.copyWith(
-          decoration: TextDecoration.combine([
-            base.decoration ?? TextDecoration.none,
-            TextDecoration.underline,
-          ]),
+          decoration: TextDecoration.combine([base.decoration ?? TextDecoration.none, TextDecoration.underline]),
         );
       case TextFormattingType.lineThrough:
         return base.copyWith(
-          decoration: TextDecoration.combine([
-            base.decoration ?? TextDecoration.none,
-            TextDecoration.lineThrough,
-          ]),
+          decoration: TextDecoration.combine([base.decoration ?? TextDecoration.none, TextDecoration.lineThrough]),
         );
       case TextFormattingType.pattern:
         return pattern ?? base;
@@ -174,12 +168,7 @@ class BoldItalicAutomaton extends PatternAutomaton {
       if (!_inPattern) {
         final invalid = _stars != 0;
         _stars = 0;
-        return (
-          false,
-          !invalid,
-          invalid,
-          _current,
-        ); // Only return valid when there are no stars left
+        return (false, !invalid, invalid, _current); // Only return valid when there are no stars left
       }
 
       // The pattern is valid as long as nothing happens
@@ -274,12 +263,7 @@ class UnderlineAutomaton extends PatternAutomaton {
       if (!_inPattern) {
         final invalid = _underscores != 0;
         _underscores = 0;
-        return (
-          false,
-          !invalid,
-          invalid,
-          [],
-        ); // Only return valid when there are no underscores left
+        return (false, !invalid, invalid, []); // Only return valid when there are no underscores left
       }
 
       // The pattern is valid as long as nothing happens

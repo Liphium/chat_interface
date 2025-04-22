@@ -144,14 +144,7 @@ class Friend {
 
   /// Convert a json to a friend (used for friends vault)
   factory Friend.fromStoredPayload(String id, int updatedAt, Map<String, dynamic> json) {
-    return Friend(
-      LPHAddress.from(json["id"]),
-      json["name"],
-      json["dname"],
-      id,
-      KeyStorage.fromJson(json),
-      updatedAt,
-    );
+    return Friend(LPHAddress.from(json["id"]), json["name"], json["dname"], id, KeyStorage.fromJson(json), updatedAt);
   }
 
   // Convert to a stored payload for the friends vault
@@ -237,9 +230,7 @@ class Friend {
   Future<void> updateProfilePicture(AttachmentContainer? picture) async {
     if (picture == null) {
       // Delete the profile picture if it is null
-      await db.profile.insertOnConflictUpdate(
-        ProfileData(id: id.encode(), pictureContainer: "", data: ""),
-      );
+      await db.profile.insertOnConflictUpdate(ProfileData(id: id.encode(), pictureContainer: "", data: ""));
 
       // Update the friend as well
       profilePicture = null;
@@ -248,18 +239,12 @@ class Friend {
     } else {
       // Set a new profile picture if it is valid
       await db.profile.insertOnConflictUpdate(
-        ProfileData(
-          id: id.encode(),
-          pictureContainer: dbEncrypted(jsonEncode(picture.toJson())),
-          data: "",
-        ),
+        ProfileData(id: id.encode(), pictureContainer: dbEncrypted(jsonEncode(picture.toJson())), data: ""),
       );
 
       // Update in the local cache (for this friend)
       profilePicture = picture;
-      profilePictureImage.value = await ProfileHelper.loadImageFromBytes(
-        await picture.file!.readAsBytes(),
-      );
+      profilePictureImage.value = await ProfileHelper.loadImageFromBytes(await picture.file!.readAsBytes());
     }
   }
 
@@ -311,9 +296,7 @@ class Friend {
       return;
     }
 
-    profilePictureImage.value = await ProfileHelper.loadImageFromBytes(
-      await profilePicture!.file!.readAsBytes(),
-    );
+    profilePictureImage.value = await ProfileHelper.loadImageFromBytes(await profilePicture!.file!.readAsBytes());
 
     sendLog("Profile picture set for $name");
   }

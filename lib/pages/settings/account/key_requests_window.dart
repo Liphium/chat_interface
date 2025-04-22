@@ -185,11 +185,7 @@ class _KeyRequestsWindowState extends State<KeyRequestsWindow> with SignalsMixin
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          AnimatedErrorContainer(
-            expand: true,
-            padding: const EdgeInsets.only(bottom: defaultSpacing),
-            message: _error,
-          ),
+          AnimatedErrorContainer(expand: true, padding: const EdgeInsets.only(bottom: defaultSpacing), message: _error),
           Builder(
             builder: (context) {
               // Check if the requests are empty
@@ -215,9 +211,7 @@ class _KeyRequestsWindowState extends State<KeyRequestsWindow> with SignalsMixin
                           horizontalSpacing(defaultSpacing),
                           Expanded(
                             child: Text(
-                              formatGeneralTime(
-                                DateTime.fromMillisecondsSinceEpoch(request.createdAt),
-                              ),
+                              formatGeneralTime(DateTime.fromMillisecondsSinceEpoch(request.createdAt)),
                               style: Get.textTheme.labelMedium,
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -242,9 +236,7 @@ class _KeyRequestsWindowState extends State<KeyRequestsWindow> with SignalsMixin
                               children: [
                                 LoadingIconButton(
                                   onTap: () async {
-                                    final result = await Get.dialog(
-                                      KeyRequestAcceptWindow(request: request),
-                                    );
+                                    final result = await Get.dialog(KeyRequestAcceptWindow(request: request));
                                     if (result != null && result) {
                                       _requests.remove(request);
                                     }
@@ -308,11 +300,7 @@ class _KeyRequestAcceptWindowState extends State<KeyRequestAcceptWindow> with Si
         children: [
           Text("key_requests.code.description".tr, style: Get.theme.textTheme.bodyMedium),
           verticalSpacing(defaultSpacing),
-          AnimatedErrorContainer(
-            expand: true,
-            padding: const EdgeInsets.only(bottom: defaultSpacing),
-            message: _error,
-          ),
+          AnimatedErrorContainer(expand: true, padding: const EdgeInsets.only(bottom: defaultSpacing), message: _error),
           FJTextField(
             controller: _codeController,
             hintText: "key_requests.code.placeholder".tr, // DRa6KS

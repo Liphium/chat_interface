@@ -105,10 +105,7 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage> {
     });
 
     if (isMobileMode()) {
-      return SettingsPageBase(
-        label: "colors",
-        child: ColorPreview(factory: _factory, mobile: true),
-      );
+      return SettingsPageBase(label: "colors", child: ColorPreview(factory: _factory, mobile: true));
     }
 
     return SettingsPageBase(
@@ -150,8 +147,7 @@ class _ThemeSettingsElementState extends State<ThemeSettingsElement> {
         Watch(
           (ctx) => Visibility(
             visible:
-                SettingController.settings[ThemeSettings.themePreset]!.getValue() ==
-                ThemeSettings.customThemeIndex,
+                SettingController.settings[ThemeSettings.themePreset]!.getValue() == ThemeSettings.customThemeIndex,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -199,8 +195,7 @@ class _ThemeSettingsElementState extends State<ThemeSettingsElement> {
                 Text("custom.background_mode".tr),
                 verticalSpacing(elementSpacing),
                 ListSelectionSetting(
-                  setting:
-                      SettingController.settings[ThemeSettings.backgroundMode]! as Setting<int>,
+                  setting: SettingController.settings[ThemeSettings.backgroundMode]! as Setting<int>,
                   items: ThemeSettings.backgroundModes,
                 ),
 

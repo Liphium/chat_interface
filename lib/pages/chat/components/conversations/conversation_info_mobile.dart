@@ -42,9 +42,7 @@ class _ConversationInfoMobileState extends State<ConversationInfoMobile> {
             ),
             horizontalSpacing(defaultSpacing),
             Text(
-              widget.conversation.isGroup
-                  ? widget.conversation.containerSub.value.name
-                  : widget.conversation.dmName,
+              widget.conversation.isGroup ? widget.conversation.containerSub.value.name : widget.conversation.dmName,
               style: Theme.of(context).textTheme.titleMedium,
             ),
           ],
@@ -82,10 +80,7 @@ class _ConversationInfoMobileState extends State<ConversationInfoMobile> {
                 icon: Icons.electric_bolt,
                 label: "chat.zapshare".tr,
                 onTap:
-                    () => ZapShareController.openWindow(
-                      widget.conversation,
-                      ContextMenuData.fromPosition(Offset.zero),
-                    ),
+                    () => ZapShareController.openWindow(widget.conversation, ContextMenuData.fromPosition(Offset.zero)),
               ),
             ),
           ),

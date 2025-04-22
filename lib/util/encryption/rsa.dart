@@ -9,12 +9,7 @@ const standardKeySize = 2048;
 AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey> generateRSAKey(int keySize) {
   final keyGen = KeyGenerator("RSA");
 
-  keyGen.init(
-    ParametersWithRandom(
-      RSAKeyGeneratorParameters(BigInt.parse("65537"), keySize, 64),
-      _secureRandom(),
-    ),
-  );
+  keyGen.init(ParametersWithRandom(RSAKeyGeneratorParameters(BigInt.parse("65537"), keySize, 64), _secureRandom()));
 
   final keyPair = keyGen.generateKeyPair();
 

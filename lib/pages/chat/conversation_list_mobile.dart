@@ -63,10 +63,7 @@ class _SidebarState extends State<ConversationListMobile> {
             child: Padding(
               padding: const EdgeInsets.all(defaultSpacing * 1.5),
               child: LoadingIconButton(
-                onTap:
-                    () => showModal(
-                      ConversationAddWindow(position: ContextMenuData.fromPosition(Offset.zero)),
-                    ),
+                onTap: () => showModal(ConversationAddWindow(position: ContextMenuData.fromPosition(Offset.zero))),
                 icon: Icons.group_add,
                 iconSize: 28,
                 extra: 24,

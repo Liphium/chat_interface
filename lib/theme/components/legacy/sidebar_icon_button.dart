@@ -83,10 +83,7 @@ class _SidebarButtonState extends State<SidebarIconButton> with TickerProviderSt
               widget.onTap();
             },
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                vertical: elementSpacing,
-                horizontal: sectionSpacing,
-              ),
+              padding: const EdgeInsets.symmetric(vertical: elementSpacing, horizontal: sectionSpacing),
               child: Icon(
                 widget.icon,
                 color:

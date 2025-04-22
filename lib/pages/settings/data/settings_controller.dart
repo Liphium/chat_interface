@@ -19,9 +19,7 @@ class AppSettings {
 }
 
 class SettingController {
-  static final currentCategory = signal<SettingCategory?>(
-    null,
-  ); // For persisting the page in the settings
+  static final currentCategory = signal<SettingCategory?>(null); // For persisting the page in the settings
   static final settings = <String, Setting>{}; // label: Setting
 
   static void openSettingsPage() {

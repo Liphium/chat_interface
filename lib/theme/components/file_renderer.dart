@@ -117,12 +117,7 @@ class _SquareFileRendererState extends State<SquareFileRenderer> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         horizontalSpacing(defaultSpacing),
-                        Expanded(
-                          child: Text(
-                            path.basename(widget.file.file.path),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
+                        Expanded(child: Text(path.basename(widget.file.file.path), overflow: TextOverflow.ellipsis)),
                         horizontalSpacing(defaultSpacing),
                         Watch(
                           (ctx) => Visibility(

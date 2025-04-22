@@ -40,9 +40,7 @@ class _MessageRendererState extends State<BubblesSystemMessageRenderer> {
             //* Icon
             SizedBox(
               width: 50,
-              child: Center(
-                child: Icon(message.icon, size: 30, color: Get.theme.colorScheme.onPrimary),
-              ),
+              child: Center(child: Icon(message.icon, size: 30, color: Get.theme.colorScheme.onPrimary)),
             ),
             horizontalSpacing(defaultSpacing),
 

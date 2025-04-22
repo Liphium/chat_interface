@@ -111,22 +111,13 @@ class _SSRRendererState extends State<SSRRenderer> {
           _renderButton(json, true), // Last = true for no padding
           Watch(
             (ctx) => Animate(
-              effects: [
-                ExpandEffect(
-                  duration: 250.ms,
-                  axis: Axis.vertical,
-                  alignment: Alignment.bottomCenter,
-                ),
-              ],
+              effects: [ExpandEffect(duration: 250.ms, axis: Axis.vertical, alignment: Alignment.bottomCenter)],
               target: widget.ssr.error.value == "" ? 0 : 1,
               child:
                   widget.ssr.suggestButton != null
                       ? Padding(
                         padding: const EdgeInsets.only(top: defaultSpacing),
-                        child: _renderButton(
-                          widget.ssr.suggestButton!,
-                          true,
-                        ), // Last = true for no padding
+                        child: _renderButton(widget.ssr.suggestButton!, true), // Last = true for no padding
                       )
                       : const SizedBox(),
             ),
@@ -203,10 +194,7 @@ class _SSRRendererState extends State<SSRRenderer> {
           widgets +
           [
             if (widget.ssr.extra?[widget.path] != null)
-              Padding(
-                padding: const EdgeInsets.only(top: defaultSpacing),
-                child: widget.ssr.extra?[widget.path],
-              ),
+              Padding(padding: const EdgeInsets.only(top: defaultSpacing), child: widget.ssr.extra?[widget.path]),
           ],
     );
   }

@@ -109,11 +109,9 @@ class _MessageInputState extends State<MessageInput> {
 
   void loadDraft(String newDraft) {
     if (MessageSendHelper.currentDraft.value != null) {
-      MessageSendHelper.drafts[MessageSendHelper.currentDraft.value!.target] =
-          MessageSendHelper.currentDraft.value!;
+      MessageSendHelper.drafts[MessageSendHelper.currentDraft.value!.target] = MessageSendHelper.currentDraft.value!;
     }
-    MessageSendHelper.currentDraft.value =
-        MessageSendHelper.drafts[newDraft] ?? MessageDraft(newDraft, "");
+    MessageSendHelper.currentDraft.value = MessageSendHelper.drafts[newDraft] ?? MessageDraft(newDraft, "");
     _message.text = MessageSendHelper.currentDraft.value!.message;
     if (!isMobileMode()) {
       _inputFocus.requestFocus();
@@ -126,10 +124,7 @@ class _MessageInputState extends State<MessageInput> {
         MessageSendHelper.currentDraft.value!.target,
         "",
       );
-      MessageSendHelper.currentDraft.value = MessageDraft(
-        MessageSendHelper.currentDraft.value!.target,
-        "",
-      );
+      MessageSendHelper.currentDraft.value = MessageDraft(MessageSendHelper.currentDraft.value!.target, "");
       _message.clear();
     }
     _loading.value = false;
@@ -142,8 +137,7 @@ class _MessageInputState extends State<MessageInput> {
         _message.selection.baseOffset > _message.selection.extentOffset
             ? _message.selection.baseOffset
             : _message.selection.extentOffset;
-    final newOffset =
-        beforeLeft - (_message.selection.end - _message.selection.start) + replacer.length;
+    final newOffset = beforeLeft - (_message.selection.end - _message.selection.start) + replacer.length;
 
     // Change the text in the field to include the pasted text
     _message.text =
@@ -152,10 +146,7 @@ class _MessageInputState extends State<MessageInput> {
         _message.text.substring(_message.selection.end, _message.text.length);
 
     // Change the selection to the calculated offset
-    _message.selection = _message.selection.copyWith(
-      baseOffset: newOffset,
-      extentOffset: newOffset,
-    );
+    _message.selection = _message.selection.copyWith(baseOffset: newOffset, extentOffset: newOffset);
   }
 
   /// Replace the emoji selector in the input with an emoji
@@ -173,10 +164,7 @@ class _MessageInputState extends State<MessageInput> {
           _inputFocus.requestFocus();
           // Change the selection to the calculated offset
           final newOffset = cursorPos - query.length + 2;
-          _message.selection = _message.selection.copyWith(
-            baseOffset: newOffset,
-            extentOffset: newOffset,
-          );
+          _message.selection = _message.selection.copyWith(baseOffset: newOffset, extentOffset: newOffset);
         }
       }
     }
@@ -294,10 +282,7 @@ class _MessageInputState extends State<MessageInput> {
           Actions(
             actions: actionsMap,
             child: Material(
-              color:
-                  widget.secondary
-                      ? theme.colorScheme.inverseSurface
-                      : theme.colorScheme.onInverseSurface,
+              color: widget.secondary ? theme.colorScheme.inverseSurface : theme.colorScheme.onInverseSurface,
               borderRadius: BorderRadius.circular(defaultSpacing * (widget.rectangle ? 0 : 1.5)),
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: defaultSpacing, vertical: elementSpacing),
@@ -321,8 +306,7 @@ class _MessageInputState extends State<MessageInput> {
                           ),
                           FadeEffect(duration: 300.ms),
                         ],
-                        target:
-                            MessageSendHelper.currentDraft.value == null || answer == null ? 0 : 1,
+                        target: MessageSendHelper.currentDraft.value == null || answer == null ? 0 : 1,
                         child: Padding(
                           padding: const EdgeInsets.all(elementSpacing),
                           child: Row(
@@ -407,13 +391,7 @@ class _MessageInputState extends State<MessageInput> {
                         return const SizedBox();
                       }
                       return Animate(
-                        effects: [
-                          ExpandEffect(
-                            duration: 250.ms,
-                            curve: Curves.easeInOut,
-                            axis: Axis.vertical,
-                          ),
-                        ],
+                        effects: [ExpandEffect(duration: 250.ms, curve: Curves.easeInOut, axis: Axis.vertical)],
                         target: MessageSendHelper.currentDraft.value!.files.isEmpty ? 0 : 1,
                         child: Padding(
                           padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
@@ -423,9 +401,7 @@ class _MessageInputState extends State<MessageInput> {
                               for (final file in MessageSendHelper.currentDraft.value!.files)
                                 SquareFileRenderer(
                                   file: file,
-                                  onRemove:
-                                      () =>
-                                          MessageSendHelper.currentDraft.value!.files.remove(file),
+                                  onRemove: () => MessageSendHelper.currentDraft.value!.files.remove(file),
                                 ),
                             ],
                           ),
@@ -466,8 +442,7 @@ class _MessageInputState extends State<MessageInput> {
                             actions: actionsMap,
                             shortcuts: {
                               LogicalKeySet(LogicalKeyboardKey.enter): const SendIntent(),
-                              LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyV):
-                                  const PasteIntent(),
+                              LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyV): const PasteIntent(),
                             },
                             descendantsAreTraversable: false,
                             child: ConstrainedBox(
@@ -503,11 +478,7 @@ class _MessageInputState extends State<MessageInput> {
                           onPressed:
                               () => showModal(
                                 LibraryWindow(
-                                  data: ContextMenuData.fromKey(
-                                    _libraryKey,
-                                    above: true,
-                                    right: true,
-                                  ),
+                                  data: ContextMenuData.fromKey(_libraryKey, above: true, right: true),
                                   provider: widget.provider,
                                 ),
                               ),

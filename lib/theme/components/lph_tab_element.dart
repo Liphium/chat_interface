@@ -100,10 +100,7 @@ class _LPHTabElementState extends State<LPHTabElement> {
                   },
                   borderRadius: BorderRadius.circular(defaultSpacing),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: defaultSpacing,
-                      vertical: elementSpacing,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: defaultSpacing, vertical: elementSpacing),
                     child: Watch(
                       (context) => Text(
                         widget.tabs[index],

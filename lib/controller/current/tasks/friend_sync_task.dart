@@ -6,7 +6,7 @@ import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/controller/current/steps/account_step.dart';
 
 class FriendsSyncTask extends SynchronizationTask {
-  FriendsSyncTask() : super("loading.friends", const Duration(seconds: 30));
+  FriendsSyncTask() : super("loading.friends");
 
   @override
   Future<String?> init() async {

@@ -8,10 +8,7 @@ import 'package:signals/signals.dart';
 
 class TabletopDecks {
   static Future<List<TabletopDeck>?> listDecks() async {
-    final json = await postAuthorizedJSON("/account/vault/list", {
-      "after": 0,
-      "tag": Constants.vaultDeckTag,
-    });
+    final json = await postAuthorizedJSON("/account/vault/list", {"after": 0, "tag": Constants.vaultDeckTag});
 
     if (!json["success"]) {
       return null;

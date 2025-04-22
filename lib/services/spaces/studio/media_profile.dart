@@ -21,11 +21,7 @@ class MediaProfile {
   MediaProfile(this.type, this.width, this.height, this.framerate, this.bitrate);
 
   /// Convert the media profile to a constraints map readable by the getUserMedia function
-  Map<String, dynamic> toConstraints() => {
-    "width": width,
-    "height": height,
-    "maxFrameRate": framerate,
-  };
+  Map<String, dynamic> toConstraints() => {"width": width, "height": height, "maxFrameRate": framerate};
 
   @override
   String toString() {
@@ -89,8 +85,7 @@ class MediaProfiles {
     final availableProfiles = profiles[type]!;
 
     // Calculate bandwidth amount that can be used
-    final usableBandwidth =
-        availableBandwidth == null ? _fallbackBandwidth : availableBandwidth * _bandwidthUsage;
+    final usableBandwidth = availableBandwidth == null ? _fallbackBandwidth : availableBandwidth * _bandwidthUsage;
     final bandwidthWiggle = availableBandwidth == null ? 0 : availableBandwidth * _wiggleRoom;
 
     // Find the nearest to the current bandwidth + wiggle room

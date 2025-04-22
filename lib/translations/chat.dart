@@ -75,8 +75,7 @@ class ChatPageTranslations extends Translations {
       'conversations.leave': 'Leave conversation',
       'conversations.leave.text':
           'Are you sure you want to leave this conversation? You will not be able to rejoin unless someone invites you back. If this is a private chat with someone, it will be deleted forever.',
-      'chat.not.signed':
-          'This message could have been sent by someone else or modified by the server.',
+      'chat.not.signed': 'This message could have been sent by someone else or modified by the server.',
       'conversations.add': 'Add a member',
       'conversations.add.create': 'New Conversation',
       'choose.members': 'Choose more than one member to create a group chat.',
@@ -115,16 +114,14 @@ class ChatPageTranslations extends Translations {
       'message.copy_file': 'Copy file to clipboard',
       'message.profile': 'Open profile',
       'message.delete': 'Delete message',
-      'message.info.text':
-          'This message was sent by @account (@token) at @hour:@minute on @day/@month/@year.',
+      'message.info.text': 'This message was sent by @account (@token) at @hour:@minute on @day/@month/@year.',
       'message.info.copy_id': 'Copy ID',
       'message.info.copy_signature': 'Copy signature',
       'message.info.copy_sender': 'Copy sender ID',
       'message.info.read_old': 'Read old message',
       'message.empty': 'An empty message.',
       'message.delete.attachments': 'Should the attachments be deleted?',
-      'message.delete.attachments.desc':
-          'Do you want to also delete all of the files attached to this message?',
+      'message.delete.attachments.desc': 'Do you want to also delete all of the files attached to this message?',
 
       // Conversation info
       'conversation.info.version': 'Conversation version: @version',
@@ -150,8 +147,7 @@ class ChatPageTranslations extends Translations {
       'chat.zapshare': 'Share any file (Zap)',
       'chat.zapshare_request': 'Request to share file',
       'chat.zapshare.not_found': 'The request has expired.',
-      'chat.zapshare.creation_failed':
-          'Failed to create a live share request. Maybe you already have one active?',
+      'chat.zapshare.creation_failed': 'Failed to create a live share request. Maybe you already have one active?',
       'chat.zapshare.not_send_self': 'You cannot accept your own request.',
       'chat.zapshare.waiting': 'Waiting..',
       'chat.zapshare.finishing': 'Finishing up..',
@@ -169,8 +165,7 @@ class ChatPageTranslations extends Translations {
       // Spaces
       'chat.space.add': 'Create Space',
       'join.space': 'Join Space',
-      'join.space.popup':
-          'Some people click this on accident, so do you really want to join this space?',
+      'join.space.popup': 'Some people click this on accident, so do you really want to join this space?',
       'chat.space_invite': 'Space invitation',
       'chat.space.not_found': 'This space already ended.',
       'chat.space.loading': 'Loading space..',

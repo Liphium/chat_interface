@@ -48,9 +48,7 @@ class SquareAddWindow extends StatefulWidget {
       return "squares.name_needed".tr;
     }
     if (name.length > specialConstants[Constants.specialConstantMaxConversationNameLength]!) {
-      return "squares.name.length".trParams({
-        "length": specialConstants["max_conversation_name_length"].toString(),
-      });
+      return "squares.name.length".trParams({"length": specialConstants["max_conversation_name_length"].toString()});
     }
 
     // Create the square
@@ -158,10 +156,7 @@ class _SquareAddWindowState extends State<SquareAddWindow> {
                     _conversationLoading.value = false;
                     return;
                   }
-                  final error = await SquareAddWindow.createSquareAction(
-                    _members,
-                    _controller.text,
-                  );
+                  final error = await SquareAddWindow.createSquareAction(_members, _controller.text);
                   if (error != null) {
                     _errorText.value = error;
                   } else {

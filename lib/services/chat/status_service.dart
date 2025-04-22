@@ -4,6 +4,7 @@ import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/services/chat/conversation_service.dart';
 import 'package:chat_interface/services/connection/connection.dart';
 import 'package:chat_interface/services/connection/messaging.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -36,6 +37,7 @@ class StatusService {
     StatusController.updateStatus(message: message, type: type);
 
     // Send the new status
+    sendLog("updating due to status");
     ConversationService.subscribeToConversations();
     return null;
   }

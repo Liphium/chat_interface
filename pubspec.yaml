@@ -50,6 +50,7 @@ dependencies:
     path: rust_builder
   flutter_rust_bridge: 2.9.0
   lorien_chat_list: "0.0.2"
+  collection: ^1.19.1
 
 dev_dependencies:
   flutter_test:

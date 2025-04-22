@@ -6,8 +6,7 @@ class SpacesTranslations extends Translations {
     //* English US
     'en_US': {
       // General
-      'spaces.already_calling':
-          'You are already in a Space. Leave it if you want to open a new one.',
+      'spaces.already_calling': 'You are already in a Space. Leave it if you want to open a new one.',
       'spaces.calling': 'is calling..',
       'spaces.sharing_other_device': 'Sharing with friends',
       'spaces.count': '@count members',
@@ -35,8 +34,7 @@ class SpacesTranslations extends Translations {
           'When you create a Warp, that port on your system will be accessible to all people and devices in the Space. Please make sure to not share important stuff.',
       'warp.port.placeholder': '25565 (default MC port)',
       'warp.create.button': 'Share this port',
-      'warp.error.port_invalid':
-          'A port can only be between 1024 and 65535, no higher and no lower.',
+      'warp.error.port_invalid': 'A port can only be between 1024 and 65535, no higher and no lower.',
       'warp.error.port_not_used': 'This port can\'t be shared because there is no server on it.',
       'warp.error.port_already_shared': 'You are already sharing this port.',
 
@@ -59,8 +57,7 @@ class SpacesTranslations extends Translations {
       'tabletop.object.create': 'Create object',
       'tabletop.object.deck': 'Deck',
       'tabletop.object.deck.choose': 'Choose a deck',
-      'tabletop.object.deck.choose_empty':
-          'No decks available. You can create one in the settings.',
+      'tabletop.object.deck.choose_empty': 'No decks available. You can create one in the settings.',
       'tabletop.match_viewport': 'Rotate to viewport',
       'tabletop.object.text': 'Text',
       'tabletop.object.text.create': 'Create text object',

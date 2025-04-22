@@ -105,11 +105,7 @@ class ZapShareController {
 
   //* Everything about sending starts here
 
-  static Future<void> newTransaction(
-    LPHAddress friend,
-    LPHAddress conversationId,
-    List<XFile> files,
-  ) async {
+  static Future<void> newTransaction(LPHAddress friend, LPHAddress conversationId, List<XFile> files) async {
     if (files.length > 1) {
       sendLog("zapping multiple files is currently not supported");
       return;
@@ -246,9 +242,7 @@ class ZapShareController {
     // Calculate the size of the next chunk to prefill the list (optimization)
     final fileSize = await file.length();
     final Uint8List toEncrypt =
-        chunk * chunkSize >= fileSize
-            ? Uint8List(fileSize - (chunk - 1) * chunkSize)
-            : Uint8List(chunkSize);
+        chunk * chunkSize >= fileSize ? Uint8List(fileSize - (chunk - 1) * chunkSize) : Uint8List(chunkSize);
 
     // Send the chunk once done
     final completer = Completer<bool>();
@@ -274,10 +268,7 @@ class ZapShareController {
         final res = await dio.post(
           nodePath("/auth/liveshare/upload"),
           data: formData,
-          options: d.Options(
-            validateStatus: (status) => true,
-            headers: {authorizationHeader: authorizationValue()},
-          ),
+          options: d.Options(validateStatus: (status) => true, headers: {authorizationHeader: authorizationValue()}),
         );
 
         // Could've been stopped at this point
@@ -457,18 +448,11 @@ class ZapShareController {
             }
 
             // Download stuff
-            final formData = d.FormData.fromMap({
-              "id": container.id,
-              "token": container.token,
-              "chunk": currentChunk,
-            });
+            final formData = d.FormData.fromMap({"id": container.id, "token": container.token, "chunk": currentChunk});
             final res = await dio.get<Uint8List>(
               "${nodeProtocol()}${container.url}/liveshare/download",
               data: formData,
-              options: d.Options(
-                responseType: d.ResponseType.bytes,
-                validateStatus: (status) => true,
-              ),
+              options: d.Options(responseType: d.ResponseType.bytes, validateStatus: (status) => true),
             );
 
             if (res.statusCode != 200) {
@@ -573,12 +557,6 @@ class LiveshareInviteContainer {
   }
 
   String toJson() {
-    return jsonEncode({
-      "url": url,
-      "id": id,
-      "token": token,
-      "name": fileName,
-      "key": packageSymmetricKey(key),
-    });
+    return jsonEncode({"url": url, "id": id, "token": token, "name": fileName, "key": packageSymmetricKey(key)});
   }
 }

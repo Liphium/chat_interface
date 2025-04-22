@@ -13,12 +13,7 @@ class SettingsSidebar extends StatefulWidget {
   final String? currentCategory;
   final double sidebarWidth;
 
-  const SettingsSidebar({
-    super.key,
-    required this.sidebarWidth,
-    this.currentCategory,
-    this.category,
-  });
+  const SettingsSidebar({super.key, required this.sidebarWidth, this.currentCategory, this.category});
 
   @override
   State<SettingsSidebar> createState() => _SettingsSidebarState();
@@ -52,11 +47,7 @@ class _SettingsSidebarState extends State<SettingsSidebar> {
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.only(
-                  top: sectionSpacing,
-                  right: sectionSpacing,
-                  left: sectionSpacing,
-                ),
+                padding: const EdgeInsets.only(top: sectionSpacing, right: sectionSpacing, left: sectionSpacing),
                 child: FJElevatedButton(
                   onTap: () => Get.back(),
                   child: Padding(
@@ -104,8 +95,7 @@ class _SettingsSidebarState extends State<SettingsSidebar> {
                                     if (!element.web && isWeb) {
                                       return const SizedBox();
                                     }
-                                    if (!StatusController.permissions.contains("admin") &&
-                                        element.admin) {
+                                    if (!StatusController.permissions.contains("admin") && element.admin) {
                                       return const SizedBox();
                                     }
 
@@ -133,9 +123,7 @@ class _SettingsSidebarState extends State<SettingsSidebar> {
                                                 Icon(
                                                   element.icon,
                                                   color: Theme.of(context).colorScheme.onPrimary,
-                                                  size:
-                                                      Get.theme.textTheme.titleLarge!.fontSize! *
-                                                      1.5,
+                                                  size: Get.theme.textTheme.titleLarge!.fontSize! * 1.5,
                                                 ),
                                                 horizontalSpacing(defaultSpacing),
                                                 Expanded(

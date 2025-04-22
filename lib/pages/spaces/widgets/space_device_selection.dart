@@ -7,12 +7,7 @@ class SpaceDeviceSelection extends StatelessWidget {
   final Widget child;
   final ContextMenuData data;
 
-  const SpaceDeviceSelection({
-    super.key,
-    required this.title,
-    required this.child,
-    required this.data,
-  });
+  const SpaceDeviceSelection({super.key, required this.title, required this.child, required this.data});
 
   @override
   Widget build(BuildContext context) {
@@ -23,11 +18,7 @@ class SpaceDeviceSelection extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: theme.textTheme.labelLarge),
-          verticalSpacing(defaultSpacing),
-          child,
-        ],
+        children: [Text(title, style: theme.textTheme.labelLarge), verticalSpacing(defaultSpacing), child],
       ),
     );
   }

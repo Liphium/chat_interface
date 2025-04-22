@@ -29,10 +29,6 @@ class MessageController {
   /// Changes the tab in the sidebar in case on desktop.
   static Future<void> openConversation(Conversation conversation, {String extra = ""}) async {
     final provider = ConversationMessageProvider(conversation, extra: extra);
-    if (conversation.notificationCount.value != 0) {
-      // Send new read state to the server
-      await ConversationService.overwriteRead(conversation);
-    }
 
     // Make sure the thing has some messages in it
     await provider.loadNewMessagesTop(date: DateTime.now().millisecondsSinceEpoch);
@@ -49,8 +45,7 @@ class MessageController {
       SidebarController.openTab(ConversationSidebarTab(provider));
 
       // Open the member sidebar in case desired
-      if (SettingController.settings[AppSettings.showGroupMembers]!.getValue() as bool &&
-          conversation.isGroup) {
+      if (SettingController.settings[AppSettings.showGroupMembers]!.getValue() as bool && conversation.isGroup) {
         SidebarController.setRightSidebar(ConversationMembersRightSidebar(conversation));
       }
     }

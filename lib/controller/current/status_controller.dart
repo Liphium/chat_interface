@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:chat_interface/services/chat/status_service.dart';
-import 'package:chat_interface/services/connection/connection.dart';
 import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/account/friend_controller.dart';
@@ -15,21 +14,6 @@ class StatusController {
   static List<String> permissions = [];
   static List<RankData> ranks = [];
   static LPHAddress get ownAddress => LPHAddress(basePath, ownAccountId);
-
-  /// Timer for constantly sending the status
-  static Timer? _timer;
-
-  /// Start a timer that always sends the status to the server.
-  static void init() {
-    if (_timer != null) _timer!.cancel();
-
-    // Update status every minute
-    _timer = Timer.periodic(const Duration(minutes: 1), (timer) {
-      if (connector.isConnected()) {
-        StatusService.sendStatus();
-      }
-    });
-  }
 
   static final displayName = signal("not-set");
   static final name = signal('not-set');
@@ -48,10 +32,8 @@ class StatusController {
   void setName(String value) => name.value = value;
 
   /// Get the current status json for the current client.
-  static String statusJson() => jsonEncode(<String, dynamic>{
-    "s": base64Encode(utf8.encode(status.peek())),
-    "t": type.peek(),
-  });
+  static String statusJson() =>
+      jsonEncode(<String, dynamic>{"s": base64Encode(utf8.encode(status.peek())), "t": type.peek()});
 
   /// Create a new status json.
   static String newStatusJson(String status, int type) =>
@@ -150,11 +132,7 @@ class RankData {
 
   // Factory constructor to create Rank object from JSON
   factory RankData.fromJson(Map<String, dynamic> json) {
-    return RankData(
-      id: json['id'] as int,
-      name: json['name'] as String,
-      level: json['level'] as int,
-    );
+    return RankData(id: json['id'] as int, name: json['name'] as String, level: json['level'] as int);
   }
 
   // Method to convert Rank object to JSON

@@ -10,35 +10,29 @@ class ErrorTranslations extends Translations {
           'There was an error while connecting to the server. Please make sure you are connected to the internet and have a stable connection to your town.',
       'render.error': 'Elements of type @type aren\'t supported.',
       'server.not_found': 'The server couldn\'t be reached. Make sure you have the right domain.',
-      'error.network':
-          'Seems like you are offline. Please try to check the connection of your device.',
+      'error.network': 'Seems like you are offline. Please try to check the connection of your device.',
       'error.untrusted_server':
           'This action couldn\'t be completed because @domain isn\'t trusted. Check your settings if you want to trust this server.',
       'server.error': 'Something went wrong on the server, please try again later.',
       'other.server.error':
           'It seems like the town this conversation is hosted on is currently down. Please try again later. We\'ll automatically try restoring a connection.',
-      'server.error.code':
-          'Something went wrong on the server, please try again later. Status code: @code',
+      'server.error.code': 'Something went wrong on the server, please try again later. Status code: @code',
       'friends.error':
           'There was an error while loading your friends. Please try again later or contact your administrator.',
       'node.error': 'The chat server didn\'t respond, please try again later.',
-      'mail.error':
-          'There was an error with our mail servers. Please try again later or contact your administrator.',
+      'mail.error': 'There was an error with our mail servers. Please try again later or contact your administrator.',
       'app.error': 'There was an error with the app. Please report this to the developers.',
       'not.setup': 'The chat server is not set up yet, maybe try updating to the newest version?',
       'not.found': 'This wasn\'t found. Maybe it has already been deleted?',
       'new.version': 'A new version is available, please update the app.',
-      'key.error':
-          'Something went wrong with your keys. Maybe try restarting the app or contacting support?',
+      'key.error': 'Something went wrong with your keys. Maybe try restarting the app or contacting support?',
       'keys.invalid':
           'Invalid keys found. This means that the server could\'ve been hacked or someone is trolling you.',
       'already.deleted': 'This object was already deleted.',
       'no.permission': 'You don\'t have permission to do that.',
-      'spaces.connection_error':
-          'Something went wrong with the spaces connection. Please try again later.',
+      'spaces.connection_error': 'Something went wrong with the spaces connection. Please try again later.',
       'invalid.method': 'This is incorrect. Please try again.',
-      'sessions.limit':
-          'You are already registered with 5 devices. Please log out of one of them to log in here.',
+      'sessions.limit': 'You are already registered with 5 devices. Please log out of one of them to log in here.',
       'password.incorrect': 'Your password is incorrect. Please try again.',
       'protocol.error.server':
           'The town you are trying to connect to runs an outdated version of Liphium. Please contact the owners of that town to update to the latest version.',
@@ -47,8 +41,7 @@ class ErrorTranslations extends Translations {
       'spaces.not.setup':
           'Spaces is not supported in your town. Please contact the owners of this town and ask them to set up Spaces.',
       'not.supported': 'This feature is not supported on this platform.',
-      'profile.conversation_not_found':
-          'You are not in a conversation with this person. Please create one first.',
+      'profile.conversation_not_found': 'You are not in a conversation with this person. Please create one first.',
 
       // Friends
       'request.friend.exists': 'Already added',
@@ -60,8 +53,7 @@ class ErrorTranslations extends Translations {
       'requests.already.exists.text':
           "I know you want to be this person's friend, but you already sent them a request. So please chill a little bit.",
       'request.not.found': 'User not found',
-      'request.not.found.text':
-          "You sure this is your friend? Maybe you just met them in your dreams?",
+      'request.not.found.text': "You sure this is your friend? Maybe you just met them in your dreams?",
       'requests.error':
           'There was an error with accepting this request. Please try again later or update to the latest version.',
 
@@ -80,8 +72,7 @@ class ErrorTranslations extends Translations {
       'topic.name.length':
           'The topic name you specified is longer than allowed. Please use less than @length characters.',
       'squares.too_many_members': 'This Square allows a maximum of @amount members.',
-      'conversation.delete_error':
-          'You can\'t delete this conversation yet. Please try again later.',
+      'conversation.delete_error': 'You can\'t delete this conversation yet. Please try again later.',
       'error.not_delete_conversation':
           'Couldn\'t delete conversation. Try restarting the app if this conversation was just created.',
       'file.not_uploaded': 'File not found.',
@@ -94,8 +85,7 @@ class ErrorTranslations extends Translations {
       'group.data_too_long':
           'The data of this conversation became too long. This shouldn\'t normally happen. You should probably contact the developers of this app.',
       'zap.no_save_location': 'Please select a save location for your file to use Zap.',
-      'zap.already_exists':
-          'This file already exists. Please choose a different place to store this file.',
+      'zap.already_exists': 'This file already exists. Please choose a different place to store this file.',
       'zap.error': 'Zap Error',
       'zap.no_mobile':
           'Zap is currently not supported on mobile. We still have some things we need to figure out. Please wait until the app gets a little more stable. We\'ll announce once we have an estimated time when Zap will be available.',
@@ -103,23 +93,18 @@ class ErrorTranslations extends Translations {
       // Settings
       'profile_picture.not_uploaded':
           'Your profile picture couldn\'t be uploaded. Please try again later or contact support.',
-      'profile_picture.not_set':
-          'Your profile picture couldn\'t be set. Please try again later or contact support.',
-      'username.invalid':
-          'Your username doesn\'t match the requirements. Please make it longer than 3 characters.',
+      'profile_picture.not_set': 'Your profile picture couldn\'t be set. Please try again later or contact support.',
+      'username.invalid': 'Your username doesn\'t match the requirements. Please make it longer than 3 characters.',
       'display_name.invalid':
           'Your display name doesn\'t match the requirements. Please make it longer than 3 characters.',
       'username.taken': 'This username is taken, please choose a different one.',
       'password.mismatch': 'The passwords don\'t match.',
 
       // Spaces, Studio and Tabletop
-      'tabletop.not_found':
-          'The table wasn\'t found for some reason, maybe try rejoining the Space?',
+      'tabletop.not_found': 'The table wasn\'t found for some reason, maybe try rejoining the Space?',
       'tabletop.already_joined': 'You are already in tabletop. You can\'t join again.',
-      'tabletop.couldnt_create':
-          'There was an issue during the table creation. Please report this to the developers.',
-      'tabletop.object_not_found':
-          'This object doesn\'t exist anymore, maybe it has already been deleted?',
+      'tabletop.couldnt_create': 'There was an issue during the table creation. Please report this to the developers.',
+      'tabletop.object_not_found': 'This object doesn\'t exist anymore, maybe it has already been deleted?',
       'tabletop.object_already_held':
           'This is object is already being held by someone else. Please try to modify it again later.',
       'tabletop.object_not_in_queue':
@@ -132,8 +117,7 @@ class ErrorTranslations extends Translations {
       // Message errors
       'error.message.timestamp': 'A timestamp for your message could not be generated.',
       'error.message.empty': 'Your message is empty, please add some content to send it.',
-      'error.message.loading':
-          'A message is still waiting to be sent, please wait for it to finish.',
+      'error.message.loading': 'A message is still waiting to be sent, please wait for it to finish.',
     },
 
     //* German

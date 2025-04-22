@@ -9,18 +9,7 @@ bool databaseInitialized = false;
 late Database db;
 
 @DriftDatabase(
-  tables: [
-    Conversation,
-    Message,
-    Member,
-    Setting,
-    Friend,
-    Request,
-    UnknownProfile,
-    Profile,
-    TrustedLink,
-    LibraryEntry,
-  ],
+  tables: [Conversation, Message, Member, Setting, Friend, Request, UnknownProfile, Profile, TrustedLink, LibraryEntry],
 )
 class Database extends _$Database {
   Database(super.e);

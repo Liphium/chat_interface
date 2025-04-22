@@ -23,9 +23,7 @@ class FJSwitch extends StatelessWidget {
         hoverColor: Get.theme.hoverColor,
         thumbColor: WidgetStateColor.resolveWith(
           (states) =>
-              states.contains(WidgetState.selected)
-                  ? Get.theme.colorScheme.onPrimary
-                  : Get.theme.colorScheme.surface,
+              states.contains(WidgetState.selected) ? Get.theme.colorScheme.onPrimary : Get.theme.colorScheme.surface,
         ),
         value: value,
         onChanged: onChanged,

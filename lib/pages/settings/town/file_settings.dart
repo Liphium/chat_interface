@@ -36,14 +36,7 @@ class FileSettings {
   ];
 
   // File types for auto download
-  static const List<String> staticImageTypes = [
-    "png",
-    "jpg",
-    "jpeg",
-    "webp",
-    "bmp",
-    "wbmp",
-  ]; // Everything except GIF
+  static const List<String> staticImageTypes = ["png", "jpg", "jpeg", "webp", "bmp", "wbmp"]; // Everything except GIF
   static const List<String> imageTypes = ["png", "jpg", "jpeg", "webp", "bmp", "wbmp", "gif"];
   static const List<String> videoTypes = ["mp4", "avi", "mkv"];
   static const List<String> audioTypes = ["mp3", "mov", "wav", "ogg"];
@@ -156,10 +149,7 @@ class FileSettingsPage extends StatelessWidget {
                     children: [
                       Icon(Icons.launch, color: Get.theme.colorScheme.onPrimary),
                       horizontalSpacing(defaultSpacing),
-                      Text(
-                        "settings.file.cache.open_saved_files".tr,
-                        style: Get.textTheme.labelLarge,
-                      ),
+                      Text("settings.file.cache.open_saved_files".tr, style: Get.textTheme.labelLarge),
                     ],
                   ),
                 ),

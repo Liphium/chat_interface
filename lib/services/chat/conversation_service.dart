@@ -42,8 +42,7 @@ class MemberContainer {
   }
 
   /// Encrypt the member container for sending it to the server
-  String encrypted(SecureKey key) =>
-      encryptSymmetric(jsonEncode(<String, dynamic>{"id": id.encode()}), key);
+  String encrypted(SecureKey key) => encryptSymmetric(jsonEncode(<String, dynamic>{"id": id.encode()}), key);
 }
 
 /// The token for accessing a conversation and acting as a specific conversation member
@@ -52,9 +51,7 @@ class ConversationToken {
   final String token;
 
   ConversationToken(this.id, this.token);
-  ConversationToken.fromJson(Map<String, dynamic> json)
-    : id = LPHAddress.from(json["id"]),
-      token = json["token"];
+  ConversationToken.fromJson(Map<String, dynamic> json) : id = LPHAddress.from(json["id"]), token = json["token"];
 
   String toJson() => jsonEncode(toMap());
   Map<String, dynamic> toMap() => <String, dynamic>{"id": id.encode(), "token": token};
@@ -86,9 +83,11 @@ class ConversationService extends VaultTarget {
   @override
   Future<void> init() async {
     final conversations =
-        await (db.select(db.conversation)
-          ..orderBy([(u) => drift.OrderingTerm.asc(u.updatedAt)])).get();
-    await batch(() async {
+        await (db.select(db.conversation)..orderBy([(u) => drift.OrderingTerm.desc(u.updatedAt)])).get();
+    batch(() {
+      final order = List<LPHAddress>.filled(conversations.length, LPHAddress.error(), growable: true);
+      final map = <LPHAddress, Conversation>{};
+      int index = 0;
       for (var conversation in conversations) {
         // Make sure to handle the different types properly
         Conversation conv;
@@ -100,9 +99,14 @@ class ConversationService extends VaultTarget {
         }
 
         // Load the members and add
-        await ConversationService.loadMembers(conv);
-        ConversationController.add(conv);
+        unawaited(ConversationService.loadMembers(conv));
+        map[conv.id] = conv;
+        order[index] = conv.id;
+        index++;
       }
+
+      ConversationController.order.value = order;
+      ConversationController.conversations.value = map;
     });
   }
 
@@ -135,6 +139,10 @@ class ConversationService extends VaultTarget {
       }
       return false;
     });
+
+    // Subscribe to conversations again
+    sendLog("vault sync completed");
+    ConversationService.subscribeToConversations();
   }
 
   /// Open a direct message with a friend.
@@ -166,11 +174,9 @@ class ConversationService extends VaultTarget {
     // Open a new conversation with the friend
     return (
       null,
-      await openConversation(
-        model.ConversationType.directMessage,
-        [friend],
-        ConversationContainer(directMessagePrefix + friend.id.id),
-      ),
+      await openConversation(model.ConversationType.directMessage, [
+        friend,
+      ], ConversationContainer(directMessagePrefix + friend.id.id)),
     );
   }
 
@@ -189,9 +195,7 @@ class ConversationService extends VaultTarget {
   ) async {
     // Prepare the conversation
     final conversationKey = randomSymmetricKey();
-    final ownMemberContainer = MemberContainer(
-      StatusController.ownAddress,
-    ).encrypted(conversationKey);
+    final ownMemberContainer = MemberContainer(StatusController.ownAddress).encrypted(conversationKey);
     final memberContainers = <LPHAddress, String>{};
     for (final friend in friends) {
       final container = MemberContainer(friend.id);
@@ -227,9 +231,7 @@ class ConversationService extends VaultTarget {
     // Send all other members their information and credentials
     for (var friend in friends) {
       // Get the token for the member
-      final token = ConversationToken.fromJson(
-        body["tokens"][hashSha(memberContainers[friend.id]!)],
-      );
+      final token = ConversationToken.fromJson(body["tokens"][hashSha(memberContainers[friend.id]!)]);
 
       // Send them an authenticated stored action and add the member to the list
       final error = await sendAuthenticatedStoredAction(
@@ -316,12 +318,7 @@ class ConversationService extends VaultTarget {
     // Send the friend the invite to the conversation
     final result = await sendAuthenticatedStoredAction(
       friend,
-      _conversationPayload(
-        conv.id,
-        ConversationToken.fromJson(json),
-        packageSymmetricKey(conv.key),
-        friend,
-      ),
+      _conversationPayload(conv.id, ConversationToken.fromJson(json), packageSymmetricKey(conv.key), friend),
     );
     return result;
   }
@@ -353,35 +350,19 @@ class ConversationService extends VaultTarget {
     }
 
     // Subscribe to all conversations
-    unawaited(
-      _sub(
-        StatusController.statusPacket(),
-        StatusController.sharedContentPacket(),
-        tokens,
-        deletions: true,
-      ),
-    );
+    unawaited(_sub(StatusController.statusPacket(), StatusController.sharedContentPacket(), tokens, deletions: true));
   }
 
   /// Ask the server to subscribe to a singular conversation.
   ///
   /// Also sends out a status packet to this conversation (if it's a direct message).
-  static void subscribeToConversation(
-    ConversationToken token, {
-    StatusController? controller,
-    deletions = true,
-  }) {
+  static void subscribeToConversation(ConversationToken token, {StatusController? controller, deletions = true}) {
     // Subscribe to all conversations
     final tokens = <Map<String, dynamic>>[token.toMap()];
 
     // Subscribe
     unawaited(
-      _sub(
-        StatusController.statusPacket(),
-        StatusController.sharedContentPacket(),
-        tokens,
-        deletions: deletions,
-      ),
+      _sub(StatusController.statusPacket(), StatusController.sharedContentPacket(), tokens, deletions: deletions),
     );
   }
 
@@ -393,8 +374,8 @@ class ConversationService extends VaultTarget {
     deletions = false,
   }) async {
     // Get the maximum value of the conversation update timestamps
-    final max = db.conversation.updatedAt.max();
-    final query = db.selectOnly(db.conversation)..addColumns([max]);
+    final max = db.message.createdAt.max();
+    final query = db.selectOnly(db.message)..addColumns([max]);
     final maxValue = await query.map((row) => row.read(max)).getSingleOrNull();
 
     // Send the subscription request
@@ -468,6 +449,7 @@ class ConversationService extends VaultTarget {
     conversation.lastVersion = json["version"];
 
     // Update the container
+    sendLog("conversation fetch with ${json["data"]}: ${conversation.container.name}");
     if (conversation.type == model.ConversationType.square) {
       conversation.container = SquareContainer.decrypt(json["data"], conversation.key);
     } else {
@@ -479,11 +461,7 @@ class ConversationService extends VaultTarget {
     for (var memberData in json["members"]) {
       final memberContainer = MemberContainer.decrypt(memberData["data"], conversation.key);
       final address = LPHAddress.from(memberData["id"]);
-      members[address] = Member(
-        address,
-        memberContainer.id,
-        MemberRole.fromValue(memberData["rank"]),
-      );
+      members[address] = Member(address, memberContainer.id, MemberRole.fromValue(memberData["rank"]));
     }
 
     // Load the members into the database
@@ -519,27 +497,52 @@ class ConversationService extends VaultTarget {
   /// Update when the last message was read in a conversation.
   ///
   /// [messageSendTime] is when the message was sent.
-  /// [increment] is whether the notification count should be incremented or not.
   ///
   /// Also calls the same method in the controller.
-  static void updateLastMessage(
+  static Future<void> updateLastMessage(
     LPHAddress conversation, {
-    bool increment = true,
+    String extra = "",
     required int messageSendTime,
-  }) {
+  }) async {
     // Save the new update time in the local database
-    (db.conversation.update()..where((tbl) => tbl.id.equals(conversation.encode()))).write(
-      ConversationCompanion(
-        updatedAt: drift.Value(BigInt.from(DateTime.now().millisecondsSinceEpoch)),
-      ),
+    final updatedTime = BigInt.from(messageSendTime);
+    final query =
+        db.conversation.update()
+          ..where((tbl) => tbl.id.equals(conversation.encode()) & tbl.updatedAt.isSmallerThanValue(updatedTime));
+    unawaited(query.write(ConversationCompanion(updatedAt: drift.Value(updatedTime))));
+
+    // Get the new notification count
+    final notificationCount = await getNotificationCount(
+      conversation,
+      DateTime.fromMillisecondsSinceEpoch(messageSendTime),
+      extra: extra,
     );
 
     // Update it in the UI
-    ConversationController.updateLastMessageTime(
-      conversation,
-      increment: increment,
-      messageSendTime: messageSendTime,
-    );
+    ConversationController.updateLastMessageTime(conversation, notificationCount, messageSendTime: messageSendTime);
+  }
+
+  /// Get the notification count of a conversation (straight from the database).
+  static Future<int> getNotificationCount(LPHAddress conversationId, DateTime updatedAt, {String extra = ""}) async {
+    final query =
+        await db.message
+            .count(
+              where:
+                  (row) =>
+                      row.conversation.equals(withExtra(conversationId.encode(), extra)) &
+                      row.createdAt.isBiggerThanValue(BigInt.from(updatedAt.millisecondsSinceEpoch)),
+            )
+            .getSingle();
+    return query;
+  }
+
+  /// Get the notification count of a conversation (straight from the database).
+  static Future<BigInt> getUpdatedAt(LPHAddress conversationId) async {
+    // Get the maximum value of the conversation update timestamps
+    final max = db.message.createdAt.max(filter: db.message.conversation.like("%${conversationId.encode()}%"));
+    final query = db.selectOnly(db.message)..addColumns([max]);
+
+    return await query.map((row) => row.read(max)).getSingleOrNull() ?? BigInt.zero;
   }
 
   /// Mark the conversation as read for the current time.
@@ -547,17 +550,15 @@ class ConversationService extends VaultTarget {
     // Send new read state to the server
     final json = await postNodeJSON("/conversations/read", {"token": conversation.token.toMap()});
     if (json["success"]) {
-      conversation.notificationCount.value = 0;
-      conversation.readAt.value = json["time"];
+      ConversationController.resetNotificationCount(conversation.id);
+      conversation.readAt = json["time"];
     }
   }
 
   /// Load all members of a conversation into it from the local database.
   static Future<void> loadMembers(Conversation conv) async {
     // Get all the members from the local database
-    final members =
-        await (db.select(db.member)
-          ..where((tbl) => tbl.conversationId.equals(conv.id.encode()))).get();
+    final members = await (db.select(db.member)..where((tbl) => tbl.conversationId.equals(conv.id.encode()))).get();
     if (members.isEmpty) {
       sendLog("WARNING: a conversation doesn't have any members associated with it");
       return;

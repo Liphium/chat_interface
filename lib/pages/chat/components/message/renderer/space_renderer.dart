@@ -203,8 +203,7 @@ class _SpaceRendererState extends State<SpaceRenderer> with SignalsMixin {
                     }
                     : null,
             child: Padding(
-              padding:
-                  widget.clickable ? const EdgeInsets.all(defaultSpacing) : const EdgeInsets.all(0),
+              padding: widget.clickable ? const EdgeInsets.all(defaultSpacing) : const EdgeInsets.all(0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -240,24 +239,15 @@ class _SpaceRendererState extends State<SpaceRenderer> with SignalsMixin {
                               ),
                             ),
                             Visibility(
-                              visible:
-                                  partyAmount >= renderAmount &&
-                                  renderAmount > 0 &&
-                                  partyAmount != renderAmount,
+                              visible: partyAmount >= renderAmount && renderAmount > 0 && partyAmount != renderAmount,
                               child: Padding(
                                 padding: const EdgeInsets.only(left: defaultSpacing),
-                                child: Text(
-                                  "+${partyAmount - renderAmount}",
-                                  style: Get.theme.textTheme.bodyLarge,
-                                ),
+                                child: Text("+${partyAmount - renderAmount}", style: Get.theme.textTheme.bodyLarge),
                               ),
                             ),
                             Visibility(
                               visible: renderAmount == 0,
-                              child: Text(
-                                "$partyAmount members",
-                                style: Get.theme.textTheme.bodyLarge,
-                              ),
+                              child: Text("$partyAmount members", style: Get.theme.textTheme.bodyLarge),
                             ),
                           ],
                         ),

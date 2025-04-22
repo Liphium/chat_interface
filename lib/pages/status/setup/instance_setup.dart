@@ -20,9 +20,7 @@ import '../../../main.dart';
 import '../../../util/vertical_spacing.dart';
 import 'setup_manager.dart';
 
-const secureStorage = FlutterSecureStorage(
-  aOptions: AndroidOptions(encryptedSharedPreferences: true),
-);
+const secureStorage = FlutterSecureStorage(aOptions: AndroidOptions(encryptedSharedPreferences: true));
 
 class InstanceSetup extends Setup {
   InstanceSetup() : super('loading.instance', false);
@@ -133,8 +131,7 @@ Future<String?> setupInstance(String name, {bool next = false}) async {
 
 /// Encrypts the specified field in the settings table of the database (to migrate it from being unencrypted before)
 Future<bool> _migrateFieldToEncryption(String field) async {
-  final value =
-      await (db.setting.select()..where((tbl) => tbl.key.equals(field))).getSingleOrNull();
+  final value = await (db.setting.select()..where((tbl) => tbl.key.equals(field))).getSingleOrNull();
   if (value == null) {
     return false;
   }
@@ -148,8 +145,7 @@ Future<bool> _migrateFieldToEncryption(String field) async {
 
 /// Get the value of a specified field store in the settings table
 Future<String?> retrieveEncryptedValue(String field) async {
-  final value =
-      await (db.setting.select()..where((tbl) => tbl.key.equals(field))).getSingleOrNull();
+  final value = await (db.setting.select()..where((tbl) => tbl.key.equals(field))).getSingleOrNull();
   if (value == null) {
     return null;
   }
@@ -160,9 +156,7 @@ Future<String?> retrieveEncryptedValue(String field) async {
 
 /// Get the value of a specified field store in the settings table
 Future<int> setEncryptedValue(String field, String value) {
-  return db.setting.insertOnConflictUpdate(
-    SettingData(key: field, value: encryptSymmetric(value, databaseKey)),
-  );
+  return db.setting.insertOnConflictUpdate(SettingData(key: field, value: encryptSymmetric(value, databaseKey)));
 }
 
 class InstanceSelectionPage extends StatefulWidget {
@@ -190,11 +184,7 @@ class _InstanceSelectionPageState extends State<InstanceSelectionPage> {
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          'setup.choose.instance'.tr,
-          style: Get.textTheme.headlineMedium,
-          textAlign: TextAlign.center,
-        ),
+        Text('setup.choose.instance'.tr, style: Get.textTheme.headlineMedium, textAlign: TextAlign.center),
         verticalSpacing(sectionSpacing),
         Text(
           "If you don't know what this is, just click on default and you'll be fine.",

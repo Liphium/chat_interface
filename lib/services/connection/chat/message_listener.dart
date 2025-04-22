@@ -49,11 +49,7 @@ class MessageListener {
       }
 
       // Unpack all of the messages in an isolate
-      final messages = await unpackMessagesInIsolate(
-        conversation,
-        event.data["msgs"],
-        includeSystemMessages: true,
-      );
+      final messages = await unpackMessagesInIsolate(conversation, event.data["msgs"], includeSystemMessages: true);
 
       // Remove all messages with more than 5 attachments
       messages.removeWhere((msg) {
@@ -75,10 +71,7 @@ class MessageListener {
   /// Also verifies the signature (but that happens in the main isolate).
   ///
   /// For the future also: TODO: Unpack the signature in a different isolate
-  static Future<Message> unpackMessageInIsolate(
-    Conversation conv,
-    Map<String, dynamic> json,
-  ) async {
+  static Future<Message> unpackMessageInIsolate(Conversation conv, Map<String, dynamic> json) async {
     // Run an isolate to parse the message
     final copy = Conversation.copyWithoutKey(conv);
     final (message, info) = await sodiumLib.runIsolated((sodium, keys, pairs) {
@@ -119,12 +112,7 @@ class MessageListener {
       // Process all messages
       final list = <(Message, String, SymmetricSequencedInfo?)>[];
       for (var msgJson in json) {
-        final (message, info) = messageFromJson(
-          msgJson,
-          conversation: copy,
-          key: keys[0],
-          sodium: sodium,
-        );
+        final (message, info) = messageFromJson(msgJson, conversation: copy, key: keys[0], sodium: sodium);
 
         // Don't render system messages that shouldn't be rendered (this is only for safety, should never actually happen)
         if (message.type == MessageType.system &&
@@ -138,7 +126,7 @@ class MessageListener {
           message.decryptSystemMessageAttachments(keys[0], sodium);
         }
 
-        list.add((message, msgJson["cv"], info));
+        list.add((message, MessageService.intoIdAndExtra(msgJson["cv"]).$2, info));
       }
 
       // Return the list to the main isolate

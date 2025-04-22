@@ -12,13 +12,7 @@ class SSRFetcher extends StatefulWidget {
   final String path;
   final int frequency;
 
-  const SSRFetcher({
-    super.key,
-    required this.label,
-    required this.ssr,
-    required this.path,
-    required this.frequency,
-  });
+  const SSRFetcher({super.key, required this.label, required this.ssr, required this.path, required this.frequency});
 
   @override
   State<SSRFetcher> createState() => _SSRFetcherState();
@@ -44,9 +38,7 @@ class _SSRFetcherState extends State<SSRFetcher> {
       final json = await widget.ssr.doRequest.call(widget.path, {
         if (widget.ssr.currentToken != null) "token": widget.ssr.currentToken,
       });
-      await Future.delayed(
-        const Duration(milliseconds: 250),
-      ); // To show the user that it's actually doing something
+      await Future.delayed(const Duration(milliseconds: 250)); // To show the user that it's actually doing something
       _loading.value = false;
       _error.value = !json["success"];
       await Future.delayed(const Duration(milliseconds: 500)); // To show the user what's going on
@@ -82,11 +74,7 @@ class _SSRFetcherState extends State<SSRFetcher> {
 
             // The label of the actual status fetcher
             Expanded(
-              child: Text(
-                widget.label,
-                style: Get.theme.textTheme.labelMedium,
-                overflow: TextOverflow.ellipsis,
-              ),
+              child: Text(widget.label, style: Get.theme.textTheme.labelMedium, overflow: TextOverflow.ellipsis),
             ),
             horizontalSpacing(defaultSpacing),
 
@@ -97,10 +85,7 @@ class _SSRFetcherState extends State<SSRFetcher> {
                 return SizedBox(
                   width: 24,
                   height: 24,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 3,
-                    color: Get.theme.colorScheme.onPrimary,
-                  ),
+                  child: CircularProgressIndicator(strokeWidth: 3, color: Get.theme.colorScheme.onPrimary),
                 );
               }
 

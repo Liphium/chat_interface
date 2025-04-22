@@ -13,12 +13,7 @@ class SpaceGridRenderer extends StatelessWidget {
   /// The padding between the rectangles
   final double padding;
 
-  const SpaceGridRenderer({
-    super.key,
-    required this.amount,
-    this.padding = defaultSpacing,
-    required this.renderer,
-  });
+  const SpaceGridRenderer({super.key, required this.amount, this.padding = defaultSpacing, required this.renderer});
 
   @override
   Widget build(BuildContext context) {
@@ -34,8 +29,7 @@ class SpaceGridRenderer extends StatelessWidget {
           final r = (amount + c - 1) ~/ c;
           final maxChildWidth = maxWidth / c;
           final maxChildHeight = maxHeight / r;
-          final childWidth =
-              maxChildWidth < maxChildHeight * ratio ? maxChildWidth : maxChildHeight * ratio;
+          final childWidth = maxChildWidth < maxChildHeight * ratio ? maxChildWidth : maxChildHeight * ratio;
           if (childWidth > bestSize) {
             bestSize = childWidth;
           }

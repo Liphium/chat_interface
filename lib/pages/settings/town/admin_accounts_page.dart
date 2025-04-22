@@ -110,10 +110,7 @@ class _AdminAccountsPageState extends State<AdminAccountsPage> {
     _currentPage.value = page;
 
     // Get the files from the server
-    final json = await postAuthorizedJSON("/townhall/accounts/list", {
-      "page": page,
-      "query": _query.value,
-    });
+    final json = await postAuthorizedJSON("/townhall/accounts/list", {"page": page, "query": _query.value});
     _startLoading.value = false;
     _pageLoading.value = false;
 
@@ -223,10 +220,7 @@ class _AdminAccountsPageState extends State<AdminAccountsPage> {
                             color: Get.theme.colorScheme.onInverseSurface,
                             borderRadius: BorderRadius.circular(10),
                             child: Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: defaultSpacing,
-                                vertical: defaultSpacing,
-                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: defaultSpacing, vertical: defaultSpacing),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
@@ -264,8 +258,7 @@ class _AdminAccountsPageState extends State<AdminAccountsPage> {
                                     children: [
                                       // Launch button (go to manage their account)
                                       LoadingIconButton(
-                                        onTap:
-                                            () => Get.dialog(AdminAccountProfile(account: account)),
+                                        onTap: () => Get.dialog(AdminAccountProfile(account: account)),
                                         icon: Icons.launch,
                                       ),
 
@@ -284,10 +277,9 @@ class _AdminAccountsPageState extends State<AdminAccountsPage> {
                                                 text: "settings.accounts.delete.desc".tr,
                                                 onConfirm: () async {
                                                   account.deleteLoading.value = true;
-                                                  final json = await postAuthorizedJSON(
-                                                    "/townhall/accounts/delete",
-                                                    {"account": account.id},
-                                                  );
+                                                  final json = await postAuthorizedJSON("/townhall/accounts/delete", {
+                                                    "account": account.id,
+                                                  });
                                                   account.deleteLoading.value = false;
 
                                                   if (!json["success"]) {

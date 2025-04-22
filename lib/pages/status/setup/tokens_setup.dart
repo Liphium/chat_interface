@@ -18,8 +18,7 @@ class TokensSetup extends Setup {
   @override
   Future<Widget?> load() async {
     // Check if there are tokens for logging in
-    final token =
-        await (db.setting.select()..where((tbl) => tbl.key.equals("tokens"))).getSingleOrNull();
+    final token = await (db.setting.select()..where((tbl) => tbl.key.equals("tokens"))).getSingleOrNull();
     if (token == null) {
       // Create the SSR renderer
       bool first = true;

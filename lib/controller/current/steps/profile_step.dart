@@ -25,10 +25,7 @@ class RefreshTokenStep extends ConnectionStep {
     String session = getSessionFromJWT(sessionToken);
 
     // Refresh token
-    final body = await postJSON("/account/auth/refresh", <String, dynamic>{
-      "session": session,
-      "token": refreshToken,
-    });
+    final body = await postJSON("/account/auth/refresh", <String, dynamic>{"session": session, "token": refreshToken});
 
     // Set new token (if refreshed)
     if (body["success"]) {

@@ -69,11 +69,7 @@ class _ProfileButtonState extends State<ProfileButton> with SignalsMixin {
                             ),
                           ),
                         )
-                        : Icon(
-                          widget.icon,
-                          size: 25,
-                          color: widget.iconColor ?? theme.colorScheme.onPrimary,
-                        ),
+                        : Icon(widget.icon, size: 25, color: widget.iconColor ?? theme.colorScheme.onPrimary),
               ),
 
               //* Label

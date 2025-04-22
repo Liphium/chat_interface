@@ -26,14 +26,9 @@ class CardObject extends TableObject {
   bool inventoryFlip = false;
   final flipAnimation = AnimatedDouble(-1, duration: 750);
 
-  CardObject(String id, int order, Offset location, Size size)
-    : super(id, order, location, size, TableObjectType.card);
+  CardObject(String id, int order, Offset location, Size size) : super(id, order, location, size, TableObjectType.card);
 
-  static Future<CardObject?> downloadCard(
-    AttachmentContainer container,
-    Offset location, {
-    String id = "",
-  }) async {
+  static Future<CardObject?> downloadCard(AttachmentContainer container, Offset location, {String id = ""}) async {
     // Check if the container fits the new standard
     if (container.width == null || container.height == null) {
       return null;
@@ -51,9 +46,7 @@ class CardObject extends TableObject {
       AttachmentController.downloadAttachment(container).then((success) async {
         if (success) {
           // Get the actual image and add it to the object
-          final buffer = await ui.ImmutableBuffer.fromUint8List(
-            await container.file!.readAsBytes(),
-          );
+          final buffer = await ui.ImmutableBuffer.fromUint8List(await container.file!.readAsBytes());
           final descriptor = await ui.ImageDescriptor.encoded(buffer);
           final codec = await descriptor.instantiateCodec();
           obj.image = (await codec.getNextFrame()).image;
@@ -73,16 +66,10 @@ class CardObject extends TableObject {
   static Size normalizeSize(Size size, double targetSize) {
     if (size.width > size.height) {
       final decreasingFactor = targetSize / size.width;
-      size = Size(
-        (size.width * decreasingFactor).roundToDouble(),
-        (size.height * decreasingFactor).roundToDouble(),
-      );
+      size = Size((size.width * decreasingFactor).roundToDouble(), (size.height * decreasingFactor).roundToDouble());
     } else {
       final decreasingFactor = targetSize / size.height;
-      size = Size(
-        (size.width * decreasingFactor).roundToDouble(),
-        (size.height * decreasingFactor).roundToDouble(),
-      );
+      size = Size((size.width * decreasingFactor).roundToDouble(), (size.height * decreasingFactor).roundToDouble());
     }
 
     return size;
@@ -153,9 +140,7 @@ class CardObject extends TableObject {
         bool found = false;
         for (var object in TabletopController.objects.values) {
           if (object is InventoryObject && TabletopController.inventory != object) {
-            if (object
-                .getInventoryRect(invisRangeX: size.width / 2, invisRangeY: size.height / 2)
-                .contains(center)) {
+            if (object.getInventoryRect(invisRangeX: size.width / 2, invisRangeY: size.height / 2).contains(center)) {
               found = true;
             }
           }

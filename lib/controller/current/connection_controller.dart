@@ -26,6 +26,7 @@ class ConnectionController {
   static final vaultSyncTask = VaultSyncTask();
 
   /// Tasks that run after the setup
+  static Timer? _taskRunner;
   static final _tasks = <SynchronizationTask>[friendSyncTask, vaultSyncTask];
   static bool tasksRan = false;
 
@@ -52,10 +53,12 @@ class ConnectionController {
   static Future<void> tryConnection() async {
     // Initialize all the stuff
     for (var task in _tasks) {
+      sendLog("initializing task ${task.name}..");
       final result = await task.init();
       if (result != null) {
         error.value = "";
         error.value = result;
+        sendLog("task ${task.name} failed during initialization: $result");
         _retry();
       }
     }
@@ -81,9 +84,7 @@ class ConnectionController {
 
       // If a retry is requested, retry all setups
       if (result.retryConnection) {
-        await Future.delayed(
-          500.ms,
-        ); // To prevent CPU overuse in case of a bug (hopefully never happens)
+        await Future.delayed(500.ms); // To prevent CPU overuse in case of a bug (hopefully never happens)
         unawaited(tryConnection());
         return;
       }
@@ -102,18 +103,29 @@ class ConnectionController {
     if (tasksRan) return;
     tasksRan = true;
 
-    // Start all the tasks
-    for (var task in _tasks) {
-      unawaited(task.start());
+    // Create an inline function for running the tasks
+    Future<void> runTasks() async {
+      for (var task in _tasks) {
+        sendLog("running sync task ${task.name}..");
+        final error = await task.run();
+        if (error != null) {
+          sendLog("task ${task.name} finished with error: $error");
+        }
+      }
     }
+
+    // Start the task runner
+    _taskRunner = Timer.periodic(Duration(seconds: 30), (timer) => runTasks());
+    await runTasks();
   }
 
   static void restart() {
     tasksRan = false;
 
     // Reset all data from the tasks before the restart
+    _taskRunner?.cancel();
     for (var task in _tasks) {
-      task.stop();
+      task.onRestart();
     }
 
     // Reset all previous state
@@ -160,34 +172,22 @@ abstract class ConnectionStep {
 
 abstract class SynchronizationTask {
   final String name;
-  final Duration frequency;
 
-  SynchronizationTask(this.name, this.frequency);
+  SynchronizationTask(this.name);
 
-  Timer? _timer;
   final loading = signal(false);
 
-  /// Starts the task.
-  Future<void> start() async {
-    Future<void> runner() async {
-      if (loading.value) {
-        return;
-      }
-      loading.value = true;
-      final result = await refresh();
-      if (result != null) {
-        sendLog("task $name finished with error: $result");
-      }
-      loading.value = false;
+  /// Run an interation of the task.
+  ///
+  /// Returns an error if there was one.
+  Future<String?> run() async {
+    if (loading.value) {
+      return "loading".tr;
     }
-
-    // Run it after being initialized
-    unawaited(runner());
-
-    // Run the thing every now and then
-    _timer = Timer.periodic(frequency, (timer) async {
-      unawaited(runner());
-    });
+    loading.value = true;
+    final result = await refresh();
+    loading.value = false;
+    return result;
   }
 
   /// This method should initialize everything needed for the task.
@@ -195,15 +195,7 @@ abstract class SynchronizationTask {
   /// Returns an error if there is one.
   Future<String?> init();
 
-  /// Stops the task.
-  void stop() {
-    _timer?.cancel();
-    onRestart();
-  }
-
   /// This method will be called every time in the loop.
-  /// You can specify the duration of it using the [frequency] parameter in
-  /// the constructor.
   ///
   /// Returns an error if there is one.
   Future<String?> refresh();

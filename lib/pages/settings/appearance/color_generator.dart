@@ -8,65 +8,28 @@ class ColorFactory {
 
   final double primHue, secHue, sat, lum, lumJumps;
   final int themeMode, backgroundMode;
-  const ColorFactory(
-    this.primHue,
-    this.secHue,
-    this.sat,
-    this.lum,
-    this.themeMode,
-    this.lumJumps,
-    this.backgroundMode,
-  );
+  const ColorFactory(this.primHue, this.secHue, this.sat, this.lum, this.themeMode, this.lumJumps, this.backgroundMode);
 
-  Color getPrimary() =>
-      HSLColor.fromAHSL(1.0, primHue, sat, themeMode == -1 ? _iconBlack : _iconWhite).toColor();
+  Color getPrimary() => HSLColor.fromAHSL(1.0, primHue, sat, themeMode == -1 ? _iconBlack : _iconWhite).toColor();
   Color getPrimaryContainer() =>
-      HSLColor.fromAHSL(
-        1.0,
-        primHue,
-        sat,
-        themeMode == -1 ? _containerBlack : _containerWhite,
-      ).toColor();
+      HSLColor.fromAHSL(1.0, primHue, sat, themeMode == -1 ? _containerBlack : _containerWhite).toColor();
 
-  Color getSecondary() =>
-      HSLColor.fromAHSL(1.0, secHue, sat, themeMode == -1 ? _iconBlack : _iconWhite).toColor();
+  Color getSecondary() => HSLColor.fromAHSL(1.0, secHue, sat, themeMode == -1 ? _iconBlack : _iconWhite).toColor();
   Color getSecondaryContainer() =>
-      HSLColor.fromAHSL(
-        1.0,
-        secHue,
-        sat,
-        themeMode == -1 ? _containerBlack : _containerWhite,
-      ).toColor();
+      HSLColor.fromAHSL(1.0, secHue, sat, themeMode == -1 ? _containerBlack : _containerWhite).toColor();
 
-  Color getBackground1() =>
-      HSLColor.fromAHSL(1.0, primHue, backgroundMode == 1 ? sat : 0.03, lum).toColor();
+  Color getBackground1() => HSLColor.fromAHSL(1.0, primHue, backgroundMode == 1 ? sat : 0.03, lum).toColor();
   Color getBackground2() =>
-      HSLColor.fromAHSL(
-        1.0,
-        primHue,
-        backgroundMode == 1 ? sat : 0.03,
-        clampDouble(lum - 0.03, 0.0, 1.0),
-      ).toColor();
+      HSLColor.fromAHSL(1.0, primHue, backgroundMode == 1 ? sat : 0.03, clampDouble(lum - 0.03, 0.0, 1.0)).toColor();
   Color getBackground3() =>
-      HSLColor.fromAHSL(
-        1.0,
-        primHue,
-        backgroundMode == 1 ? sat : 0.03,
-        clampDouble(lum - 0.06, 0.0, 1.0),
-      ).toColor();
+      HSLColor.fromAHSL(1.0, primHue, backgroundMode == 1 ? sat : 0.03, clampDouble(lum - 0.06, 0.0, 1.0)).toColor();
 
-  Color completeBackground() =>
-      HSLColor.fromAHSL(1.0, primHue, backgroundMode == 1 ? sat : 0, 0.0).toColor();
+  Color completeBackground() => HSLColor.fromAHSL(1.0, primHue, backgroundMode == 1 ? sat : 0, 0.0).toColor();
 
   Color customHue(double hue) =>
       HSLColor.fromAHSL(1.0, hue * 360.0, sat, themeMode == -1 ? _iconBlack : _iconWhite).toColor();
   Color customHueContainer(double hue) =>
-      HSLColor.fromAHSL(
-        1.0,
-        hue * 360.0,
-        sat,
-        themeMode == -1 ? _containerBlack : _containerWhite,
-      ).toColor();
+      HSLColor.fromAHSL(1.0, hue * 360.0, sat, themeMode == -1 ? _containerBlack : _containerWhite).toColor();
 
   Color getFontColor() {
     final hsl = HSLColor.fromColor(getBackground1());
@@ -107,9 +70,7 @@ ColorFactory buildColorFactoryFromSettings() {
     sat = SettingController.settings[ThemeSettings.baseSaturation]!.getValue() as double;
 
     // Advanced color
-    themeMode =
-        ThemeSettings.themeModes[SettingController.settings[ThemeSettings.themeMode]!.getValue()
-            as int];
+    themeMode = ThemeSettings.themeModes[SettingController.settings[ThemeSettings.themeMode]!.getValue() as int];
     backgroundMode = SettingController.settings[ThemeSettings.backgroundMode]!.getValue() as int;
   }
 

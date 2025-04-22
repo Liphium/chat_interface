@@ -46,8 +46,7 @@ class MessageSearchQuery {
       working = true;
 
       // Check if there is a conversation filter
-      final convFilter =
-          filters.firstWhereOrNull((f) => f is ConversationFilter) as ConversationFilter?;
+      final convFilter = filters.firstWhereOrNull((f) => f is ConversationFilter) as ConversationFilter?;
 
       // Grab all the messages from the list using the offset
       // Make sure to only search in the current conversation in case there is a conversation filter
@@ -83,10 +82,7 @@ class MessageSearchQuery {
       // Check all the filters for the current messages (maybe put in an isolate in the future?)
       final found = <Message>[];
       for (var message in messages) {
-        final (processed, conversation) = ConversationMessageProvider.decryptFromLocalDatabase(
-          message,
-          databaseKey,
-        );
+        final (processed, conversation) = ConversationMessageProvider.decryptFromLocalDatabase(message, databaseKey);
 
         // Maybe remove this limitation in the future?
         if (processed.type != MessageType.text) {
@@ -171,18 +167,14 @@ class ContentFilter extends MessageFilter {
 
     // Check if all words in the search query are found in the content
     final contentWords = message.content.toLowerCase().split(RegExp(r'\s+'));
-    if (searchWords.every(
-      (word) => contentWords.any((contentWord) => contentWord.contains(word)),
-    )) {
+    if (searchWords.every((word) => contentWords.any((contentWord) => contentWord.contains(word)))) {
       return true;
     }
 
     // Check if all words in the search query are found in any attachment
     for (var attachment in message.attachments) {
       final attachmentWords = attachment.toLowerCase().split(RegExp(r'\s+'));
-      if (searchWords.every(
-        (word) => attachmentWords.any((attachmentWord) => attachmentWord.contains(word)),
-      )) {
+      if (searchWords.every((word) => attachmentWords.any((attachmentWord) => attachmentWord.contains(word)))) {
         return true;
       }
     }

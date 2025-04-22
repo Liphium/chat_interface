@@ -50,11 +50,7 @@ class _SidebarState extends State<Sidebar> {
               top: false,
               bottom: false,
               child: AnimatedErrorContainer(
-                padding: const EdgeInsets.only(
-                  bottom: defaultSpacing,
-                  right: defaultSpacing,
-                  left: defaultSpacing,
-                ),
+                padding: const EdgeInsets.only(bottom: defaultSpacing, right: defaultSpacing, left: defaultSpacing),
                 message: ConnectionController.error,
               ),
             ),
@@ -105,9 +101,7 @@ class _SidebarState extends State<Sidebar> {
                                   key: _universalKey,
                                   onPressed: () {
                                     showModal(
-                                      UniversalCreateWindow(
-                                        data: ContextMenuData.fromKey(_universalKey, below: true),
-                                      ),
+                                      UniversalCreateWindow(data: ContextMenuData.fromKey(_universalKey, below: true)),
                                     );
                                   },
                                   icon: Icon(Icons.add_circle, color: theme.colorScheme.onPrimary),

@@ -20,11 +20,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   RustLib._();
 
   /// Initialize flutter_rust_bridge
-  static Future<void> init({
-    RustLibApi? api,
-    BaseHandler? handler,
-    ExternalLibrary? externalLibrary,
-  }) async {
+  static Future<void> init({RustLibApi? api, BaseHandler? handler, ExternalLibrary? externalLibrary}) async {
     await instance.initImpl(api: api, handler: handler, externalLibrary: externalLibrary);
   }
 
@@ -50,8 +46,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   Future<void> executeRustInitializers() async {}
 
   @override
-  ExternalLibraryLoaderConfig get defaultExternalLibraryLoaderConfig =>
-      kDefaultExternalLibraryLoaderConfig;
+  ExternalLibraryLoaderConfig get defaultExternalLibraryLoaderConfig => kDefaultExternalLibraryLoaderConfig;
 
   @override
   String get codegenVersion => '2.9.0';
@@ -85,44 +80,21 @@ abstract class RustLibApi extends BaseApi {
     required List<int> packet,
   });
 
-  Future<void> crateApiEngineSetActivityDetection({
-    required LightwireEngine engine,
-    required bool enabled,
-  });
+  Future<void> crateApiEngineSetActivityDetection({required LightwireEngine engine, required bool enabled});
 
-  Future<void> crateApiEngineSetAudioEnabled({
-    required LightwireEngine engine,
-    required bool enabled,
-  });
+  Future<void> crateApiEngineSetAudioEnabled({required LightwireEngine engine, required bool enabled});
 
-  Future<void> crateApiEngineSetAutomaticDetection({
-    required LightwireEngine engine,
-    required bool enabled,
-  });
+  Future<void> crateApiEngineSetAutomaticDetection({required LightwireEngine engine, required bool enabled});
 
-  Future<void> crateApiEngineSetInputDevice({
-    required LightwireEngine engine,
-    required String device,
-  });
+  Future<void> crateApiEngineSetInputDevice({required LightwireEngine engine, required String device});
 
-  Future<void> crateApiEngineSetOutputDevice({
-    required LightwireEngine engine,
-    required String device,
-  });
+  Future<void> crateApiEngineSetOutputDevice({required LightwireEngine engine, required String device});
 
-  Future<void> crateApiEngineSetTalkingAmplitude({
-    required LightwireEngine engine,
-    required double amplitude,
-  });
+  Future<void> crateApiEngineSetTalkingAmplitude({required LightwireEngine engine, required double amplitude});
 
-  Future<void> crateApiEngineSetVoiceEnabled({
-    required LightwireEngine engine,
-    required bool enabled,
-  });
+  Future<void> crateApiEngineSetVoiceEnabled({required LightwireEngine engine, required bool enabled});
 
-  Stream<(Uint8List?, double?, bool?)> crateApiEngineStartPacketStream({
-    required LightwireEngine engine,
-  });
+  Stream<(Uint8List?, double?, bool?)> crateApiEngineStartPacketStream({required LightwireEngine engine});
 
   Future<void> crateApiEngineStopAllEngines();
 
@@ -226,10 +198,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 5, port: port_);
         },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_list_audio_input_device,
-          decodeErrorData: null,
-        ),
+        codec: SseCodec(decodeSuccessData: sse_decode_list_audio_input_device, decodeErrorData: null),
         constMeta: kCrateApiAudioDevicesGetInputDevicesConstMeta,
         argValues: [],
         apiImpl: this,
@@ -248,10 +217,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 6, port: port_);
         },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_list_audio_ouput_device,
-          decodeErrorData: null,
-        ),
+        codec: SseCodec(decodeSuccessData: sse_decode_list_audio_ouput_device, decodeErrorData: null),
         constMeta: kCrateApiAudioDevicesGetOutputDevicesConstMeta,
         argValues: [],
         apiImpl: this,
@@ -289,10 +255,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(debugName: "handle_packet", argNames: ["engine", "id", "packet"]);
 
   @override
-  Future<void> crateApiEngineSetActivityDetection({
-    required LightwireEngine engine,
-    required bool enabled,
-  }) {
+  Future<void> crateApiEngineSetActivityDetection({required LightwireEngine engine, required bool enabled}) {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
@@ -313,10 +276,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(debugName: "set_activity_detection", argNames: ["engine", "enabled"]);
 
   @override
-  Future<void> crateApiEngineSetAudioEnabled({
-    required LightwireEngine engine,
-    required bool enabled,
-  }) {
+  Future<void> crateApiEngineSetAudioEnabled({required LightwireEngine engine, required bool enabled}) {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
@@ -337,10 +297,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(debugName: "set_audio_enabled", argNames: ["engine", "enabled"]);
 
   @override
-  Future<void> crateApiEngineSetAutomaticDetection({
-    required LightwireEngine engine,
-    required bool enabled,
-  }) {
+  Future<void> crateApiEngineSetAutomaticDetection({required LightwireEngine engine, required bool enabled}) {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
@@ -361,10 +318,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(debugName: "set_automatic_detection", argNames: ["engine", "enabled"]);
 
   @override
-  Future<void> crateApiEngineSetInputDevice({
-    required LightwireEngine engine,
-    required String device,
-  }) {
+  Future<void> crateApiEngineSetInputDevice({required LightwireEngine engine, required String device}) {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
@@ -385,10 +339,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(debugName: "set_input_device", argNames: ["engine", "device"]);
 
   @override
-  Future<void> crateApiEngineSetOutputDevice({
-    required LightwireEngine engine,
-    required String device,
-  }) {
+  Future<void> crateApiEngineSetOutputDevice({required LightwireEngine engine, required String device}) {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
@@ -409,10 +360,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(debugName: "set_output_device", argNames: ["engine", "device"]);
 
   @override
-  Future<void> crateApiEngineSetTalkingAmplitude({
-    required LightwireEngine engine,
-    required double amplitude,
-  }) {
+  Future<void> crateApiEngineSetTalkingAmplitude({required LightwireEngine engine, required double amplitude}) {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
@@ -433,10 +381,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(debugName: "set_talking_amplitude", argNames: ["engine", "amplitude"]);
 
   @override
-  Future<void> crateApiEngineSetVoiceEnabled({
-    required LightwireEngine engine,
-    required bool enabled,
-  }) {
+  Future<void> crateApiEngineSetVoiceEnabled({required LightwireEngine engine, required bool enabled}) {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
@@ -457,9 +402,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(debugName: "set_voice_enabled", argNames: ["engine", "enabled"]);
 
   @override
-  Stream<(Uint8List?, double?, bool?)> crateApiEngineStartPacketStream({
-    required LightwireEngine engine,
-  }) {
+  Stream<(Uint8List?, double?, bool?)> crateApiEngineStartPacketStream({required LightwireEngine engine}) {
     final packetSink = RustStreamSink<(Uint8List?, double?, bool?)>();
     unawaited(
       handler.executeNormal(
@@ -539,9 +482,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @protected
   RustStreamSink<(Uint8List?, double?, bool?)>
-  dco_decode_StreamSink_record_opt_list_prim_u_8_strict_opt_box_autoadd_f_32_opt_box_autoadd_bool_Sse(
-    dynamic raw,
-  ) {
+  dco_decode_StreamSink_record_opt_list_prim_u_8_strict_opt_box_autoadd_f_32_opt_box_autoadd_bool_Sse(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     throw UnimplementedError();
   }
@@ -557,10 +498,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
     if (arr.length != 2) throw Exception('unexpected arr length: expect 2 but see ${arr.length}');
-    return AudioInputDevice(
-      name: dco_decode_String(arr[0]),
-      systemDefault: dco_decode_bool(arr[1]),
-    );
+    return AudioInputDevice(name: dco_decode_String(arr[0]), systemDefault: dco_decode_bool(arr[1]));
   }
 
   @protected
@@ -568,10 +506,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
     if (arr.length != 2) throw Exception('unexpected arr length: expect 2 but see ${arr.length}');
-    return AudioOuputDevice(
-      name: dco_decode_String(arr[0]),
-      systemDefault: dco_decode_bool(arr[1]),
-    );
+    return AudioOuputDevice(name: dco_decode_String(arr[0]), systemDefault: dco_decode_bool(arr[1]));
   }
 
   @protected
@@ -655,8 +590,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  (Uint8List?, double?, bool?)
-  dco_decode_record_opt_list_prim_u_8_strict_opt_box_autoadd_f_32_opt_box_autoadd_bool(
+  (Uint8List?, double?, bool?) dco_decode_record_opt_list_prim_u_8_strict_opt_box_autoadd_f_32_opt_box_autoadd_bool(
     dynamic raw,
   ) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
@@ -843,8 +777,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  (Uint8List?, double?, bool?)
-  sse_decode_record_opt_list_prim_u_8_strict_opt_box_autoadd_f_32_opt_box_autoadd_bool(
+  (Uint8List?, double?, bool?) sse_decode_record_opt_list_prim_u_8_strict_opt_box_autoadd_f_32_opt_box_autoadd_bool(
     SseDeserializer deserializer,
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
@@ -888,18 +821,14 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_String(
       self.setupAndSerialize(
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_String,
-          decodeErrorData: sse_decode_AnyhowException,
-        ),
+        codec: SseCodec(decodeSuccessData: sse_decode_String, decodeErrorData: sse_decode_AnyhowException),
       ),
       serializer,
     );
   }
 
   @protected
-  void
-  sse_encode_StreamSink_record_opt_list_prim_u_8_strict_opt_box_autoadd_f_32_opt_box_autoadd_bool_Sse(
+  void sse_encode_StreamSink_record_opt_list_prim_u_8_strict_opt_box_autoadd_f_32_opt_box_autoadd_bool_Sse(
     RustStreamSink<(Uint8List?, double?, bool?)> self,
     SseSerializer serializer,
   ) {
@@ -907,8 +836,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_String(
       self.setupAndSerialize(
         codec: SseCodec(
-          decodeSuccessData:
-              sse_decode_record_opt_list_prim_u_8_strict_opt_box_autoadd_f_32_opt_box_autoadd_bool,
+          decodeSuccessData: sse_decode_record_opt_list_prim_u_8_strict_opt_box_autoadd_f_32_opt_box_autoadd_bool,
           decodeErrorData: sse_decode_AnyhowException,
         ),
       ),

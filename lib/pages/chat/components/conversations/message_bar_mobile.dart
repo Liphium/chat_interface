@@ -55,9 +55,7 @@ class MobileMessageBar extends StatelessWidget {
                       horizontalSpacing(elementSpacing),
                       Flexible(
                         child: Text(
-                          conversation.isGroup
-                              ? conversation.containerSub.value.name
-                              : conversation.dmName,
+                          conversation.isGroup ? conversation.containerSub.value.name : conversation.dmName,
                           style: Theme.of(context).textTheme.titleMedium,
                           overflow: TextOverflow.ellipsis,
                         ),

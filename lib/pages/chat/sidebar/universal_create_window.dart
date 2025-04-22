@@ -14,12 +14,7 @@ class _CreateData {
   final String description;
   final Widget Function() build;
 
-  _CreateData({
-    required this.icon,
-    required this.title,
-    required this.description,
-    required this.build,
-  });
+  _CreateData({required this.icon, required this.title, required this.description, required this.build});
 }
 
 class UniversalCreateWindow extends StatefulWidget {
@@ -31,8 +26,7 @@ class UniversalCreateWindow extends StatefulWidget {
   State<UniversalCreateWindow> createState() => _UniversalCreateWindowState();
 }
 
-class _UniversalCreateWindowState extends State<UniversalCreateWindow>
-    with TickerProviderStateMixin {
+class _UniversalCreateWindowState extends State<UniversalCreateWindow> with TickerProviderStateMixin {
   /// All the different types of things that can be created
   late final _types = <_CreateData>[
     _CreateData(
@@ -83,10 +77,7 @@ class _UniversalCreateWindowState extends State<UniversalCreateWindow>
                         borderRadius: BorderRadius.circular(defaultSpacing),
                         onTap: () {
                           _controller.transitionTo(
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: dialogPadding),
-                              child: data.build(),
-                            ),
+                            Padding(padding: const EdgeInsets.symmetric(vertical: dialogPadding), child: data.build()),
                           );
                         },
                         child: Padding(

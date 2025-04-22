@@ -104,10 +104,7 @@ class DefaultSidebarTab extends SidebarTab {
         verticalSpacing(sectionSpacing),
         Text('app.welcome'.tr, style: Theme.of(context).textTheme.bodyLarge),
         verticalSpacing(elementSpacing),
-        Text(
-          'app.build'.trParams({"build": "Alpha"}),
-          style: Theme.of(context).textTheme.bodyLarge,
-        ),
+        Text('app.build'.trParams({"build": "Alpha"}), style: Theme.of(context).textTheme.bodyLarge),
       ],
     );
   }
@@ -154,10 +151,7 @@ class ConversationSidebarTab extends SidebarTab {
                     ],
                     onInit: (ac) => ac.value = SidebarController.rightSidebar[key] != null ? 1 : 0,
                     target: SidebarController.rightSidebar[key] != null ? 1 : 0,
-                    child: SizedBox(
-                      width: 350,
-                      child: SidebarController.rightSidebar[key]?.build(ctx),
-                    ),
+                    child: SizedBox(width: 350, child: SidebarController.rightSidebar[key]?.build(ctx)),
                   ),
                 ),
               ),

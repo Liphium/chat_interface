@@ -17,10 +17,7 @@ class MessageService {
   /// The string next to the message in the list is its extra id.
   ///
   /// This method doesn't play a sound because it's only used for synchronization.
-  static Future<bool> storeMessages(
-    List<(Message, String)> messages,
-    Conversation conversation,
-  ) async {
+  static Future<bool> storeMessages(List<(Message, String)> messages, Conversation conversation) async {
     if (messages.isEmpty) {
       return false;
     }
@@ -31,7 +28,6 @@ class MessageService {
     });
 
     // Encrypt everything for local database storage
-    final copied = Conversation.copyWithoutKey(conversation);
     final parts = await sodiumLib.runIsolated((sodium, keys, pairs) async {
       final list = <(String, String)>[];
       for (var (message, _) in messages) {
@@ -45,23 +41,23 @@ class MessageService {
     }, secureKeys: [databaseKey]);
 
     // Store all the messages in the local database
+    final extras = <String>[];
     int index = 0;
     for (var (message, extra) in messages) {
-      await storeMessage(message, copied, extra: extra, simple: true, part: parts[index]);
+      if (!extras.contains(extra)) {
+        extras.add(extra);
+      }
+      await storeMessage(message, conversation, extra: extra, simple: true, part: parts[index]);
       index++;
     }
 
-    // Update message read time (to sort conversations properly)
-    final provider = SidebarController.getCurrentProvider();
-    ConversationService.updateLastMessage(
-      conversation.id,
-      increment: (provider?.conversation.id ?? "hi") != conversation.id,
-      messageSendTime: messages.last.$1.createdAt.millisecondsSinceEpoch,
-    );
-
-    // Tell the server about the new read state in case the messages have been received properly
-    if (provider != null && provider.conversation.token.id != messages.last.$1.senderToken) {
-      await ConversationService.overwriteRead(provider.conversation);
+    // Update message read time for all extras
+    for (var extra in extras) {
+      await ConversationService.updateLastMessage(
+        conversation.id,
+        extra: extra,
+        messageSendTime: messages.last.$1.createdAt.millisecondsSinceEpoch,
+      );
     }
 
     return true;
@@ -83,16 +79,11 @@ class MessageService {
 
     if (!simple) {
       // Update message read time for conversations (nessecary for notification count)
-      ConversationService.updateLastMessage(
+      await ConversationService.updateLastMessage(
         conversation.id,
-        increment: (provider?.conversation.id ?? "hi") != conversation.id,
+        extra: extra,
         messageSendTime: message.createdAt.millisecondsSinceEpoch,
       );
-
-      // Update read time in case the message is sent in the currently open conversation
-      if (provider != null && message.senderToken != provider.conversation.token.id) {
-        await ConversationService.overwriteRead(provider.conversation);
-      }
 
       // Play a notification sound when a new message arrives
       unawaited(RingingManager.playNotificationSound());
@@ -103,10 +94,7 @@ class MessageService {
       if ((provider?.conversation.id ?? "hi") == conversation.id) {
         SystemMessages.messages[message.content]?.handle(message, provider!);
       } else {
-        SystemMessages.messages[message.content]?.handle(
-          message,
-          ConversationMessageProvider(conversation),
-        );
+        SystemMessages.messages[message.content]?.handle(message, ConversationMessageProvider(conversation));
       }
 
       // Check if message should be stored

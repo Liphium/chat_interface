@@ -16,8 +16,7 @@ class ServerSelectorContainer extends StatelessWidget {
       color: Get.theme.colorScheme.inverseSurface,
       borderRadius: BorderRadius.circular(defaultSpacing),
       child: InkWell(
-        onTap:
-            () => setupManager.controller!.transitionTo(ServerSelectorPage(onSelected: onSelected)),
+        onTap: () => setupManager.controller!.transitionTo(ServerSelectorPage(onSelected: onSelected)),
         borderRadius: BorderRadius.circular(defaultSpacing),
         child: Padding(
           padding: const EdgeInsets.all(defaultSpacing),

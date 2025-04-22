@@ -78,19 +78,13 @@ class _FJTextFieldState extends State<FJTextField> with SignalsMixin {
           end: 1,
           duration: 250.ms,
           builder: (context, value, child) {
-            return Padding(
-              padding: EdgeInsets.symmetric(horizontal: defaultSpacing * value),
-              child: child,
-            );
+            return Padding(padding: EdgeInsets.symmetric(horizontal: defaultSpacing * value), child: child);
           },
         ),
       ],
       target: _focus.value && widget.animation ? 1 : 0,
       child: Material(
-        color:
-            widget.secondaryColor
-                ? Get.theme.colorScheme.onInverseSurface
-                : Get.theme.colorScheme.inverseSurface,
+        color: widget.secondaryColor ? Get.theme.colorScheme.onInverseSurface : Get.theme.colorScheme.inverseSurface,
         borderRadius: BorderRadius.circular(defaultSpacing),
         child: Padding(
           padding: const EdgeInsets.all(defaultSpacing * 1.5),
@@ -103,10 +97,7 @@ class _FJTextFieldState extends State<FJTextField> with SignalsMixin {
                   child: Icon(
                     widget.prefixIcon,
                     color: Get.theme.colorScheme.onPrimary,
-                    size:
-                        (widget.small ? theme.textTheme.labelMedium : theme.textTheme.labelLarge)!
-                            .fontSize! *
-                        1.5,
+                    size: (widget.small ? theme.textTheme.labelMedium : theme.textTheme.labelLarge)!.fontSize! * 1.5,
                   ),
                 ),
               Flexible(
@@ -114,10 +105,8 @@ class _FJTextFieldState extends State<FJTextField> with SignalsMixin {
                   decoration: InputDecoration(
                     isDense: true,
                     hintText: widget.hintText,
-                    labelStyle:
-                        widget.small ? theme.textTheme.labelMedium : theme.textTheme.labelLarge,
-                    hintStyle:
-                        widget.small ? theme.textTheme.bodyMedium : theme.textTheme.bodyLarge,
+                    labelStyle: widget.small ? theme.textTheme.labelMedium : theme.textTheme.labelLarge,
+                    hintStyle: widget.small ? theme.textTheme.bodyMedium : theme.textTheme.bodyLarge,
                     errorText: widget.errorText,
                     border: InputBorder.none,
                     counterText: "",

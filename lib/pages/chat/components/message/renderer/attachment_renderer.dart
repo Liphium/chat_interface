@@ -25,13 +25,7 @@ class AttachmentRenderer extends StatefulWidget {
   final ConversationMessageProvider? provider;
   final AttachmentContainer container;
 
-  const AttachmentRenderer({
-    super.key,
-    required this.container,
-    required this.self,
-    this.message,
-    this.provider,
-  });
+  const AttachmentRenderer({super.key, required this.container, required this.self, this.message, this.provider});
 
   @override
   State<AttachmentRenderer> createState() => _AttachmentRendererState();
@@ -119,10 +113,7 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
             padding: const EdgeInsets.all(defaultSpacing),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(defaultSpacing),
-              color:
-                  widget.self
-                      ? Get.theme.colorScheme.primary
-                      : Get.theme.colorScheme.primaryContainer,
+              color: widget.self ? Get.theme.colorScheme.primary : Get.theme.colorScheme.primaryContainer,
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
@@ -174,10 +165,7 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
                   borderRadius: BorderRadius.circular(defaultSpacing),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(defaultSpacing),
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxHeight: 350),
-                      child: _networkImage,
-                    ),
+                    child: ConstrainedBox(constraints: const BoxConstraints(maxHeight: 350), child: _networkImage),
                   ),
                 ),
               ),
@@ -223,9 +211,7 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
                 Flexible(
                   child: Watch(
                     (ctx) => Text(
-                      !widget.container.error.value
-                          ? formatFileSize(widget.container.size)
-                          : 'file.not_uploaded'.tr,
+                      !widget.container.error.value ? formatFileSize(widget.container.size) : 'file.not_uploaded'.tr,
                       style: Get.theme.textTheme.bodyMedium,
                     ),
                   ),

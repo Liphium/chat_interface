@@ -52,17 +52,11 @@ class _ConversationAddWindowState extends State<FileInfoWindow> {
       child: Watch((ctx) {
         // Show loading spinner
         if (_loading.value) {
-          return Center(
-            heightFactor: 1,
-            child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary),
-          );
+          return Center(heightFactor: 1, child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary));
         }
 
         if (_errorText.value.isNotEmpty) {
-          return Center(
-            heightFactor: 1,
-            child: Text(_errorText.value, style: Get.textTheme.bodyMedium),
-          );
+          return Center(heightFactor: 1, child: Text(_errorText.value, style: Get.textTheme.bodyMedium));
         }
 
         return Column(
@@ -70,10 +64,7 @@ class _ConversationAddWindowState extends State<FileInfoWindow> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "file.dialog".trParams({
-                "name": widget.container.name,
-                "size": _size.toStringAsFixed(2),
-              }),
+              "file.dialog".trParams({"name": widget.container.name, "size": _size.toStringAsFixed(2)}),
               style: Get.textTheme.bodyMedium,
             ),
             verticalSpacing(defaultSpacing),

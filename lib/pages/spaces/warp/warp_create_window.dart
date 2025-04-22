@@ -42,11 +42,7 @@ class _WarpCreateWindowState extends State<WarpCreateWindow> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            "warp.create.desc".tr,
-            style: Get.theme.textTheme.bodyMedium,
-            textAlign: TextAlign.start,
-          ),
+          Text("warp.create.desc".tr, style: Get.theme.textTheme.bodyMedium, textAlign: TextAlign.start),
           verticalSpacing(defaultSpacing),
           FJTextField(
             maxLength: 5,
@@ -55,10 +51,7 @@ class _WarpCreateWindowState extends State<WarpCreateWindow> {
             hintText: 'warp.port.placeholder'.tr,
           ),
           verticalSpacing(defaultSpacing),
-          AnimatedErrorContainer(
-            padding: const EdgeInsets.only(bottom: defaultSpacing),
-            message: _error,
-          ),
+          AnimatedErrorContainer(padding: const EdgeInsets.only(bottom: defaultSpacing), message: _error),
           FJElevatedLoadingButton(
             onTap: () async {
               _loading.value = true;

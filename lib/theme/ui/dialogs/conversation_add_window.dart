@@ -62,8 +62,7 @@ class ConversationAddWindow extends StatefulWidget {
     if (name!.isEmpty && friends.length > 1) {
       return "conversations.name_needed".tr;
     }
-    if (name.length > specialConstants[Constants.specialConstantMaxConversationNameLength]! &&
-        friends.length > 1) {
+    if (name.length > specialConstants[Constants.specialConstantMaxConversationNameLength]! && friends.length > 1) {
       return "conversations.name.length".trParams({
         "length": specialConstants["max_conversation_name_length"].toString(),
       });
@@ -163,8 +162,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                         padding: const EdgeInsets.only(bottom: defaultSpacing),
                         child: FJTextField(
                           controller: _controller,
-                          maxLength:
-                              specialConstants[Constants.specialConstantMaxConversationNameLength],
+                          maxLength: specialConstants[Constants.specialConstantMaxConversationNameLength],
                           hintText: "conversations.name".tr,
                         ),
                       ),
@@ -190,10 +188,7 @@ class _ConversationAddWindowState extends State<ConversationAddWindow> {
                     _conversationLoading.value = false;
                     return;
                   }
-                  final error = await ConversationAddWindow.createConversationAction(
-                    _members,
-                    _controller.text,
-                  );
+                  final error = await ConversationAddWindow.createConversationAction(_members, _controller.text);
                   if (error != null) {
                     _errorText.value = error;
                   } else {
@@ -304,9 +299,7 @@ class _FriendSelectorState extends State<FriendSelector> {
                       final member = FriendController.friends.values.firstWhere(
                         (element) =>
                             (element.name.toLowerCase().contains(value.toLowerCase()) ||
-                                element.displayName.value.toLowerCase().contains(
-                                  value.toLowerCase(),
-                                )) &&
+                                element.displayName.value.toLowerCase().contains(value.toLowerCase())) &&
                             element.id != StatusController.ownAddress,
                         orElse: () => Friend.unknown(LPHAddress.error()),
                       );
@@ -358,10 +351,7 @@ class _FriendSelectorState extends State<FriendSelector> {
                     padding: const EdgeInsets.only(bottom: defaultSpacing),
                     child: Watch(
                       (ctx) => Material(
-                        color:
-                            widget.signal.contains(friend)
-                                ? theme.colorScheme.primary
-                                : Colors.transparent,
+                        color: widget.signal.contains(friend) ? theme.colorScheme.primary : Colors.transparent,
                         borderRadius: BorderRadius.circular(defaultSpacing),
                         child: InkWell(
                           borderRadius: BorderRadius.circular(defaultSpacing),
@@ -376,20 +366,12 @@ class _FriendSelectorState extends State<FriendSelector> {
                             }
                           },
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: elementSpacing,
-                              vertical: elementSpacing,
-                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: elementSpacing, vertical: elementSpacing),
                             child: Row(
                               children: [
                                 UserAvatar(id: friend.id, size: 35),
                                 horizontalSpacing(defaultSpacing),
-                                Watch(
-                                  (ctx) => Text(
-                                    friend.displayName.value,
-                                    style: theme.textTheme.labelLarge,
-                                  ),
-                                ),
+                                Watch((ctx) => Text(friend.displayName.value, style: theme.textTheme.labelLarge)),
                               ],
                             ),
                           ),

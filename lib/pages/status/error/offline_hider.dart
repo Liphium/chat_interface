@@ -10,13 +10,7 @@ class OfflineHider extends StatelessWidget {
   final Widget child;
   final Alignment alignment;
 
-  const OfflineHider({
-    super.key,
-    required this.axis,
-    required this.child,
-    required this.alignment,
-    this.padding,
-  });
+  const OfflineHider({super.key, required this.axis, required this.child, required this.alignment, this.padding});
 
   @override
   Widget build(BuildContext context) {

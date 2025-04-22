@@ -39,9 +39,7 @@ class _ConversationInfoWindowState extends State<ConversationInfoWindow> {
             ),
             horizontalSpacing(defaultSpacing),
             Text(
-              widget.conversation.isGroup
-                  ? widget.conversation.containerSub.value.name
-                  : widget.conversation.dmName,
+              widget.conversation.isGroup ? widget.conversation.containerSub.value.name : widget.conversation.dmName,
               style: Theme.of(context).textTheme.titleMedium,
             ),
           ],

@@ -29,10 +29,7 @@ class FriendsService {
 
     // Send the deletion stored action in case necessary
     if (removeAction) {
-      final error = await sendAuthenticatedStoredAction(
-        friend,
-        authenticatedStoredAction("fr_rem", {}),
-      );
+      final error = await sendAuthenticatedStoredAction(friend, authenticatedStoredAction("fr_rem", {}));
       if (error != null) {
         return error;
       }

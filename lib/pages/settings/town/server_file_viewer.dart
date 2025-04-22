@@ -172,11 +172,7 @@ class _ConversationsPageState extends State<ServerFileViewer> {
                     (ctx) => Animate(
                       key: ValueKey(file.id),
                       effects: [
-                        ReverseExpandEffect(
-                          axis: Axis.vertical,
-                          curve: const ElasticOutCurve(2.0),
-                          duration: 1000.ms,
-                        ),
+                        ReverseExpandEffect(axis: Axis.vertical, curve: const ElasticOutCurve(2.0), duration: 1000.ms),
                         ScaleEffect(
                           begin: const Offset(1, 1),
                           end: const Offset(0, 0),
@@ -193,10 +189,7 @@ class _ConversationsPageState extends State<ServerFileViewer> {
                           color: Get.theme.colorScheme.onInverseSurface,
                           borderRadius: BorderRadius.circular(10),
                           child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: defaultSpacing,
-                              vertical: defaultSpacing,
-                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: defaultSpacing, vertical: defaultSpacing),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -214,10 +207,7 @@ class _ConversationsPageState extends State<ServerFileViewer> {
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
                                             Text(file.name, style: Get.theme.textTheme.labelMedium),
-                                            Text(
-                                              formatFileSize(file.size),
-                                              style: Get.theme.textTheme.bodyMedium,
-                                            ),
+                                            Text(formatFileSize(file.size), style: Get.theme.textTheme.bodyMedium),
                                           ],
                                         ),
                                       ),
@@ -247,12 +237,11 @@ class _ConversationsPageState extends State<ServerFileViewer> {
                                         file.deleteLoading.value = true;
 
                                         // Make a request to the server
-                                        final success =
-                                            await AttachmentController.deleteFileFromPath(
-                                              file.id,
-                                              file.path != null ? XFile(file.path!) : null,
-                                              popup: true,
-                                            );
+                                        final success = await AttachmentController.deleteFileFromPath(
+                                          file.id,
+                                          file.path != null ? XFile(file.path!) : null,
+                                          popup: true,
+                                        );
                                         if (!success) {
                                           file.path = null;
                                         }
@@ -317,12 +306,7 @@ class FileContainer {
   // Deserialize from JSON
   factory FileContainer.fromJson(Map<String, dynamic> json, KeyPair key, [Sodium? sodium]) {
     // Get the name and stuff
-    final packagedKey = decryptAsymmetricAnonymous(
-      key.publicKey,
-      key.secretKey,
-      json["key"],
-      sodium,
-    );
+    final packagedKey = decryptAsymmetricAnonymous(key.publicKey, key.secretKey, json["key"], sodium);
     final name = decryptSymmetric(json["name"], unpackageSymmetricKey(packagedKey, sodium), sodium);
 
     return FileContainer(

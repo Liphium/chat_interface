@@ -121,9 +121,7 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
                         return Visibility(
                           visible: !verified,
                           child: Padding(
-                            padding: const EdgeInsets.only(
-                              top: elementSpacing + elementSpacing / 4,
-                            ),
+                            padding: const EdgeInsets.only(top: elementSpacing + elementSpacing / 4),
                             child: Tooltip(
                               message: "chat.not.signed".tr,
                               child: const Icon(Icons.warning_rounded, color: Colors.amber),
@@ -146,9 +144,7 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
     return LayoutBuilder(
       builder: (context, constraints) {
         return ConstrainedBox(
-          constraints: BoxConstraints(
-            maxWidth: widget.mobileLayout ? Get.width * 0.75 : (Get.width - 350) * 0.5,
-          ),
+          constraints: BoxConstraints(maxWidth: widget.mobileLayout ? Get.width * 0.75 : (Get.width - 350) * 0.5),
           child: Column(
             crossAxisAlignment: widget.self ? CrossAxisAlignment.end : CrossAxisAlignment.start,
             children: [
@@ -156,28 +152,18 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
               Visibility(
                 visible: widget.message.content.isNotEmpty,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: defaultSpacing * 0.5,
-                    horizontal: defaultSpacing,
-                  ),
+                  padding: const EdgeInsets.symmetric(vertical: defaultSpacing * 0.5, horizontal: defaultSpacing),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(defaultSpacing),
-                    color:
-                        widget.self
-                            ? Get.theme.colorScheme.primary
-                            : Get.theme.colorScheme.primaryContainer,
+                    color: widget.self ? Get.theme.colorScheme.primary : Get.theme.colorScheme.primaryContainer,
                   ),
                   child: Column(
-                    crossAxisAlignment:
-                        widget.self ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                    crossAxisAlignment: widget.self ? CrossAxisAlignment.end : CrossAxisAlignment.start,
                     children: [
                       renderReplyMessage(),
 
                       //* Actual message (with formatted renderer)
-                      FormattedText(
-                        text: widget.message.content,
-                        baseStyle: Get.theme.textTheme.labelLarge!,
-                      ),
+                      FormattedText(text: widget.message.content, baseStyle: Get.theme.textTheme.labelLarge!),
                     ],
                   ),
                 ),
@@ -199,10 +185,7 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
       padding: const EdgeInsets.only(top: elementSpacing, bottom: elementSpacing),
       child: Material(
         borderRadius: BorderRadius.circular(defaultSpacing),
-        color:
-            widget.self
-                ? Get.theme.colorScheme.onPrimary.withAlpha(50)
-                : Get.theme.colorScheme.inverseSurface,
+        color: widget.self ? Get.theme.colorScheme.onPrimary.withAlpha(50) : Get.theme.colorScheme.inverseSurface,
         child: InkWell(
           borderRadius: BorderRadius.circular(defaultSpacing),
           onTap: () => widget.provider.scrollToMessage(widget.message.answer),
@@ -258,22 +241,14 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
 
                   if (container.width != null && container.height != null) {
                     return Padding(
-                      padding: EdgeInsets.only(
-                        top: widget.message.content.isEmpty && index == 0 ? 0 : elementSpacing,
-                      ),
+                      padding: EdgeInsets.only(top: widget.message.content.isEmpty && index == 0 ? 0 : elementSpacing),
                       child: ImageAttachmentRenderer(image: container, hoverCheck: true),
                     );
                   }
 
                   return Padding(
-                    padding: EdgeInsets.only(
-                      top: widget.message.content.isEmpty && index == 0 ? 0 : elementSpacing,
-                    ),
-                    child: AttachmentRenderer(
-                      container: container,
-                      message: widget.message,
-                      self: widget.self,
-                    ),
+                    padding: EdgeInsets.only(top: widget.message.content.isEmpty && index == 0 ? 0 : elementSpacing),
+                    child: AttachmentRenderer(container: container, message: widget.message, self: widget.self),
                   );
                 }).toList(),
           ),

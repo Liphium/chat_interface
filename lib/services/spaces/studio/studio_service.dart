@@ -22,9 +22,7 @@ class StudioService {
     }
 
     // Get all the info needed for a WebRTC connection from the server
-    var event = await SpaceConnection.spaceConnector!.sendActionAndWait(
-      ServerAction("st_info", {}),
-    );
+    var event = await SpaceConnection.spaceConnector!.sendActionAndWait(ServerAction("st_info", {}));
     if (event == null) {
       return (null, "server.error".tr);
     }
@@ -62,16 +60,13 @@ class StudioService {
     final completer = Completer<void>();
     peer.onIceCandidate = (candidate) async {
       if (candidate.candidate != null) {
-        await completer
-            .future; // Make sure to not send ice candidates before the client is registered
+        await completer.future; // Make sure to not send ice candidates before the client is registered
         SpaceConnection.spaceConnector!.sendAction(ServerAction("st_ice", candidate.toMap()));
       }
     };
 
     // Send the offer to the server
-    event = await SpaceConnection.spaceConnector!.sendActionAndWait(
-      ServerAction("st_join", offer.toMap()),
-    );
+    event = await SpaceConnection.spaceConnector!.sendActionAndWait(ServerAction("st_join", offer.toMap()));
     if (event == null) {
       return (null, "error.studio.rtp".trParams({"code": "200"}));
     }
@@ -81,9 +76,7 @@ class StudioService {
     completer.complete();
 
     // Accept the offer from the server
-    await peer.setRemoteDescription(
-      RTCSessionDescription(event.data["answer"]["sdp"], event.data["answer"]["type"]),
-    );
+    await peer.setRemoteDescription(RTCSessionDescription(event.data["answer"]["sdp"], event.data["answer"]["type"]));
 
     return (studioConn, null);
   }
@@ -131,10 +124,7 @@ class StudioService {
 
     // Send the new audio state to the server
     final event = await SpaceConnection.spaceConnector!.sendActionAndWait(
-      ServerAction("set_audio_state", {
-        if (muted != null) "muted": muted,
-        if (deafened != null) "deafened": deafened,
-      }),
+      ServerAction("set_audio_state", {if (muted != null) "muted": muted, if (deafened != null) "deafened": deafened}),
     );
     if (event == null) {
       return "server.error".tr;

@@ -42,11 +42,7 @@ class _MessageFeedState extends State<MessageFeed> {
               children: [
                 Text("conversation.error".tr, style: Get.textTheme.titleMedium),
                 verticalSpacing(defaultSpacing),
-                Text(
-                  provider.conversation.error.value!,
-                  style: Get.textTheme.bodyMedium,
-                  textAlign: TextAlign.center,
-                ),
+                Text(provider.conversation.error.value!, style: Get.textTheme.bodyMedium, textAlign: TextAlign.center),
               ],
             ),
           ),
@@ -69,12 +65,7 @@ class _MessageFeedState extends State<MessageFeed> {
                           child: ConstrainedBox(
                             constraints: BoxConstraints(
                               maxWidth:
-                                  (SettingController
-                                                  .settings[ChatSettings.chatTheme]!
-                                                  .value
-                                                  .value ??
-                                              1) ==
-                                          0
+                                  (SettingController.settings[ChatSettings.chatTheme]!.value.value ?? 1) == 0
                                       ? double.infinity
                                       : 1200,
                             ),

@@ -87,9 +87,7 @@ class UnknownService {
 
     // Check if it was successful
     if (!json["success"]) {
-      sendLog(
-        "couldn't retrieve account ${address.id} on ${address.server} because of: ${json["error"]}",
-      );
+      sendLog("couldn't retrieve account ${address.id} on ${address.server} because of: ${json["error"]}");
       return null;
     }
 
@@ -134,22 +132,14 @@ class UnknownAccount {
 
   static Future<UnknownAccount> fromFriend(Friend friend) async {
     final keys = await friend.getKeys();
-    return UnknownAccount(
-      friend.id,
-      friend.name,
-      friend.displayName.value,
-      keys.signatureKey,
-      keys.publicKey,
-    );
+    return UnknownAccount(friend.id, friend.name, friend.displayName.value, keys.signatureKey, keys.publicKey);
   }
 
   UnknownProfileData toData(DateTime lastFetched) => UnknownProfileData(
     id: id.encode(),
     name: dbEncrypted(name),
     displayName: dbEncrypted(displayName),
-    keys: dbEncrypted(
-      jsonEncode({"sg": packagePublicKey(signatureKey), "pub": packagePublicKey(publicKey)}),
-    ),
+    keys: dbEncrypted(jsonEncode({"sg": packagePublicKey(signatureKey), "pub": packagePublicKey(publicKey)})),
     lastFetched: lastFetched,
   );
 }

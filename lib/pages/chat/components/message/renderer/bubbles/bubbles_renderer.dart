@@ -41,8 +41,7 @@ class BubblesRenderer extends StatefulWidget {
   State<BubblesRenderer> createState() => _BubblesRendererState();
 }
 
-class _BubblesRendererState extends State<BubblesRenderer>
-    with TickerProviderStateMixin, SignalsMixin {
+class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderStateMixin, SignalsMixin {
   final GlobalKey contextMenuKey = GlobalKey();
   final hovering = signal(false);
   Message? _message;

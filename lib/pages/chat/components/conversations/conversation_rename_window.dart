@@ -63,10 +63,7 @@ class _ConversationRenameWindowState extends State<ConversationRenameWindow> {
     }
 
     // Change the data of the conversation
-    final error = await ConversationService.setData(
-      widget.conversation,
-      ConversationContainer(_titleController.text),
-    );
+    final error = await ConversationService.setData(widget.conversation, ConversationContainer(_titleController.text));
     if (error != null) {
       _errorText.value = error;
       _loading.value = false;

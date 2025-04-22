@@ -87,10 +87,7 @@ class StudioConnection {
           _engine = await libspace.createLightwireEngine();
           libspace.startPacketStream(engine: _engine!).listen((data) {
             final (packet, amplitude, speech) = data;
-            SpaceMemberController.handleTalkingState(
-              SpaceMemberController.getOwnId(),
-              speech ?? false,
-            );
+            SpaceMemberController.handleTalkingState(SpaceMemberController.getOwnId(), speech ?? false);
 
             // Send the packets to the data channel
             if (packet != null) {
@@ -102,20 +99,14 @@ class StudioConnection {
           _disposeFunctions.add(
             AudioSettings.microphone.value.subscribe((value) {
               if (_engine != null) {
-                libspace.setInputDevice(
-                  engine: _engine!,
-                  device: value ?? AudioSettings.useDefaultDevice,
-                );
+                libspace.setInputDevice(engine: _engine!, device: value ?? AudioSettings.useDefaultDevice);
               }
             }),
           );
           _disposeFunctions.add(
             AudioSettings.outputDevice.value.subscribe((value) {
               if (_engine != null) {
-                libspace.setOutputDevice(
-                  engine: _engine!,
-                  device: value ?? AudioSettings.useDefaultDevice,
-                );
+                libspace.setOutputDevice(engine: _engine!, device: value ?? AudioSettings.useDefaultDevice);
               }
             }),
           );
@@ -177,24 +168,18 @@ class StudioConnection {
     await _peer.setLocalDescription(offer);
 
     // Send the server the new offer
-    final event = await SpaceConnection.spaceConnector!.sendActionAndWait(
-      ServerAction("st_reneg", offer.toMap()),
-    );
+    final event = await SpaceConnection.spaceConnector!.sendActionAndWait(ServerAction("st_reneg", offer.toMap()));
     if (event == null) {
       sendLog("studio: renegotiation failed, disconnect would be good probably");
       return;
     }
     if (!event.data["success"]) {
-      sendLog(
-        "studio: renegotiation failed cause of ${event.data["message"]}, disconnect would be good probably",
-      );
+      sendLog("studio: renegotiation failed cause of ${event.data["message"]}, disconnect would be good probably");
       return;
     }
 
     // Set new answer as remote description
-    await _peer.setRemoteDescription(
-      RTCSessionDescription(event.data["answer"]["sdp"], event.data["answer"]["type"]),
-    );
+    await _peer.setRemoteDescription(RTCSessionDescription(event.data["answer"]["sdp"], event.data["answer"]["type"]));
   }
 
   /// Handle a new track

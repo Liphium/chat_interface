@@ -72,9 +72,7 @@ class _MaterialMessageRendererState extends State<MaterialMessageRenderer> {
           },
           child: Padding(
             padding: EdgeInsets.symmetric(
-              horizontal:
-                  widget.overwritePadding ??
-                  (widget.mobileLayout ? defaultSpacing : sectionSpacing),
+              horizontal: widget.overwritePadding ?? (widget.mobileLayout ? defaultSpacing : sectionSpacing),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -96,10 +94,7 @@ class _MaterialMessageRendererState extends State<MaterialMessageRenderer> {
 
                     // Render the time of the sent message
                     SelectionContainer.disabled(
-                      child: Text(
-                        formatMessageTime(widget.message.createdAt),
-                        style: Get.theme.textTheme.bodySmall,
-                      ),
+                      child: Text(formatMessageTime(widget.message.createdAt), style: Get.theme.textTheme.bodySmall),
                     ),
 
                     // Render the verified indicator of the message
@@ -144,10 +139,7 @@ class _MaterialMessageRendererState extends State<MaterialMessageRenderer> {
       visible: widget.message.content.isNotEmpty,
       child: Padding(
         padding: const EdgeInsets.only(left: elementSpacing),
-        child: FormattedText(
-          text: widget.message.content,
-          baseStyle: Get.theme.textTheme.bodyLarge!,
-        ),
+        child: FormattedText(text: widget.message.content, baseStyle: Get.theme.textTheme.bodyLarge!),
       ),
     );
   }
@@ -160,10 +152,7 @@ class _MaterialMessageRendererState extends State<MaterialMessageRenderer> {
       padding: const EdgeInsets.only(top: elementSpacing, bottom: elementSpacing),
       child: Material(
         borderRadius: BorderRadius.circular(defaultSpacing),
-        color:
-            widget.self
-                ? Get.theme.colorScheme.onPrimary.withAlpha(40)
-                : Get.theme.colorScheme.inverseSurface,
+        color: widget.self ? Get.theme.colorScheme.onPrimary.withAlpha(40) : Get.theme.colorScheme.inverseSurface,
         child: InkWell(
           borderRadius: BorderRadius.circular(defaultSpacing),
           onTap: () => widget.provider!.scrollToMessage(widget.message.answer),
@@ -224,11 +213,7 @@ class _MaterialMessageRendererState extends State<MaterialMessageRenderer> {
 
                 return Padding(
                   padding: EdgeInsets.only(top: elementSpacing),
-                  child: AttachmentRenderer(
-                    container: container,
-                    message: widget.message,
-                    self: widget.self,
-                  ),
+                  child: AttachmentRenderer(container: container, message: widget.message, self: widget.self),
                 );
               }).toList(),
         ),

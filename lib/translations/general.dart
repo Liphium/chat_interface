@@ -41,19 +41,16 @@ class GeneralTranslations extends Translations {
       'close': 'Close',
       'open': 'Open',
       'username': 'Username',
-      'username.description':
-          'Your username can only contain lowercase characters, numbers and "_" or "-".',
+      'username.description': 'Your username can only contain lowercase characters, numbers and "_" or "-".',
       'display_name': "Display name",
-      'display_name.description':
-          'Your display name is the name everyone sees. No special requirements.',
+      'display_name.description': 'Your display name is the name everyone sees. No special requirements.',
       'password': 'Password',
       'password.current': 'Current password',
       'invite': 'Invite',
       'email': 'Email',
       'code': 'Code',
       'under.dev': 'This feature is still under development. Sorry for the inconvenience.',
-      'no.friends':
-          'You have no friends yet. If you want to add some, you can do that in the friends page.',
+      'no.friends': 'You have no friends yet. If you want to add some, you can do that in the friends page.',
       'open.friends': 'Open friends page',
       'reset': 'Reset',
       'app.settings': 'App settings',

@@ -66,9 +66,7 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
           itemBuilder: (context, index) {
             // Normal conversation renderer
             Conversation conversation =
-                ConversationController.conversations[ConversationController.order.elementAt(
-                  index,
-                )]!;
+                ConversationController.conversations[ConversationController.order.elementAt(index)]!;
 
             Friend? friend;
             if (!conversation.isGroup) {
@@ -77,8 +75,7 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                   conversation.members.values
                       .firstWhere(
                         (element) => element.address != StatusController.ownAddress,
-                        orElse:
-                            () => Member(LPHAddress.error(), LPHAddress.error(), MemberRole.user),
+                        orElse: () => Member(LPHAddress.error(), LPHAddress.error(), MemberRole.user),
                       )
                       .address;
 
@@ -129,9 +126,7 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                             Material(
                               borderRadius: BorderRadius.circular(defaultSpacing),
                               color:
-                                  provider?.conversation == conversation &&
-                                          provider?.extra == "" &&
-                                          !isMobileMode()
+                                  provider?.conversation == conversation && provider?.extra == "" && !isMobileMode()
                                       ? Get.theme.colorScheme.onSurface.withAlpha(20)
                                       : Colors.transparent,
                               child: InkWell(
@@ -156,21 +151,13 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                                   showModal(
                                     ConversationInfoWindow(
                                       conversation: conversation,
-                                      position: ContextMenuData.fromPosition(
-                                        details.globalPosition,
-                                      ),
+                                      position: ContextMenuData.fromPosition(details.globalPosition),
                                     ),
                                   );
                                 },
 
                                 // Conversation item content
-                                child: renderConversationItem(
-                                  conversation,
-                                  title,
-                                  provider,
-                                  friend,
-                                  hover,
-                                ),
+                                child: renderConversationItem(conversation, title, provider, friend, hover),
                               ),
                             ),
 
@@ -223,8 +210,7 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                     // When conversation is tapped (open conversation)
                     onTap: () {
                       // Make sure to not open when already open on desktop
-                      if ((SidebarController.getCurrentProvider()?.extra ?? "") == topic.id &&
-                          !isMobileMode()) {
+                      if ((SidebarController.getCurrentProvider()?.extra ?? "") == topic.id && !isMobileMode()) {
                         return;
                       }
                       MessageController.openConversation(square, extra: topic.id);
@@ -245,8 +231,7 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                             child: Text(
                               topic.name,
                               style:
-                                  (SidebarController.getCurrentProviderReactive()?.extra ?? "") ==
-                                          topic.id
+                                  (SidebarController.getCurrentProviderReactive()?.extra ?? "") == topic.id
                                       ? theme.textTheme.labelMedium
                                       : theme.textTheme.bodyMedium,
                               overflow: TextOverflow.ellipsis,
@@ -292,7 +277,7 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
               return const SizedBox();
             }
 
-            final notifications = conversation.notificationCount.value;
+            final notifications = ConversationController.notificationMap[conversation.id.encode()] ?? 0;
             if (hover.value) {
               // Show the create topic button in case it's a square
               if (conversation.type == model.ConversationType.square) {
@@ -326,15 +311,10 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
             return Visibility(
               visible: notifications > 0,
               child: Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Get.theme.colorScheme.error,
-                ),
+                decoration: BoxDecoration(shape: BoxShape.circle, color: Get.theme.colorScheme.error),
                 child: Padding(
                   padding: const EdgeInsets.only(left: 5, right: 5, top: 2, bottom: 3),
-                  child: Center(
-                    child: Text(min(notifications, 99).toString(), style: Get.textTheme.labelSmall),
-                  ),
+                  child: Center(child: Text(min(notifications, 99).toString(), style: Get.textTheme.labelSmall)),
                 ),
               ),
             );
@@ -349,9 +329,7 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                   onPressed: () {
                     conversation.topicsShown.value = !conversation.topicsShown.peek();
                   },
-                  icon: Icon(
-                    conversation.topicsShown.value ? Icons.expand_less : Icons.expand_more,
-                  ),
+                  icon: Icon(conversation.topicsShown.value ? Icons.expand_less : Icons.expand_more),
                 ),
               ),
             ),
@@ -406,11 +384,7 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                         child: Tooltip(
                           waitDuration: const Duration(milliseconds: 500),
                           message: "friends.different_town".trParams({"town": friend.id.server}),
-                          child: Icon(
-                            Icons.sensors,
-                            color: Get.theme.colorScheme.onPrimary,
-                            size: 21,
-                          ),
+                          child: Icon(Icons.sensors, color: Get.theme.colorScheme.onPrimary, size: 21),
                         ),
                       ),
                     horizontalSpacing(defaultSpacing),
@@ -439,8 +413,7 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                 else
                   Watch(
                     (ctx) => Visibility(
-                      visible:
-                          friend.status.value != "" && friend.statusType.value != statusOffline,
+                      visible: friend.status.value != "" && friend.statusType.value != statusOffline,
                       child: Text(
                         friend.status.value,
                         style: Get.textTheme.bodySmall,
@@ -459,11 +432,7 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
   }
 
   /// Render a group preview for the sidebar
-  Widget renderGroup(
-    String title,
-    Conversation conversation,
-    ConversationMessageProvider? provider,
-  ) {
+  Widget renderGroup(String title, Conversation conversation, ConversationMessageProvider? provider) {
     return Expanded(
       child: Row(
         children: [
@@ -497,14 +466,8 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                         padding: const EdgeInsets.only(left: defaultSpacing),
                         child: Tooltip(
                           waitDuration: const Duration(milliseconds: 500),
-                          message: "conversations.different_town".trParams({
-                            "town": conversation.id.server,
-                          }),
-                          child: Icon(
-                            Icons.sensors,
-                            color: Get.theme.colorScheme.onPrimary,
-                            size: 21,
-                          ),
+                          message: "conversations.different_town".trParams({"town": conversation.id.server}),
+                          child: Icon(Icons.sensors, color: Get.theme.colorScheme.onPrimary, size: 21),
                         ),
                       ),
                   ],
@@ -514,9 +477,7 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
 
                 // Render the amount of members of the conversation
                 Text(
-                  "chat.members".trParams(<String, String>{
-                    "count": conversation.members.length.toString(),
-                  }),
+                  "chat.members".trParams(<String, String>{"count": conversation.members.length.toString()}),
                   style: Get.textTheme.bodySmall,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -530,11 +491,7 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
   }
 
   /// Render a square preview for the sidebar
-  Widget renderSquare(
-    String title,
-    Conversation conversation,
-    ConversationMessageProvider? provider,
-  ) {
+  Widget renderSquare(String title, Conversation conversation, ConversationMessageProvider? provider) {
     return Expanded(
       child: Row(
         children: [
@@ -568,14 +525,8 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                         padding: const EdgeInsets.only(left: defaultSpacing),
                         child: Tooltip(
                           waitDuration: const Duration(milliseconds: 500),
-                          message: "conversations.different_town".trParams({
-                            "town": conversation.id.server,
-                          }),
-                          child: Icon(
-                            Icons.sensors,
-                            color: Get.theme.colorScheme.onPrimary,
-                            size: 21,
-                          ),
+                          message: "conversations.different_town".trParams({"town": conversation.id.server}),
+                          child: Icon(Icons.sensors, color: Get.theme.colorScheme.onPrimary, size: 21),
                         ),
                       ),
                   ],
@@ -585,9 +536,7 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
 
                 // Render the amount of members of the conversation
                 Text(
-                  "chat.members".trParams(<String, String>{
-                    "count": conversation.members.length.toString(),
-                  }),
+                  "chat.members".trParams(<String, String>{"count": conversation.members.length.toString()}),
                   style: Get.textTheme.bodySmall,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,

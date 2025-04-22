@@ -51,9 +51,7 @@ class KeySetup extends ConnectionStep {
       final genVaultKey = randomSymmetricKey();
 
       // Set public key on the server
-      res = await postAuthorizedJSON("/account/keys/public/set", <String, dynamic>{
-        "key": packagedPub,
-      });
+      res = await postAuthorizedJSON("/account/keys/public/set", <String, dynamic>{"key": packagedPub});
       if (!res["success"]) {
         return SetupResponse(error: "key.error");
       }
@@ -69,9 +67,7 @@ class KeySetup extends ConnectionStep {
       if (!res["success"]) {
         return SetupResponse(error: "key.error");
       }
-      res = await postAuthorizedJSON("/account/keys/signature/set", <String, dynamic>{
-        "key": packagedSignaturePub,
-      });
+      res = await postAuthorizedJSON("/account/keys/signature/set", <String, dynamic>{"key": packagedSignaturePub});
       if (!res["success"]) {
         return SetupResponse(error: "key.error");
       }

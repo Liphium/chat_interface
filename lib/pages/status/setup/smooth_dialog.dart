@@ -144,10 +144,8 @@ class _SmoothDialogState extends State<SmoothDialog> with TickerProviderStateMix
                   child: Padding(
                     padding: const EdgeInsets.all(sectionSpacing),
                     child: Watch(
-                      (ctx) => SizedBox(
-                        key: ValueKey(widget.controller.keyTwo),
-                        child: widget.controller.widgetTwo.value!,
-                      ),
+                      (ctx) =>
+                          SizedBox(key: ValueKey(widget.controller.keyTwo), child: widget.controller.widgetTwo.value!),
                     ),
                   ),
                 ),
@@ -234,10 +232,8 @@ class _SmoothDialogWindowState extends State<SmoothDialogWindow> with TickerProv
                 child: Padding(
                   padding: const EdgeInsets.all(sectionSpacing),
                   child: Watch(
-                    (ctx) => SizedBox(
-                      key: ValueKey(widget.controller.keyTwo),
-                      child: widget.controller.widgetTwo.value!,
-                    ),
+                    (ctx) =>
+                        SizedBox(key: ValueKey(widget.controller.keyTwo), child: widget.controller.widgetTwo.value!),
                   ),
                 ),
               ),
@@ -308,10 +304,7 @@ class _SmoothBoxState extends State<SmoothBox> with TickerProviderStateMixin {
             const FadeEffect(begin: 0, end: 1),
           ],
           child: Watch(
-            (ctx) => SizedBox(
-              key: ValueKey(widget.controller.keyTwo),
-              child: widget.controller.widgetTwo.value!,
-            ),
+            (ctx) => SizedBox(key: ValueKey(widget.controller.keyTwo), child: widget.controller.widgetTwo.value!),
           ),
         ),
       ],
@@ -327,9 +320,7 @@ class SmoothDialogTest extends StatefulWidget {
 }
 
 class _SmoothDialogTestState extends State<SmoothDialogTest> {
-  final controller = SmoothDialogController(
-    const SetupLoadingWidget(text: "Welcome to this experiment!"),
-  );
+  final controller = SmoothDialogController(const SetupLoadingWidget(text: "Welcome to this experiment!"));
 
   @override
   void initState() {
@@ -359,9 +350,7 @@ class SmoothDialogBoxTest extends StatefulWidget {
 }
 
 class _SmoothDialogBoxTestState extends State<SmoothDialogBoxTest> {
-  final controller = SmoothDialogController(
-    const SetupLoadingWidget(text: "Welcome to this experiment!"),
-  );
+  final controller = SmoothDialogController(const SetupLoadingWidget(text: "Welcome to this experiment!"));
 
   @override
   Widget build(BuildContext context) {
@@ -374,9 +363,7 @@ class _SmoothDialogBoxTestState extends State<SmoothDialogBoxTest> {
               controller.transitionTo(
                 Builder(
                   builder: (context) {
-                    return SetupLoadingWidget(
-                      text: "Hi ${Random().nextDouble().toStringAsFixed(2)}",
-                    );
+                    return SetupLoadingWidget(text: "Hi ${Random().nextDouble().toStringAsFixed(2)}");
                   },
                 ),
               );

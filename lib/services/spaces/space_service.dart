@@ -34,13 +34,7 @@ class SpaceService {
     }
 
     // Connect to the space
-    final error = await _connectToRoom(
-      domain,
-      spaceJson["token"],
-      spaceJson["client"],
-      spaceId,
-      key,
-    );
+    final error = await _connectToRoom(domain, spaceJson["token"], spaceJson["client"], spaceId, key);
     if (error != null) {
       return error;
     }

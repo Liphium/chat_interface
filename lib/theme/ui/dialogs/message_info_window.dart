@@ -39,9 +39,7 @@ class _MessageInfoWindowState extends State<MessageInfoWindow> {
     Member member;
     if (provider is ConversationMessageProvider) {
       member =
-          ConversationController.conversations[provider.conversation.id]!.members[widget
-              .message
-              .senderToken] ??
+          ConversationController.conversations[provider.conversation.id]!.members[widget.message.senderToken] ??
           Member(LPHAddress("", "removed".tr), widget.message.senderAddress, MemberRole.user);
     } else {
       member = Member(LPHAddress("", "removed".tr), widget.message.senderAddress, MemberRole.user);

@@ -13,8 +13,7 @@ class AppSettingsTranslations extends Translations {
           'The Spaces ringtone is currently disabled. It will be re-introduced when voice chat returns to Spaces some time in 2025. Together with Liphium Ring, but that\'s not even on the roadmap yet.',
       'notification_sounds.tooltip': 'This only plays the sound when your settings allow it to.',
       'notification_sounds.enabled': 'Enable notification sounds',
-      'notification_sounds.do_not_disturb':
-          'Play notification sounds even when in do-not-disturb mode',
+      'notification_sounds.do_not_disturb': 'Play notification sounds even when in do-not-disturb mode',
       'notification_sounds.only_when_tray': 'Only play notification sounds when minimized to tray',
       'ring.desc':
           'The ringtone will follow all settings from the notification sounds above. You can also make it so the ringtone still plays when Liphium is not minimized by using the settings below.',

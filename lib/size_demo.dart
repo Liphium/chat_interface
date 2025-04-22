@@ -14,10 +14,7 @@ class SizeDemo extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         // Calculate the available height for every participant
-        double computedHeight = calculateMaxChildHeight(
-          Size(constraints.biggest.width, constraints.biggest.height),
-          n,
-        );
+        double computedHeight = calculateMaxChildHeight(Size(constraints.biggest.width, constraints.biggest.height), n);
         computedHeight -= defaultSpacing * n;
 
         return Center(
