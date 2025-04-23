@@ -554,12 +554,15 @@ class ConversationService extends VaultTarget {
   }
 
   /// Mark the conversation as read for the current time.
-  static Future<void> overwriteRead(Conversation conversation) async {
+  static Future<void> overwriteRead(Conversation conversation, int stamp) async {
     // Send new read state to the server
-    final json = await postNodeJSON("/conversations/read", {"token": conversation.token.toMap(conversation.id)});
+    final json = await postNodeJSON("/conversations/read", {
+      "token": conversation.token.toMap(conversation.id),
+      "data": stamp,
+    });
     if (json["success"]) {
       ConversationController.resetNotificationCount(conversation.id);
-      conversation.readAt = json["time"];
+      conversation.readAt = stamp;
     }
   }
 
