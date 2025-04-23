@@ -30,7 +30,7 @@ class ConversationMessageProvider extends MessageProvider {
         db.select(db.message)
           ..where((tbl) => tbl.conversation.equals(ConversationService.withExtra(conversation.id.encode(), extra)))
           ..where((tbl) => tbl.createdAt.isSmallerThanValue(BigInt.from(time)))
-          ..orderBy([(u) => OrderingTerm.desc(u.createdAt)])
+          ..orderBy([(u) => OrderingTerm.desc(u.createdAt), (u) => OrderingTerm.asc(u.id)])
           ..limit(30);
     final loadedMessages = await messageQuery.get();
     var processed = await _processMessages(loadedMessages);
@@ -45,7 +45,7 @@ class ConversationMessageProvider extends MessageProvider {
 
       // Load messages from the server
       final json = await postNodeJSON("/conversations/message/list_before", {
-        "token": conversation.token.toMap(),
+        "token": conversation.token.toMap(conversation.id),
         "data": {"extra": extra, "before": loadedMessages.isEmpty ? time : loadedMessages.last.createdAt.toInt()},
       });
 
@@ -81,7 +81,7 @@ class ConversationMessageProvider extends MessageProvider {
         db.select(db.message)
           ..where((tbl) => tbl.conversation.equals(ConversationService.withExtra(conversation.id.encode(), extra)))
           ..where((tbl) => tbl.createdAt.isBiggerThanValue(BigInt.from(time)))
-          ..orderBy([(u) => OrderingTerm.asc(u.createdAt)])
+          ..orderBy([(u) => OrderingTerm.asc(u.createdAt), (u) => OrderingTerm.asc(u.id)])
           ..limit(10);
     final messages = await messageQuery.get();
 
@@ -107,7 +107,10 @@ class ConversationMessageProvider extends MessageProvider {
       }
 
       // Get the message from the server
-      final json = await postNodeJSON("/conversations/message/get", {"token": conversation.token.toMap(), "data": id});
+      final json = await postNodeJSON("/conversations/message/get", {
+        "token": conversation.token.toMap(conversation.id),
+        "data": id,
+      });
 
       // Check if there is an error
       if (!json["success"]) {
@@ -204,7 +207,10 @@ class ConversationMessageProvider extends MessageProvider {
     }
 
     // Send a request to the server
-    final json = await postNodeJSON("/conversations/message/delete", {"token": token.toMap(), "data": message.id});
+    final json = await postNodeJSON("/conversations/message/delete", {
+      "token": token.toMap(conversation.id),
+      "data": message.id,
+    });
 
     if (!json["success"]) {
       return json["error"];
@@ -228,7 +234,7 @@ class ConversationMessageProvider extends MessageProvider {
   @override
   Future<(String, int)?> getTimestamp() async {
     // Grab a new timestamp from the server
-    var json = await postNodeJSON("/conversations/timestamp", {"token": conversation.token.toMap()});
+    var json = await postNodeJSON("/conversations/timestamp", {"token": conversation.token.toMap(conversation.id)});
     if (!json["success"]) {
       return null;
     }
@@ -241,7 +247,7 @@ class ConversationMessageProvider extends MessageProvider {
   Future<String?> handleMessageSend(String timeToken, String data) async {
     // Send message to the server with conversation token as authentication
     final json = await postNodeJSON("/conversations/message/send", <String, dynamic>{
-      "token": conversation.token.toMap(),
+      "token": conversation.token.toMap(conversation.id),
       "data": {"token": timeToken, "data": data, "extra": extra},
     });
 

@@ -260,7 +260,7 @@ class Conversation {
       vaultId: dbEncrypted(vaultId),
       type: type,
       data: dbEncrypted(jsonEncode(container.toJson())),
-      token: dbEncrypted(token.toJson()),
+      token: dbEncrypted(token.toJson(id)),
       key: dbEncrypted(packageSymmetricKey(key)),
       lastVersion: BigInt.from(lastVersion),
       updatedAt: BigInt.from(updatedAt),
@@ -271,7 +271,7 @@ class Conversation {
   String toJson() => jsonEncode(<String, dynamic>{
     "id": id.encode(),
     "type": type.index,
-    "token": token.toMap(),
+    "token": token.toMap(id),
     "key": packageSymmetricKey(key),
     "data": container.toJson(),
   });

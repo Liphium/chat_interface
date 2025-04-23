@@ -41,7 +41,7 @@ class Member {
   /// Returns an error if there was one.
   Future<String?> promote(Conversation conversation) async {
     final json = await postNodeJSON("/conversations/promote_token", {
-      "token": conversation.token.toMap(),
+      "token": conversation.token.toMap(conversation.id),
       "data": tokenId.encode(),
     });
 
@@ -57,7 +57,7 @@ class Member {
   /// Returns an error if there was one.
   Future<String?> demote(Conversation conversation) async {
     final json = await postNodeJSON("/conversations/demote_token", {
-      "token": conversation.token.toMap(),
+      "token": conversation.token.toMap(conversation.id),
       "data": tokenId.encode(),
     });
 
@@ -74,7 +74,7 @@ class Member {
   Future<String?> remove(Conversation conversation) async {
     // Kick the member's token out of the conversation
     final json = await postNodeJSON("/conversations/kick_member", {
-      "token": conversation.token.toMap(),
+      "token": conversation.token.toMap(conversation.id),
       "data": tokenId.encode(),
     });
 

@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:chat_interface/controller/conversation/message_controller.dart';
+import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/controller/conversation/sidebar_controller.dart';
 import 'package:chat_interface/services/chat/vault_versioning_service.dart';
 import 'package:chat_interface/services/connection/connection.dart';
@@ -74,7 +74,28 @@ class _DeveloperWindowState extends State<DeveloperWindow> {
           Text("Current account: ${StatusController.ownAddress.encode()}", style: Get.textTheme.bodyMedium),
           verticalSpacing(defaultSpacing),
           if (SidebarController.getCurrentProvider() != null)
-            Padding(padding: EdgeInsets.all(defaultSpacing)),
+            Padding(
+              padding: EdgeInsets.all(defaultSpacing),
+              child: ProfileButton(
+                icon: Icons.delete,
+                label: "Load test conversation",
+                onTap: () async {
+                  final timestamp = await SidebarController.getCurrentProvider()!.getTimestamp();
+                  for (int i = 0; i <= 50; i++) {
+                    unawaited(
+                      SidebarController.getCurrentProvider()!.sendMessage(
+                        signal(false),
+                        MessageType.text,
+                        [],
+                        "message $i",
+                        "",
+                        timestampInfo: timestamp,
+                      ),
+                    );
+                  }
+                },
+              ),
+            ),
           ProfileButton(
             icon: Icons.launch,
             label: 'Local database viewer',

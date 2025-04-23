@@ -318,8 +318,9 @@ abstract class MessageProvider {
     MessageType type,
     List<String> attachments,
     String message,
-    String answer,
-  ) async {
+    String answer, {
+    (String, int)? timestampInfo,
+  }) async {
     // Check if there is a connection before doing this
     if (!ConnectionController.connected.value) {
       return "error.no_connection".tr;
@@ -361,13 +362,13 @@ abstract class MessageProvider {
     }
 
     // Grab a new timestamp from the server
-    var obj = await getTimestamp();
-    if (obj == null) {
+    timestampInfo = await getTimestamp();
+    if (timestampInfo == null) {
       return "error.message.timestamp".tr;
     }
 
     // Use the timestamp from the json (to prevent desynchronization and stuff)
-    final (timeToken, stamp) = obj;
+    final (timeToken, stamp) = timestampInfo;
     final content = Message.buildContentJson(content: message, type: type, attachments: attachments, answerId: answer);
 
     // Encrypt message with signature

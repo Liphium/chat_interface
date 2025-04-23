@@ -53,8 +53,13 @@ class ConversationToken {
   ConversationToken(this.id, this.token);
   ConversationToken.fromJson(Map<String, dynamic> json) : id = LPHAddress.from(json["id"]), token = json["token"];
 
-  String toJson() => jsonEncode(toMap());
-  Map<String, dynamic> toMap() => <String, dynamic>{"id": id.encode(), "token": token};
+  String toJson(LPHAddress conv) => jsonEncode(toMap(conv));
+  Map<String, dynamic> toMap(LPHAddress conv) => <String, dynamic>{
+    "id": id.encode(),
+    "conv": conv.encode(),
+    "token": token,
+    "time": -1,
+  };
 }
 
 /// The container used for storing conversation data on the server.
@@ -284,7 +289,7 @@ class ConversationService extends VaultTarget {
 
     // Send a removal request to the server (if desired)
     if (token != null) {
-      final json = await postNodeJSON("/conversations/leave", {"token": token.toMap()});
+      final json = await postNodeJSON("/conversations/leave", {"token": token.toMap(id)});
 
       if (!json["success"]) {
         sendLog("Error deleting conversation on the server, ignoring though: ${json["error"]}");
@@ -308,7 +313,7 @@ class ConversationService extends VaultTarget {
   static Future<String?> addToConversation(Conversation conv, Friend friend) async {
     // Generate a new conversation token for the friend
     final json = await postNodeJSON("/conversations/generate_token", {
-      "token": conv.token.toMap(),
+      "token": conv.token.toMap(conv.id),
       "data": MemberContainer(friend.id).encrypted(conv.key),
     });
     if (!json["success"]) {
@@ -334,7 +339,7 @@ class ConversationService extends VaultTarget {
     return authenticatedStoredAction("conv", {
       "id": id.encode(),
       "sg": signature,
-      "token": token.toJson(),
+      "token": token.toJson(id),
       "key": packagedKey,
     });
   }
@@ -346,7 +351,7 @@ class ConversationService extends VaultTarget {
     // Collect all thet tokens for the conversations currently in cache
     final tokens = <Map<String, dynamic>>[];
     for (var conversation in ConversationController.conversations.values) {
-      tokens.add(conversation.token.toMap());
+      tokens.add(conversation.token.toMap(conversation.id));
     }
 
     // Subscribe to all conversations
@@ -356,9 +361,14 @@ class ConversationService extends VaultTarget {
   /// Ask the server to subscribe to a singular conversation.
   ///
   /// Also sends out a status packet to this conversation (if it's a direct message).
-  static void subscribeToConversation(ConversationToken token, {StatusController? controller, deletions = true}) {
+  static void subscribeToConversation(
+    LPHAddress id,
+    ConversationToken token, {
+    StatusController? controller,
+    deletions = true,
+  }) {
     // Subscribe to all conversations
-    final tokens = <Map<String, dynamic>>[token.toMap()];
+    final tokens = <Map<String, dynamic>>[token.toMap(id)];
 
     // Subscribe
     unawaited(
@@ -373,19 +383,17 @@ class ConversationService extends VaultTarget {
     List<Map<String, dynamic>> tokens, {
     deletions = false,
   }) async {
-    // Get the maximum value of the conversation update timestamps
-    final max = db.message.createdAt.max();
-    final query = db.selectOnly(db.message)..addColumns([max]);
-    final maxValue = await query.map((row) => row.read(max)).getSingleOrNull();
+    // Get the sync dates for every conversation
+    for (var token in tokens) {
+      // Get the maximum value of the conversation update timestamps
+      final max = db.message.createdAt.max(filter: db.message.conversation.like("%${token["conv"]}%"));
+      final query = db.selectOnly(db.message)..addColumns([max]);
+      token["time"] = (await query.map((row) => row.read(max)).getSingleOrNull() ?? BigInt.zero).toInt();
+    }
 
     // Send the subscription request
     final event = await connector.sendActionAndWait(
-      ServerAction("conv_sub", <String, dynamic>{
-        "tokens": tokens,
-        "status": status,
-        "sync": maxValue?.toInt() ?? 0,
-        "data": statusData,
-      }),
+      ServerAction("conv_sub", <String, dynamic>{"tokens": tokens, "status": status, "data": statusData}),
     );
     if (event == null) {
       return "server.error".tr;
@@ -416,7 +424,7 @@ class ConversationService extends VaultTarget {
     saveToDatabase(conversation, saveMembers: false);
 
     // Subscribe to conversation
-    ConversationService.subscribeToConversation(conversation.token);
+    ConversationService.subscribeToConversation(conversation.id, conversation.token);
 
     return true;
   }
@@ -432,7 +440,7 @@ class ConversationService extends VaultTarget {
 
     // Get the data from the server
     conversation.membersLoading.value = true;
-    final json = await postNodeJSON("/conversations/data", {"token": conversation.token.toMap()});
+    final json = await postNodeJSON("/conversations/data", {"token": conversation.token.toMap(conversation.id)});
     if (!json["success"]) {
       sendLog("SOMETHING WENT WRONG KINDA WITH MEMBER FETCHING ${json["error"]}");
       conversation.membersLoading.value = false;
@@ -548,7 +556,7 @@ class ConversationService extends VaultTarget {
   /// Mark the conversation as read for the current time.
   static Future<void> overwriteRead(Conversation conversation) async {
     // Send new read state to the server
-    final json = await postNodeJSON("/conversations/read", {"token": conversation.token.toMap()});
+    final json = await postNodeJSON("/conversations/read", {"token": conversation.token.toMap(conversation.id)});
     if (json["success"]) {
       ConversationController.resetNotificationCount(conversation.id);
       conversation.readAt = json["time"];
@@ -581,7 +589,7 @@ class ConversationService extends VaultTarget {
 
     // Update the conversation on the server
     final json = await postNodeJSON("/conversations/set_data", {
-      "token": conv.token.toMap(),
+      "token": conv.token.toMap(conv.id),
       "data": {"version": conv.lastVersion, "data": data},
     });
     if (!json["success"]) {
