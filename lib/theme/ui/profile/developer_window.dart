@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:chat_interface/controller/conversation/message_controller.dart';
+import 'package:chat_interface/controller/conversation/sidebar_controller.dart';
 import 'package:chat_interface/services/chat/vault_versioning_service.dart';
 import 'package:chat_interface/services/connection/connection.dart';
 import 'package:chat_interface/controller/account/friend_controller.dart';
@@ -71,6 +73,8 @@ class _DeveloperWindowState extends State<DeveloperWindow> {
           verticalSpacing(elementSpacing),
           Text("Current account: ${StatusController.ownAddress.encode()}", style: Get.textTheme.bodyMedium),
           verticalSpacing(defaultSpacing),
+          if (SidebarController.getCurrentProvider() != null)
+            Padding(padding: EdgeInsets.all(defaultSpacing)),
           ProfileButton(
             icon: Icons.launch,
             label: 'Local database viewer',
