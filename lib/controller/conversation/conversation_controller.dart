@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:chat_interface/controller/conversation/square.dart';
 import 'package:chat_interface/services/chat/conversation_member.dart';
 import 'package:chat_interface/services/chat/conversation_service.dart';
+import 'package:chat_interface/services/squares/square_container.dart';
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
@@ -86,7 +88,19 @@ class ConversationController {
         final info = (conversationInfo[conversation.id.encode()] ?? {}) as Map<dynamic, dynamic>;
         final version = (info["v"] ?? 0) as int;
         conversation.notificationCount.value = (info["n"] ?? 0) as int;
-        conversation.readAt = (info["r"] ?? 0) as int;
+        final readJson = jsonDecode(info["r"]);
+        if (conversation.type == model.ConversationType.square) {
+          final squareContainer = conversation.container as SquareContainer;
+          if (readJson is! Map<String, dynamic>) {
+            continue;
+          }
+
+          for (var topic in squareContainer.topics) {
+            // TODO: Evaluate
+          }
+        } else {
+          conversation.readAt = (readJson ?? 0) as int;
+        }
 
         // Set an error if there is one
         if (error) {
