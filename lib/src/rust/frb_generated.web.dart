@@ -30,7 +30,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   RustStreamSink<(Uint8List?, double?, bool?)>
-  dco_decode_StreamSink_record_opt_list_prim_u_8_strict_opt_box_autoadd_f_32_opt_box_autoadd_bool_Sse(dynamic raw);
+  dco_decode_StreamSink_record_opt_list_prim_u_8_strict_opt_box_autoadd_f_32_opt_box_autoadd_bool_Sse(
+    dynamic raw,
+  );
 
   @protected
   String dco_decode_String(dynamic raw);
@@ -57,6 +59,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   double dco_decode_f_32(dynamic raw);
 
   @protected
+  int dco_decode_i_32(dynamic raw);
+
+  @protected
   LightwireEngine dco_decode_lightwire_engine(dynamic raw);
 
   @protected
@@ -81,7 +86,8 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   Uint8List? dco_decode_opt_list_prim_u_8_strict(dynamic raw);
 
   @protected
-  (Uint8List?, double?, bool?) dco_decode_record_opt_list_prim_u_8_strict_opt_box_autoadd_f_32_opt_box_autoadd_bool(
+  (Uint8List?, double?, bool?)
+  dco_decode_record_opt_list_prim_u_8_strict_opt_box_autoadd_f_32_opt_box_autoadd_bool(
     dynamic raw,
   );
 
@@ -98,7 +104,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   AnyhowException sse_decode_AnyhowException(SseDeserializer deserializer);
 
   @protected
-  RustStreamSink<String> sse_decode_StreamSink_String_Sse(SseDeserializer deserializer);
+  RustStreamSink<String> sse_decode_StreamSink_String_Sse(
+    SseDeserializer deserializer,
+  );
 
   @protected
   RustStreamSink<(Uint8List?, double?, bool?)>
@@ -125,19 +133,28 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   double sse_decode_box_autoadd_f_32(SseDeserializer deserializer);
 
   @protected
-  LightwireEngine sse_decode_box_autoadd_lightwire_engine(SseDeserializer deserializer);
+  LightwireEngine sse_decode_box_autoadd_lightwire_engine(
+    SseDeserializer deserializer,
+  );
 
   @protected
   double sse_decode_f_32(SseDeserializer deserializer);
 
   @protected
+  int sse_decode_i_32(SseDeserializer deserializer);
+
+  @protected
   LightwireEngine sse_decode_lightwire_engine(SseDeserializer deserializer);
 
   @protected
-  List<AudioInputDevice> sse_decode_list_audio_input_device(SseDeserializer deserializer);
+  List<AudioInputDevice> sse_decode_list_audio_input_device(
+    SseDeserializer deserializer,
+  );
 
   @protected
-  List<AudioOuputDevice> sse_decode_list_audio_ouput_device(SseDeserializer deserializer);
+  List<AudioOuputDevice> sse_decode_list_audio_ouput_device(
+    SseDeserializer deserializer,
+  );
 
   @protected
   List<int> sse_decode_list_prim_u_8_loose(SseDeserializer deserializer);
@@ -155,7 +172,8 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   Uint8List? sse_decode_opt_list_prim_u_8_strict(SseDeserializer deserializer);
 
   @protected
-  (Uint8List?, double?, bool?) sse_decode_record_opt_list_prim_u_8_strict_opt_box_autoadd_f_32_opt_box_autoadd_bool(
+  (Uint8List?, double?, bool?)
+  sse_decode_record_opt_list_prim_u_8_strict_opt_box_autoadd_f_32_opt_box_autoadd_bool(
     SseDeserializer deserializer,
   );
 
@@ -169,16 +187,20 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_decode_unit(SseDeserializer deserializer);
 
   @protected
-  int sse_decode_i_32(SseDeserializer deserializer);
+  void sse_encode_AnyhowException(
+    AnyhowException self,
+    SseSerializer serializer,
+  );
 
   @protected
-  void sse_encode_AnyhowException(AnyhowException self, SseSerializer serializer);
+  void sse_encode_StreamSink_String_Sse(
+    RustStreamSink<String> self,
+    SseSerializer serializer,
+  );
 
   @protected
-  void sse_encode_StreamSink_String_Sse(RustStreamSink<String> self, SseSerializer serializer);
-
-  @protected
-  void sse_encode_StreamSink_record_opt_list_prim_u_8_strict_opt_box_autoadd_f_32_opt_box_autoadd_bool_Sse(
+  void
+  sse_encode_StreamSink_record_opt_list_prim_u_8_strict_opt_box_autoadd_f_32_opt_box_autoadd_bool_Sse(
     RustStreamSink<(Uint8List?, double?, bool?)> self,
     SseSerializer serializer,
   );
@@ -187,10 +209,16 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_String(String self, SseSerializer serializer);
 
   @protected
-  void sse_encode_audio_input_device(AudioInputDevice self, SseSerializer serializer);
+  void sse_encode_audio_input_device(
+    AudioInputDevice self,
+    SseSerializer serializer,
+  );
 
   @protected
-  void sse_encode_audio_ouput_device(AudioOuputDevice self, SseSerializer serializer);
+  void sse_encode_audio_ouput_device(
+    AudioOuputDevice self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_bool(bool self, SseSerializer serializer);
@@ -202,25 +230,43 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_box_autoadd_f_32(double self, SseSerializer serializer);
 
   @protected
-  void sse_encode_box_autoadd_lightwire_engine(LightwireEngine self, SseSerializer serializer);
+  void sse_encode_box_autoadd_lightwire_engine(
+    LightwireEngine self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_f_32(double self, SseSerializer serializer);
 
   @protected
-  void sse_encode_lightwire_engine(LightwireEngine self, SseSerializer serializer);
+  void sse_encode_i_32(int self, SseSerializer serializer);
 
   @protected
-  void sse_encode_list_audio_input_device(List<AudioInputDevice> self, SseSerializer serializer);
+  void sse_encode_lightwire_engine(
+    LightwireEngine self,
+    SseSerializer serializer,
+  );
 
   @protected
-  void sse_encode_list_audio_ouput_device(List<AudioOuputDevice> self, SseSerializer serializer);
+  void sse_encode_list_audio_input_device(
+    List<AudioInputDevice> self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_list_audio_ouput_device(
+    List<AudioOuputDevice> self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_list_prim_u_8_loose(List<int> self, SseSerializer serializer);
 
   @protected
-  void sse_encode_list_prim_u_8_strict(Uint8List self, SseSerializer serializer);
+  void sse_encode_list_prim_u_8_strict(
+    Uint8List self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_opt_box_autoadd_bool(bool? self, SseSerializer serializer);
@@ -229,10 +275,14 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_opt_box_autoadd_f_32(double? self, SseSerializer serializer);
 
   @protected
-  void sse_encode_opt_list_prim_u_8_strict(Uint8List? self, SseSerializer serializer);
+  void sse_encode_opt_list_prim_u_8_strict(
+    Uint8List? self,
+    SseSerializer serializer,
+  );
 
   @protected
-  void sse_encode_record_opt_list_prim_u_8_strict_opt_box_autoadd_f_32_opt_box_autoadd_bool(
+  void
+  sse_encode_record_opt_list_prim_u_8_strict_opt_box_autoadd_f_32_opt_box_autoadd_bool(
     (Uint8List?, double?, bool?) self,
     SseSerializer serializer,
   );
@@ -245,9 +295,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_unit(void self, SseSerializer serializer);
-
-  @protected
-  void sse_encode_i_32(int self, SseSerializer serializer);
 }
 
 // Section: wire_class

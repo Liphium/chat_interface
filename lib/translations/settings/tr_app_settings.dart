@@ -36,6 +36,13 @@ class AppSettingsTranslations extends Translations {
       'microphone.auto_activity': 'Automatically determine when I speak',
       'settings.audio.microphone.sensitivity.desc':
           'You will be heard by other people when your volume is over the threshold defined below.',
+      'settings.audio.advanced': 'Advanced audio settings',
+      'audio.encoding.mode': 'Audio encoding mode',
+      'audio.encoding.mode.auto': 'Auto (based on network conditions)',
+      'audio.encoding.mode.max': 'Maximum (over 500 kbit/s)',
+      'audio.encoding.mode.high': 'High (144 kbit/s)',
+      'audio.encoding.mode.medium': 'Medium (96 kbit/s)',
+      'audio.encoding.mode.low': 'Low (40 kbit/s)',
     },
   };
 }

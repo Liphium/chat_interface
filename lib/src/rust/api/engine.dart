@@ -32,6 +32,13 @@ Future<void> setAutomaticDetection({required LightwireEngine engine, required bo
 Future<void> setTalkingAmplitude({required LightwireEngine engine, required double amplitude}) =>
     RustLib.instance.api.crateApiEngineSetTalkingAmplitude(engine: engine, amplitude: amplitude);
 
+Future<void> setEncodingBitrate({
+  required LightwireEngine engine,
+  required bool auto,
+  required bool max,
+  required int bitrate,
+}) => RustLib.instance.api.crateApiEngineSetEncodingBitrate(engine: engine, auto: auto, max: max, bitrate: bitrate);
+
 Future<void> handlePacket({required LightwireEngine engine, required String id, required List<int> packet}) =>
     RustLib.instance.api.crateApiEngineHandlePacket(engine: engine, id: id, packet: packet);
 

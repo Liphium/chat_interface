@@ -80,6 +80,22 @@ pub async fn set_talking_amplitude(engine: LightwireEngine, amplitude: f32) {
     engine.set_talking_amplitude(amplitude).await;
 }
 
+// Set the bitrate for encoding
+pub async fn set_encoding_bitrate(engine: LightwireEngine, auto: bool, max: bool, bitrate: i32) {
+    let engine = binding::get_engine(engine.id)
+        .await
+        .expect("Engine hasn't been initialized yet");
+    if auto {
+        engine.set_bitrate(audiopus::Bitrate::Auto).await;
+    } else if max {
+        engine.set_bitrate(audiopus::Bitrate::Max).await;
+    } else {
+        engine
+            .set_bitrate(audiopus::Bitrate::BitsPerSecond(bitrate))
+            .await;
+    }
+}
+
 // Let the engine play a new audio packet (id needs to be registered before using register_target)
 pub async fn handle_packet(engine: LightwireEngine, id: String, packet: Vec<u8>) {
     let engine = binding::get_engine(engine.id)

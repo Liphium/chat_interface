@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use audiopus::Bitrate;
 use encoder::EncodingEngine;
 use player::PlayingEngine;
 use tokio::sync::{mpsc::UnboundedSender, Mutex};
@@ -95,6 +96,12 @@ impl Engine {
     pub async fn set_talking_amplitude(&self, amplitude: f32) {
         let mut opts = self.microphone_options.lock().await;
         opts.talking_amplitude = amplitude;
+    }
+
+    // Set the bitrate of the encoder
+    pub async fn set_bitrate(&self, bitrate: Bitrate) {
+        let mut opts = self.encoding_engine.lock().await;
+        opts.set_bitrate(bitrate);
     }
 
     // Handle a packet

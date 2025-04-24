@@ -22,12 +22,22 @@ class AudioSettings {
 
   /// The activation mode for the microphone
   static Setting<int> microphoneActivationMode = Setting("microphone.activation_mode", 0);
-
-  /// All the activation modes for the microphone
   static final activationModes = <SelectableItem>[
     SelectableItem("microphone.mode.voice_activity", Icons.graphic_eq),
     SelectableItem("microphone.mode.always_on", Icons.radio_button_checked),
   ];
+
+  /// The bitrate for sending audio to the server
+  static Setting<int> audioBitrateMode = Setting("audio.encoding.mode", 0);
+  static final audioBitrateModes = <SelectableItem>[
+    SelectableItem("audio.encoding.mode.auto", Icons.auto_awesome),
+    SelectableItem("audio.encoding.mode.max", Icons.speed),
+    SelectableItem("audio.encoding.mode.high", Icons.signal_cellular_alt),
+    SelectableItem("audio.encoding.mode.medium", Icons.signal_cellular_alt_2_bar),
+    SelectableItem("audio.encoding.mode.low", Icons.signal_cellular_alt_1_bar),
+  ];
+
+  /// All the activation modes for the microphone
 
   /// If the sensitivity should be determined automatically
   static Setting<bool> automaticVoiceActivity = Setting("microphone.auto_activity", true);
@@ -45,6 +55,21 @@ class AudioSettings {
     SettingController.addSetting(microphoneSensitivity);
 
     SettingController.addSetting(outputDevice);
+  }
+
+  static void applyBitrate(libspace.LightwireEngine engine) {
+    switch (audioBitrateMode.getValue()) {
+      case 0:
+        libspace.setEncodingBitrate(engine: engine, auto: true, max: false, bitrate: 0);
+      case 1:
+        libspace.setEncodingBitrate(engine: engine, auto: false, max: true, bitrate: 0);
+      case 2:
+        libspace.setEncodingBitrate(engine: engine, auto: false, max: false, bitrate: 144000);
+      case 3:
+        libspace.setEncodingBitrate(engine: engine, auto: false, max: false, bitrate: 96000);
+      case 4:
+        libspace.setEncodingBitrate(engine: engine, auto: false, max: false, bitrate: 40000);
+    }
   }
 }
 
@@ -126,6 +151,7 @@ class _AudioSettingsPageState extends State<AudioSettingsPage> {
       engine: _engine.peek()!,
       amplitude: AudioSettings.microphoneSensitivity.getValue(),
     );
+    AudioSettings.applyBitrate(_engine.peek()!);
 
     // Enable the packet sending
     await libspace.setVoiceEnabled(engine: _engine.peek()!, enabled: true);
@@ -220,6 +246,22 @@ class _AudioSettingsPageState extends State<AudioSettingsPage> {
                 unit: "dB",
               ),
             ),
+          ),
+          verticalSpacing(sectionSpacing),
+
+          // Render a selection for the encoding mode
+          Text("settings.audio.advanced".tr, style: theme.textTheme.labelLarge),
+          verticalSpacing(defaultSpacing),
+          Text("audio.encoding.mode".tr, style: theme.textTheme.bodyMedium),
+          verticalSpacing(defaultSpacing),
+          ListSelectionSetting(
+            setting: AudioSettings.audioBitrateMode,
+            items: AudioSettings.audioBitrateModes,
+            callback: (value) {
+              if (_engine.peek() != null) {
+                AudioSettings.applyBitrate(_engine.peek()!);
+              }
+            },
           ),
         ],
       ),

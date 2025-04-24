@@ -1,6 +1,6 @@
 use std::{cmp, sync::Arc};
 
-use audiopus::coder::Encoder;
+use audiopus::{coder::Encoder, Bitrate};
 use rand::Rng;
 use tokio::sync::{mpsc::Receiver, Mutex};
 
@@ -8,6 +8,7 @@ use super::{AudioPacket, MicrophoneOptions};
 
 pub struct EncodingEngine {
     encoder: Option<Mutex<Encoder>>,
+    bitrate: audiopus::Bitrate,
     current_seq: u16,
 }
 
@@ -31,6 +32,7 @@ impl EncodingEngine {
 
         let engine = Arc::new(Mutex::new(Self {
             encoder: Some(Mutex::new(encoder)),
+            bitrate: audiopus::Bitrate::Auto,
             current_seq: rand::rng().random(),
         }));
 
@@ -107,9 +109,14 @@ impl EncodingEngine {
                         engine.current_seq += 1;
                     }
 
-                    // Encode the packet
+                    // Get and set the encoder settings
                     let encoder = engine.encoder.as_ref().unwrap();
-                    let coder = encoder.blocking_lock();
+                    let mut coder = encoder.blocking_lock();
+                    coder
+                        .set_bitrate(engine.bitrate)
+                        .expect("Couldn't set bitrate");
+
+                    // Encode the packet
                     let mut output = [0u8; 2000];
                     let output_size = coder
                         .encode_float(samples.as_slice(), &mut output)
@@ -133,6 +140,11 @@ impl EncodingEngine {
         });
 
         return engine.clone();
+    }
+
+    // Set the bitrate of the encoder
+    pub fn set_bitrate(&mut self, bitrate: Bitrate) {
+        self.bitrate = bitrate
     }
 
     // Stop the encoding engine
