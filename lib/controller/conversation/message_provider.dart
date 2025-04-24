@@ -127,6 +127,14 @@ abstract class MessageProvider {
     _scrollController!.addListener(checkCurrentScrollHeight);
   }
 
+  Future<void> reloadAt(int stamp) async {
+    final (loaded, error) = await loadMessagesAfter(stamp);
+    if (error) {
+      return;
+    }
+    await scrollToMessage(loaded![0].id);
+  }
+
   /// Runs on every scroll to check if new messages should be loaded
   Future<void> checkCurrentScrollHeight() async {
     /*
@@ -269,7 +277,9 @@ abstract class MessageProvider {
 
     // Load the messages below
     // TODO: Make this not flicker somehow
-    await loadNewMessagesBottom();
+    Timer(Duration(milliseconds: 500), () {
+      loadNewMessagesBottom();
+    });
     await loadNewMessagesTop(date: message.createdAt.millisecondsSinceEpoch);
 
     return true;
