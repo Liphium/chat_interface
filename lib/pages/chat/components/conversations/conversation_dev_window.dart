@@ -22,7 +22,7 @@ class _ConversationAddWindowState extends State<ConversationDevWindow> {
 
   @override
   Widget build(BuildContext context) {
-    final readDate = DateTime.fromMillisecondsSinceEpoch(widget.conversation.readAt.toInt());
+    final readDate = DateTime.fromMillisecondsSinceEpoch(widget.conversation.reads.getMain());
     final updateDate = DateTime.fromMillisecondsSinceEpoch(widget.conversation.updatedAt.toInt());
     sendLog(widget.conversation.lastVersion);
 

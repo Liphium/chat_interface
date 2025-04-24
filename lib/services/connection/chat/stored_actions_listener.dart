@@ -232,6 +232,7 @@ Future<bool> _handleConversationOpening(String actionId, Map<String, dynamic> ac
     packageSymmetricKey(key),
     0,
     DateTime.now().millisecondsSinceEpoch,
+    ConversationReads.fromContainer(""),
   );
 
   // Add to vault

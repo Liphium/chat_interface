@@ -6,6 +6,7 @@ import 'package:chat_interface/controller/conversation/conversation_controller.d
 import 'package:chat_interface/controller/conversation/sidebar_controller.dart';
 import 'package:chat_interface/controller/conversation/square.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
+import 'package:chat_interface/controller/current/steps/account_step.dart';
 import 'package:chat_interface/controller/current/steps/key_step.dart';
 import 'package:chat_interface/controller/current/tasks/vault_sync_task.dart';
 import 'package:chat_interface/database/database.dart';
@@ -170,6 +171,7 @@ class ConversationService extends VaultTarget {
             "",
             0,
             0,
+            ConversationReads.fromContainer(""),
           ),
     );
     if (!conversation.id.isError()) {
@@ -231,6 +233,7 @@ class ConversationService extends VaultTarget {
       packagedKey,
       0,
       DateTime.now().millisecondsSinceEpoch,
+      ConversationReads.fromContainer(""),
     );
 
     // Send all other members their information and credentials
@@ -417,6 +420,8 @@ class ConversationService extends VaultTarget {
   /// Inserts it into the database or updates it.
   /// Subscribes to the conversation.
   static Future<bool> insertFromVault(Conversation conversation) async {
+    sendLog("new vault insertion");
+
     // Insert it into cache
     ConversationController.add(conversation);
 
@@ -507,38 +512,27 @@ class ConversationService extends VaultTarget {
   /// [messageSendTime] is when the message was sent.
   ///
   /// Also calls the same method in the controller.
-  static Future<void> updateLastMessage(
-    LPHAddress conversation, {
-    String extra = "",
-    required int messageSendTime,
-  }) async {
+  static void updateLastMessage(Conversation conversation, int stamp) {
     // Save the new update time in the local database
-    final updatedTime = BigInt.from(messageSendTime);
+    final updatedTime = BigInt.from(stamp);
     final query =
         db.conversation.update()
-          ..where((tbl) => tbl.id.equals(conversation.encode()) & tbl.updatedAt.isSmallerThanValue(updatedTime));
+          ..where((tbl) => tbl.id.equals(conversation.id.encode()) & tbl.updatedAt.isSmallerThanValue(updatedTime));
     unawaited(query.write(ConversationCompanion(updatedAt: drift.Value(updatedTime))));
 
-    // Get the new notification count
-    final notificationCount = await getNotificationCount(
-      conversation,
-      DateTime.fromMillisecondsSinceEpoch(messageSendTime),
-      extra: extra,
-    );
-
-    // Update it in the UI
-    ConversationController.updateLastMessageTime(conversation, notificationCount, messageSendTime: messageSendTime);
+    // Re-evaluate order in the sidebar
+    ConversationController.reorder(conversation);
   }
 
   /// Get the notification count of a conversation (straight from the database).
-  static Future<int> getNotificationCount(LPHAddress conversationId, DateTime updatedAt, {String extra = ""}) async {
+  static Future<int> getNotificationCount(LPHAddress conversationId, int readAt, {String extra = ""}) async {
     final query =
         await db.message
             .count(
               where:
                   (row) =>
                       row.conversation.equals(withExtra(conversationId.encode(), extra)) &
-                      row.createdAt.isBiggerThanValue(BigInt.from(updatedAt.millisecondsSinceEpoch)),
+                      row.createdAt.isBiggerThanValue(BigInt.from(readAt)),
             )
             .getSingle();
     return query;
@@ -554,15 +548,36 @@ class ConversationService extends VaultTarget {
   }
 
   /// Mark the conversation as read for the current time.
-  static Future<void> overwriteRead(Conversation conversation, int stamp) async {
+  static Future<void> overwriteRead(Conversation conversation, int stamp, {String extra = ""}) async {
     // Send new read state to the server
     final json = await postNodeJSON("/conversations/read", {
       "token": conversation.token.toMap(conversation.id),
       "data": stamp,
     });
+
+    // Build new reads
+    final reads = ConversationReads.copy(conversation.reads);
+    reads.map[ConversationReads.getContainerKey(extra)] = stamp;
+
     if (json["success"]) {
-      ConversationController.resetNotificationCount(conversation.id);
-      conversation.readAt = stamp;
+      conversation.reads = reads;
+      unawaited(evaluateNotificationCount(conversation));
+    }
+  }
+
+  /// Process new reads when they come from the server (re-evaluate conversation count and more)
+  static Future<void> evaluateNotificationCount(Conversation conversation) async {
+    if (conversation is Square) {
+      final squareContainer = conversation.container as SquareContainer;
+
+      // Update for all topics
+      for (var topic in squareContainer.topics) {
+        final count = await getNotificationCount(conversation.id, conversation.reads.get(topic.id), extra: topic.id);
+        ConversationController.updateNotificationCount(conversation.id, count, extra: topic.id);
+      }
+    } else {
+      final count = await getNotificationCount(conversation.id, conversation.reads.getMain());
+      ConversationController.updateNotificationCount(conversation.id, count);
     }
   }
 
@@ -613,5 +628,47 @@ class ConversationService extends VaultTarget {
       return convId;
     }
     return "${convId}_$extra";
+  }
+}
+
+/// A simple helper class to store conversation reads
+class ConversationReads {
+  final map = <String, int>{};
+
+  /// Parse as the format received from the server (use "" for empty conversation reads)
+  ConversationReads.fromContainer(String container) {
+    // Make sure to not parse no reads at all
+    if (container == "") {
+      return;
+    }
+
+    // Parse the reads from the container to the map
+    final decrypted = decryptSymmetric(container, vaultKey);
+    map.addAll(jsonDecode(decrypted));
+  }
+
+  /// Copy another instance of [ConversationReads]
+  ConversationReads.copy(ConversationReads reads) {
+    for (var entry in reads.map.entries) {
+      map[entry.key] = entry.value;
+    }
+  }
+
+  /// Get all the reads in the form they're stored on the server.
+  String toContainer() => encryptSymmetric(jsonEncode(map), vaultKey);
+
+  /// Get the read time for an extra id.
+  int get(String extra) {
+    return map[getContainerKey(extra)] ?? 0;
+  }
+
+  /// Get the read time for the main conversation.
+  int getMain() {
+    return map[getContainerKey("")] ?? 0;
+  }
+
+  /// Get the key of a read time in any instance of [ConversationReads]
+  static String getContainerKey(String extra) {
+    return extra == "" ? "_" : extra;
   }
 }

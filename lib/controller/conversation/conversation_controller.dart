@@ -1,10 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:chat_interface/controller/conversation/square.dart';
 import 'package:chat_interface/services/chat/conversation_member.dart';
 import 'package:chat_interface/services/chat/conversation_service.dart';
-import 'package:chat_interface/services/squares/square_container.dart';
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
@@ -14,7 +12,6 @@ import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/web.dart';
-import 'package:collection/collection.dart';
 import 'package:get/get.dart';
 import 'package:signals/signals_flutter.dart';
 import 'package:sodium_libs/sodium_libs.dart';
@@ -29,33 +26,24 @@ class ConversationController {
   /// Add a conversation to the cache.
   static void add(Conversation conversation) {
     batch(() {
-      _insertToOrder(conversation.id);
       conversations[conversation.id] = conversation;
+      _insertToOrder(conversation.id);
     });
   }
 
-  /// Update the last message send time of a conversation in the UI.
-  ///
-  /// For more explanation look at [ConversationService.updateLastMessage].
-  static void updateLastMessageTime(
+  /// Re-evaluate the order of [conversation] in the sidebar.
+  static void reorder(Conversation conversation) {
+    _insertToOrder(conversation.id);
+  }
+
+  /// Update the notification count of a conversation in the UI.
+  static void updateNotificationCount(
     LPHAddress conversation,
     int notificationCount, {
     String extra = "",
-    required int messageSendTime,
+    int? messageSendTime,
   }) {
-    batch(() {
-      // Make sure the conversation is at the top
-      _insertToOrder(conversation);
-
-      // Update the notification count and updated at time of the conversation
-      notificationMap[ConversationService.withExtra(conversation.encode(), extra)] = notificationCount;
-      conversations[conversation]?.updatedAt = messageSendTime;
-    });
-  }
-
-  /// Reset the notification count for a message.
-  static void resetNotificationCount(LPHAddress conversation, {String extra = ""}) {
-    notificationMap[ConversationService.withExtra(conversation.encode(), extra)] = 0;
+    notificationMap[ConversationService.withExtra(conversation.encode(), extra)] = notificationCount;
   }
 
   /// Called when a subscription is finished to make sure conversations are properly sorted and up to date.
@@ -87,20 +75,10 @@ class ConversationController {
         // Get conversation info
         final info = (conversationInfo[conversation.id.encode()] ?? {}) as Map<dynamic, dynamic>;
         final version = (info["v"] ?? 0) as int;
-        conversation.notificationCount.value = (info["n"] ?? 0) as int;
-        final readJson = jsonDecode(info["r"]);
-        if (conversation.type == model.ConversationType.square) {
-          final squareContainer = conversation.container as SquareContainer;
-          if (readJson is! Map<String, dynamic>) {
-            continue;
-          }
 
-          for (var topic in squareContainer.topics) {
-            // TODO: Evaluate
-          }
-        } else {
-          conversation.readAt = (readJson ?? 0) as int;
-        }
+        // Handle the new reads
+        conversation.reads = ConversationReads.fromContainer(info["r"] ?? "");
+        unawaited(ConversationService.evaluateNotificationCount(conversation));
 
         // Set an error if there is one
         if (error) {
@@ -120,30 +98,20 @@ class ConversationController {
   /// Insert a conversation into the ordered list of conversations (performance could be improved using binary search).
   static void _insertToOrder(LPHAddress id) {
     batch(() {
-      // Try to remove it from the ordered list
-      var index = _findBinarySearch(id);
-      if (index != -1) {
-        order.removeAt(index);
-      }
+      // Remove it from the order
+      order.remove(id);
 
       // Dirty insert the conversation
-      final readAt = conversations[id]!.readAt;
-      index = 0;
+      final updatedAt = conversations[id]!.updatedAt;
+      var index = 0;
       for (var id in order) {
-        if (readAt > conversations[id]!.readAt) {
+        if (updatedAt > conversations[id]!.updatedAt) {
           break;
         }
         index++;
       }
       order.insert(index, id);
     });
-  }
-
-  /// Find a conversation id in the sorted order list using binary search.
-  ///
-  /// Returns -1 in case the thing wasn't found.
-  static int _findBinarySearch(LPHAddress id) {
-    return order.binarySearchBy(id, (conv) => conversations[conv]!.updatedAt);
   }
 
   /// Remove a conversation from the cache.
@@ -161,7 +129,7 @@ class Conversation {
   ConversationContainer container;
   int lastVersion;
   int updatedAt = 0;
-  int readAt = 0;
+  ConversationReads reads = ConversationReads.fromContainer("");
   final notificationCount = signal(0);
   final containerSub = signal(ConversationContainer("")); // Data subscription
   final error = signal<String?>(null);
@@ -185,6 +153,7 @@ class Conversation {
     this.packedKey,
     this.lastVersion,
     this.updatedAt,
+    this.reads,
   ) {
     containerSub.value = container;
   }
@@ -198,6 +167,7 @@ class Conversation {
         json["key"],
         0, // This shouldn't matter, just makes sure the data is fetched
         0,
+        ConversationReads.fromContainer(""),
       );
   Conversation.fromData(ConversationData data)
     : this(
@@ -209,6 +179,7 @@ class Conversation {
         fromDbEncrypted(data.key),
         data.lastVersion.toInt(),
         data.updatedAt.toInt(),
+        ConversationReads.fromContainer(data.reads),
       );
 
   /// Copy a conversation without the `key`.
@@ -225,6 +196,7 @@ class Conversation {
       "",
       conversation.lastVersion,
       conversation.updatedAt,
+      conversation.reads,
     );
 
     // Copy all the members
@@ -278,7 +250,7 @@ class Conversation {
       key: dbEncrypted(packageSymmetricKey(key)),
       lastVersion: BigInt.from(lastVersion),
       updatedAt: BigInt.from(updatedAt),
-      readAt: BigInt.from(readAt),
+      reads: reads.toContainer(),
     );
   }
 

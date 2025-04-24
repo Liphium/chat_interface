@@ -20,7 +20,8 @@ class Square extends Conversation {
     String packedKey,
     int lastVersion,
     int updatedAt,
-  ) : super(id, vaultId, model.ConversationType.square, token, container, packedKey, lastVersion, updatedAt);
+    ConversationReads reads,
+  ) : super(id, vaultId, model.ConversationType.square, token, container, packedKey, lastVersion, updatedAt, reads);
 
   @override
   Square.fromJson(Map<String, dynamic> json, String vaultId)
@@ -32,6 +33,7 @@ class Square extends Conversation {
         json["key"],
         0, // Just ignore it for now
         json["update"] ?? DateTime.now().millisecondsSinceEpoch,
+        ConversationReads.fromContainer(""),
       );
 
   @override
@@ -44,6 +46,7 @@ class Square extends Conversation {
         fromDbEncrypted(data.key),
         data.lastVersion.toInt(),
         data.updatedAt.toInt(),
+        ConversationReads.fromContainer(data.reads),
       );
 
   @override
@@ -56,6 +59,7 @@ class Square extends Conversation {
       "",
       square.lastVersion,
       square.updatedAt,
+      square.reads,
     );
 
     // Copy all the members

@@ -15,7 +15,7 @@ class Database extends _$Database {
   Database(super.e);
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration {
@@ -43,6 +43,11 @@ class Database extends _$Database {
           await m.createIndex(schema.idxUnknownProfilesLastFetched);
           await m.createIndex(schema.idxLibraryEntryIdhash);
           await m.createIndex(schema.idxRequestsUpdated);
+        },
+        from4To5: (m, schema) async {
+          // Replace the read column with the new encrypted version (that also handles extras)
+          await m.dropColumn(schema.conversation, "read_at");
+          await m.addColumn(schema.conversation, schema.conversation.reads);
         },
       ),
     );

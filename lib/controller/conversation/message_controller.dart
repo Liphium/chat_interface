@@ -73,6 +73,7 @@ class MessageController {
   static Future<bool> addMessage(
     Message message,
     Conversation conversation, {
+    String extra = "",
     bool simple = false,
     (String, String)? part,
   }) async {
@@ -85,7 +86,11 @@ class MessageController {
     // Add message to message history if it's the selected one
     if (tab.provider.conversation.id == conversation.id) {
       if (message.senderToken != tab.provider.conversation.token.id && !simple) {
-        await ConversationService.overwriteRead(tab.provider.conversation, message.createdAt.millisecondsSinceEpoch);
+        await ConversationService.overwriteRead(
+          tab.provider.conversation,
+          message.createdAt.millisecondsSinceEpoch,
+          extra: extra,
+        );
       }
 
       // Check if it is a system message and if it should be rendered or not

@@ -51,14 +51,8 @@ class MessageService {
       index++;
     }
 
-    // Update message read time for all extras
-    for (var extra in extras) {
-      await ConversationService.updateLastMessage(
-        conversation.id,
-        extra: extra,
-        messageSendTime: messages.last.$1.createdAt.millisecondsSinceEpoch,
-      );
-    }
+    // Update last message in the conversation
+    ConversationService.updateLastMessage(conversation, messages.last.$1.createdAt.millisecondsSinceEpoch);
 
     return true;
   }
@@ -79,11 +73,7 @@ class MessageService {
 
     if (!simple) {
       // Update message read time for conversations (nessecary for notification count)
-      await ConversationService.updateLastMessage(
-        conversation.id,
-        extra: extra,
-        messageSendTime: message.createdAt.millisecondsSinceEpoch,
-      );
+      ConversationService.updateLastMessage(conversation, message.createdAt.millisecondsSinceEpoch);
 
       // Play a notification sound when a new message arrives
       unawaited(RingingManager.playNotificationSound());
@@ -116,7 +106,7 @@ class MessageService {
     */
 
     // Add to the cache
-    return MessageController.addMessage(message, conversation, part: part, simple: simple);
+    return MessageController.addMessage(message, conversation, extra: extra, part: part, simple: simple);
   }
 
   /// Store a message in the database.

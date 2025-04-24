@@ -13,7 +13,7 @@ class Conversation extends Table {
   TextColumn get key => text()();
   Int64Column get lastVersion => int64()();
   Int64Column get updatedAt => int64()();
-  Int64Column get readAt => int64()();
+  TextColumn get reads => text().withDefault(Constant(""))();
 
   @override
   Set<Column<Object>>? get primaryKey => {id};
