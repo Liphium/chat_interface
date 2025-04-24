@@ -32,7 +32,7 @@ class MessageController {
 
     // Load the current position for messages
     final read = conversation.reads.get(extra);
-    await provider.reloadAt(read);
+    await provider.reloadAt(read + 1);
 
     // Show the messages once they are fully loaded
     loaded.value = true;

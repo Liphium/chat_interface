@@ -12,6 +12,7 @@ import 'package:chat_interface/pages/chat/components/squares/topic_add_window.da
 import 'package:chat_interface/services/chat/conversation_member.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/services/chat/conversation_message_provider.dart';
+import 'package:chat_interface/services/chat/conversation_service.dart';
 import 'package:chat_interface/services/squares/square_container.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
@@ -62,7 +63,7 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
           controller: _controller,
           itemCount: ConversationController.order.length,
           addRepaintBoundaries: true,
-          padding: const EdgeInsets.only(top: defaultSpacing),
+          padding: const EdgeInsets.only(top: defaultSpacing, right: defaultSpacing, left: defaultSpacing),
           itemBuilder: (context, index) {
             // Normal conversation renderer
             Conversation conversation =
@@ -207,7 +208,7 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                     hoverColor: Get.theme.hoverColor,
                     splashColor: Get.theme.hoverColor,
 
-                    // When conversation is tapped (open conversation)
+                    // When topic is tapped (open topic)
                     onTap: () {
                       // Make sure to not open when already open on desktop
                       if ((SidebarController.getCurrentProvider()?.extra ?? "") == topic.id && !isMobileMode()) {
@@ -220,23 +221,41 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                       sendLog("TO-DO: topic context menu here");
                     },
 
-                    // Conversation item content
+                    // Topic item content
                     child: Padding(
                       padding: const EdgeInsets.all(elementSpacing2),
                       child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Icon(Icons.numbers),
-                          horizontalSpacing(elementSpacing2),
-                          Flexible(
-                            child: Text(
-                              topic.name,
-                              style:
-                                  (SidebarController.getCurrentProviderReactive()?.extra ?? "") == topic.id
-                                      ? theme.textTheme.labelMedium
-                                      : theme.textTheme.bodyMedium,
-                              overflow: TextOverflow.ellipsis,
+                          Expanded(
+                            child: Row(
+                              children: [
+                                const Icon(Icons.numbers),
+                                horizontalSpacing(elementSpacing2),
+                                Flexible(
+                                  child: Text(
+                                    topic.name,
+                                    style:
+                                        (SidebarController.getCurrentProviderReactive()?.extra ?? "") == topic.id
+                                            ? theme.textTheme.labelMedium
+                                            : theme.textTheme.bodyMedium,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
+                          horizontalSpacing(elementSpacing2),
+                          Watch((ctx) {
+                            final notifications =
+                                ConversationController.notificationMap[ConversationService.withExtra(
+                                  square.id.encode(),
+                                  topic.id,
+                                )] ??
+                                0;
+
+                            return Visibility(visible: notifications > 0, child: renderNotificationDot(notifications));
+                          }),
                         ],
                       ),
                     ),
@@ -308,30 +327,51 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
               );
             }
 
-            return Visibility(
-              visible: notifications > 0,
-              child: Container(
-                decoration: BoxDecoration(shape: BoxShape.circle, color: Get.theme.colorScheme.error),
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 5, right: 5, top: 2, bottom: 3),
-                  child: Center(child: Text(min(notifications, 99).toString(), style: Get.textTheme.labelSmall)),
-                ),
-              ),
-            );
+            return Visibility(visible: notifications > 0, child: renderNotificationDot(notifications));
           }),
 
           // Show a collapse/expand topics button when it's a square
           if (conversation is Square)
             Padding(
               padding: EdgeInsets.only(left: elementSpacing),
-              child: Watch(
-                (ctx) => IconButton(
-                  onPressed: () {
-                    conversation.topicsShown.value = !conversation.topicsShown.peek();
-                  },
-                  icon: Icon(conversation.topicsShown.value ? Icons.expand_less : Icons.expand_more),
-                ),
-              ),
+              child: Watch((ctx) {
+                final squareContainer = conversation.container as SquareContainer;
+                final toggled = conversation.topicsShown.value;
+                bool notifications = false;
+                for (var topic in squareContainer.topics) {
+                  if (ConversationController.notificationMap[ConversationService.withExtra(
+                        conversation.id.encode(),
+                        topic.id,
+                      )] !=
+                      0) {
+                    notifications = true;
+                    break;
+                  }
+                }
+
+                return Stack(
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        conversation.topicsShown.value = !conversation.topicsShown.peek();
+                      },
+                      icon: Icon(toggled ? Icons.expand_less : Icons.expand_more),
+                    ),
+                    Visibility(
+                      visible: notifications,
+                      child: Positioned(
+                        right: defaultSpacing,
+                        bottom: defaultSpacing,
+                        child: Container(
+                          decoration: BoxDecoration(shape: BoxShape.circle, color: Get.theme.colorScheme.error),
+                          width: defaultSpacing,
+                          height: defaultSpacing,
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              }),
             ),
         ],
       ),
@@ -427,6 +467,16 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget renderNotificationDot(int count) {
+    return Container(
+      decoration: BoxDecoration(shape: BoxShape.circle, color: Get.theme.colorScheme.error),
+      child: Padding(
+        padding: const EdgeInsets.only(left: 5, right: 5, top: 5, bottom: 5),
+        child: Center(child: Text(min(count, 99).toString(), style: Get.textTheme.labelSmall)),
       ),
     );
   }

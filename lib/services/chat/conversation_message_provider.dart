@@ -256,4 +256,21 @@ class ConversationMessageProvider extends MessageProvider {
     }
     return null;
   }
+
+  bool sendingRead = false;
+
+  @override
+  Future<void> handleBottomReached() async {
+    // Update read state when scrolled to the bottom
+    if (ConversationController.notificationMap[ConversationService.withExtra(conversation.id.encode(), extra)] != 0 &&
+        !sendingRead) {
+      final newest = getNewestMessage();
+      if (newest == null) {
+        return;
+      }
+      sendingRead = true;
+      await ConversationService.overwriteRead(conversation, messages[newest]!.createdAt.millisecondsSinceEpoch);
+      sendingRead = false;
+    }
+  }
 }

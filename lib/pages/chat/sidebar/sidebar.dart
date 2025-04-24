@@ -118,16 +118,7 @@ class _SidebarState extends State<Sidebar> {
             ),
 
             // Conversation list and the profile
-            Expanded(
-              child: SafeArea(
-                top: false,
-                bottom: false,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-                  child: SidebarConversationList(query: _query),
-                ),
-              ),
-            ),
+            Expanded(child: SafeArea(top: false, bottom: false, child: SidebarConversationList(query: _query))),
             if (!isMobileMode()) const SidebarProfile(),
           ],
         ),

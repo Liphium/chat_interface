@@ -389,9 +389,7 @@ class ConversationService extends VaultTarget {
     // Get the sync dates for every conversation
     for (var token in tokens) {
       // Get the maximum value of the conversation update timestamps
-      final max = db.message.createdAt.max(filter: db.message.conversation.like("%${token["conv"]}%"));
-      final query = db.selectOnly(db.message)..addColumns([max]);
-      token["time"] = (await query.map((row) => row.read(max)).getSingleOrNull() ?? BigInt.zero).toInt();
+      token["time"] = ConversationController.conversations[LPHAddress.from(token["conv"])]?.updatedAt ?? 0;
     }
 
     // Send the subscription request
@@ -549,15 +547,15 @@ class ConversationService extends VaultTarget {
 
   /// Mark the conversation as read for the current time.
   static Future<void> overwriteRead(Conversation conversation, int stamp, {String extra = ""}) async {
-    // Send new read state to the server
-    final json = await postNodeJSON("/conversations/read", {
-      "token": conversation.token.toMap(conversation.id),
-      "data": stamp,
-    });
-
     // Build new reads
     final reads = ConversationReads.copy(conversation.reads);
     reads.map[ConversationReads.getContainerKey(extra)] = stamp;
+
+    // Send new read state to the server
+    final json = await postNodeJSON("/conversations/read", {
+      "token": conversation.token.toMap(conversation.id),
+      "data": reads.toContainer(),
+    });
 
     if (json["success"]) {
       conversation.reads = reads;
@@ -571,7 +569,7 @@ class ConversationService extends VaultTarget {
       final squareContainer = conversation.container as SquareContainer;
 
       // Update for all topics
-      for (var topic in squareContainer.topics) {
+      for (var topic in [Topic("", "")] + squareContainer.topics) {
         final count = await getNotificationCount(conversation.id, conversation.reads.get(topic.id), extra: topic.id);
         ConversationController.updateNotificationCount(conversation.id, count, extra: topic.id);
       }
@@ -644,7 +642,9 @@ class ConversationReads {
 
     // Parse the reads from the container to the map
     final decrypted = decryptSymmetric(container, vaultKey);
-    map.addAll(jsonDecode(decrypted));
+    for (var entry in jsonDecode(decrypted).entries) {
+      map[entry.key] = entry.value;
+    }
   }
 
   /// Copy another instance of [ConversationReads]

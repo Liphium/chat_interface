@@ -29,7 +29,7 @@ abstract class MessageProvider {
   final waitingMessages = <String>[]; // To prevent messages from being sent twice due to a race condition
 
   //* Scroll
-  static const newLoadOffset = 200;
+  static const newLoadOffset = 50;
   bool topReached = false;
   AutoScrollController? _scrollController;
   ChatListController<String> listController = ChatListController<String>(initialItems: []);
@@ -88,6 +88,10 @@ abstract class MessageProvider {
   }
 
   Future<void> addMessageToBottom(Message message, {bool animation = true}) async {
+    if (!bottomReached) {
+      return;
+    }
+
     // Update the last message date
     lastMessage = message.createdAt.millisecondsSinceEpoch;
 
@@ -95,8 +99,7 @@ abstract class MessageProvider {
     final lastAdded = messages[getNewestMessage()];
     if (messages.isNotEmpty && lastAdded != null) {
       if (lastAdded.createdAt.isAfter(message.createdAt)) {
-        sendLog("TODO: Reload the message list ${lastAdded.content}");
-        return;
+        sendLog("WARNING: Message time mismatch detected, but we can't add into a specific index yet :c");
       }
     }
 
@@ -106,14 +109,10 @@ abstract class MessageProvider {
     }
     waitingMessages.add(message.id);
 
-    // Initialize all message data
+    // Add the message and initialize
     await message.initAttachments(this);
-
-    // Only load the message, if scrolled near enough to the bottom
-    if (_scrollController!.position.pixels <= newLoadOffset) {
-      messages[message.id] = message;
-      listController.addToBottom(message.id);
-    }
+    messages[message.id] = message;
+    listController.addToBottom(message.id);
 
     // Remove after cause then it is added
     waitingMessages.remove(message.id);
@@ -127,30 +126,72 @@ abstract class MessageProvider {
     _scrollController!.addListener(checkCurrentScrollHeight);
   }
 
+  /// Reload at a specific spot in time
   Future<void> reloadAt(int stamp) async {
-    final (loaded, error) = await loadMessagesAfter(stamp);
+    bottomReached = false;
+    messages.clear();
+    listController.clearAll();
+    newMessagesLoading.value = true;
+
+    // Load all the messages after the stamp
+    final (loadedAfter, error) = await loadMessagesAfter(stamp);
     if (error) {
+      sendLog("ERROR: Couldn't load messages after");
       return;
     }
-    await scrollToMessage(loaded![0].id);
+
+    // If there are no messages after, load chat normally (no messages after the read)
+    if (loadedAfter == null || loadedAfter.isEmpty) {
+      newMessagesLoading.value = false;
+      sendLog("loading normally");
+      bottomReached = true;
+      await loadNewMessagesTop(date: stamp);
+      return;
+    }
+
+    // Load all the messages before
+    final (loadedBefore, errorBefore) = await loadMessagesBefore(loadedAfter[0].createdAt.millisecondsSinceEpoch);
+    if (errorBefore) {
+      sendLog("ERROR: Couldn't load messages before");
+      return;
+    }
+
+    // Add the first message and all the ones before it to the thing
+    batch(() {
+      messages[loadedAfter[0].id] = loadedAfter[0];
+      listController.addToTop(loadedAfter[0].id);
+      if (loadedBefore != null && loadedBefore.isNotEmpty) {
+        addMessagesToTop(loadedBefore);
+      }
+    });
+
+    // Add the messages below after a frame has been rendered
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      addMessagesToBottom(loadedAfter.sublist(1));
+      newMessagesLoading.value = false;
+    });
   }
 
   /// Runs on every scroll to check if new messages should be loaded
   Future<void> checkCurrentScrollHeight() async {
-    /*
-    if (_scrollController!.position.pixels <= newLoadOffset &&
-        _scrollController!.position.pixels != 0 &&
-        !listController.shouldScrollToBottom) {
+    if (_scrollController!.position.pixels <= _scrollController!.position.minScrollExtent + newLoadOffset &&
+        !newMessagesLoading.peek()) {
       unawaited(loadNewMessagesBottom());
     }
-    */
+
+    if (_scrollController!.position.pixels <= _scrollController!.position.minScrollExtent + 20 &&
+        !newMessagesLoading.peek()) {
+      handleBottomReached();
+    }
   }
+
+  void handleBottomReached() {}
+
+  /// If the bottom has been reached, means new messages will be added to the bottom when there
+  bool bottomReached = true;
 
   /// Loading state for new messages (at top or bottom)
   final newMessagesLoading = signal(false);
-
-  /// Whether or not the messages are loading at the top (for showing a loading indicator)
-  bool messagesLoadingTop = false;
 
   /// The timestamp of the last message at the bottom (for preventing too many requests)
   int? lastMessage;
@@ -163,34 +204,31 @@ abstract class MessageProvider {
     if (newMessagesLoading.value || (messages.isEmpty && date == null)) {
       return (false, true);
     }
-    messagesLoadingTop = true;
     newMessagesLoading.value = true;
     date ??= messages[getOldestMessage()]!.createdAt.millisecondsSinceEpoch;
-
-    sendLog("do request with $date ${DateTime.now().millisecondsSinceEpoch}");
 
     // Load new messages
     final (loadedMessages, error) = await loadMessagesBefore(date);
     if (error) {
       newMessagesLoading.value = false;
-      sendLog("error");
       return (false, true);
     }
     newMessagesLoading.value = false;
     if (loadedMessages == null) {
-      sendLog("no messages");
       return (true, false);
     }
-    batch(() {
-      for (var msg in loadedMessages) {
-        messages[msg.id] = msg;
-      }
-      listController.addRangeToTop(loadedMessages.map((m) => m.id).toList());
-    });
-
-    sendLog("success loading top ${newMessagesLoading.value} ${loadedMessages.length}");
+    addMessagesToTop(loadedMessages);
 
     return (false, false);
+  }
+
+  void addMessagesToTop(List<Message> loaded) {
+    batch(() {
+      for (var msg in loaded) {
+        messages[msg.id] = msg;
+      }
+      listController.addRangeToTop(loaded.map((m) => m.id).toList());
+    });
   }
 
   /// Load new messages at the bottom of the scroll feed from the server.
@@ -201,7 +239,6 @@ abstract class MessageProvider {
     if (newMessagesLoading.value || (messages.isEmpty && time == null)) {
       return false;
     }
-    messagesLoadingTop = false;
     newMessagesLoading.value = true; // Same loading state as above to not break anything
     time ??= messages[getNewestMessage()]!.createdAt.millisecondsSinceEpoch;
 
@@ -214,20 +251,29 @@ abstract class MessageProvider {
 
     // Process the messages
     final (loadedMessages, error) = await loadMessagesAfter(time);
-    if (error || loadedMessages == null) {
+    if (error) {
       newMessagesLoading.value = false;
       return true;
     }
-    loadedMessages.sort((a, b) => a.createdAt.compareTo(b.createdAt)); // Sort to prevent weird order
-    batch(() {
-      for (var msg in loadedMessages) {
-        messages[msg.id] = msg;
-      }
-      listController.addRangeToBottom(loadedMessages.map((m) => m.id).toList(), scrollToBottom: false);
-    });
+    if (loadedMessages == null || loadedMessages.isEmpty) {
+      newMessagesLoading.value = false;
+      bottomReached = true;
+      return true;
+    }
+    addMessagesToBottom(loadedMessages);
 
     newMessagesLoading.value = false;
     return true;
+  }
+
+  void addMessagesToBottom(List<Message> loaded) {
+    loaded.sort((a, b) => a.createdAt.compareTo(b.createdAt)); // Sort to prevent weird order
+    batch(() {
+      for (var msg in loaded) {
+        messages[msg.id] = msg;
+      }
+      listController.addRangeToBottom(loaded.map((m) => m.id).toList(), scrollToBottom: false);
+    });
   }
 
   /// Scroll to a message (only animated when message is loaded in cache).
@@ -254,18 +300,28 @@ abstract class MessageProvider {
       }
       return true;
     }
+    newMessagesLoading.value = true;
 
     // If message is not on screen, load it dynamically from the database
     message = await loadMessageFromServer(id);
     if (message == null) {
+      newMessagesLoading.value = false;
       return false;
     }
+
+    // Get the messages before the message
+    final (loaded, error) = await loadMessagesBefore(message.createdAt.millisecondsSinceEpoch);
+    if (error) {
+      newMessagesLoading.value = false;
+      return false;
+    }
+    final toAdd = [message] + (loaded ?? []);
 
     // Add the message to the feed and remove all the others
     messages.clear();
     listController.clearAll();
-    listController.addToTop(message.id);
-    messages[message.id] = message;
+    bottomReached = false;
+    addMessagesToTop(toAdd);
 
     // Highlight the message
     message.highlightCallback = () {
@@ -275,13 +331,12 @@ abstract class MessageProvider {
       });
     };
 
-    // Load the messages below
-    // TODO: Make this not flicker somehow
-    Timer(Duration(milliseconds: 500), () {
+    // Add the messages below after a frame has been rendered
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       loadNewMessagesBottom();
     });
-    await loadNewMessagesTop(date: message.createdAt.millisecondsSinceEpoch);
 
+    newMessagesLoading.value = false;
     return true;
   }
 
