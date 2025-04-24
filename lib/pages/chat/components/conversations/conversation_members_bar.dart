@@ -4,6 +4,7 @@ import 'package:chat_interface/controller/conversation/sidebar_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/services/chat/conversation_member.dart';
 import 'package:chat_interface/services/chat/conversation_service.dart';
+import 'package:chat_interface/theme/components/forms/fj_button.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/profile/profile.dart';
@@ -41,6 +42,49 @@ class ConversationMembers extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
+              child: Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: Get.theme.colorScheme.inverseSurface,
+                  borderRadius: BorderRadius.circular(sectionSpacing),
+                ),
+                padding: EdgeInsets.all(sectionSpacing),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("The gamers", style: Get.textTheme.labelMedium),
+                    verticalSpacing(elementSpacing),
+                    Text("player1", style: Get.textTheme.bodyMedium),
+                    verticalSpacing(elementSpacing),
+                    Text("player1", style: Get.textTheme.bodyMedium),
+                    verticalSpacing(elementSpacing),
+                    Text("player1", style: Get.textTheme.bodyMedium),
+                    verticalSpacing(elementSpacing),
+                    Text("player1", style: Get.textTheme.bodyMedium),
+                    verticalSpacing(elementSpacing),
+                    Text("player1", style: Get.textTheme.bodyMedium),
+                  ],
+                ),
+              ),
+            ),
+            verticalSpacing(defaultSpacing),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
+              child: FJElevatedButton(
+                onTap: () => {},
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.public, color: Get.theme.colorScheme.onPrimary),
+                    horizontalSpacing(defaultSpacing),
+                    Text("Create new Space", style: Get.theme.textTheme.labelMedium),
+                  ],
+                ),
+              ),
+            ),
+            verticalSpacing(defaultSpacing),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [

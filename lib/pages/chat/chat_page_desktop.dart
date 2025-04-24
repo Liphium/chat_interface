@@ -1,4 +1,7 @@
+import 'dart:math';
+
 import 'package:chat_interface/controller/conversation/sidebar_controller.dart';
+import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/chat_page_mobile.dart';
 import 'package:chat_interface/pages/chat/components/conversations/message_bar.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
@@ -100,11 +103,18 @@ class DefaultSidebarTab extends SidebarTab {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Text('app.title'.tr, style: Theme.of(context).textTheme.headlineMedium),
-        verticalSpacing(sectionSpacing),
-        Text('app.welcome'.tr, style: Theme.of(context).textTheme.bodyLarge),
-        verticalSpacing(elementSpacing),
-        Text('app.build'.trParams({"build": "Alpha"}), style: Theme.of(context).textTheme.bodyLarge),
+        Image.asset("assets/tray/icon_macos.png", width: 150, height: 150),
+        verticalSpacing(sectionSpacing * 2),
+        SizedBox(
+          width: 400,
+          child: Text(
+            'app.welcome.${Random().nextInt(19) + 1}'.tr,
+            style: Theme.of(context).textTheme.labelLarge,
+            textAlign: TextAlign.center,
+          ),
+        ),
+        verticalSpacing(defaultSpacing),
+        Text('app.build'.trParams({"build": currentVersionName}), style: Theme.of(context).textTheme.bodyMedium),
       ],
     );
   }

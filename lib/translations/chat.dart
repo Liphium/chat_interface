@@ -6,8 +6,27 @@ class ChatPageTranslations extends Translations {
     //* English US
     'en_US': {
       // App
-      'app.title': 'The chat app',
-      'app.welcome': 'Thanks for joining me on this journey!',
+      'app.title': 'Liphium',
+      'app.welcome.1': 'Welcome! Your chats are on the left, what are you waiting for?',
+      'app.welcome.2': 'Is it funny that I had the idea for this with Lithiuman?',
+      'app.welcome.3': 'And no, Liphium doesn\'t go into batteries!',
+      'app.welcome.4': 'Welcome to your town! Yes, that\'s really how we call it.',
+      'app.welcome.5': 'Have you changed the amount of dots yet?',
+      'app.welcome.6': 'Please don\'t make your audio bitrate too high!!',
+      'app.welcome.7': 'We\'ve got nothing to hide. Or do we?',
+      'app.welcome.8': 'If we ever make an AI assistant we should call it Liphy...',
+      'app.welcome.9': 'Why is the logo in pixel art? I don\'t know either.',
+      'app.welcome.10': 'YOU THINK THIS IS IMPORTANT? Well, it isn\'t...',
+      'app.welcome.11': 'How many GIFs does your library contain, my slayer?',
+      'app.welcome.12': 'Tabletop exists because of an anime card game...',
+      'app.welcome.13': 'Why is this called a town? Because you\'re in the Liphiuverse.',
+      'app.welcome.14': 'Why are you weak? Have you considered donating?',
+      'app.welcome.15': 'For your failure there is only one explanation: No donation to Liphium.',
+      'app.welcome.16': 'We have Squares? When do we get Circles?',
+      'app.welcome.17': 'When you connect to Spaces, you use libspaceship to connect to space-station.',
+      'app.welcome.18': 'A very friendly reminder to donate to Liphium :D ... Or is it friendly??',
+      'app.welcome.19': ':DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD',
+      'app.welcome.20': '.___________. <- my reaction when you haven\'t donated.',
       'app.build': 'Current version: @build',
 
       // Profile
