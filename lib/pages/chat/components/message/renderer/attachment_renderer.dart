@@ -33,46 +33,11 @@ class AttachmentRenderer extends StatefulWidget {
 
 class _AttachmentRendererState extends State<AttachmentRenderer> {
   Image? _networkImage;
-  final GlobalKey _heightKey = GlobalKey();
-  final _loading = signal(true);
-
-  @override
-  void dispose() {
-    _loading.dispose();
-    super.dispose();
-  }
 
   @override
   void initState() {
     super.initState();
-    if (widget.container.attachmentType == AttachmentContainerType.remoteImage &&
-        widget.message != null &&
-        (widget.message?.heightCallback ?? false)) {
-      _networkImage = Image.network(
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null || loadingProgress.expectedTotalBytes == null) {
-            return const SizedBox(width: 60, height: 60, child: CircularProgressIndicator());
-          }
-          return SizedBox(
-            width: 60,
-            height: 60,
-            child: CircularProgressIndicator(
-              value: loadingProgress.expectedTotalBytes! / loadingProgress.cumulativeBytesLoaded,
-            ),
-          );
-        },
-        widget.container.url,
-        fit: BoxFit.cover,
-      );
-      final stream = _networkImage!.image.resolve(const ImageConfiguration());
-      final listener = ImageStreamListener((image, synchronousCall) {
-        if (!_loading.value) {
-          return;
-        }
-        _loading.value = false;
-      });
-      stream.addListener(listener);
-    } else if (widget.container.attachmentType == AttachmentContainerType.remoteImage) {
+    if (widget.container.attachmentType == AttachmentContainerType.remoteImage) {
       _networkImage = Image.network(
         loadingBuilder: (context, child, loadingProgress) {
           if (loadingProgress == null || loadingProgress.expectedTotalBytes == null) {
@@ -93,7 +58,6 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
         widget.container.url,
         fit: BoxFit.cover,
       );
-      _loading.value = false;
     }
   }
 
@@ -155,18 +119,14 @@ class _AttachmentRendererState extends State<AttachmentRenderer> {
         return Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Align(
-              key: _heightKey,
-              heightFactor: _loading.value ? 0 : 1,
-              child: LibraryFavoriteButton(
-                container: widget.container,
-                child: InkWell(
-                  onTap: () => Get.dialog(ImagePreviewWindow(url: widget.container.url)),
+            LibraryFavoriteButton(
+              container: widget.container,
+              child: InkWell(
+                onTap: () => Get.dialog(ImagePreviewWindow(url: widget.container.url)),
+                borderRadius: BorderRadius.circular(defaultSpacing),
+                child: ClipRRect(
                   borderRadius: BorderRadius.circular(defaultSpacing),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(defaultSpacing),
-                    child: ConstrainedBox(constraints: const BoxConstraints(maxHeight: 350), child: _networkImage),
-                  ),
+                  child: ConstrainedBox(constraints: const BoxConstraints(maxHeight: 350), child: _networkImage),
                 ),
               ),
             ),

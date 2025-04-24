@@ -6,6 +6,7 @@ import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/bu
 import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/bubbles_message_renderer.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/bubbles_space_renderer.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/bubbles_system_renderer.dart';
+import 'package:chat_interface/services/chat/conversation_message_provider.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/message_options_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
@@ -59,15 +60,37 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
 
     // Evaluate whether we need a heading
     bool lastMessage = false;
+    bool readHeading = false;
     bool last = widget.properties.isAtTopEdge;
     bool newHeading = false;
-    final nextMessage = widget.provider.getNextMessageId(widget.properties.index);
-    if (nextMessage != null && widget.provider.messages[nextMessage] != null) {
+    final nextMessageId = widget.provider.getNextMessageId(widget.properties.index);
+    if (nextMessageId != null && widget.provider.messages[nextMessageId] != null) {
+      final nextMessage = widget.provider.messages[nextMessageId]!;
+
       // Check if the last message was a day before the current one
-      if (widget.provider.messages[nextMessage]!.createdAt.day != message.createdAt.day) {
+      if (nextMessage.createdAt.day != message.createdAt.day) {
         newHeading = true;
       } else {
         lastMessage = true;
+      }
+
+      // See if we need a heading to indicate messages below it are not read
+      if (widget.provider is ConversationMessageProvider) {
+        final provider = widget.provider as ConversationMessageProvider;
+        final readTime = provider.conversation.reads.get(provider.extra);
+        if (readTime < message.createdAt.millisecondsSinceEpoch &&
+            readTime > nextMessage.createdAt.millisecondsSinceEpoch) {
+          readHeading = true;
+        }
+      }
+    }
+
+    // Make sure to also show it when there are no messages before the current one
+    if (nextMessageId == null && widget.provider is ConversationMessageProvider) {
+      final provider = widget.provider as ConversationMessageProvider;
+      final readTime = provider.conversation.reads.get(provider.extra);
+      if (readTime < message.createdAt.millisecondsSinceEpoch) {
+        readHeading = true;
       }
     }
 
@@ -76,6 +99,7 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
         mainAxisSize: MainAxisSize.min,
         children: [
           if (newHeading || last) renderHeightTag(message),
+          if (readHeading) renderRead(message, newHeading || last),
           BubblesSystemMessageRenderer(message: message, provider: widget.provider),
         ],
       );
@@ -140,6 +164,7 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
         mainAxisSize: MainAxisSize.min,
         children: [
           if (newHeading || last) renderHeightTag(message),
+          if (readHeading) renderRead(message, newHeading || last),
           MouseRegion(
             onEnter: (event) {
               hovering.value = true;
@@ -180,6 +205,21 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
     return Padding(
       padding: const EdgeInsets.only(top: sectionSpacing, bottom: defaultSpacing),
       child: Text(formatDay(message.createdAt), style: Get.theme.textTheme.bodyMedium),
+    );
+  }
+
+  Widget renderRead(Message message, bool heading) {
+    return Padding(
+      padding: EdgeInsets.only(top: heading ? 0 : defaultSpacing, bottom: elementSpacing),
+      child: Row(
+        children: [
+          Expanded(child: Container(height: 2, color: Get.theme.colorScheme.error)),
+          horizontalSpacing(defaultSpacing),
+          Text("unread.messages".tr, style: Get.textTheme.labelMedium),
+          horizontalSpacing(defaultSpacing),
+          Expanded(child: Container(height: 2, color: Get.theme.colorScheme.error)),
+        ],
+      ),
     );
   }
 

@@ -737,10 +737,11 @@ packages:
   lorien_chat_list:
     dependency: "direct main"
     description:
-      name: lorien_chat_list
-      sha256: bf0d7c5128a9b67661d079dde4d412a54dd1aeb5f278b092eb214425add0356c
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: master
+      resolved-ref: "262c65789adfd9c89792174bb8458e331a34a35b"
+      url: "https://github.com/Unbreathable/chat_list.git"
+    source: git
     version: "0.0.2"
   matcher:
     dependency: transitive

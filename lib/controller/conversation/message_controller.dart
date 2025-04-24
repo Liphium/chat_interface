@@ -30,7 +30,8 @@ class MessageController {
   static Future<void> openConversation(Conversation conversation, {String extra = ""}) async {
     final provider = ConversationMessageProvider(conversation, extra: extra);
 
-    // Make sure the thing has some messages in it
+    // Load the current position for messages
+    final read = conversation.reads.get(extra);
     await provider.loadNewMessagesTop(date: DateTime.now().millisecondsSinceEpoch);
 
     // Show the messages once they are fully loaded
