@@ -34,6 +34,16 @@ class MessageController {
     final read = conversation.reads.get(extra);
     await provider.reloadAt(read + 1);
 
+    if (ConversationController.notificationMap[ConversationService.withExtra(conversation.id.encode(), extra)] == 1) {
+      unawaited(
+        ConversationService.overwriteRead(
+          conversation,
+          provider.messages.values.first.createdAt.millisecondsSinceEpoch,
+          extra: extra,
+        ),
+      );
+    }
+
     // Show the messages once they are fully loaded
     loaded.value = true;
 

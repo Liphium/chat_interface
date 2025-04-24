@@ -36,6 +36,8 @@
 - You can now choose how many dots appear
 - All creation buttons are now in one menu in the sidebar
 - Added a right click context menu in the sidebar
+- More reliable notification handling
+- The chat view now opens where the newest messages are
 
 ## 0.6.0
 

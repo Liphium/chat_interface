@@ -235,7 +235,7 @@ class SpacesMessageProvider extends MessageProvider {
   }
 
   @override
-  Future<String?> handleMessageSend(String timeToken, String data) async {
+  Future<String?> handleMessageSend(String timeToken, String data, int stamp) async {
     final event = await SpaceConnection.spaceConnector!.sendActionAndWait(
       ServerAction("msg_send", {"token": timeToken, "data": data}),
     );

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
@@ -244,16 +246,19 @@ class ConversationMessageProvider extends MessageProvider {
   }
 
   @override
-  Future<String?> handleMessageSend(String timeToken, String data) async {
+  Future<String?> handleMessageSend(String timeToken, String data, int stamp) async {
     // Send message to the server with conversation token as authentication
     final json = await postNodeJSON("/conversations/message/send", <String, dynamic>{
       "token": conversation.token.toMap(conversation.id),
       "data": {"token": timeToken, "data": data, "extra": extra},
     });
-
     if (!json["success"]) {
       return json["error"];
     }
+
+    // Make sure to update the reads on the conversation
+    unawaited(ConversationService.overwriteRead(conversation, stamp, extra: extra));
+
     return null;
   }
 

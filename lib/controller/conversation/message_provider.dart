@@ -435,7 +435,7 @@ abstract class MessageProvider {
     final info = SymmetricSequencedInfo.builder(content, stamp).finish(encryptionKey());
 
     // Send message
-    final error = await handleMessageSend(timeToken, info);
+    final error = await handleMessageSend(timeToken, info, stamp);
     if (error != null) {
       loading.value = false;
       return error;
@@ -481,7 +481,7 @@ abstract class MessageProvider {
   /// This method should send this data to the server as the message.
   ///
   /// This method should return an error or null if it was successful.
-  Future<String?> handleMessageSend(String timeToken, String data);
+  Future<String?> handleMessageSend(String timeToken, String data, int stamp);
 }
 
 class Message {
