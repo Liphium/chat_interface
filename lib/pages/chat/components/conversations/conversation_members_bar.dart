@@ -2,6 +2,7 @@ import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/sidebar_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
+import 'package:chat_interface/controller/spaces/space_controller.dart';
 import 'package:chat_interface/services/chat/conversation_member.dart';
 import 'package:chat_interface/services/chat/conversation_service.dart';
 import 'package:chat_interface/theme/components/forms/fj_button.dart';
@@ -42,33 +43,7 @@ class ConversationMembers extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-              child: Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  color: Get.theme.colorScheme.inverseSurface,
-                  borderRadius: BorderRadius.circular(sectionSpacing),
-                ),
-                padding: EdgeInsets.all(sectionSpacing),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text("The gamers", style: Get.textTheme.labelMedium),
-                    verticalSpacing(elementSpacing),
-                    Text("player1", style: Get.textTheme.bodyMedium),
-                    verticalSpacing(elementSpacing),
-                    Text("player1", style: Get.textTheme.bodyMedium),
-                    verticalSpacing(elementSpacing),
-                    Text("player1", style: Get.textTheme.bodyMedium),
-                    verticalSpacing(elementSpacing),
-                    Text("player1", style: Get.textTheme.bodyMedium),
-                    verticalSpacing(elementSpacing),
-                    Text("player1", style: Get.textTheme.bodyMedium),
-                  ],
-                ),
-              ),
-            ),
+            renderSpacePreview(),
             verticalSpacing(defaultSpacing),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
@@ -260,5 +235,60 @@ class ConversationMembers extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Widget renderSpacePreview() {
+    return Watch((ctx) {
+      if (SpaceController.connected.value) {
+        return SizedBox();
+      }
+
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
+        child: Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: Get.theme.colorScheme.inverseSurface,
+            borderRadius: BorderRadius.circular(sectionSpacing),
+          ),
+          padding: EdgeInsets.only(
+            top: sectionSpacing * 0.75,
+            bottom: sectionSpacing,
+            right: sectionSpacing,
+            left: sectionSpacing,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text("Some space #1", style: Get.textTheme.labelMedium),
+              verticalSpacing(sectionSpacing),
+              Row(
+                children: [
+                  UserAvatar(id: StatusController.ownAddress, size: 28),
+                  horizontalSpacing(defaultSpacing),
+                  Text("Unbreathable"),
+                ],
+              ),
+              verticalSpacing(defaultSpacing),
+              Row(
+                children: [
+                  UserAvatar(id: StatusController.ownAddress, size: 28),
+                  horizontalSpacing(defaultSpacing),
+                  Text("Unbreathable"),
+                ],
+              ),
+              verticalSpacing(defaultSpacing),
+              Row(
+                children: [
+                  UserAvatar(id: StatusController.ownAddress, size: 28),
+                  horizontalSpacing(defaultSpacing),
+                  Text("Unbreathable"),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+    });
   }
 }
