@@ -90,30 +90,36 @@ class ConversationService extends VaultTarget {
   Future<void> init() async {
     final conversations =
         await (db.select(db.conversation)..orderBy([(u) => drift.OrderingTerm.desc(u.updatedAt)])).get();
-    batch(() {
-      final order = List<LPHAddress>.filled(conversations.length, LPHAddress.error(), growable: true);
-      final map = <LPHAddress, Conversation>{};
-      int index = 0;
-      for (var conversation in conversations) {
-        // Make sure to handle the different types properly
-        Conversation conv;
-        switch (conversation.type) {
-          case model.ConversationType.square:
-            conv = Square.fromData(conversation);
-          default:
-            conv = Conversation.fromData(conversation);
-        }
-
-        // Load the members and add
-        unawaited(ConversationService.loadMembers(conv));
-        map[conv.id] = conv;
-        order[index] = conv.id;
-        index++;
+    final futures = <Future<void>>[];
+    final order = List<LPHAddress>.filled(conversations.length, LPHAddress.error(), growable: true);
+    final map = <LPHAddress, Conversation>{};
+    int index = 0;
+    for (var conversation in conversations) {
+      // Make sure to handle the different types properly
+      Conversation conv;
+      switch (conversation.type) {
+        case model.ConversationType.square:
+          conv = Square.fromData(conversation);
+        default:
+          conv = Conversation.fromData(conversation);
       }
 
-      ConversationController.order.value = order;
-      ConversationController.conversations.value = map;
-    });
+      // Load the members and add to the order and map
+      futures.add(ConversationService.loadMembers(conv));
+      map[conv.id] = conv;
+      order[index] = conv.id;
+      index++;
+    }
+
+    // Wait for the members to be loaded and then update the UI
+    unawaited(
+      futures.wait.then((_) {
+        batch(() {
+          ConversationController.order.value = order;
+          ConversationController.conversations.value = map;
+        });
+      }),
+    );
   }
 
   @override

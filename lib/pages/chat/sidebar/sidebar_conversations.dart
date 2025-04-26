@@ -91,7 +91,7 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
             }
 
             // Hover menu
-            return Watch(key: ValueKey(conversation.id), (ctx) {
+            return Watch(key: ValueKey("${conversation.id.encode()}-sb"), (ctx) {
               // Determine the title of the conversation based on the type
               String title;
               if (conversation.isGroup || friend == null) {
