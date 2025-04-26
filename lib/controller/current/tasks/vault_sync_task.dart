@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:chat_interface/controller/current/status_controller.dart';
+import 'package:chat_interface/controller/square/shared_space_controller.dart';
 import 'package:chat_interface/services/chat/library_manager.dart';
 import 'package:chat_interface/services/chat/conversation_service.dart';
 import 'package:chat_interface/services/chat/vault_versioning_service.dart';
@@ -129,7 +130,9 @@ class VaultSyncTask extends SynchronizationTask {
   }
 
   @override
-  void onRestart() {}
+  void onRestart() {
+    SharedSpaceController.clearAll();
+  }
 }
 
 abstract class VaultTarget {

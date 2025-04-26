@@ -105,7 +105,9 @@ class SpaceService {
     StudioController.resetControllerState();
 
     // Open the screen
-    SidebarController.openTab(SpaceSidebarTab());
+    if (SpaceController.shouldSwitchToPage) {
+      SidebarController.openTab(SpaceSidebarTab());
+    }
 
     // Send the server all the data required for setup
     final event = await SpaceConnection.spaceConnector!.sendActionAndWait(

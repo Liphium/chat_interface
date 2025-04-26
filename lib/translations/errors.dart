@@ -71,6 +71,10 @@ class ErrorTranslations extends Translations {
       'topic.name_needed': 'Please specify a name for this topic.',
       'topic.name.length':
           'The topic name you specified is longer than allowed. Please use less than @length characters.',
+      'squares.space.name_needed': 'Please specify a name for this Space.',
+      'squares.space.name.length':
+          'The Space name length you specified is longer than allowed. Please use less than @length characters.',
+      'squares.space.already_added': 'This Space has already been added.',
       'squares.too_many_members': 'This Square allows a maximum of @amount members.',
       'conversation.delete_error': 'You can\'t delete this conversation yet. Please try again later.',
       'error.not_delete_conversation':

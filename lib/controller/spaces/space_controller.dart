@@ -27,6 +27,7 @@ class SpaceController {
   static final start = signal(DateTime.now());
   static final currentTab = signal(SpaceTabType.space.index);
   static int _prevTab = SpaceTabType.space.index;
+  static bool shouldSwitchToPage = true;
 
   //* Space information
   static String? domain;
@@ -80,23 +81,30 @@ class SpaceController {
     _prevTab = currentTab.value;
   }
 
-  /// Create a space (publish says whether or not it should be published through status)
-  static Future<void> createSpace(bool publish) async {
+  /// Create a space (publish says whether or not it should be published through status).
+  ///
+  /// Returns an error if there was one.
+  static Future<String?> createSpace(bool publish, {bool dialog = true, bool openPage = true}) async {
+    shouldSwitchToPage = openPage;
     spaceLoading.value = true;
     final (container, error) = await SpaceService.createSpace();
     spaceLoading.value = false;
     if (error != null) {
-      showErrorPopup("error", error);
-      return;
+      if (dialog) {
+        showErrorPopup("error", error);
+      }
+      return error;
     }
 
     if (publish) {
       unawaited(StatusController.share(container!));
     }
+    return null;
   }
 
   /// Create a space and connect to it (with sending an invite to the message provider)
-  static Future<void> createAndConnect(MessageProvider provider) async {
+  static Future<void> createAndConnect(MessageProvider provider, {bool openPage = true}) async {
+    shouldSwitchToPage = openPage;
     if (!areSpacesSupported) {
       showNotSupported();
       return;

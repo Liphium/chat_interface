@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:chat_interface/services/connection/chat/conversation_listener.dart';
+import 'package:chat_interface/services/connection/chat/shared_space_listener.dart';
 import 'package:chat_interface/util/encryption/aes.dart';
 import 'package:chat_interface/util/encryption/hash.dart';
 import 'package:chat_interface/util/encryption/rsa.dart';
@@ -293,6 +294,7 @@ Future<bool> startConnection(String node, String connectionToken) async {
   MessageListener.setupMessageListener();
   ConversationListener.setupListeners();
   setupLiveshareListening();
+  SharedSpaceListener.setupListeners();
 
   return true;
 }

@@ -189,12 +189,6 @@ class ChatPageTranslations extends Translations {
       'chat.space.not_found': 'This space already ended.',
       'chat.space.loading': 'Loading space..',
       'chat.space.leave': 'Do you really want to leave your current space?',
-
-      // Squares
-      'squares.topics.create': 'Create topic',
-      'squares.topics.name.placeholder': 'Some chat',
-      'squares.topics.too_many':
-          'We currently only allow a maximum of 5 topics to be created. Please delete old ones to make space for new ones.',
     },
 
     //* German

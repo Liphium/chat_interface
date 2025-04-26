@@ -2,9 +2,12 @@ import 'dart:math';
 
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/square.dart';
+import 'package:chat_interface/controller/spaces/space_controller.dart';
 import 'package:chat_interface/database/database_entities.dart' as model;
 import 'package:chat_interface/services/chat/conversation_service.dart';
 import 'package:chat_interface/services/squares/square_container.dart';
+import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
+import 'package:chat_interface/util/web.dart';
 import 'package:get/get_utils/get_utils.dart';
 
 class SquareService {
@@ -46,5 +49,40 @@ class SquareService {
   static String randomString(int length) {
     const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789';
     return List.generate(length, (_) => chars[_rnd.nextInt(chars.length)]).join();
+  }
+
+  /// Create a new Space and add it to a square.
+  ///
+  /// Returns an error if there was one.
+  static Future<String?> createSharedSpace(Square square, String name, {String underlyingId = "-"}) async {
+    // Create a new Space (if not connected already)
+    if (!SpaceController.connected.peek()) {
+      // Create a new Space
+      final error = await SpaceController.createSpace(false, openPage: false);
+      if (error != null) {
+        return error;
+      }
+    }
+    final container = SpaceController.getContainer();
+
+    // Add the Space to the square as a shared space
+    final json = await postNodeJSON("/conversations/shared_spaces/add", {
+      "token": square.token.toMap(square.id),
+      "data": {
+        "server": container.node,
+        "id": container.roomId,
+        "underlying_id": underlyingId,
+        "name": encryptSymmetric(name, square.key),
+        "container": encryptSymmetric(container.toInviteJson(), square.key),
+      },
+    });
+    if (!json["success"]) {
+      return json["error"];
+    }
+    if (json["exists"]) {
+      return "squares.space.already_added".tr;
+    }
+
+    return null;
   }
 }

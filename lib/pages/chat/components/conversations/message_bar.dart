@@ -18,7 +18,6 @@ import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/conversation_add_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/constants.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -100,7 +99,6 @@ class _MessageBarState extends State<MessageBar> {
                           position: ContextMenuData.fromKey(_infoKey, below: true),
                         ),
                       );
-                      sendLog("is square: ${widget.conversation is Square}");
                     },
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: elementSpacing, horizontal: defaultSpacing),
@@ -175,7 +173,10 @@ class _MessageBarState extends State<MessageBar> {
 
                         // Render an invite button in case the user is currently in a Space
                         Watch((context) {
-                          if (SpaceController.connected.value && areSpacesSupported && !error) {
+                          if (SpaceController.connected.value &&
+                              widget.conversation is! Square &&
+                              areSpacesSupported &&
+                              !error) {
                             return LoadingIconButton(
                               icon: Icons.forward_to_inbox,
                               iconSize: 27,
@@ -191,7 +192,7 @@ class _MessageBarState extends State<MessageBar> {
                         }),
 
                         // Only show launch button in case supported
-                        if (areSpacesSupported && !error)
+                        if (areSpacesSupported && widget.conversation is! Square && !error)
                           LoadingIconButton(
                             icon: Icons.rocket_launch,
                             iconSize: 27,
