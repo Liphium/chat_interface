@@ -189,7 +189,7 @@ class SpaceController {
     provider = SpacesMessageProvider();
 
     // Show an error if there was one
-    if (!error) {
+    if (!error && SidebarController.currentOpenTab.peek().type == SidebarTabType.space) {
       SidebarController.openTab(DefaultSidebarTab());
     }
   }

@@ -10,11 +10,9 @@ import 'package:chat_interface/theme/components/forms/fj_button.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/util/dispose_hook.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
-import 'package:collection/collection.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -50,7 +48,6 @@ class _SquareSharedSpacesState extends State<SquareSharedSpaces> {
 
               // Add at the new index
               final removed = container.spaces.removeAt(oldIndex);
-              sendLog("swap $oldIndex $newIndex ${oldIndex > newIndex ? newIndex : newIndex - 1}");
               container.spaces.insert(oldIndex > newIndex ? newIndex : newIndex - 1, removed);
 
               // Change on the server, reset in case didn't work
@@ -84,7 +81,11 @@ class _SquareSharedSpacesState extends State<SquareSharedSpaces> {
                         return LoadingIconButton(
                           onTap: () async {
                             loading.value = true;
-                            final error = await SquareService.unpinSharedSpace(widget.square, pinnedSpace.id);
+                            final error = await SquareService.unpinSharedSpace(
+                              widget.square,
+                              pinnedSpace.id,
+                              space: space,
+                            );
                             if (error != null) {
                               showErrorPopup("error", error);
                               loading.value = false;
@@ -96,13 +97,31 @@ class _SquareSharedSpacesState extends State<SquareSharedSpaces> {
                       },
                     );
 
+                    // Create the onTap function for the item
+                    Future<void> onTap() async {
+                      if (pinnedSpace.loading) {
+                        return;
+                      }
+                      pinnedSpace.loading = true;
+                      final error = await SquareService.createSharedSpace(
+                        widget.square,
+                        pinnedSpace.name,
+                        underlyingId: pinnedSpace.id,
+                        rejoin: true,
+                      );
+                      pinnedSpace.loading = false;
+                      if (error != null) {
+                        showErrorPopup("error", error);
+                      }
+                    }
+
                     // Render the pinned space as empty when there isn't a shared one
                     if (space == null) {
-                      return renderSpaceItem(pinnedSpace.name, [], button: button);
+                      return renderSpaceItem(pinnedSpace.name, [], button: button, onTap: onTap);
                     }
 
                     // Render the space as shared when it's actually there
-                    return renderSpaceItem(pinnedSpace.name, space.members, button: button);
+                    return renderSpaceItem(pinnedSpace.name, space.members, button: button, onTap: onTap);
                   }),
                 ),
               );
@@ -195,47 +214,58 @@ class _SquareSharedSpacesState extends State<SquareSharedSpaces> {
   }
 
   /// Render a shared space
-  Widget renderSpaceItem(String name, List<String> members, {Widget? button}) {
+  Widget renderSpaceItem(String name, List<String> members, {Widget? button, Function()? onTap}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-      child: Container(
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: Get.theme.colorScheme.inverseSurface,
+      child: Material(
+        color: Get.theme.colorScheme.inverseSurface,
+        borderRadius: BorderRadius.circular(sectionSpacing),
+        child: InkWell(
           borderRadius: BorderRadius.circular(sectionSpacing),
-        ),
-        padding: EdgeInsets.only(
-          top: sectionSpacing * 0.75,
-          bottom: sectionSpacing,
-          right: sectionSpacing,
-          left: sectionSpacing,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+          onTap: onTap,
+          child: Container(
+            color: Colors.transparent,
+            width: double.infinity,
+            padding: EdgeInsets.all(defaultSpacing),
+            child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [Text(name, style: Get.textTheme.labelMedium), horizontalSpacing(defaultSpacing), button!],
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: elementSpacing),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      verticalSpacing(elementSpacing),
+                      // Display name
+                      Text(name, style: Get.textTheme.labelMedium),
+
+                      // Render all of the members
+                      for (var member in members)
+                        Builder(
+                          builder: (context) {
+                            final friend = FriendController.getFriend(LPHAddress.from(member));
+                            return Padding(
+                              padding: const EdgeInsets.only(top: defaultSpacing),
+                              child: Row(
+                                children: [
+                                  UserAvatar(id: friend.id, size: 28),
+                                  horizontalSpacing(defaultSpacing),
+                                  // Not watching here, should be fine (hover = update)
+                                  Text(friend.displayName.peek(), style: Get.textTheme.bodyMedium),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+                      verticalSpacing(elementSpacing),
+                    ],
+                  ),
+                ),
+                horizontalSpacing(defaultSpacing),
+                button!,
+              ],
             ),
-            verticalSpacing(defaultSpacing),
-            for (var member in members)
-              Builder(
-                builder: (context) {
-                  final friend = FriendController.getFriend(LPHAddress.from(member));
-                  return Padding(
-                    padding: const EdgeInsets.only(top: defaultSpacing),
-                    child: Row(
-                      children: [
-                        UserAvatar(id: friend.id, size: 28),
-                        horizontalSpacing(defaultSpacing),
-                        // Not watching here, should be fine (hover = update)
-                        Text(friend.displayName.peek(), style: Get.textTheme.bodyMedium),
-                      ],
-                    ),
-                  );
-                },
-              ),
-          ],
+          ),
         ),
       ),
     );

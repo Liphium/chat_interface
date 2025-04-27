@@ -37,6 +37,15 @@ class _ChatSettingsPageState extends State<ChatSettingsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Chat theme
+          Text("appearance.chat.theme".tr, style: Get.theme.textTheme.labelLarge),
+          verticalSpacing(defaultSpacing),
+          ListSelectionSetting(
+            setting: SettingController.settings[ChatSettings.chatTheme]! as Setting<int>,
+            items: ChatSettings.chatThemes,
+          ),
+          verticalSpacing(sectionSpacing),
+
           Text("appearance.chat.dot_amount.title".tr, style: Get.theme.textTheme.labelLarge),
           verticalSpacing(defaultSpacing),
 
@@ -47,15 +56,6 @@ class _ChatSettingsPageState extends State<ChatSettingsPage> {
             min: 1,
             max: 5,
             rounded: true,
-          ),
-          verticalSpacing(sectionSpacing),
-
-          //* Chat theme
-          Text("appearance.chat.theme".tr, style: Get.theme.textTheme.labelLarge),
-          verticalSpacing(defaultSpacing),
-          ListSelectionSetting(
-            setting: SettingController.settings[ChatSettings.chatTheme]! as Setting<int>,
-            items: ChatSettings.chatThemes,
           ),
         ],
       ),

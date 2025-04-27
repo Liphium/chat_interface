@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/square.dart';
 import 'package:chat_interface/controller/spaces/space_controller.dart';
+import 'package:chat_interface/controller/square/shared_space_controller.dart';
 import 'package:chat_interface/database/database_entities.dart' as model;
 import 'package:chat_interface/services/chat/conversation_service.dart';
 import 'package:chat_interface/services/squares/square_container.dart';
@@ -50,9 +51,19 @@ class SquareService {
   /// Create a new Space and add it to a square.
   ///
   /// Returns an error if there was one.
-  static Future<String?> createSharedSpace(Square square, String name, {String underlyingId = "-"}) async {
+  static Future<String?> createSharedSpace(
+    Square square,
+    String name, {
+    String underlyingId = "-",
+    bool rejoin = false,
+  }) async {
     // Create a new Space (if not connected already)
-    if (!SpaceController.connected.peek()) {
+    if (!SpaceController.connected.peek() || rejoin) {
+      // Leave in case rejoin is true
+      if (rejoin && SpaceController.connected.peek()) {
+        await SpaceController.leaveSpace();
+      }
+
       // Create a new Space
       final error = await SpaceController.createSpace(false, openPage: false);
       if (error != null) {
@@ -114,15 +125,31 @@ class SquareService {
   }
 
   /// Unpin a shared space in a Square.
+  /// Set [space] in case currently shared.
   ///
   /// Returns an error if there was one.
-  static Future<String?> unpinSharedSpace(Square square, String id) async {
+  static Future<String?> unpinSharedSpace(Square square, String id, {SharedSpace? space}) async {
     // Generate a new container for the square
     final newContainer = SquareContainer.copy(square.container as SquareContainer);
     newContainer.spaces.removeWhere((s) => s.id == id);
 
     // Set the new data
-    return ConversationService.setData(square, newContainer);
+    final error = await ConversationService.setData(square, newContainer);
+    if (error != null) {
+      return error;
+    }
+
+    // Change the key of the shared space to a space type (in case there and shared)
+    if (SharedSpaceController.sharedSpaceMap[square.id] != null && space != null) {
+      final map = SharedSpaceController.sharedSpaceMap[square.id]!;
+      if (map[SharedSpace.getKeyUnderlying(id)] != null) {
+        map.remove(SharedSpace.getKeyUnderlying(id));
+        map[SharedSpace.getKeySpace(space.id)] = space;
+        SharedSpaceController.sharedSpaceMap[square.id] = map;
+      }
+    }
+
+    return null;
   }
 
   /// Refresh the container of a Square.
