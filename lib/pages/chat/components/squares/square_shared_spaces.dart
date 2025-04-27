@@ -4,11 +4,18 @@ import 'package:chat_interface/controller/spaces/space_controller.dart';
 import 'package:chat_interface/controller/square/shared_space_controller.dart';
 import 'package:chat_interface/pages/chat/components/squares/shared_space_add_window.dart';
 import 'package:chat_interface/services/squares/square_container.dart';
+import 'package:chat_interface/services/squares/square_service.dart';
 import 'package:chat_interface/services/squares/square_shared_space.dart';
 import 'package:chat_interface/theme/components/forms/fj_button.dart';
+import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
+import 'package:chat_interface/util/dispose_hook.dart';
+import 'package:chat_interface/util/logging_framework.dart';
+import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
+import 'package:collection/collection.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:signals/signals_flutter.dart';
@@ -34,30 +41,70 @@ class _SquareSharedSpacesState extends State<SquareSharedSpaces> {
 
           // Render a reordable list so the pinned spaces can be dragged around
           return ReorderableListView.builder(
+            dragStartBehavior: DragStartBehavior.start,
+            buildDefaultDragHandles: false,
             shrinkWrap: true,
-            onReorder: (oldIndex, newIndex) {
-              // TODO: Implement reordering
+            onReorder: (oldIndex, newIndex) async {
+              // Create a new container with the order changed
+              final copied = SquareContainer.copy(container);
+
+              // Add at the new index
+              final removed = container.spaces.removeAt(oldIndex);
+              sendLog("swap $oldIndex $newIndex ${oldIndex > newIndex ? newIndex : newIndex - 1}");
+              container.spaces.insert(oldIndex > newIndex ? newIndex : newIndex - 1, removed);
+
+              // Change on the server, reset in case didn't work
+              final error = await SquareService.refreshContainer(widget.square, copied);
+              if (error != null) {
+                widget.square.containerSub.value = widget.square.container;
+                showErrorPopup("error", error);
+              } else {
+                widget.square.containerSub.value = container;
+              }
             },
             itemCount: container.spaces.length,
             itemBuilder: (context, index) {
               final pinnedSpace = container.spaces[index];
 
               return Padding(
+                key: ValueKey("psl-${pinnedSpace.id}"),
                 padding: const EdgeInsets.only(bottom: defaultSpacing),
-                child: Watch((ctx) {
-                  final space =
-                      SharedSpaceController.sharedSpaceMap[widget.square.id]?[SharedSpace.getKeyUnderlying(
-                        pinnedSpace.id,
-                      )];
+                child: ReorderableDragStartListener(
+                  index: index,
+                  child: Watch((ctx) {
+                    final space =
+                        SharedSpaceController.sharedSpaceMap[widget.square.id]?[SharedSpace.getKeyUnderlying(
+                          pinnedSpace.id,
+                        )];
 
-                  // Render the pinned space as empty when there isn't a shared one
-                  if (space == null) {
-                    return renderSpaceItem(pinnedSpace.name, []);
-                  }
+                    // Render a button for unpinning the space
+                    final Widget button = SignalHook(
+                      value: false,
+                      builder: (loading) {
+                        return LoadingIconButton(
+                          onTap: () async {
+                            loading.value = true;
+                            final error = await SquareService.unpinSharedSpace(widget.square, pinnedSpace.id);
+                            if (error != null) {
+                              showErrorPopup("error", error);
+                              loading.value = false;
+                            }
+                          },
+                          loading: loading,
+                          icon: Icons.push_pin,
+                        );
+                      },
+                    );
 
-                  // Render the space as shared when it's actually there
-                  return renderSpaceItem(pinnedSpace.name, space.members);
-                }),
+                    // Render the pinned space as empty when there isn't a shared one
+                    if (space == null) {
+                      return renderSpaceItem(pinnedSpace.name, [], button: button);
+                    }
+
+                    // Render the space as shared when it's actually there
+                    return renderSpaceItem(pinnedSpace.name, space.members, button: button);
+                  }),
+                ),
               );
             },
           );
@@ -79,8 +126,29 @@ class _SquareSharedSpacesState extends State<SquareSharedSpaces> {
             itemBuilder: (context, index) {
               final space = spaces[index].value;
               return Padding(
+                key: ValueKey("ssl-${space.id}"),
                 padding: const EdgeInsets.only(bottom: defaultSpacing),
-                child: renderSpaceItem(space.name, space.members),
+                child: renderSpaceItem(
+                  space.name,
+                  space.members,
+                  button: SignalHook(
+                    value: false,
+                    builder: (loading) {
+                      return LoadingIconButton(
+                        onTap: () async {
+                          loading.value = true;
+                          final error = await SquareService.pinSharedSpace(widget.square, space);
+                          if (error != null) {
+                            showErrorPopup("error", error);
+                            loading.value = false;
+                          }
+                        },
+                        loading: loading,
+                        icon: Icons.push_pin_outlined,
+                      );
+                    },
+                  ),
+                ),
               );
             },
           );
@@ -127,7 +195,7 @@ class _SquareSharedSpacesState extends State<SquareSharedSpaces> {
   }
 
   /// Render a shared space
-  Widget renderSpaceItem(String name, List<String> members) {
+  Widget renderSpaceItem(String name, List<String> members, {Widget? button}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
       child: Container(
@@ -145,7 +213,10 @@ class _SquareSharedSpacesState extends State<SquareSharedSpaces> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(name, style: Get.textTheme.labelMedium),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [Text(name, style: Get.textTheme.labelMedium), horizontalSpacing(defaultSpacing), button!],
+            ),
             verticalSpacing(defaultSpacing),
             for (var member in members)
               Builder(

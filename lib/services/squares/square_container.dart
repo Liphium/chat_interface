@@ -47,6 +47,7 @@ class SquareContainer extends ConversationContainer {
   Map<String, dynamic> toJson() {
     final json = super.toJson();
     json["topics"] = topics.map((t) => t.toJson()).toList();
+    json["spaces"] = spaces.map((s) => s.toJson()).toList();
     return json;
   }
 }

@@ -46,7 +46,7 @@ class Square extends Conversation {
         fromDbEncrypted(data.key),
         data.lastVersion.toInt(),
         data.updatedAt.toInt(),
-        ConversationReads.fromContainer(data.reads),
+        ConversationReads.fromLocalContainer(data.reads),
       );
 
   @override

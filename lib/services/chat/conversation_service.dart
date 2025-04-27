@@ -11,6 +11,7 @@ import 'package:chat_interface/controller/current/steps/key_step.dart';
 import 'package:chat_interface/controller/current/tasks/vault_sync_task.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/database/database_entities.dart' as model;
+import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/services/chat/conversation_member.dart';
 import 'package:chat_interface/services/connection/chat/stored_actions_listener.dart';
 import 'package:chat_interface/services/connection/connection.dart';
@@ -653,6 +654,25 @@ class ConversationReads {
     }
   }
 
+  /// Parse as the format received from the local database (use "" for empty conversation reads)
+  ConversationReads.fromLocalContainer(String container) {
+    // Make sure to not parse no reads at all
+    if (container == "") {
+      return;
+    }
+
+    // Parse the reads from the container to the map
+    try {
+      final decrypted = decryptSymmetric(container, databaseKey);
+      for (var entry in jsonDecode(decrypted).entries) {
+        map[entry.key] = entry.value;
+      }
+    } catch (_) {
+      sendLog("ERROR: Local conversation read decryption failure");
+      return;
+    }
+  }
+
   /// Copy another instance of [ConversationReads]
   ConversationReads.copy(ConversationReads reads) {
     for (var entry in reads.map.entries) {
@@ -662,6 +682,9 @@ class ConversationReads {
 
   /// Get all the reads in the form they're stored on the server.
   String toContainer() => encryptSymmetric(jsonEncode(map), vaultKey);
+
+  /// Get all the reads in the form they're stored in the local database.
+  String toLocalContainer() => encryptSymmetric(jsonEncode(map), databaseKey);
 
   /// Get the read time for an extra id.
   int get(String extra) {

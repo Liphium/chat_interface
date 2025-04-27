@@ -33,7 +33,7 @@ class SharedSpaceListener {
     // Listen for shared space deletion events
     connector.listen("shared_space_delete", (event) {
       // Make sure the conversation is valid
-      final conversationAdr = LPHAddress.from(event.data["space"]["conv"]);
+      final conversationAdr = LPHAddress.from(event.data["conv"]);
       if (conversationAdr.isError()) {
         return;
       }

@@ -179,7 +179,7 @@ class Conversation {
         fromDbEncrypted(data.key),
         data.lastVersion.toInt(),
         data.updatedAt.toInt(),
-        ConversationReads.fromContainer(data.reads),
+        ConversationReads.fromLocalContainer(data.reads),
       );
 
   /// Copy a conversation without the `key`.
@@ -250,7 +250,7 @@ class Conversation {
       key: dbEncrypted(packageSymmetricKey(key)),
       lastVersion: BigInt.from(lastVersion),
       updatedAt: BigInt.from(updatedAt),
-      reads: reads.toContainer(),
+      reads: reads.toLocalContainer(),
     );
   }
 

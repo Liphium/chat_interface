@@ -89,7 +89,7 @@ class SquareService {
     final current = square.container as SquareContainer;
 
     // Generate a new container for the square
-    final newContainer = SquareContainer(current.name, [...current.topics], [...current.spaces]);
+    final newContainer = SquareContainer.copy(current);
     String sharedSpaceId = randomString(8);
     while (newContainer.spaces.any((s) => s.id == sharedSpaceId)) {
       sharedSpaceId = randomString(8);
@@ -97,7 +97,20 @@ class SquareService {
     newContainer.spaces.add(PinnedSharedSpace(sharedSpaceId, space.name));
 
     // Set the new data
-    return ConversationService.setData(square, newContainer);
+    final error = await ConversationService.setData(square, newContainer);
+    if (error != null) {
+      return error;
+    }
+
+    // Change to pinned on the chat server
+    final json = await postNodeJSON("/conversations/shared_spaces/pin", {
+      "token": square.token.toMap(square.id),
+      "data": {"id": space.id, "underlying": sharedSpaceId},
+    });
+    if (!json["success"]) {
+      return json["error"];
+    }
+    return null;
   }
 
   /// Unpin a shared space in a Square.
