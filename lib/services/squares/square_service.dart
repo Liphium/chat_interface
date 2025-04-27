@@ -6,6 +6,7 @@ import 'package:chat_interface/controller/spaces/space_controller.dart';
 import 'package:chat_interface/database/database_entities.dart' as model;
 import 'package:chat_interface/services/chat/conversation_service.dart';
 import 'package:chat_interface/services/squares/square_container.dart';
+import 'package:chat_interface/services/squares/square_shared_space.dart';
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:get/get_utils/get_utils.dart';
@@ -16,7 +17,7 @@ class SquareService {
   /// Returns an error if there was one.
   static Future<String?> openSquare(List<Friend> friends, String name) async {
     // Create the conversation for the square
-    return ConversationService.openConversation(model.ConversationType.square, friends, SquareContainer(name, []));
+    return ConversationService.openConversation(model.ConversationType.square, friends, SquareContainer(name, [], []));
   }
 
   /// Add a topic to a square.
@@ -25,13 +26,8 @@ class SquareService {
   static Future<String?> createTopic(Square square, String name) async {
     final current = square.container as SquareContainer;
 
-    // Make sure there aren't too many topics
-    if (current.topics.length >= 5) {
-      return "squares.topics.too_many".tr;
-    }
-
     // Generate a new container for the square
-    final newContainer = SquareContainer(current.name, [...current.topics]);
+    final newContainer = SquareContainer(current.name, [...current.topics], [...current.spaces]);
     String topicId = randomString(8);
     while (newContainer.topics.any((t) => t.id == topicId)) {
       topicId = randomString(8);
@@ -84,5 +80,40 @@ class SquareService {
     }
 
     return null;
+  }
+
+  /// Pin a new shared space in a Square.
+  ///
+  /// Returns an error if there was one.
+  static Future<String?> pinSharedSpace(Square square, SharedSpace space) async {
+    final current = square.container as SquareContainer;
+
+    // Generate a new container for the square
+    final newContainer = SquareContainer(current.name, [...current.topics], [...current.spaces]);
+    String sharedSpaceId = randomString(8);
+    while (newContainer.spaces.any((s) => s.id == sharedSpaceId)) {
+      sharedSpaceId = randomString(8);
+    }
+    newContainer.spaces.add(PinnedSharedSpace(sharedSpaceId, space.name));
+
+    // Set the new data
+    return ConversationService.setData(square, newContainer);
+  }
+
+  /// Unpin a shared space in a Square.
+  ///
+  /// Returns an error if there was one.
+  static Future<String?> unpinSharedSpace(Square square, String id) async {
+    // Generate a new container for the square
+    final newContainer = SquareContainer.copy(square.container as SquareContainer);
+    newContainer.spaces.removeWhere((s) => s.id == id);
+
+    // Set the new data
+    return ConversationService.setData(square, newContainer);
+  }
+
+  /// Refresh the container of a Square.
+  static Future<String?> refreshContainer(Square square, SquareContainer container) {
+    return ConversationService.setData(square, container);
   }
 }

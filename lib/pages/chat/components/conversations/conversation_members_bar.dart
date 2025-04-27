@@ -47,7 +47,7 @@ class ConversationMembers extends StatelessWidget {
             if (conversation is Square)
               Padding(
                 padding: const EdgeInsets.only(bottom: defaultSpacing),
-                child: SquareSharedSpaces(conversation: conversation),
+                child: SquareSharedSpaces(square: conversation as Square),
               ),
 
             // Render the rest

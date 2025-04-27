@@ -6,15 +6,25 @@ import 'package:sodium_libs/sodium_libs.dart';
 
 class SquareContainer extends ConversationContainer {
   late List<Topic> topics;
+  late List<PinnedSharedSpace> spaces;
 
-  SquareContainer(super.name, this.topics);
+  SquareContainer(super.name, this.topics, this.spaces);
 
   @override
   SquareContainer.fromJson(Map<String, dynamic> json) : super(json["name"]) {
+    // Parse all of the topics
     topics = [];
     if (json["topics"] != null) {
       for (var topic in json["topics"]) {
         topics.add(Topic.fromJson(topic));
+      }
+    }
+
+    // Parse all of the spaces
+    spaces = [];
+    if (json["spaces"] != null) {
+      for (var space in json["spaces"]) {
+        spaces.add(PinnedSharedSpace.fromJson(space));
       }
     }
   }
@@ -22,6 +32,10 @@ class SquareContainer extends ConversationContainer {
   @override
   factory SquareContainer.decrypt(String cipherText, SecureKey key) {
     return SquareContainer.fromJson(jsonDecode(decryptSymmetric(cipherText, key)));
+  }
+
+  factory SquareContainer.copy(SquareContainer other) {
+    return SquareContainer(other.name, [...other.topics], [...other.spaces]);
   }
 
   @override
@@ -43,6 +57,16 @@ class Topic {
 
   Topic(this.id, this.name);
   Topic.fromJson(Map<String, dynamic> json) : this(json["id"], json["name"]);
+
+  Map<String, dynamic> toJson() => {"id": id, "name": name};
+}
+
+class PinnedSharedSpace {
+  final String id;
+  final String name;
+
+  PinnedSharedSpace(this.id, this.name);
+  PinnedSharedSpace.fromJson(Map<String, dynamic> json) : this(json["id"], json["name"]);
 
   Map<String, dynamic> toJson() => {"id": id, "name": name};
 }

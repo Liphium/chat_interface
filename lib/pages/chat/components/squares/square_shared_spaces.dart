@@ -1,9 +1,9 @@
 import 'package:chat_interface/controller/account/friend_controller.dart';
-import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/square.dart';
 import 'package:chat_interface/controller/spaces/space_controller.dart';
 import 'package:chat_interface/controller/square/shared_space_controller.dart';
 import 'package:chat_interface/pages/chat/components/squares/shared_space_add_window.dart';
+import 'package:chat_interface/services/squares/square_container.dart';
 import 'package:chat_interface/services/squares/square_shared_space.dart';
 import 'package:chat_interface/theme/components/forms/fj_button.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
@@ -14,9 +14,9 @@ import 'package:get/get.dart';
 import 'package:signals/signals_flutter.dart';
 
 class SquareSharedSpaces extends StatefulWidget {
-  final Conversation conversation;
+  final Square square;
 
-  const SquareSharedSpaces({super.key, required this.conversation});
+  const SquareSharedSpaces({super.key, required this.square});
 
   @override
   State<SquareSharedSpaces> createState() => _SquareSharedSpacesState();
@@ -28,10 +28,45 @@ class _SquareSharedSpacesState extends State<SquareSharedSpaces> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
+        // Render the pinned shared spaces
+        Watch((ctx) {
+          final container = widget.square.containerSub.value as SquareContainer;
+
+          // Render a reordable list so the pinned spaces can be dragged around
+          return ReorderableListView.builder(
+            shrinkWrap: true,
+            onReorder: (oldIndex, newIndex) {
+              // TODO: Implement reordering
+            },
+            itemCount: container.spaces.length,
+            itemBuilder: (context, index) {
+              final pinnedSpace = container.spaces[index];
+
+              return Padding(
+                padding: const EdgeInsets.only(bottom: defaultSpacing),
+                child: Watch((ctx) {
+                  final space =
+                      SharedSpaceController.sharedSpaceMap[widget.square.id]?[SharedSpace.getKeyUnderlying(
+                        pinnedSpace.id,
+                      )];
+
+                  // Render the pinned space as empty when there isn't a shared one
+                  if (space == null) {
+                    return renderSpaceItem(pinnedSpace.name, []);
+                  }
+
+                  // Render the space as shared when it's actually there
+                  return renderSpaceItem(pinnedSpace.name, space.members);
+                }),
+              );
+            },
+          );
+        }),
+
         // Render dynamic shared spaces
         Watch((ctx) {
           // Only render when there actually are dynamically shared spaces
-          final sharedSpaces = SharedSpaceController.sharedSpaceMap[widget.conversation.id];
+          final sharedSpaces = SharedSpaceController.sharedSpaceMap[widget.square.id];
           if (sharedSpaces == null) {
             return SizedBox();
           }
@@ -43,7 +78,10 @@ class _SquareSharedSpacesState extends State<SquareSharedSpaces> {
             itemCount: spaces.length,
             itemBuilder: (context, index) {
               final space = spaces[index].value;
-              return Padding(padding: const EdgeInsets.only(bottom: defaultSpacing), child: renderSpaceItem(space));
+              return Padding(
+                padding: const EdgeInsets.only(bottom: defaultSpacing),
+                child: renderSpaceItem(space.name, space.members),
+              );
             },
           );
         }),
@@ -55,7 +93,7 @@ class _SquareSharedSpacesState extends State<SquareSharedSpaces> {
             child: Padding(
               padding: const EdgeInsets.only(right: defaultSpacing, left: defaultSpacing, bottom: defaultSpacing),
               child: FJElevatedButton(
-                onTap: () => showModal(SharedSpaceAddWindow(square: widget.conversation as Square, action: "add")),
+                onTap: () => showModal(SharedSpaceAddWindow(square: widget.square, action: "add")),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -73,7 +111,7 @@ class _SquareSharedSpacesState extends State<SquareSharedSpaces> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
           child: FJElevatedButton(
-            onTap: () => showModal(SharedSpaceAddWindow(square: widget.conversation as Square)),
+            onTap: () => showModal(SharedSpaceAddWindow(square: widget.square)),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -89,7 +127,7 @@ class _SquareSharedSpacesState extends State<SquareSharedSpaces> {
   }
 
   /// Render a shared space
-  Widget renderSpaceItem(SharedSpace space) {
+  Widget renderSpaceItem(String name, List<String> members) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
       child: Container(
@@ -107,9 +145,9 @@ class _SquareSharedSpacesState extends State<SquareSharedSpaces> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(space.name, style: Get.textTheme.labelMedium),
+            Text(name, style: Get.textTheme.labelMedium),
             verticalSpacing(defaultSpacing),
-            for (var member in space.members)
+            for (var member in members)
               Builder(
                 builder: (context) {
                   final friend = FriendController.getFriend(LPHAddress.from(member));
