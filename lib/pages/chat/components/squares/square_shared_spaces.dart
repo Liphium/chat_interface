@@ -66,7 +66,7 @@ class _SquareSharedSpacesState extends State<SquareSharedSpaces> {
               return Padding(
                 key: ValueKey("psl-${pinnedSpace.id}"),
                 padding: const EdgeInsets.only(bottom: defaultSpacing),
-                child: ReorderableDragStartListener(
+                child: ReorderableDelayedDragStartListener(
                   index: index,
                   child: Watch((ctx) {
                     final space =
@@ -93,6 +93,9 @@ class _SquareSharedSpacesState extends State<SquareSharedSpaces> {
                           },
                           loading: loading,
                           icon: Icons.push_pin,
+                          iconSize: Get.textTheme.labelMedium!.fontSize! * 1.5,
+                          extra: elementSpacing2 - 1,
+                          padding: elementSpacing2 - 1,
                         );
                       },
                     );
@@ -117,11 +120,11 @@ class _SquareSharedSpacesState extends State<SquareSharedSpaces> {
 
                     // Render the pinned space as empty when there isn't a shared one
                     if (space == null) {
-                      return renderSpaceItem(pinnedSpace.name, [], button: button, onTap: onTap);
+                      return renderSpaceItem(pinnedSpace.name, [], button: button, onTap: onTap, pinned: true);
                     }
 
                     // Render the space as shared when it's actually there
-                    return renderSpaceItem(pinnedSpace.name, space.members, button: button, onTap: onTap);
+                    return renderSpaceItem(pinnedSpace.name, space.members, button: button, onTap: onTap, pinned: true);
                   }),
                 ),
               );
@@ -147,26 +150,50 @@ class _SquareSharedSpacesState extends State<SquareSharedSpaces> {
               return Padding(
                 key: ValueKey("ssl-${space.id}"),
                 padding: const EdgeInsets.only(bottom: defaultSpacing),
-                child: renderSpaceItem(
-                  space.name,
-                  space.members,
-                  button: SignalHook(
-                    value: false,
-                    builder: (loading) {
-                      return LoadingIconButton(
+                child: SignalHook(
+                  value: false,
+                  builder:
+                      (loading) => renderSpaceItem(
+                        space.name,
+                        space.members,
+                        button: LoadingIconButton(
+                          onTap: () async {
+                            loading.value = true;
+                            final error = await SquareService.pinSharedSpace(widget.square, space);
+                            if (error != null) {
+                              showErrorPopup("error", error);
+                              loading.value = false;
+                            }
+                          },
+                          loading: loading,
+                          icon: Icons.push_pin_outlined,
+                        ),
+
+                        // Join the space when the item is clicked
                         onTap: () async {
-                          loading.value = true;
-                          final error = await SquareService.pinSharedSpace(widget.square, space);
-                          if (error != null) {
-                            showErrorPopup("error", error);
-                            loading.value = false;
+                          if (loading.value) {
+                            return;
                           }
+                          loading.value = true;
+
+                          // Make sure we're not connecting to the same space
+                          if (SpaceController.id.peek() == space.container.roomId) {
+                            loading.value = false;
+                            return;
+                          }
+
+                          // Leave the space in case currently in one
+                          if (SpaceController.connected.peek()) {
+                            await SpaceController.leaveSpace();
+                          }
+
+                          // Connect to the new one
+                          SpaceController.shouldSwitchToPage = false;
+                          await SpaceController.join(space.container);
+                          loading.value = false;
                         },
-                        loading: loading,
-                        icon: Icons.push_pin_outlined,
-                      );
-                    },
-                  ),
+                        pinned: false,
+                      ),
                 ),
               );
             },
@@ -214,59 +241,82 @@ class _SquareSharedSpacesState extends State<SquareSharedSpaces> {
   }
 
   /// Render a shared space
-  Widget renderSpaceItem(String name, List<String> members, {Widget? button, Function()? onTap}) {
+  Widget renderSpaceItem(String name, List<String> members, {Widget? button, bool pinned = false, Function()? onTap}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-      child: Material(
-        color: Get.theme.colorScheme.inverseSurface,
-        borderRadius: BorderRadius.circular(sectionSpacing),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(sectionSpacing),
-          onTap: onTap,
-          child: Container(
-            color: Colors.transparent,
-            width: double.infinity,
-            padding: EdgeInsets.all(defaultSpacing),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(left: elementSpacing),
-                  child: Column(
+      child: SignalHook(
+        value: false,
+        builder:
+            (hovered) => Material(
+              color: Get.theme.colorScheme.inverseSurface,
+              borderRadius: BorderRadius.circular(sectionSpacing),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(sectionSpacing),
+                onTap: onTap,
+                onHover: (value) {
+                  hovered.value = value;
+                },
+                child: Container(
+                  color: Colors.transparent,
+                  width: double.infinity,
+                  padding: EdgeInsets.all(defaultSpacing),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      verticalSpacing(elementSpacing),
-                      // Display name
-                      Text(name, style: Get.textTheme.labelMedium),
-
-                      // Render all of the members
-                      for (var member in members)
-                        Builder(
-                          builder: (context) {
-                            final friend = FriendController.getFriend(LPHAddress.from(member));
-                            return Padding(
-                              padding: const EdgeInsets.only(top: defaultSpacing),
-                              child: Row(
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: elementSpacing),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              verticalSpacing(elementSpacing),
+                              // Display name and icon
+                              Row(
                                 children: [
-                                  UserAvatar(id: friend.id, size: 28),
+                                  Icon(
+                                    pinned ? Icons.volume_up : Icons.rocket_launch,
+                                    size: Get.textTheme.labelMedium!.fontSize! * 1.5,
+                                  ),
                                   horizontalSpacing(defaultSpacing),
-                                  // Not watching here, should be fine (hover = update)
-                                  Text(friend.displayName.peek(), style: Get.textTheme.bodyMedium),
+                                  Flexible(
+                                    child: Text(name, overflow: TextOverflow.ellipsis, style: Get.textTheme.labelLarge),
+                                  ),
                                 ],
                               ),
-                            );
-                          },
+
+                              // Render all of the members
+                              for (var member in members)
+                                Builder(
+                                  builder: (context) {
+                                    final friend = FriendController.getFriend(LPHAddress.from(member));
+                                    return Padding(
+                                      padding: const EdgeInsets.only(top: defaultSpacing),
+                                      child: Row(
+                                        children: [
+                                          UserAvatar(id: friend.id, size: 28),
+                                          horizontalSpacing(defaultSpacing),
+                                          // Not watching here, should be fine (hover = update)
+                                          Flexible(
+                                            child: Text(friend.displayName.peek(), style: Get.textTheme.bodyMedium),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                ),
+                              verticalSpacing(elementSpacing),
+                            ],
+                          ),
                         ),
-                      verticalSpacing(elementSpacing),
+                      ),
+                      horizontalSpacing(defaultSpacing),
+                      Visibility(visible: hovered.value, child: button!),
                     ],
                   ),
                 ),
-                horizontalSpacing(defaultSpacing),
-                button!,
-              ],
+              ),
             ),
-          ),
-        ),
       ),
     );
   }
