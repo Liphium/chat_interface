@@ -12,6 +12,7 @@ class SquareTranslations extends Translations {
       'squares.topics.name.placeholder': 'Some chat',
       'squares.spaces.create': 'Create new Space',
       'squares.spaces.add': 'Add current Space',
+      'squares.spaces.edit': 'Edit Space',
       'squares.spaces.name.placeholder': 'Hangout #1',
     },
   };

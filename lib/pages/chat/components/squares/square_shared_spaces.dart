@@ -13,6 +13,7 @@ import 'package:chat_interface/util/dispose_hook.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -70,35 +71,9 @@ class _SquareSharedSpacesState extends State<SquareSharedSpaces> {
                   index: index,
                   child: Watch((ctx) {
                     final space =
-                        SharedSpaceController.sharedSpaceMap[widget.square.id]?[SharedSpace.getKeyUnderlying(
-                          pinnedSpace.id,
-                        )];
-
-                    // Render a button for unpinning the space
-                    final Widget button = SignalHook(
-                      value: false,
-                      builder: (loading) {
-                        return LoadingIconButton(
-                          onTap: () async {
-                            loading.value = true;
-                            final error = await SquareService.unpinSharedSpace(
-                              widget.square,
-                              pinnedSpace.id,
-                              space: space,
-                            );
-                            if (error != null) {
-                              showErrorPopup("error", error);
-                              loading.value = false;
-                            }
-                          },
-                          loading: loading,
-                          icon: Icons.push_pin,
-                          iconSize: Get.textTheme.labelMedium!.fontSize! * 1.5,
-                          extra: elementSpacing2 - 1,
-                          padding: elementSpacing2 - 1,
-                        );
-                      },
-                    );
+                        SharedSpaceController.sharedSpaceMap[widget.square.id]?.entries
+                            .firstWhereOrNull((entry) => entry.value.underlyingId == pinnedSpace.id)
+                            ?.value;
 
                     // Create the onTap function for the item
                     Future<void> onTap() async {
@@ -120,11 +95,17 @@ class _SquareSharedSpacesState extends State<SquareSharedSpaces> {
 
                     // Render the pinned space as empty when there isn't a shared one
                     if (space == null) {
-                      return renderSpaceItem(pinnedSpace.name, [], button: button, onTap: onTap, pinned: true);
+                      return renderSpaceItem(pinnedSpace.name, [], onTap: onTap, pinnedSpace: pinnedSpace);
                     }
 
                     // Render the space as shared when it's actually there
-                    return renderSpaceItem(pinnedSpace.name, space.members, button: button, onTap: onTap, pinned: true);
+                    return renderSpaceItem(
+                      pinnedSpace.name,
+                      space.members,
+                      onTap: onTap,
+                      pinnedSpace: pinnedSpace,
+                      space: space,
+                    );
                   }),
                 ),
               );
@@ -139,7 +120,7 @@ class _SquareSharedSpacesState extends State<SquareSharedSpaces> {
           if (sharedSpaces == null) {
             return SizedBox();
           }
-          final spaces = sharedSpaces.entries.where((entry) => entry.key.startsWith("space")).toList();
+          final spaces = sharedSpaces.entries.where((entry) => entry.value.underlyingId == "-").toList();
 
           // Render the dynamically shared space as an item
           return ListView.builder(
@@ -156,18 +137,6 @@ class _SquareSharedSpacesState extends State<SquareSharedSpaces> {
                       (loading) => renderSpaceItem(
                         space.name,
                         space.members,
-                        button: LoadingIconButton(
-                          onTap: () async {
-                            loading.value = true;
-                            final error = await SquareService.pinSharedSpace(widget.square, space);
-                            if (error != null) {
-                              showErrorPopup("error", error);
-                              loading.value = false;
-                            }
-                          },
-                          loading: loading,
-                          icon: Icons.push_pin_outlined,
-                        ),
 
                         // Join the space when the item is clicked
                         onTap: () async {
@@ -192,7 +161,7 @@ class _SquareSharedSpacesState extends State<SquareSharedSpaces> {
                           await SpaceController.join(space.container);
                           loading.value = false;
                         },
-                        pinned: false,
+                        space: space,
                       ),
                 ),
               );
@@ -241,7 +210,13 @@ class _SquareSharedSpacesState extends State<SquareSharedSpaces> {
   }
 
   /// Render a shared space
-  Widget renderSpaceItem(String name, List<String> members, {Widget? button, bool pinned = false, Function()? onTap}) {
+  Widget renderSpaceItem(
+    String name,
+    List<String> members, {
+    SharedSpace? space,
+    PinnedSharedSpace? pinnedSpace,
+    Function()? onTap,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
       child: SignalHook(
@@ -275,7 +250,7 @@ class _SquareSharedSpacesState extends State<SquareSharedSpaces> {
                               Row(
                                 children: [
                                   Icon(
-                                    pinned ? Icons.volume_up : Icons.rocket_launch,
+                                    pinnedSpace != null ? Icons.volume_up : Icons.rocket_launch,
                                     size: Get.textTheme.labelMedium!.fontSize! * 1.5,
                                   ),
                                   horizontalSpacing(defaultSpacing),
@@ -311,7 +286,26 @@ class _SquareSharedSpacesState extends State<SquareSharedSpaces> {
                         ),
                       ),
                       horizontalSpacing(defaultSpacing),
-                      Visibility(visible: hovered.value, child: button!),
+                      Visibility(
+                        visible: hovered.value,
+                        child: LoadingIconButton(
+                          onTap: () {
+                            showModal(
+                              SharedSpaceAddWindow(
+                                square: widget.square,
+                                action: "edit",
+                                onlyEdit: true,
+                                pinned: pinnedSpace,
+                                space: space,
+                              ),
+                            );
+                          },
+                          icon: Icons.edit,
+                          iconSize: Get.textTheme.labelMedium!.fontSize! * 1.5,
+                          extra: elementSpacing2 - 1,
+                          padding: elementSpacing2 - 1,
+                        ),
+                      ),
                     ],
                   ),
                 ),

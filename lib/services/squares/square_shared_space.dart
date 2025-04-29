@@ -35,22 +35,4 @@ class SharedSpace {
     final name = (json["name"] ?? "") != "" ? decryptSymmetric(json["name"], conversationKey) : "";
     return SharedSpace(json["id"], json["underlying"], name, container, members);
   }
-
-  /// Get the key for the map in the controller
-  String getKey() {
-    if (underlyingId == "-") {
-      return "space-$id";
-    }
-    return "under-$underlyingId";
-  }
-
-  /// Get the key when the underlying id is used (in the controller)
-  static String getKeyUnderlying(String id) {
-    return "under-$id";
-  }
-
-  /// Get the key when the space id is used (in the controller)
-  static String getKeySpace(String id) {
-    return "space-$id";
-  }
 }

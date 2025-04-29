@@ -39,7 +39,7 @@ class SharedSpaceListener {
       }
 
       // Delete the thing from the controller
-      SharedSpaceController.deleteSharedSpace(conversationAdr, event.data["id"], event.data["underlying"]);
+      SharedSpaceController.deleteSharedSpace(conversationAdr, event.data["id"]);
     });
   }
 }

@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/square.dart';
 import 'package:chat_interface/controller/spaces/space_controller.dart';
-import 'package:chat_interface/controller/square/shared_space_controller.dart';
 import 'package:chat_interface/database/database_entities.dart' as model;
 import 'package:chat_interface/services/chat/conversation_service.dart';
 import 'package:chat_interface/services/squares/square_container.dart';
@@ -97,31 +96,42 @@ class SquareService {
   ///
   /// Returns an error if there was one.
   static Future<String?> pinSharedSpace(Square square, SharedSpace space) async {
-    final current = square.container as SquareContainer;
-
-    // Generate a new container for the square
-    final newContainer = SquareContainer.copy(current);
-    String sharedSpaceId = randomString(8);
-    while (newContainer.spaces.any((s) => s.id == sharedSpaceId)) {
-      sharedSpaceId = randomString(8);
-    }
-    newContainer.spaces.add(PinnedSharedSpace(sharedSpaceId, space.name));
-
-    // Set the new data
-    final error = await ConversationService.setData(square, newContainer);
+    // Add to the square as a new pinned space
+    final pinnedSpace = newPinnedSharedSpace(square, space.name);
+    final error = await pinPinnedSpace(square, pinnedSpace);
     if (error != null) {
       return error;
     }
 
     // Change to pinned on the chat server
-    final json = await postNodeJSON("/conversations/shared_spaces/pin", {
-      "token": square.token.toMap(square.id),
-      "data": {"id": space.id, "underlying": sharedSpaceId},
-    });
-    if (!json["success"]) {
-      return json["error"];
+    return await changePinnedStatus(square, space.id, pinnedSpace.id);
+  }
+
+  /// Pin a pinned shared space in a Square.
+  ///
+  /// Returns an error if there was one.
+  static Future<String?> pinPinnedSpace(Square square, PinnedSharedSpace space) async {
+    final current = square.container as SquareContainer;
+
+    // Generate a new container for the square
+    final newContainer = SquareContainer.copy(current);
+    newContainer.spaces.add(space);
+
+    // Set the new data
+    return await ConversationService.setData(square, newContainer);
+  }
+
+  /// Generate a new pinned shared space for a square.
+  static PinnedSharedSpace newPinnedSharedSpace(Square square, String name) {
+    final container = square.container as SquareContainer;
+
+    // Generate a new id for the pinned shared space
+    String sharedSpaceId = randomString(8);
+    while (container.spaces.any((s) => s.id == sharedSpaceId)) {
+      sharedSpaceId = randomString(8);
     }
-    return null;
+
+    return PinnedSharedSpace(sharedSpaceId, name);
   }
 
   /// Unpin a shared space in a Square.
@@ -134,21 +144,56 @@ class SquareService {
     newContainer.spaces.removeWhere((s) => s.id == id);
 
     // Set the new data
-    final error = await ConversationService.setData(square, newContainer);
+    var error = await ConversationService.setData(square, newContainer);
     if (error != null) {
       return error;
     }
 
-    // Change the key of the shared space to a space type (in case there and shared)
-    if (SharedSpaceController.sharedSpaceMap[square.id] != null && space != null) {
-      final map = SharedSpaceController.sharedSpaceMap[square.id]!;
-      if (map[SharedSpace.getKeyUnderlying(id)] != null) {
-        map.remove(SharedSpace.getKeyUnderlying(id));
-        map[SharedSpace.getKeySpace(space.id)] = space;
-        SharedSpaceController.sharedSpaceMap[square.id] = map;
-      }
-    }
+    // Change status on the server
+    return await changePinnedStatus(square, id, "-");
+  }
 
+  /// Rename a pinned shared space.
+  ///
+  /// Returns an error if there was one.
+  static Future<String?> changePinnedName(Square square, PinnedSharedSpace space, String name) async {
+    // Generate a new container for the square
+    final newContainer = SquareContainer.copy(square.container as SquareContainer);
+    final index = newContainer.spaces.indexOf(space);
+    if (index == -1) {
+      return "not.found".tr;
+    }
+    newContainer.spaces[index] = PinnedSharedSpace(space.id, name);
+
+    // Set the new data
+    return await ConversationService.setData(square, newContainer);
+  }
+
+  /// Change the pin status on the chat server.
+  ///
+  /// Returns an error if there was one.
+  static Future<String?> changePinnedStatus(Square square, String id, String underlying) async {
+    final json = await postNodeJSON("/conversations/shared_spaces/pin_status", {
+      "token": square.token.toMap(square.id),
+      "data": {"id": id, "underlying": underlying},
+    });
+    if (!json["success"]) {
+      return json["error"];
+    }
+    return null;
+  }
+
+  /// Change the name on the chat server.
+  ///
+  /// Returns an error if there was one.
+  static Future<String?> renameSharedSpace(Square square, String id, String name) async {
+    final json = await postNodeJSON("/conversations/shared_spaces/rename", {
+      "token": square.token.toMap(square.id),
+      "data": {"id": id, "name": name},
+    });
+    if (!json["success"]) {
+      return json["error"];
+    }
     return null;
   }
 
