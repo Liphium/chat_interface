@@ -187,8 +187,8 @@ Future<bool> _handleFriendRequestAction(String actionId, Map<String, dynamic> js
   final profileKey = unpackageSymmetricKey(json["pf"]);
   request = Request(
     address,
-    json["name"],
-    json["dname"],
+    account.name,
+    account.displayName,
     "",
     KeyStorage(account.publicKey, account.signatureKey, profileKey, json["sa"]),
     DateTime.now().millisecondsSinceEpoch,

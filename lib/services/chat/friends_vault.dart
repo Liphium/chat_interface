@@ -78,7 +78,10 @@ class FriendsVault {
     final payload = encryptSymmetric(data, vaultKey);
 
     // Add the friend to the vault
-    final json = await postAuthorizedJSON("/account/friends/update", <String, dynamic>{"id": id, "payload": payload});
+    final json = await postAuthorizedJSON("/account/friends/update", <String, dynamic>{
+      "entry": id,
+      "payload": payload,
+    });
 
     // Check if there was an error
     if (!json["success"]) {
@@ -122,7 +125,11 @@ class FriendsVault {
       return null;
     }
 
-    return decryptDate(json["date"]);
+    try {
+      return decryptDate(json["date"]);
+    } catch (e) {
+      return null;
+    }
   }
 
   /// Set a new receive date (for replay attack prevention)
@@ -234,9 +241,13 @@ class FriendsVault {
 
     // Remove all requests and also the ones that aren't requests anymore (a friend could've been upgraded)
     if (update.deleted.isNotEmpty || update.friendVaultIds.isNotEmpty) {
-      RequestController.requests.removeWhere(
-        (item, rq) => update.deleted.contains(rq.vaultId) || update.friendVaultIds.contains(rq.vaultId),
-      );
+      RequestController.requests.removeWhere((item, rq) {
+        if (update.deleted.contains(rq.vaultId) || update.friendVaultIds.contains(rq.vaultId)) {
+          unawaited(db.request.deleteWhere((t) => t.id.equals(rq.id.encode())));
+          return true;
+        }
+        return false;
+      });
     }
 
     for (var request in update.requestsSent) {
@@ -247,31 +258,29 @@ class FriendsVault {
 
     // Remove all requests and also the ones that aren't requests anymore (a friend could've been upgraded)
     if (update.deleted.isNotEmpty || update.friendVaultIds.isNotEmpty) {
-      RequestController.requestsSent.removeWhere(
-        (item, rq) => update.deleted.contains(rq.vaultId) || update.friendVaultIds.contains(rq.vaultId),
-      );
-    }
-
-    // Delete all deleted requests from the database
-    if (update.deleted.isNotEmpty || update.friendVaultIds.isNotEmpty) {
-      await db.request.deleteWhere((t) => t.vaultId.isIn(update.deleted) | t.vaultId.isIn(update.friendVaultIds));
+      RequestController.requestsSent.removeWhere((item, rq) {
+        if (update.deleted.contains(rq.vaultId) || update.friendVaultIds.contains(rq.vaultId)) {
+          unawaited(db.request.deleteWhere((t) => t.id.equals(rq.id.encode())));
+          return true;
+        }
+        return false;
+      });
     }
 
     // Push friends
     for (var friend in update.friends) {
       if (FriendController.friends[friend.id] == null) {
-        FriendsService.onVaultUpdate(friend);
+        await FriendsService.onVaultUpdate(friend);
       }
     }
     if (update.deleted.isNotEmpty) {
-      FriendController.friends.removeWhere(
-        (id, fr) => update.deleted.contains(fr.vaultId) && id != StatusController.ownAddress,
-      );
-    }
-
-    // Delete all deleted friends from the database
-    if (update.deleted.isNotEmpty) {
-      await db.friend.deleteWhere((t) => t.vaultId.isIn(update.deleted)); // Remove the other ones that aren't there
+      FriendController.friends.removeWhere((id, fr) {
+        if (update.deleted.contains(fr.vaultId) && id != StatusController.ownAddress) {
+          unawaited(db.friend.deleteWhere((t) => t.id.equals(fr.id.encode())));
+          return true;
+        }
+        return false;
+      });
     }
   }
 }

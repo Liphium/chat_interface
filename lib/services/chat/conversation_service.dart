@@ -145,7 +145,7 @@ class ConversationService extends VaultTarget {
     // Delete everything that's been deleted from the vault on the server
     ConversationController.conversations.removeWhere((id, conv) {
       if (deleted.contains(conv.vaultId)) {
-        ConversationService.delete(id, vaultId: conv.vaultId, deleteLocal: false);
+        ConversationService.delete(id, vaultId: conv.vaultId, deleteCache: false);
         ConversationController.order.remove(id);
         SidebarController.unselectConversation(id);
         return true;
@@ -280,14 +280,15 @@ class ConversationService extends VaultTarget {
   ///
   /// If you want to delete it from the vault, specify [vaultId].
   /// If you want to also leave the conversation, specify [token].
-  /// Deletion from the local database and cache will always happen.
+  /// Deletion from the local database will always happen.
+  /// Control deletion from the cache using [deleteCache].
   ///
   /// Returns an error if there was one.
   static Future<String?> delete(
     LPHAddress id, {
     String? vaultId,
     ConversationToken? token,
-    bool deleteLocal = true,
+    bool deleteCache = true,
   }) async {
     // Remove the conversation from the vault (if desired)
     if (vaultId != null) {
@@ -310,7 +311,7 @@ class ConversationService extends VaultTarget {
     // Remove the conversation from the local database
     await db.conversation.deleteWhere((tbl) => tbl.id.equals(id.encode()));
     await db.member.deleteWhere((tbl) => tbl.conversationId.equals(id.encode()));
-    if (deleteLocal) {
+    if (deleteCache) {
       SidebarController.unselectConversation(id);
       ConversationController.removeConversation(id);
     }
