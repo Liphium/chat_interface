@@ -46,10 +46,10 @@ abstract class MessageProvider {
 
   /// Helper function to make sure the message returned actually exists
   String? getMessageIdAfter(List<String> list, int index, int direction) {
-    while (messages[list[index]] == null) {
+    while (list.length > index && messages[list[index]] == null) {
       index += direction;
     }
-    return list[index];
+    return list.length > index ? list[index] : null;
   }
 
   /// Helper method to get the index
@@ -96,10 +96,13 @@ abstract class MessageProvider {
     lastMessage = message.createdAt.millisecondsSinceEpoch;
 
     // Make sure the message is fit for the bottom
-    final lastAdded = messages[getNewestMessage()];
-    if (messages.isNotEmpty && lastAdded != null) {
-      if (lastAdded.createdAt.isAfter(message.createdAt)) {
-        sendLog("WARNING: Message time mismatch detected, but we can't add into a specific index yet :c");
+    final newest = getNewestMessage();
+    if (newest != null) {
+      final lastAdded = messages[newest];
+      if (messages.isNotEmpty && lastAdded != null) {
+        if (lastAdded.createdAt.isAfter(message.createdAt)) {
+          sendLog("WARNING: Message time mismatch detected, but we can't add into a specific index yet :c");
+        }
       }
     }
 

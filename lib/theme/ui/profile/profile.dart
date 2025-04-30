@@ -53,7 +53,7 @@ class ProfileDefaults {
     loading.value = false;
   };
 
-  static List<ProfileAction> buildDefaultActions(Friend friend) {
+  static List<ProfileAction> buildDefaultActions(Friend friend, {bool messageAction = true}) {
     final removeLoading = signal(false);
 
     if (friend.unknown) {
@@ -61,13 +61,14 @@ class ProfileDefaults {
     }
 
     return [
-      ProfileAction(
-        category: true,
-        icon: Icons.message,
-        label: 'friends.message'.tr,
-        onTap: openAction,
-        loading: friend.openConversationLoading,
-      ),
+      if (messageAction)
+        ProfileAction(
+          category: true,
+          icon: Icons.message,
+          label: 'friends.message'.tr,
+          onTap: openAction,
+          loading: friend.openConversationLoading,
+        ),
       if (SpaceController.connected.value)
         ProfileAction(
           icon: Icons.forward_to_inbox,
@@ -122,19 +123,12 @@ class ProfileAction {
 
 class Profile extends StatefulWidget {
   final bool leftAligned;
-  final Offset? position;
+  final ContextMenuData? data;
   final Friend friend;
   final int size;
   final List<ProfileAction> Function(Friend)? actions;
 
-  const Profile({
-    super.key,
-    this.position,
-    required this.friend,
-    this.size = 300,
-    this.leftAligned = true,
-    this.actions,
-  });
+  const Profile({super.key, this.data, required this.friend, this.size = 350, this.leftAligned = true, this.actions});
 
   @override
   State<Profile> createState() => _ProfileState();
@@ -148,20 +142,16 @@ class _ProfileState extends State<Profile> {
   Widget build(BuildContext context) {
     actions.clear();
     if (widget.actions == null) {
-      if (widget.friend.unknown) {
-      } else {
-        actions.addAll(ProfileDefaults.buildDefaultActions(widget.friend));
-      }
+      actions.addAll(ProfileDefaults.buildDefaultActions(widget.friend));
     } else {
       actions.addAll(widget.actions!(widget.friend));
     }
 
     //* Context menu
-    if (widget.position != null) {
+    if (widget.data != null) {
       return SlidingWindowBase(
         title: const [],
-        padding: defaultSpacing,
-        position: ContextMenuData(widget.position!, true, widget.leftAligned),
+        position: widget.data,
         maxSize: widget.size.toDouble(),
         child: buildProfile(),
       );

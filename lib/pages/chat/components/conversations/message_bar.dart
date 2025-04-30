@@ -1,18 +1,17 @@
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
-import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/controller/conversation/sidebar_controller.dart';
 import 'package:chat_interface/controller/conversation/square.dart';
 import 'package:chat_interface/controller/conversation/zap_share_controller.dart';
 import 'package:chat_interface/controller/spaces/space_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database_entities.dart' as model;
-import 'package:chat_interface/pages/chat/components/conversations/conversation_edit_window.dart';
 import 'package:chat_interface/pages/chat/components/conversations/conversation_members_bar.dart';
 import 'package:chat_interface/pages/chat/components/conversations/message_search_bar.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/pages/status/error/offline_hider.dart';
+import 'package:chat_interface/services/chat/conversation_message_provider.dart';
 import 'package:chat_interface/services/chat/conversation_service.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/conversation_add_window.dart';
@@ -28,7 +27,7 @@ import 'package:url_launcher/url_launcher_string.dart';
 
 class MessageBar extends StatefulWidget {
   final Conversation conversation;
-  final MessageProvider provider;
+  final ConversationMessageProvider provider;
 
   const MessageBar({super.key, required this.conversation, required this.provider});
 
@@ -93,24 +92,23 @@ class _MessageBarState extends State<MessageBar> {
                     borderRadius: BorderRadius.circular(defaultSpacing),
                     hoverColor: Get.theme.hoverColor,
                     onTap: () {
-                      showModal(
-                        ConversationInfoWindow(
-                          conversation: widget.conversation,
-                          position: ContextMenuData.fromKey(_infoKey, below: true),
-                        ),
-                      );
+                      widget.provider.openDialogForConversation(ContextMenuData.fromKey(_infoKey, below: true));
                     },
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: elementSpacing, horizontal: defaultSpacing),
                       child: Row(
                         children: [
-                          Icon(getIconForConversation(), size: 30, color: Theme.of(context).colorScheme.onPrimary),
+                          Icon(
+                            widget.provider.getIconForConversation(),
+                            size: 30,
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
                           horizontalSpacing(defaultSpacing),
-                          Text(
-                            widget.conversation.isGroup
-                                ? widget.conversation.containerSub.value.name
-                                : widget.conversation.dmName,
-                            style: Theme.of(context).textTheme.titleMedium,
+                          Watch(
+                            (ctx) => Text(
+                              widget.provider.getNameForConversation(),
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
                           ),
                         ],
                       ),
@@ -283,17 +281,6 @@ class _MessageBarState extends State<MessageBar> {
         ),
       ),
     );
-  }
-
-  IconData getIconForConversation() {
-    switch (widget.conversation.type) {
-      case model.ConversationType.directMessage:
-        return Icons.person;
-      case model.ConversationType.group:
-        return Icons.people;
-      case model.ConversationType.square:
-        return Icons.public;
-    }
   }
 }
 

@@ -3,10 +3,11 @@ import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/sidebar_controller.dart';
 import 'package:chat_interface/controller/conversation/square.dart';
 import 'package:chat_interface/pages/chat/components/conversations/notification_dot.dart';
+import 'package:chat_interface/services/chat/conversation_message_provider.dart';
 import 'package:chat_interface/services/chat/conversation_service.dart';
 import 'package:chat_interface/services/squares/square_container.dart';
 import 'package:chat_interface/services/squares/square_service.dart';
-import 'package:chat_interface/util/logging_framework.dart';
+import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -86,8 +87,10 @@ class _SquareTopicListState extends State<SquareTopicList> {
                         MessageController.openConversation(widget.square, extra: topic.id);
                       },
                       onSecondaryTapDown: (details) {
-                        // TODO: Open topic context menu
-                        sendLog("TO-DO: topic context menu here");
+                        ConversationMessageProvider(
+                          widget.square,
+                          extra: topic.id,
+                        ).openDialogForConversation(ContextMenuData.fromPosition(details.globalPosition));
                       },
 
                       // Topic item content

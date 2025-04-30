@@ -6,6 +6,8 @@ import 'package:chat_interface/pages/chat/chat_page_mobile.dart';
 import 'package:chat_interface/pages/chat/components/conversations/message_bar.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar.dart';
+import 'package:chat_interface/pages/settings/app/general_settings.dart';
+import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/pages/spaces/space_rectangle.dart';
 import 'package:chat_interface/services/chat/conversation_message_provider.dart';
 import 'package:chat_interface/theme/desktop_widgets.dart';
@@ -52,43 +54,52 @@ class _ChatPageDesktopState extends State<ChatPageDesktop> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Get.theme.colorScheme.inverseSurface,
-      body: CloseToTray(
-        child: SafeArea(
-          top: false,
-          bottom: false,
-          left: false,
-          child: PlatformCallback(
-            mobile: () {
-              Get.off(const ChatPageMobile());
-            },
-            child: Row(
-              children: [
-                // Render the sidebar (with an animation when it's hidden/shown)
-                SelectionContainer.disabled(
-                  child: Watch(
-                    (ctx) => Animate(
-                      effects: [
-                        ExpandEffect(
-                          curve: Curves.easeInOut,
-                          duration: 250.ms,
-                          axis: Axis.horizontal,
-                          alignment: Alignment.centerRight,
-                        ),
-                        FadeEffect(duration: 250.ms),
-                      ],
-                      onInit: (ac) => ac.value = SidebarController.hideSidebar.value ? 0 : 1,
-                      target: SidebarController.hideSidebar.value ? 0 : 1,
-                      child: SizedBox(width: 350, child: Sidebar()),
+      body: Watch.builder(
+        builder: (context) {
+          final page = SafeArea(
+            top: false,
+            bottom: false,
+            left: false,
+            child: PlatformCallback(
+              mobile: () {
+                Get.off(const ChatPageMobile());
+              },
+              child: Row(
+                children: [
+                  // Render the sidebar (with an animation when it's hidden/shown)
+                  SelectionContainer.disabled(
+                    child: Watch(
+                      (ctx) => Animate(
+                        effects: [
+                          ExpandEffect(
+                            curve: Curves.easeInOut,
+                            duration: 250.ms,
+                            axis: Axis.horizontal,
+                            alignment: Alignment.centerRight,
+                          ),
+                          FadeEffect(duration: 250.ms),
+                        ],
+                        onInit: (ac) => ac.value = SidebarController.hideSidebar.value ? 0 : 1,
+                        target: SidebarController.hideSidebar.value ? 0 : 1,
+                        child: SizedBox(width: 350, child: Sidebar()),
+                      ),
                     ),
                   ),
-                ),
 
-                // Render the current sidebar tab
-                Expanded(child: Watch((ctx) => SidebarController.currentOpenTab.value.build(ctx))),
-              ],
+                  // Render the current sidebar tab
+                  Expanded(child: Watch((ctx) => SidebarController.currentOpenTab.value.build(ctx))),
+                ],
+              ),
             ),
-          ),
-        ),
+          );
+
+          // Close to tray when wanted
+          final shouldMinimize = GeneralSettings.minimizeToTray.getValue();
+          if (shouldMinimize && !GetPlatform.isMobile) {
+            return CloseToTray(child: page);
+          }
+          return page;
+        },
       ),
     );
   }
