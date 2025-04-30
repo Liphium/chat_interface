@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
@@ -8,6 +6,8 @@ import 'package:chat_interface/controller/conversation/square.dart';
 import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/database/database_entities.dart' as model;
 import 'package:chat_interface/pages/chat/components/conversations/conversation_edit_window.dart';
+import 'package:chat_interface/pages/chat/components/conversations/notification_dot.dart';
+import 'package:chat_interface/pages/chat/components/squares/square_topic_list.dart';
 import 'package:chat_interface/pages/chat/components/squares/topic_add_window.dart';
 import 'package:chat_interface/services/chat/conversation_member.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
@@ -55,8 +55,6 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Watch((ctx) {
       return FadingEdgeScrollView.fromScrollView(
         child: ListView.builder(
@@ -164,7 +162,7 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
 
                             // Render the topic list in case open and square
                             if (conversation.type == model.ConversationType.square)
-                              renderTopics(conversation as Square, theme),
+                              SquareTopicList(square: conversation as Square),
                           ],
                         );
                       }),
@@ -175,98 +173,6 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
         ),
       );
     });
-  }
-
-  /// Render all of the topics of a square
-  Widget renderTopics(Square square, ThemeData theme) {
-    final container = square.container as SquareContainer;
-    return Padding(
-      padding: const EdgeInsets.only(left: sectionSpacing),
-      child: Watch((ctx) {
-        // Only render when the topics are shown
-        if (!square.topicsShown.value) {
-          return SizedBox();
-        }
-
-        // Render the actual topic list
-        return ListView.builder(
-          shrinkWrap: true,
-          itemCount: min(container.topics.length, 5),
-          itemBuilder: (context, index) {
-            final topic = container.topics[index];
-            return Padding(
-              padding: const EdgeInsets.only(top: elementSpacing),
-              child: Watch(
-                (ctx) => Material(
-                  borderRadius: BorderRadius.circular(defaultSpacing),
-                  color:
-                      (SidebarController.getCurrentProviderReactive()?.extra ?? "") == topic.id
-                          ? Get.theme.colorScheme.onSurface.withAlpha(20)
-                          : Colors.transparent,
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(defaultSpacing),
-                    hoverColor: Get.theme.hoverColor,
-                    splashColor: Get.theme.hoverColor,
-
-                    // When topic is tapped (open topic)
-                    onTap: () {
-                      // Make sure to not open when already open on desktop
-                      if ((SidebarController.getCurrentProvider()?.extra ?? "") == topic.id && !isMobileMode()) {
-                        return;
-                      }
-                      MessageController.openConversation(square, extra: topic.id);
-                    },
-                    onSecondaryTapDown: (details) {
-                      // TODO: Open topic context menu
-                      sendLog("TO-DO: topic context menu here");
-                    },
-
-                    // Topic item content
-                    child: Padding(
-                      padding: const EdgeInsets.all(elementSpacing2),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Expanded(
-                            child: Row(
-                              children: [
-                                const Icon(Icons.numbers),
-                                horizontalSpacing(elementSpacing2),
-                                Flexible(
-                                  child: Text(
-                                    topic.name,
-                                    style:
-                                        (SidebarController.getCurrentProviderReactive()?.extra ?? "") == topic.id
-                                            ? theme.textTheme.labelMedium
-                                            : theme.textTheme.bodyMedium,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          horizontalSpacing(elementSpacing2),
-                          Watch((ctx) {
-                            final notifications =
-                                ConversationController.notificationMap[ConversationService.withExtra(
-                                  square.id.encode(),
-                                  topic.id,
-                                )] ??
-                                0;
-
-                            return Visibility(visible: notifications > 0, child: renderNotificationDot(notifications));
-                          }),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            );
-          },
-        );
-      }),
-    );
   }
 
   /// Render the item for one conversation in the list
@@ -327,7 +233,7 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
               );
             }
 
-            return Visibility(visible: notifications > 0, child: renderNotificationDot(notifications));
+            return Visibility(visible: notifications > 0, child: NotificationDot(amount: notifications));
           }),
 
           // Show a collapse/expand topics button when it's a square
@@ -467,16 +373,6 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget renderNotificationDot(int count) {
-    return Container(
-      decoration: BoxDecoration(shape: BoxShape.circle, color: Get.theme.colorScheme.error),
-      child: Padding(
-        padding: const EdgeInsets.only(left: 5, right: 5, top: 5, bottom: 5),
-        child: Center(child: Text(min(count, 99).toString(), style: Get.textTheme.labelSmall)),
       ),
     );
   }

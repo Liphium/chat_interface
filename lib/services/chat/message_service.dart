@@ -41,12 +41,8 @@ class MessageService {
     }, secureKeys: [databaseKey]);
 
     // Store all the messages in the local database
-    final extras = <String>[];
     int index = 0;
     for (var (message, extra) in messages) {
-      if (!extras.contains(extra)) {
-        extras.add(extra);
-      }
       await storeMessage(message, conversation, extra: extra, simple: true, part: parts[index]);
       index++;
     }
@@ -81,10 +77,13 @@ class MessageService {
 
     // Handle system messages
     if (message.type == MessageType.system) {
-      if ((provider?.conversation.id ?? "hi") == conversation.id) {
+      if ((provider?.conversation.id ?? "hi") == conversation.id && extra == (provider?.extra ?? "-")) {
         SystemMessages.messages[message.content]?.handle(message, provider!);
       } else {
-        SystemMessages.messages[message.content]?.handle(message, ConversationMessageProvider(conversation));
+        SystemMessages.messages[message.content]?.handle(
+          message,
+          ConversationMessageProvider(conversation, extra: extra),
+        );
       }
 
       // Check if message should be stored
