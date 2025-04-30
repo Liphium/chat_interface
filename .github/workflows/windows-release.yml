@@ -19,6 +19,15 @@ jobs:
       # Just to make sure
       - run: flutter --version
 
+      # Get the Rust toolchain
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@v1
+        with:
+          toolchain: stable
+          
+      # Make sure Rust is installed
+      - run: rustc --version
+
       # Get all the dependencies
       - name: Get dependencies
         run: flutter pub get
