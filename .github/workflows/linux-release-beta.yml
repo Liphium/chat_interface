@@ -2,7 +2,7 @@ name: Linux Release
 # Do this whenever someone pushes to the main branch
 on:
   push:
-    branches: ["main"]
+    branches: ["next"]
 jobs:
   build:
     # Normally you should build this stuff on older versions, but somehow older Ubuntu didn't work, don't want to debug
@@ -44,7 +44,7 @@ jobs:
 
       # Runs a set of commands using the runners shell
       - name: Start release build
-        run: flutter build linux --release -v --dart-define DEBUG_MODE=false
+        run: flutter build linux --release -v
 
       - name: List directory (in case I'm stupid rn)
         run: ls -a
