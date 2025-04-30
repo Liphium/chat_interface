@@ -14,7 +14,7 @@ class ChatPageTranslations extends Translations {
       'app.welcome.5': 'Have you changed the amount of dots yet?',
       'app.welcome.6': 'Please don\'t make your audio bitrate too high!!',
       'app.welcome.7': 'We\'ve got nothing to hide. Or do we?',
-      'app.welcome.8': 'If we ever make an AI assistant we should call it Liphy...',
+      'app.welcome.8': 'If we ever make an AI assistant we should call it Liph...',
       'app.welcome.9': 'Why is the logo in pixel art? I don\'t know either.',
       'app.welcome.10': 'YOU THINK THIS IS IMPORTANT? Well, it isn\'t...',
       'app.welcome.11': 'How many GIFs does your library contain, my slayer?',

@@ -1,5 +1,6 @@
 import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/bubbles/bubbles_renderer.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:lorien_chat_list/lorien_chat_list.dart';
@@ -46,10 +47,11 @@ class _MessageListState extends State<MessageList> {
               loadingMoreWidget: SizedBox(),
               onLoadMoreCallback: () async {
                 var (topReached, error) = await widget.provider.loadNewMessagesTop();
+                sendLog("new top $topReached $error");
                 if (!error) {
-                  return topReached;
+                  return !topReached;
                 }
-                return false;
+                return true;
               },
               scrollPhysics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
               itemBuilder: (messageId, itemDetails) {

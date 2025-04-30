@@ -110,7 +110,7 @@ class StudioConnection {
               }
             }),
           );
-          // TODO: Set bitrate + other audio settings on the current engine
+          _disposeFunctions.addAll(await AudioSettings.subscribeToSettings(_engine!));
         }
 
         // Close the lightwire engine when the data channel is closed

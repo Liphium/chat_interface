@@ -45,6 +45,7 @@ class _SettingsSidebarState extends State<SettingsSidebar> {
             borderRadius: BorderRadius.circular(sectionSpacing),
           ),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Padding(
                 padding: const EdgeInsets.only(top: sectionSpacing, right: sectionSpacing, left: sectionSpacing),
@@ -62,7 +63,7 @@ class _SettingsSidebarState extends State<SettingsSidebar> {
                   ),
                 ),
               ),
-              Expanded(
+              Flexible(
                 child: FadingEdgeScrollView.fromScrollView(
                   child: ListView.builder(
                     controller: _controller,
@@ -79,6 +80,7 @@ class _SettingsSidebarState extends State<SettingsSidebar> {
                           bottom: index == SettingLabel.values.length - 1 ? sectionSpacing : 0,
                         ),
                         child: Column(
+                          mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
