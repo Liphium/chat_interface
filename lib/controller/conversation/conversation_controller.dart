@@ -12,6 +12,7 @@ import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/web.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:signals/signals_flutter.dart';
 import 'package:sodium_libs/sodium_libs.dart';
@@ -278,6 +279,17 @@ class Conversation {
     if (error != null) {
       showErrorPopup("error", error);
       sendLog("ERROR: Can't delete conversation: $error");
+    }
+  }
+
+  IconData getIconForConversation() {
+    switch (type) {
+      case model.ConversationType.directMessage:
+        return Icons.person;
+      case model.ConversationType.group:
+        return Icons.people;
+      case model.ConversationType.square:
+        return Icons.public;
     }
   }
 }

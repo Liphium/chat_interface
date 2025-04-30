@@ -8,6 +8,7 @@ import 'package:chat_interface/services/chat/conversation_member.dart';
 import 'package:chat_interface/services/chat/conversation_service.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
+import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/theme/ui/profile/profile.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
@@ -93,7 +94,7 @@ class ConversationMembers extends StatelessWidget {
                               final RenderBox box = listKey.currentContext?.findRenderObject() as RenderBox;
                               Get.dialog(
                                 Profile(
-                                  position: box.localToGlobal(box.size.bottomLeft(Offset.zero)),
+                                  data: ContextMenuData.fromKey(listKey, below: true),
                                   friend: friend ?? Friend.unknown(member.address),
                                   size: box.size.width.toInt(),
                                   actions: (friend) {

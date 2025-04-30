@@ -5,10 +5,9 @@ import 'package:chat_interface/controller/conversation/sidebar_controller.dart';
 import 'package:chat_interface/controller/conversation/square.dart';
 import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/database/database_entities.dart' as model;
-import 'package:chat_interface/pages/chat/components/conversations/conversation_edit_window.dart';
 import 'package:chat_interface/pages/chat/components/conversations/notification_dot.dart';
 import 'package:chat_interface/pages/chat/components/squares/square_topic_list.dart';
-import 'package:chat_interface/pages/chat/components/squares/topic_add_window.dart';
+import 'package:chat_interface/pages/chat/components/squares/topic_manage_window.dart';
 import 'package:chat_interface/services/chat/conversation_member.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/services/chat/conversation_message_provider.dart';
@@ -147,12 +146,9 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                                   MessageController.openConversation(conversation);
                                 },
                                 onSecondaryTapDown: (details) {
-                                  showModal(
-                                    ConversationInfoWindow(
-                                      conversation: conversation,
-                                      position: ContextMenuData.fromPosition(details.globalPosition),
-                                    ),
-                                  );
+                                  ConversationMessageProvider(
+                                    conversation,
+                                  ).openDialogForConversation(ContextMenuData.fromPosition(details.globalPosition));
                                 },
 
                                 // Conversation item content
@@ -210,7 +206,7 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                   children: [
                     IconButton(
                       onPressed: () {
-                        showModal(TopicAddWindow(square: conversation as Square));
+                        showModal(TopicManageWindow(square: conversation as Square));
                       },
                       icon: Icon(Icons.add),
                     ),

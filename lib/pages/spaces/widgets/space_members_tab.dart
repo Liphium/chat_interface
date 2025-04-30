@@ -3,6 +3,7 @@ import 'package:chat_interface/controller/spaces/tabletop/tabletop_controller.da
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/settings/town/tabletop_settings.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
+import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/theme/ui/profile/profile.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
@@ -42,7 +43,7 @@ class _SpaceMembersTabState extends State<SpaceMembersTab> {
                         final RenderBox box = listKey.currentContext?.findRenderObject() as RenderBox;
                         Get.dialog(
                           Profile(
-                            position: box.localToGlobal(box.size.bottomLeft(Offset.zero)),
+                            data: ContextMenuData.fromKey(listKey, below: true),
                             friend: member.friend,
                             size: box.size.width.toInt(),
                           ),

@@ -6,6 +6,8 @@ class AppSettingsTranslations extends Translations {
     //* English US
     'en_US': {
       // General settings
+      'settings.general.behavior': 'Behavior',
+      'behavior.minimize_to_tray': 'Minimize Liphium to the system tray when closed',
       'settings.general.notifications': 'Notifications',
       'settings.general.ringtone': 'Spaces ringtone',
       'settings.general.language': 'Choose the app language',

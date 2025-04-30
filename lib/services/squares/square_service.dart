@@ -24,10 +24,8 @@ class SquareService {
   ///
   /// Returns an error if there was one.
   static Future<String?> createTopic(Square square, String name) async {
-    final current = square.container as SquareContainer;
-
     // Generate a new container for the square
-    final newContainer = SquareContainer(current.name, [...current.topics], [...current.spaces]);
+    final newContainer = SquareContainer.copy(square.container as SquareContainer);
     String topicId = randomString(8);
     while (newContainer.topics.any((t) => t.id == topicId)) {
       topicId = randomString(8);
@@ -45,6 +43,32 @@ class SquareService {
   static String randomString(int length) {
     const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ123456789';
     return List.generate(length, (_) => chars[_rnd.nextInt(chars.length)]).join();
+  }
+
+  /// Rename a topic in a square.
+  ///
+  /// Returns an error if there was one.
+  static Future<String?> renameTopic(Square square, String id, String name) async {
+    // Create a new container with the modifications
+    final newContainer = SquareContainer.copy(square.container as SquareContainer);
+    final index = newContainer.topics.indexWhere((t) => t.id == id);
+    if (index == -1) {
+      return "not.found".tr;
+    }
+    newContainer.topics[index] = Topic(id, name);
+
+    return await refreshContainer(square, newContainer);
+  }
+
+  /// Delete a topic in a square.
+  ///
+  /// Returns an error if there was one.
+  static Future<String?> deleteTopic(Square square, String id) async {
+    // Create a new container with the modifications
+    final newContainer = SquareContainer.copy(square.container as SquareContainer);
+    newContainer.topics.removeWhere((t) => t.id == id);
+
+    return await refreshContainer(square, newContainer);
   }
 
   /// Create a new Space and add it to a square.

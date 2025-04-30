@@ -9,10 +9,13 @@ import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/services/chat/conversation_service.dart';
 import 'package:chat_interface/services/connection/chat/message_listener.dart';
+import 'package:chat_interface/theme/ui/conversation_util.dart';
+import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
@@ -256,9 +259,6 @@ class ConversationMessageProvider extends MessageProvider {
       return json["error"];
     }
 
-    // Make sure to update the reads on the conversation
-    unawaited(ConversationService.overwriteRead(conversation, stamp, extra: extra));
-
     return null;
   }
 
@@ -277,5 +277,20 @@ class ConversationMessageProvider extends MessageProvider {
       await ConversationService.overwriteRead(conversation, messages[newest]!.createdAt.millisecondsSinceEpoch);
       sendingRead = false;
     }
+  }
+
+  /// Get an appropriate icon for the current conversation.
+  IconData getIconForConversation() {
+    return ConversationUtil.getIconForConversation(conversation, extra: extra);
+  }
+
+  /// Get an appropriate name for the current conversation.
+  String getNameForConversation() {
+    return ConversationUtil.getNameForConversation(conversation, extra: extra);
+  }
+
+  /// Open the appropriate dialog for the conversation.
+  void openDialogForConversation(ContextMenuData data) {
+    return ConversationUtil.openDialogForConversation(conversation, data, extra: extra);
   }
 }

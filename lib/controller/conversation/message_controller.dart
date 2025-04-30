@@ -95,8 +95,8 @@ class MessageController {
     }
 
     // Add message to message history if it's the selected one
-    if (tab.provider.conversation.id == conversation.id) {
-      if (message.senderToken != tab.provider.conversation.token.id && !simple) {
+    if (tab.provider.conversation.id == conversation.id && tab.provider.extra == extra) {
+      if (!simple) {
         await ConversationService.overwriteRead(
           tab.provider.conversation,
           message.createdAt.millisecondsSinceEpoch,
