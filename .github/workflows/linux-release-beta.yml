@@ -1,4 +1,4 @@
-name: Linux Release
+name: Linux Release Debug
 # Do this whenever someone pushes to the main branch
 on:
   push:
