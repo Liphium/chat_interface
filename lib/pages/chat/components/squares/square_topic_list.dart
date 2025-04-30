@@ -138,7 +138,7 @@ class _SquareTopicListState extends State<SquareTopicList> {
             );
           },
         );
-      }),
+      }, dependencies: [widget.square.topicsShown, widget.square.containerSub]),
     );
   }
 }

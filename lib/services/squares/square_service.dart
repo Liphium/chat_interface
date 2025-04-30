@@ -150,7 +150,10 @@ class SquareService {
     }
 
     // Change status on the server
-    return await changePinnedStatus(square, id, "-");
+    if (space != null) {
+      return await changePinnedStatus(square, space.id, "-");
+    }
+    return null;
   }
 
   /// Rename a pinned shared space.
@@ -189,7 +192,7 @@ class SquareService {
   static Future<String?> renameSharedSpace(Square square, String id, String name) async {
     final json = await postNodeJSON("/conversations/shared_spaces/rename", {
       "token": square.token.toMap(square.id),
-      "data": {"id": id, "name": name},
+      "data": {"id": id, "name": encryptSymmetric(name, square.key)},
     });
     if (!json["success"]) {
       return json["error"];

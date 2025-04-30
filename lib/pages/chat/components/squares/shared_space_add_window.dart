@@ -8,6 +8,7 @@ import 'package:chat_interface/theme/components/forms/fj_switch.dart';
 import 'package:chat_interface/theme/components/forms/fj_textfield.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/constants.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -118,6 +119,7 @@ class _SharedSpaceAddWindowState extends State<SharedSpaceAddWindow> {
   Future<void> editSpace(String name) async {
     // If the space shouldn't be pinned anymore, unpin it
     if (widget.pinned != null && !_pinned.peek()) {
+      sendLog("unpin shared space");
       // If it shouldn't be pinned anymore, remove it
       final error = await SquareService.unpinSharedSpace(widget.square, widget.pinned!.id, space: widget.space);
       if (error != null) {
@@ -129,6 +131,7 @@ class _SharedSpaceAddWindowState extends State<SharedSpaceAddWindow> {
 
     // If the space should be pinned, pin it
     if (widget.pinned == null && widget.space != null && _pinned.peek()) {
+      sendLog("pin shared space");
       final error = await SquareService.pinSharedSpace(widget.square, widget.space!);
       if (error != null) {
         _errorText.value = error;
@@ -137,8 +140,9 @@ class _SharedSpaceAddWindowState extends State<SharedSpaceAddWindow> {
       }
     }
 
-    // If the name changed and there is a pinned space, change the name of it
-    if (name != (widget.pinned?.name ?? "") && _pinned.peek()) {
+    // If the name changed and there is a pinned spxace, change the name of it
+    if (name != (widget.pinned?.name ?? "") && widget.pinned != null && _pinned.peek()) {
+      sendLog("change name square");
       final error = await SquareService.changePinnedName(widget.square, widget.pinned!, name);
       if (error != null) {
         _errorText.value = error;
@@ -149,6 +153,7 @@ class _SharedSpaceAddWindowState extends State<SharedSpaceAddWindow> {
 
     // If there is a shared space, also change the name on the server
     if (name != (widget.space?.name ?? "") && widget.space != null) {
+      sendLog("change name shared-spaces");
       final error = await SquareService.renameSharedSpace(widget.square, widget.space!.id, name);
       if (error != null) {
         _errorText.value = error;
