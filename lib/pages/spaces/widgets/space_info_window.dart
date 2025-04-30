@@ -52,6 +52,7 @@ class SpaceInfoWindow extends StatelessWidget {
               Get.back();
             },
           ),
+          /*
           verticalSpacing(elementSpacing),
           ProfileButton(
             icon: Icons.play_arrow,
@@ -60,6 +61,7 @@ class SpaceInfoWindow extends StatelessWidget {
               StudioController.getConnection()!.getPublisher().createCameraTrack();
             },
           ),
+          */
           verticalSpacing(sectionSpacing),
           Text("Members", style: Get.theme.textTheme.labelMedium),
           verticalSpacing(defaultSpacing),

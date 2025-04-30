@@ -71,6 +71,43 @@ class AudioSettings {
         libspace.setEncodingBitrate(engine: engine, auto: false, max: false, bitrate: 40000);
     }
   }
+
+  /// Apply all the audio settings to a lightwire engine.
+  ///
+  /// Returns all the dispose functions for the signals.
+  static Future<List<Function()>> subscribeToSettings(libspace.LightwireEngine engine) async {
+    final list = <Function()>[];
+
+    list.add(
+      AudioSettings.microphoneActivationMode.value.subscribe((value) {
+        libspace.setActivityDetection(engine: engine, enabled: AudioSettings.microphoneActivationMode.getValue() == 0);
+      }),
+    );
+    await libspace.setActivityDetection(
+      engine: engine,
+      enabled: AudioSettings.microphoneActivationMode.getValue() == 0,
+    );
+    list.add(
+      AudioSettings.automaticVoiceActivity.value.subscribe((value) {
+        libspace.setAutomaticDetection(engine: engine, enabled: AudioSettings.automaticVoiceActivity.getValue());
+      }),
+    );
+    await libspace.setAutomaticDetection(engine: engine, enabled: AudioSettings.automaticVoiceActivity.getValue());
+    list.add(
+      AudioSettings.microphoneSensitivity.value.subscribe((value) {
+        libspace.setTalkingAmplitude(engine: engine, amplitude: AudioSettings.microphoneSensitivity.getValue());
+      }),
+    );
+    await libspace.setTalkingAmplitude(engine: engine, amplitude: AudioSettings.microphoneSensitivity.getValue());
+    list.add(
+      AudioSettings.audioBitrateMode.value.subscribe((mode) {
+        AudioSettings.applyBitrate(engine);
+      }),
+    );
+    AudioSettings.applyBitrate(engine);
+
+    return list;
+  }
 }
 
 class AudioSettingsPage extends StatefulWidget {
@@ -115,43 +152,7 @@ class _AudioSettingsPageState extends State<AudioSettingsPage> {
     await libspace.setOutputDevice(engine: _engine.peek()!, device: AudioSettings.microphone.getValue());
 
     // Add subscriptions to automatically update the engine
-    _disposeFunctions.add(
-      AudioSettings.microphoneActivationMode.value.subscribe((value) {
-        libspace.setActivityDetection(
-          engine: _engine.peek()!,
-          enabled: AudioSettings.microphoneActivationMode.getValue() == 0,
-        );
-      }),
-    );
-    await libspace.setActivityDetection(
-      engine: _engine.peek()!,
-      enabled: AudioSettings.microphoneActivationMode.getValue() == 0,
-    );
-    _disposeFunctions.add(
-      AudioSettings.automaticVoiceActivity.value.subscribe((value) {
-        libspace.setAutomaticDetection(
-          engine: _engine.peek()!,
-          enabled: AudioSettings.automaticVoiceActivity.getValue(),
-        );
-      }),
-    );
-    await libspace.setAutomaticDetection(
-      engine: _engine.peek()!,
-      enabled: AudioSettings.automaticVoiceActivity.getValue(),
-    );
-    _disposeFunctions.add(
-      AudioSettings.microphoneSensitivity.value.subscribe((value) {
-        libspace.setTalkingAmplitude(
-          engine: _engine.peek()!,
-          amplitude: AudioSettings.microphoneSensitivity.getValue(),
-        );
-      }),
-    );
-    await libspace.setTalkingAmplitude(
-      engine: _engine.peek()!,
-      amplitude: AudioSettings.microphoneSensitivity.getValue(),
-    );
-    AudioSettings.applyBitrate(_engine.peek()!);
+    _disposeFunctions.addAll(await AudioSettings.subscribeToSettings(_engine.peek()!));
 
     // Enable the packet sending
     await libspace.setVoiceEnabled(engine: _engine.peek()!, enabled: true);
@@ -254,15 +255,7 @@ class _AudioSettingsPageState extends State<AudioSettingsPage> {
           verticalSpacing(defaultSpacing),
           Text("audio.encoding.mode".tr, style: theme.textTheme.bodyMedium),
           verticalSpacing(defaultSpacing),
-          ListSelectionSetting(
-            setting: AudioSettings.audioBitrateMode,
-            items: AudioSettings.audioBitrateModes,
-            callback: (value) {
-              if (_engine.peek() != null) {
-                AudioSettings.applyBitrate(_engine.peek()!);
-              }
-            },
-          ),
+          ListSelectionSetting(setting: AudioSettings.audioBitrateMode, items: AudioSettings.audioBitrateModes),
         ],
       ),
     );

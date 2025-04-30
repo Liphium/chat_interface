@@ -7,11 +7,12 @@ import 'package:chat_interface/pages/chat/components/conversations/message_bar.d
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar.dart';
 import 'package:chat_interface/pages/settings/app/general_settings.dart';
-import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/pages/spaces/space_rectangle.dart';
 import 'package:chat_interface/services/chat/conversation_message_provider.dart';
+import 'package:chat_interface/theme/components/forms/fj_button.dart';
 import 'package:chat_interface/theme/desktop_widgets.dart';
 import 'package:chat_interface/util/platform_callback.dart';
+import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
@@ -111,6 +112,8 @@ class DefaultSidebarTab extends SidebarTab {
 
   @override
   Widget build(BuildContext context) {
+    final message = Random().nextInt(19) + 1;
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -119,11 +122,22 @@ class DefaultSidebarTab extends SidebarTab {
         SizedBox(
           width: 400,
           child: Text(
-            'app.welcome.${Random().nextInt(19) + 1}'.tr,
+            'app.welcome.$message'.tr,
             style: Theme.of(context).textTheme.labelLarge,
             textAlign: TextAlign.center,
           ),
         ),
+        if (message == 8)
+          Padding(
+            padding: const EdgeInsets.only(top: defaultSpacing),
+            child: FJElevatedButton(
+              onTap: () {
+                showErrorPopup("Our AI assistant", "Liph with deez nuts in your mouth :)");
+              },
+              child: Text("What is Liph?", style: Get.textTheme.labelMedium),
+            ),
+          ),
+
         verticalSpacing(defaultSpacing),
         Text('app.build'.trParams({"build": currentVersionName}), style: Theme.of(context).textTheme.bodyMedium),
       ],

@@ -2,6 +2,7 @@ import 'package:chat_interface/theme/components/forms/fj_slider.dart';
 import 'package:chat_interface/theme/components/forms/fj_switch.dart';
 import 'package:chat_interface/theme/components/lph_tab_element.dart';
 import 'package:chat_interface/util/dispose_hook.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
@@ -59,7 +60,6 @@ class _TownAdminSettingsState extends State<TownAdminSettings> {
     _loading.value = true;
     _error.value = "";
     final json = await postAuthorizedJSON("/townhall/settings/categories", {});
-    _loading.value = false;
     if (!json["success"]) {
       _error.value = json["error"];
       return;
@@ -69,6 +69,7 @@ class _TownAdminSettingsState extends State<TownAdminSettings> {
     for (var category in json["categories"]) {
       _categories.add(CategoryData.fromJson(category));
     }
+    _loading.value = false;
 
     // Fetch category one
     await fetchSettings(_categories[0].name);
@@ -122,7 +123,7 @@ class _TownAdminSettingsState extends State<TownAdminSettings> {
 
           // Render the tab overview
           return LPHTabElement(tabs: _categories.map((c) => c.name).toList(), onTabSwitch: (tab) => fetchSettings(tab));
-        }),
+        }, dependencies: [_loading, _error]),
         verticalSpacing(defaultSpacing),
         Watch((ctx) {
           // Return nothing if there is no tab content

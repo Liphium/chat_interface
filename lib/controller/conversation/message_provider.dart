@@ -217,7 +217,7 @@ abstract class MessageProvider {
       return (false, true);
     }
     newMessagesLoading.value = false;
-    if (loadedMessages == null) {
+    if (loadedMessages == null || loadedMessages.isEmpty) {
       return (true, false);
     }
     addMessagesToTop(loadedMessages);
