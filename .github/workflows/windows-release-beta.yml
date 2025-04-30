@@ -2,7 +2,7 @@ name: Windows Release
 # Do this whenever someone pushes to the main branch
 on:
   push:
-    branches: ["main", "next"]
+    branches: ["next"]
 jobs:
   build:
     runs-on: windows-latest
@@ -34,7 +34,7 @@ jobs:
 
       # Runs a set of commands using the runners shell
       - name: Start release build
-        run: flutter build windows --release -v --dart-define DEBUG_MODE=false
+        run: flutter build windows --release -v
 
       - name: List directory (in case I'm stupid rn)
         run: ls
