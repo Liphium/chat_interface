@@ -70,7 +70,11 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
       // Check if the last message was a day before the current one
       if (nextMessage.createdAt.day != message.createdAt.day) {
         newHeading = true;
-      } else {
+        lastMessage = true;
+      }
+
+      // Check if we should render the profile picture
+      if (nextMessage.senderAddress != message.senderAddress) {
         lastMessage = true;
       }
 
@@ -83,6 +87,8 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
           readHeading = true;
         }
       }
+    } else {
+      lastMessage = true;
     }
 
     // Make sure to also show it when there are no messages before the current one

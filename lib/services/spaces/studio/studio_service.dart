@@ -65,6 +65,7 @@ class StudioService {
     peer.onIceCandidate = (candidate) async {
       if (candidate.candidate != null) {
         await completer.future; // Make sure to not send ice candidates before the client is registered
+        sendLog("ice candidate: ${candidate.candidate}");
         SpaceConnection.spaceConnector!.sendAction(ServerAction("st_ice", candidate.toMap()));
       }
     };
