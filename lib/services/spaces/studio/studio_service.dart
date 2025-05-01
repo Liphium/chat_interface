@@ -8,6 +8,7 @@ import 'package:chat_interface/services/connection/connection.dart';
 import 'package:chat_interface/services/connection/messaging.dart';
 import 'package:chat_interface/services/spaces/space_connection.dart';
 import 'package:chat_interface/services/spaces/studio/studio_connection.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:get/get.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
@@ -31,7 +32,7 @@ class StudioService {
     }
 
     // Create a connection and generate an offer
-    final peer = await createPeerConnection({
+    final config = {
       "iceServers": [
         {
           "urls": ["stun:${event.data["stun"]}"],
@@ -43,7 +44,9 @@ class StudioService {
             "credential": event.data["turn_pass"] ?? "",
           },
       ],
-    });
+    };
+    sendLog(config);
+    final peer = await createPeerConnection(config);
 
     // Create a data channel for pipes
     final studioConn = StudioConnection(peer);
