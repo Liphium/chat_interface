@@ -33,6 +33,7 @@ class StudioService {
 
     // Create a connection and generate an offer
     final config = {
+      'sdpSemantics': 'unified-plan',
       "iceServers": [
         {
           "urls": ["stun:${event.data["stun"]}"],
