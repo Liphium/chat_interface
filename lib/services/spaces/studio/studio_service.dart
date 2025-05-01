@@ -32,6 +32,7 @@ class StudioService {
 
     // Create a connection and generate an offer
     final peer = await createPeerConnection({
+      'sdpSemantics': 'unified-plan',
       "iceServers": [
         {
           "urls": ["stun:${event.data["stun"]}"],
