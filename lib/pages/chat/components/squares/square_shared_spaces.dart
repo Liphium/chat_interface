@@ -19,16 +19,28 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:signals/signals_flutter.dart';
 
-class SquareSharedSpaces extends StatefulWidget {
+class SquareSharedSpaces extends StatelessWidget {
   final Square square;
 
   const SquareSharedSpaces({super.key, required this.square});
 
-  @override
-  State<SquareSharedSpaces> createState() => _SquareSharedSpacesState();
-}
+  /// Connect to a shared space (with a loading signal)
+  Future<void> joinSpaceAction(SharedSpace space) async {
+    // Make sure we're not connecting to the same space (or already connecting)
+    if (SpaceController.id.peek() == space.container.roomId || SpaceController.spaceLoading.peek()) {
+      return;
+    }
 
-class _SquareSharedSpacesState extends State<SquareSharedSpaces> {
+    // Leave the space in case currently in one
+    if (SpaceController.connected.peek()) {
+      await SpaceController.leaveSpace();
+    }
+
+    // Connect to the shared space
+    SpaceController.shouldSwitchToPage = false;
+    await SpaceController.join(space.container);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -36,7 +48,7 @@ class _SquareSharedSpacesState extends State<SquareSharedSpaces> {
       children: [
         // Render the pinned shared spaces
         Watch((ctx) {
-          final container = widget.square.containerSub.value as SquareContainer;
+          final container = square.containerSub.value as SquareContainer;
 
           // Render a reordable list so the pinned spaces can be dragged around
           return ReorderableListView.builder(
@@ -52,12 +64,12 @@ class _SquareSharedSpacesState extends State<SquareSharedSpaces> {
               container.spaces.insert(oldIndex > newIndex ? newIndex : newIndex - 1, removed);
 
               // Change on the server, reset in case didn't work
-              final error = await SquareService.refreshContainer(widget.square, copied);
+              final error = await SquareService.refreshContainer(square, copied);
               if (error != null) {
-                widget.square.containerSub.value = widget.square.container;
+                square.containerSub.value = square.container;
                 showErrorPopup("error", error);
               } else {
-                widget.square.containerSub.value = container;
+                square.containerSub.value = container;
               }
             },
             itemCount: container.spaces.length,
@@ -71,40 +83,61 @@ class _SquareSharedSpacesState extends State<SquareSharedSpaces> {
                   index: index,
                   child: Watch((ctx) {
                     final space =
-                        SharedSpaceController.sharedSpaceMap[widget.square.id]?.entries
+                        SharedSpaceController.sharedSpaceMap[square.id]?.entries
                             .firstWhereOrNull((entry) => entry.value.underlyingId == pinnedSpace.id)
                             ?.value;
 
-                    // Create the onTap function for the item
-                    Future<void> onTap() async {
-                      if (pinnedSpace.loading) {
-                        return;
-                      }
-                      pinnedSpace.loading = true;
-                      final error = await SquareService.createSharedSpace(
-                        widget.square,
-                        pinnedSpace.name,
-                        underlyingId: pinnedSpace.id,
-                        rejoin: true,
-                      );
-                      pinnedSpace.loading = false;
-                      if (error != null) {
-                        showErrorPopup("error", error);
-                      }
-                    }
+                    return SignalHook(
+                      value: false,
+                      builder: (loading) {
+                        // Create the onTap function for the item
+                        Future<void> onTap() async {
+                          if (loading.value) {
+                            return;
+                          }
+                          loading.value = true;
 
-                    // Render the pinned space as empty when there isn't a shared one
-                    if (space == null) {
-                      return renderSpaceItem(pinnedSpace.name, [], onTap: onTap, pinnedSpace: pinnedSpace);
-                    }
+                          // Connect to the space in case there is already one
+                          if (space != null) {
+                            await joinSpaceAction(space);
+                            loading.value = false;
+                            return;
+                          }
 
-                    // Render the space as shared when it's actually there
-                    return renderSpaceItem(
-                      pinnedSpace.name,
-                      space.members,
-                      onTap: onTap,
-                      pinnedSpace: pinnedSpace,
-                      space: space,
+                          // Create a new shared space
+                          final error = await SquareService.createSharedSpace(
+                            square,
+                            pinnedSpace.name,
+                            underlyingId: pinnedSpace.id,
+                            rejoin: true,
+                          );
+                          loading.value = false;
+                          if (error != null) {
+                            showErrorPopup("error", error);
+                          }
+                        }
+
+                        // Render the pinned space as empty when there isn't a shared one
+                        if (space == null) {
+                          return renderSpaceItem(
+                            pinnedSpace.name,
+                            [],
+                            onTap: onTap,
+                            pinnedSpace: pinnedSpace,
+                            loading: loading,
+                          );
+                        }
+
+                        // Render the space as shared when it's actually there
+                        return renderSpaceItem(
+                          pinnedSpace.name,
+                          space.members,
+                          onTap: onTap,
+                          pinnedSpace: pinnedSpace,
+                          space: space,
+                          loading: loading,
+                        );
+                      },
                     );
                   }),
                 ),
@@ -116,7 +149,7 @@ class _SquareSharedSpacesState extends State<SquareSharedSpaces> {
         // Render dynamic shared spaces
         Watch((ctx) {
           // Only render when there actually are dynamically shared spaces
-          final sharedSpaces = SharedSpaceController.sharedSpaceMap[widget.square.id];
+          final sharedSpaces = SharedSpaceController.sharedSpaceMap[square.id];
           if (sharedSpaces == null) {
             return SizedBox();
           }
@@ -144,23 +177,10 @@ class _SquareSharedSpacesState extends State<SquareSharedSpaces> {
                             return;
                           }
                           loading.value = true;
-
-                          // Make sure we're not connecting to the same space
-                          if (SpaceController.id.peek() == space.container.roomId) {
-                            loading.value = false;
-                            return;
-                          }
-
-                          // Leave the space in case currently in one
-                          if (SpaceController.connected.peek()) {
-                            await SpaceController.leaveSpace();
-                          }
-
-                          // Connect to the new one
-                          SpaceController.shouldSwitchToPage = false;
-                          await SpaceController.join(space.container);
+                          await joinSpaceAction(space);
                           loading.value = false;
                         },
+                        loading: loading,
                         space: space,
                       ),
                 ),
@@ -176,7 +196,7 @@ class _SquareSharedSpacesState extends State<SquareSharedSpaces> {
             child: Padding(
               padding: const EdgeInsets.only(right: defaultSpacing, left: defaultSpacing, bottom: defaultSpacing),
               child: FJElevatedButton(
-                onTap: () => showModal(SharedSpaceAddWindow(square: widget.square, action: "add")),
+                onTap: () => showModal(SharedSpaceAddWindow(square: square, action: "add")),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -194,7 +214,7 @@ class _SquareSharedSpacesState extends State<SquareSharedSpaces> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
           child: FJElevatedButton(
-            onTap: () => showModal(SharedSpaceAddWindow(square: widget.square)),
+            onTap: () => showModal(SharedSpaceAddWindow(square: square)),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -216,6 +236,7 @@ class _SquareSharedSpacesState extends State<SquareSharedSpaces> {
     SharedSpace? space,
     PinnedSharedSpace? pinnedSpace,
     Function()? onTap,
+    Signal<bool>? loading,
   }) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
@@ -292,7 +313,7 @@ class _SquareSharedSpacesState extends State<SquareSharedSpaces> {
                           onTap: () {
                             showModal(
                               SharedSpaceAddWindow(
-                                square: widget.square,
+                                square: square,
                                 action: "edit",
                                 onlyEdit: true,
                                 pinned: pinnedSpace,
@@ -300,6 +321,7 @@ class _SquareSharedSpacesState extends State<SquareSharedSpaces> {
                               ),
                             );
                           },
+                          loading: loading,
                           icon: Icons.edit,
                           iconSize: Get.textTheme.labelMedium!.fontSize! * 1.5,
                           extra: elementSpacing2 - 1,
