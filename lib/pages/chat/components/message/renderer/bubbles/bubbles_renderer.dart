@@ -192,7 +192,14 @@ class _BubblesRendererState extends State<BubblesRenderer> with TickerProviderSt
                 Flexible(
                   child: Animate(
                     controller: message.highlightAnimation,
-                    effects: [ShimmerEffect(duration: 1000.ms, curve: Curves.ease)],
+                    effects: [
+                      ScaleEffect(
+                        begin: Offset(1, 1),
+                        end: Offset(1.15, 1.15),
+                        curve: Curves.ease,
+                        alignment: self ? Alignment.centerRight : Alignment.centerLeft,
+                      ),
+                    ],
                     target: 0,
                     child: renderer,
                   ),

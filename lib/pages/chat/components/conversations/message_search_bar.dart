@@ -100,64 +100,61 @@ class _MessageSearchSidebarState extends State<MessageSearchSidebar> {
           verticalSpacing(defaultSpacing),
           Expanded(
             child: Watch((ctx) {
-              return FadingEdgeScrollView.fromScrollView(
-                gradientFractionOnEnd: 0,
-                child: ListView.builder(
-                  controller: _controller,
-                  itemCount: widget.query.results.length,
-                  itemBuilder: (context, index) {
-                    final message = widget.query.results[index];
-                    final friend = FriendController.friends[message.senderAddress];
+              return ListView.builder(
+                controller: _controller,
+                itemCount: widget.query.results.length,
+                itemBuilder: (context, index) {
+                  final message = widget.query.results[index];
+                  final friend = FriendController.friends[message.senderAddress];
 
-                    // Check if a timestamp should be rendered
-                    bool newHeading = false;
-                    if (index != 0) {
-                      final lastMessage = widget.query.results[index - 1];
+                  // Check if a timestamp should be rendered
+                  bool newHeading = false;
+                  if (index != 0) {
+                    final lastMessage = widget.query.results[index - 1];
 
-                      // Check if the last message was a day before the current one
-                      if (lastMessage.createdAt.day != message.createdAt.day) {
-                        newHeading = true;
-                      }
+                    // Check if the last message was a day before the current one
+                    if (lastMessage.createdAt.day != message.createdAt.day) {
+                      newHeading = true;
                     }
+                  }
 
-                    return Padding(
-                      padding: const EdgeInsets.only(
-                        bottom: defaultSpacing,
-                        right: defaultSpacing + elementSpacing,
-                        left: defaultSpacing + elementSpacing,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          if (newHeading || index == 0)
-                            Padding(
-                              padding: const EdgeInsets.only(top: defaultSpacing, bottom: defaultSpacing),
-                              child: Text(formatDay(message.createdAt), style: Get.theme.textTheme.labelMedium),
-                            ),
-                          Material(
+                  return Padding(
+                    padding: const EdgeInsets.only(
+                      bottom: defaultSpacing,
+                      right: defaultSpacing + elementSpacing,
+                      left: defaultSpacing + elementSpacing,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (newHeading || index == 0)
+                          Padding(
+                            padding: const EdgeInsets.only(top: defaultSpacing, bottom: defaultSpacing),
+                            child: Text(formatDay(message.createdAt), style: Get.theme.textTheme.labelMedium),
+                          ),
+                        Material(
+                          borderRadius: BorderRadius.circular(defaultSpacing),
+                          color: Get.theme.colorScheme.inverseSurface,
+                          child: InkWell(
                             borderRadius: BorderRadius.circular(defaultSpacing),
-                            color: Get.theme.colorScheme.inverseSurface,
-                            child: InkWell(
-                              borderRadius: BorderRadius.circular(defaultSpacing),
-                              onTap: () => SidebarController.getCurrentProvider()!.scrollToMessage(message.id),
-                              child: Padding(
-                                padding: const EdgeInsets.all(defaultSpacing),
-                                child: MaterialMessageRenderer(
-                                  message: message,
-                                  provider: null,
-                                  senderAddress: message.senderAddress,
-                                  sender: friend,
-                                  overwritePadding: 0,
-                                ),
+                            onTap: () => SidebarController.getCurrentProvider()!.scrollToMessage(message.id),
+                            child: Padding(
+                              padding: const EdgeInsets.all(defaultSpacing),
+                              child: MaterialMessageRenderer(
+                                message: message,
+                                provider: null,
+                                senderAddress: message.senderAddress,
+                                sender: friend,
+                                overwritePadding: 0,
                               ),
                             ),
                           ),
-                          if (index == widget.query.results.length - 1) verticalSpacing(elementSpacing),
-                        ],
-                      ),
-                    );
-                  },
-                ),
+                        ),
+                        if (index == widget.query.results.length - 1) verticalSpacing(elementSpacing),
+                      ],
+                    ),
+                  );
+                },
               );
             }),
           ),

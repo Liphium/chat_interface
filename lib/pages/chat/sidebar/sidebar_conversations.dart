@@ -55,118 +55,116 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
   @override
   Widget build(BuildContext context) {
     return Watch((ctx) {
-      return FadingEdgeScrollView.fromScrollView(
-        child: ListView.builder(
-          controller: _controller,
-          itemCount: ConversationController.order.length,
-          addRepaintBoundaries: true,
-          padding: const EdgeInsets.only(top: defaultSpacing, right: defaultSpacing, left: defaultSpacing),
-          itemBuilder: (context, index) {
-            // Normal conversation renderer
-            Conversation conversation =
-                ConversationController.conversations[ConversationController.order.elementAt(index)]!;
+      return ListView.builder(
+        controller: _controller,
+        itemCount: ConversationController.order.length,
+        addRepaintBoundaries: true,
+        padding: const EdgeInsets.only(top: defaultSpacing, right: defaultSpacing, left: defaultSpacing),
+        itemBuilder: (context, index) {
+          // Normal conversation renderer
+          Conversation conversation =
+              ConversationController.conversations[ConversationController.order.elementAt(index)]!;
 
-            Friend? friend;
-            if (!conversation.isGroup) {
-              // Fetch the member that isn't the own account
-              LPHAddress id =
-                  conversation.members.values
-                      .firstWhere(
-                        (element) => element.address != StatusController.ownAddress,
-                        orElse: () => Member(LPHAddress.error(), LPHAddress.error(), MemberRole.user),
-                      )
-                      .address;
+          Friend? friend;
+          if (!conversation.isGroup) {
+            // Fetch the member that isn't the own account
+            LPHAddress id =
+                conversation.members.values
+                    .firstWhere(
+                      (element) => element.address != StatusController.ownAddress,
+                      orElse: () => Member(LPHAddress.error(), LPHAddress.error(), MemberRole.user),
+                    )
+                    .address;
 
-              // If not found, just use own friend as a backup plan
-              if (id.id == "-") {
-                sendLog("THIS SHOULD NOT HAPPEN, rendering me as member of conversation");
-                friend = Friend.me();
-              } else {
-                // If found, use the actual friend of course
-                friend = FriendController.friends[id];
-              }
+            // If not found, just use own friend as a backup plan
+            if (id.id == "-") {
+              sendLog("THIS SHOULD NOT HAPPEN, rendering me as member of conversation");
+              friend = Friend.me();
+            } else {
+              // If found, use the actual friend of course
+              friend = FriendController.friends[id];
+            }
+          }
+
+          // Hover menu
+          return Watch(key: ValueKey("${conversation.id.encode()}-sb"), (ctx) {
+            // Determine the title of the conversation based on the type
+            String title;
+            if (conversation.isGroup || friend == null) {
+              title = conversation.containerSub.value.name;
+            } else {
+              title = conversation.dmName;
             }
 
-            // Hover menu
-            return Watch(key: ValueKey("${conversation.id.encode()}-sb"), (ctx) {
-              // Determine the title of the conversation based on the type
-              String title;
-              if (conversation.isGroup || friend == null) {
-                title = conversation.containerSub.value.name;
-              } else {
-                title = conversation.dmName;
-              }
+            // Make sure to mark the conversation as archived in case the friend doesn't exist
+            if (friend == null && !conversation.isGroup) {
+              title = ".$title";
+            }
 
-              // Make sure to mark the conversation as archived in case the friend doesn't exist
-              if (friend == null && !conversation.isGroup) {
-                title = ".$title";
-              }
-
-              // Handle when hidden by search
-              if (_query.value != "") {
-                if (!title.toLowerCase().startsWith(_query.value.toLowerCase())) {
-                  return const SizedBox();
-                }
-              } else if (friend == null && !conversation.isGroup) {
+            // Handle when hidden by search
+            if (_query.value != "") {
+              if (!title.toLowerCase().startsWith(_query.value.toLowerCase())) {
                 return const SizedBox();
               }
+            } else if (friend == null && !conversation.isGroup) {
+              return const SizedBox();
+            }
 
-              return SignalHook(
-                value: false,
-                builder:
-                    (hover) => Padding(
-                      padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
-                      child: Watch((ctx) {
-                        final provider = SidebarController.getCurrentProviderReactive();
+            return SignalHook(
+              value: false,
+              builder:
+                  (hover) => Padding(
+                    padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
+                    child: Watch((ctx) {
+                      final provider = SidebarController.getCurrentProviderReactive();
 
-                        return Column(
-                          children: [
-                            Material(
+                      return Column(
+                        children: [
+                          Material(
+                            borderRadius: BorderRadius.circular(defaultSpacing),
+                            color:
+                                provider?.conversation == conversation && provider?.extra == "" && !isMobileMode()
+                                    ? Get.theme.colorScheme.onSurface.withAlpha(20)
+                                    : Colors.transparent,
+                            child: InkWell(
                               borderRadius: BorderRadius.circular(defaultSpacing),
-                              color:
-                                  provider?.conversation == conversation && provider?.extra == "" && !isMobileMode()
-                                      ? Get.theme.colorScheme.onSurface.withAlpha(20)
-                                      : Colors.transparent,
-                              child: InkWell(
-                                borderRadius: BorderRadius.circular(defaultSpacing),
-                                hoverColor: Get.theme.hoverColor,
-                                splashColor: Get.theme.hoverColor,
-                                onHover: (value) {
-                                  hover.value = value;
-                                },
+                              hoverColor: Get.theme.hoverColor,
+                              splashColor: Get.theme.hoverColor,
+                              onHover: (value) {
+                                hover.value = value;
+                              },
 
-                                // When conversation is tapped (open conversation)
-                                onTap: () {
-                                  // Make sure to not open the conversation again
-                                  if (provider?.conversation == conversation &&
-                                      provider?.extra == "" &&
-                                      !isMobileMode()) {
-                                    return;
-                                  }
-                                  MessageController.openConversation(conversation);
-                                },
-                                onSecondaryTapDown: (details) {
-                                  ConversationMessageProvider(
-                                    conversation,
-                                  ).openDialogForConversation(ContextMenuData.fromPosition(details.globalPosition));
-                                },
+                              // When conversation is tapped (open conversation)
+                              onTap: () {
+                                // Make sure to not open the conversation again
+                                if (provider?.conversation == conversation &&
+                                    provider?.extra == "" &&
+                                    !isMobileMode()) {
+                                  return;
+                                }
+                                MessageController.openConversation(conversation);
+                              },
+                              onSecondaryTapDown: (details) {
+                                ConversationMessageProvider(
+                                  conversation,
+                                ).openDialogForConversation(ContextMenuData.fromPosition(details.globalPosition));
+                              },
 
-                                // Conversation item content
-                                child: renderConversationItem(conversation, title, provider, friend, hover),
-                              ),
+                              // Conversation item content
+                              child: renderConversationItem(conversation, title, provider, friend, hover),
                             ),
+                          ),
 
-                            // Render the topic list in case open and square
-                            if (conversation.type == model.ConversationType.square)
-                              SquareTopicList(square: conversation as Square),
-                          ],
-                        );
-                      }),
-                    ),
-              );
-            });
-          },
-        ),
+                          // Render the topic list in case open and square
+                          if (conversation.type == model.ConversationType.square)
+                            SquareTopicList(square: conversation as Square),
+                        ],
+                      );
+                    }),
+                  ),
+            );
+          });
+        },
       );
     });
   }
