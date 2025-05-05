@@ -9,7 +9,6 @@ import 'package:chat_interface/pages/status/setup/database/database_init_stub.da
     if (dart.library.js) 'package:chat_interface/pages/status/setup/database/database_init_web.dart';
 import 'package:chat_interface/theme/components/forms/fj_button.dart';
 import 'package:chat_interface/theme/components/forms/fj_textfield.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:dbus_secrets/dbus_secrets.dart';
 import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
