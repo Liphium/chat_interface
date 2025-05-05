@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/pages/settings/app/log_settings.dart';
@@ -8,7 +9,7 @@ import 'package:chat_interface/pages/status/setup/database/database_init_stub.da
     if (dart.library.js) 'package:chat_interface/pages/status/setup/database/database_init_web.dart';
 import 'package:chat_interface/theme/components/forms/fj_button.dart';
 import 'package:chat_interface/theme/components/forms/fj_textfield.dart';
-import 'package:chat_interface/util/logging_framework.dart';
+import 'package:dbus_secrets/dbus_secrets.dart';
 import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -82,40 +83,14 @@ Future<String?> setupInstance(String name, {bool next = false}) async {
   var _ = await (db.select(db.setting)).get();
 
   // Get the encryption password from secure storage
-  final databaseKeyField = "db_key_$name";
-  var encryptionKey = await secureStorage.read(key: databaseKeyField);
-  if (encryptionKey == null) {
-    // Create a new random encryption key (with sodium so it's secure)
-    databaseKey = randomSymmetricKey();
-
-    // Insert the key into secure storage
-    await secureStorage.write(key: databaseKeyField, value: packageSymmetricKey(databaseKey));
-    encryptionKey = await secureStorage.read(key: databaseKeyField);
-    if (encryptionKey == null) {
-      sendLog("couldn't write encryption key to secure storage");
-      return "Your browser doesn't support secure storage.";
-    }
-
-    // Migrate all fields that need to be encrypted from now on
-    for (var toMigrate in [
-      "tokens",
-      "private_key",
-      "public_key",
-      "signature_public_key",
-      "signature_private_key",
-      "key_sync_pub",
-      "key_sync_priv",
-      "key_sync_sig_pub",
-      "key_sync_sig_priv",
-      "key_sync_sig",
-    ]) {
-      final success = await _migrateFieldToEncryption(toMigrate);
-      if (!success) {
-        sendLog("field to migrate ($toMigrate) not found..");
-      }
-    }
+  String? error;
+  if (Platform.isLinux) {
+    error = await loadEncryptionKeyDbusSecrets(name);
   } else {
-    databaseKey = unpackageSymmetricKey(encryptionKey);
+    error = await loadEncryptionKeySecureStorage(name);
+  }
+  if (error != null) {
+    return error;
   }
 
   // Enable logging for the current instance
@@ -129,18 +104,76 @@ Future<String?> setupInstance(String name, {bool next = false}) async {
   return null;
 }
 
-/// Encrypts the specified field in the settings table of the database (to migrate it from being unencrypted before)
-Future<bool> _migrateFieldToEncryption(String field) async {
-  final value = await (db.setting.select()..where((tbl) => tbl.key.equals(field))).getSingleOrNull();
-  if (value == null) {
-    return false;
+/// Load the encryption key from flutter_secure_storage.
+///
+/// Returns an error if there was one.
+Future<String?> loadEncryptionKeySecureStorage(String instance) async {
+  final databaseKeyField = "db_key_$instance";
+  String? encryptionKey;
+  try {
+    encryptionKey = await secureStorage.read(key: databaseKeyField);
+  } catch (_) {
+    return "secure_storage.not_supported".tr;
   }
 
-  // Encrypt the value and put it back into the database
-  final encrypted = encryptSymmetric(value.value, databaseKey);
-  await db.setting.insertOnConflictUpdate(SettingData(key: field, value: encrypted));
+  // Generate a new encryption key in case there isn't one yet
+  if (encryptionKey == null) {
+    // Create a new random encryption key (with sodium so it's secure)
+    databaseKey = randomSymmetricKey();
 
-  return true;
+    // Insert the key into secure storage
+    await secureStorage.write(key: databaseKeyField, value: packageSymmetricKey(databaseKey));
+    encryptionKey = await secureStorage.read(key: databaseKeyField);
+    if (encryptionKey == null) {
+      return "secure_storage.not_supported".tr;
+    }
+  } else {
+    databaseKey = unpackageSymmetricKey(encryptionKey);
+  }
+
+  return null;
+}
+
+/// Load the encryption key from dbus_secrets (specifically for Linux).
+///
+/// Returns an error if there was one.
+Future<String?> loadEncryptionKeyDbusSecrets(String instance) async {
+  // Connect to org.freedesktop.secrets using dbus
+  final secrets = DBusSecrets(appName: linuxDbusAppName);
+  var result = await secrets.initialize();
+  if (!result) {
+    await secrets.close();
+    return "secure_storage.not_supported".tr;
+  }
+
+  // Try to unlock the vault
+  result = await secrets.unlock();
+  if (!result) {
+    await secrets.close();
+    return "secure_storage.unlock_failed".tr;
+  }
+
+  // Get the encryption key from the vault
+  final databaseKeyField = "db_key_$instance";
+  var encryptionKey = await secrets.get(databaseKeyField);
+
+  // Create a new database encryption key in case it isn't there yet
+  if (encryptionKey == null) {
+    encryptionKey = packageSymmetricKey(randomSymmetricKey());
+    result = await secrets.set(databaseKeyField, encryptionKey);
+    if (!result) {
+      await secrets.close();
+      return "secure_storage.not_supported".tr;
+    }
+  }
+
+  // Set the database key
+  databaseKey = unpackageSymmetricKey(encryptionKey);
+
+  // Close the dbus session
+  await secrets.close();
+
+  return null;
 }
 
 /// Get the value of a specified field store in the settings table

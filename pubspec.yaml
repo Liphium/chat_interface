@@ -54,6 +54,10 @@ dependencies:
       url: https://github.com/Unbreathable/chat_list.git
       ref: master
   collection: ^1.19.1
+  dbus_secrets:
+    git:
+      url: https://github.com/Liphium/dbus_secrets.git
+      ref: main
 
 dev_dependencies:
   flutter_test:
