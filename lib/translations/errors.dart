@@ -42,6 +42,8 @@ class ErrorTranslations extends Translations {
           'Spaces is not supported in your town. Please contact the owners of this town and ask them to set up Spaces.',
       'not.supported': 'This feature is not supported on this platform.',
       'profile.conversation_not_found': 'You are not in a conversation with this person. Please create one first.',
+      'secure_storage.not_supported': 'Secure storage is not supported on your platform.',
+      'secure_storage.unlock_failed': 'Couldn\'t unlock keyring. Please make sure everything is set up correctly.',
 
       // Friends
       'request.friend.exists': 'Already added',

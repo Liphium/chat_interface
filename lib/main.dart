@@ -22,6 +22,7 @@ const appTag = "liphium_chat";
 const appTagSpaces = "liphium_spaces";
 const protocolVersion = 8;
 const currentVersionName = "1.0.0 Beta";
+const linuxDbusAppName = "com.liphium.chat";
 
 final dio = Dio();
 late final Sodium sodiumLib;
