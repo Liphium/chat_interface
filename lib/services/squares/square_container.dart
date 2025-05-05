@@ -66,8 +66,6 @@ class PinnedSharedSpace {
   final String id;
   final String name;
 
-  bool loading = false; // Loading state for the UI
-
   PinnedSharedSpace(this.id, this.name);
   PinnedSharedSpace.fromJson(Map<String, dynamic> json) : this(json["id"], json["name"]);
 

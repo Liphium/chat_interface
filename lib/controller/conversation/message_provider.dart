@@ -15,6 +15,7 @@ import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:lorien_chat_list/chat_list_controller.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
@@ -290,16 +291,10 @@ abstract class MessageProvider {
       unawaited(_scrollController!.scrollToIndex(getIndexOf(message.id)!));
       if (message.highlightAnimation == null) {
         // If the message is not yet rendered do it through a callback
-        message.highlightCallback = () {
-          Timer(Duration(milliseconds: 500), () {
-            message!.highlightAnimation!.value = 0;
-            message.highlightAnimation!.animateTo(1);
-          });
-        };
+        message.queueHighlightAnimation();
       } else {
         // If it is rendered, don't do it through a callback
-        message.highlightAnimation!.value = 0;
-        unawaited(message.highlightAnimation!.animateTo(1));
+        message.playHighlightAnimation();
       }
       return true;
     }
@@ -327,12 +322,7 @@ abstract class MessageProvider {
     addMessagesToTop(toAdd);
 
     // Highlight the message
-    message.highlightCallback = () {
-      Timer(Duration(milliseconds: 500), () {
-        message!.highlightAnimation!.value = 0;
-        message.highlightAnimation!.animateTo(1);
-      });
-    };
+    message.queueHighlightAnimation();
 
     // Add the messages below after a frame has been rendered
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -505,6 +495,21 @@ class Message {
   bool renderingAttachments = false;
   final attachmentsRenderer = <AttachmentContainer>[];
   Message? answerMessage;
+
+  /// Queue playing the highlight animation on the message
+  void queueHighlightAnimation() {
+    highlightCallback = () {
+      Timer(500.ms, () {
+        playHighlightAnimation();
+      });
+    };
+  }
+
+  /// Play the highlight animation for the message
+  void playHighlightAnimation() {
+    highlightAnimation!.value = 0;
+    highlightAnimation!.loop(count: 2, reverse: true, period: 250.ms);
+  }
 
   /// Extracts and decrypts the attachments
   Future<bool> initAttachments(MessageProvider? provider) async {

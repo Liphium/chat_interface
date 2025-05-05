@@ -76,10 +76,10 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                //* Avatar
+                // Avatar with a tooltip to show their name
                 Visibility(
-                  visible: !widget.last,
-                  replacement: const SizedBox(width: 34), //* Show timestamp instead
+                  visible: widget.last,
+                  replacement: const SizedBox(width: 34),
                   child: Tooltip(
                     message: sender.displayName.value,
                     child: InkWell(

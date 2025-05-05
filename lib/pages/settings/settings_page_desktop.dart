@@ -4,6 +4,7 @@ import 'package:chat_interface/pages/chat/chat_page_mobile.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/pages/settings/settings_sidebar.dart';
 import 'package:chat_interface/pages/settings/setting_selection_mobile.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/platform_callback.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
