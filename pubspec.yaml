@@ -38,7 +38,6 @@ dependencies:
   just_audio_windows: ">=0.2.1 <1.0.0"
   sqlite3_flutter_libs: ">=0.5.24 <1.0.0"
   fading_edge_scrollview: ">=4.1.1 <5.0.0"
-  tray_manager: ">=0.2.4 <1.0.0"
   liphium_bridge:
     path: ./liphium_bridge
   web_socket: ">=0.1.6 <1.0.0"
