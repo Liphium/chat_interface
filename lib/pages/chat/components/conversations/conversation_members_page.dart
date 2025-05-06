@@ -4,10 +4,7 @@ import 'package:flutter/material.dart';
 class ConversationMembersPage extends StatefulWidget {
   final Conversation conversation;
 
-  const ConversationMembersPage({
-    super.key,
-    required this.conversation,
-  });
+  const ConversationMembersPage({super.key, required this.conversation});
 
   @override
   State<ConversationMembersPage> createState() => _ConversationMembersPageState();

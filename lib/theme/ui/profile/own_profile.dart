@@ -1,24 +1,26 @@
 import 'dart:async';
 
 import 'package:chat_interface/controller/current/connection_controller.dart';
-import 'package:chat_interface/controller/spaces/spaces_controller.dart';
+import 'package:chat_interface/controller/spaces/space_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/sidebar/friends/friends_page.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
-import 'package:chat_interface/pages/status/setup/setup_manager.dart';
+import 'package:chat_interface/services/chat/status_service.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/theme/ui/profile/developer_window.dart';
 import 'package:chat_interface/theme/ui/profile/profile_button.dart';
 import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
 import 'package:chat_interface/util/constants.dart';
+import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:drift_db_viewer/drift_db_viewer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class OwnProfile extends StatefulWidget {
@@ -32,33 +34,35 @@ class OwnProfile extends StatefulWidget {
 }
 
 class _ProfileState extends State<OwnProfile> {
-  //* Edit state for buttons
-  final edit = false.obs;
+  // Edit state for buttons
+  final _edit = signal(false);
 
   final TextEditingController _status = TextEditingController();
-  final statusMessage = "".obs;
+  final _statusMessage = signal("");
   final FocusNode _statusFocus = FocusNode();
 
   // Developer things
-  final testLoading = false.obs;
-  final _clicks = 0.obs;
+  final _testLoading = signal(false);
+  var _clicks = 0;
 
   @override
   void dispose() {
     _status.dispose();
     _statusFocus.dispose();
+    _edit.dispose();
+    _testLoading.dispose();
+    _statusMessage.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    StatusController controller = Get.find();
     ThemeData theme = Theme.of(context);
 
-    _status.text = controller.status.value;
-    statusMessage.value = controller.status.value;
+    _status.text = StatusController.status.value;
+    _statusMessage.value = StatusController.status.value;
 
-    //* Context menu
+    // Context menu
     return SlidingWindowBase(
       title: const [],
       position: widget.position,
@@ -70,59 +74,55 @@ class _ProfileState extends State<OwnProfile> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              //* Profile info
+              // Show display name
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Icon(Icons.person, size: 30.0, color: theme.colorScheme.onPrimary),
                   horizontalSpacing(defaultSpacing),
                   Text(
-                    controller.displayName.value,
+                    StatusController.displayName.value,
                     style: theme.textTheme.titleMedium,
                     textHeightBehavior: noTextHeight,
                   ),
                 ],
               ),
 
-              //* Copy button
+              // Show a button for copying your own name (with secret developer window)
               LoadingIconButton(
-                loading: false.obs,
                 onTap: () {
-                  _clicks.value++;
-                  if (_clicks.value > 7) {
+                  _clicks++;
+                  if (_clicks > 7) {
                     Get.dialog(const DeveloperWindow());
                   }
-                  Clipboard.setData(ClipboardData(text: controller.name.value));
+                  Clipboard.setData(ClipboardData(text: StatusController.name.value));
                 },
                 icon: Icons.copy,
-              )
+              ),
             ],
           ),
           verticalSpacing(defaultSpacing),
 
-          //* Status
-          Obx(() {
-            if (controller.ownContainer.value != null) {
+          // Show a button for stopping sharing the current space
+          Watch((ctx) {
+            if (StatusController.ownContainer.value != null) {
               return Padding(
                 padding: const EdgeInsets.only(bottom: elementSpacing),
                 child: ProfileButton(
                   icon: Icons.stop,
                   label: 'profile.stop_sharing'.tr,
-                  onTap: () => controller.stopSharing(),
-                  loading: false.obs,
+                  onTap: () => StatusController.stopSharing(),
                 ),
               );
             }
 
-            final spacesController = Get.find<SpacesController>();
-            if (spacesController.connected.value) {
+            if (SpaceController.connected.value) {
               return Padding(
                 padding: const EdgeInsets.only(bottom: elementSpacing),
                 child: ProfileButton(
                   icon: Icons.start,
                   label: 'profile.start_sharing'.tr,
-                  onTap: () => controller.share(spacesController.getContainer()),
-                  loading: false.obs,
+                  onTap: () => StatusController.share(SpaceController.getContainer()),
                 ),
               );
             } else {
@@ -130,16 +130,16 @@ class _ProfileState extends State<OwnProfile> {
             }
           }),
 
-          //* Current status type
+          // Current status type
           RepaintBoundary(
-            child: GetX<StatusController>(builder: (statusController) {
+            child: Watch((ctx) {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: List.generate(4, (index) {
                   // Get details
                   Color color = getStatusColor(theme, index);
                   IconData icon = getStatusIcon(index);
-                  final bool selected = statusController.type.value == index;
+                  final bool selected = StatusController.type.value == index;
 
                   return Padding(
                     padding: const EdgeInsets.only(bottom: elementSpacing),
@@ -148,14 +148,19 @@ class _ProfileState extends State<OwnProfile> {
                       borderRadius: BorderRadius.circular(defaultSpacing),
                       child: InkWell(
                         borderRadius: BorderRadius.circular(defaultSpacing),
-                        onTap: () {
-                          controller.setStatus(type: index, success: () => Get.back());
+                        onTap: () async {
+                          final error = await StatusService.sendStatus(type: index);
+                          if (error != null) {
+                            showErrorPopup("error", error);
+                            return;
+                          }
+                          Get.back();
                         },
                         child: Padding(
                           padding: const EdgeInsets.all(defaultSpacing),
                           child: Row(
                             children: [
-                              //* Status icon
+                              // Status icon
                               Icon(icon, size: 13.0, color: color),
                               horizontalSpacing(defaultSpacing),
                               Text(
@@ -176,23 +181,23 @@ class _ProfileState extends State<OwnProfile> {
             }),
           ),
 
-          //* Status message
+          // Status message
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              //* Profile id
+              // Profile id
               Expanded(
                 child: GestureDetector(
                   onTap: () {
-                    edit.value = true;
+                    _edit.value = true;
                     _statusFocus.requestFocus();
                   },
-                  child: Obx(
-                    () => Visibility(
-                      visible: edit.value,
+                  child: Watch(
+                    (ctx) => Visibility(
+                      visible: _edit.value,
                       replacement: Text(
-                        controller.status.value == "" ? 'status.message.add'.tr : controller.status.value,
+                        StatusController.status.value == "" ? 'status.message.add'.tr : StatusController.status.value,
                         style: theme.textTheme.bodyMedium,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -200,7 +205,7 @@ class _ProfileState extends State<OwnProfile> {
                       ),
                       child: TextField(
                         focusNode: _statusFocus,
-                        onChanged: (value) => statusMessage.value = value,
+                        onChanged: (value) => _statusMessage.value = value,
                         decoration: InputDecoration(
                           border: InputBorder.none,
                           hintStyle: theme.textTheme.bodyMedium!,
@@ -208,16 +213,18 @@ class _ProfileState extends State<OwnProfile> {
                         ),
                         style: theme.textTheme.bodyMedium!.copyWith(color: theme.colorScheme.onSurface),
 
-                        //* Save status
-                        onEditingComplete: () {
+                        // Save status
+                        onEditingComplete: () async {
                           if (_status.text == "") _status.text = "";
-                          controller.setStatus(message: _status.text);
-                          edit.value = false;
+                          final error = await StatusService.sendStatus(message: _status.text);
+                          if (error != null) {
+                            showErrorPopup("error", error);
+                            return;
+                          }
+                          _edit.value = false;
                         },
 
-                        inputFormatters: [
-                          LengthLimitingTextInputFormatter(70),
-                        ],
+                        inputFormatters: [LengthLimitingTextInputFormatter(70)],
                         controller: _status,
                       ),
                     ),
@@ -225,56 +232,59 @@ class _ProfileState extends State<OwnProfile> {
                 ),
               ),
 
-              //* Close button
-              Obx(
-                () => LoadingIconButton(
-                  loading: controller.statusLoading,
-                  onTap: () {
-                    if (controller.status.value == "" && !edit.value) {
-                      edit.value = true;
+              // Close button
+              Watch(
+                (ctx) => LoadingIconButton(
+                  loading: StatusController.statusLoading,
+                  onTap: () async {
+                    if (StatusController.status.value == "" && !_edit.value) {
+                      _edit.value = true;
                       _status.text = "";
                       _statusFocus.requestFocus();
                       return;
                     }
 
-                    if (!edit.value) {
-                      controller.setStatus(message: "");
+                    if (!_edit.value) {
+                      final error = await StatusService.sendStatus(message: "");
+                      if (error != null) {
+                        showErrorPopup("error", error);
+                        return;
+                      }
                       _status.text = "";
                       return;
                     }
 
-                    edit.value = false;
+                    final error = await StatusService.sendStatus(message: _status.text);
+                    if (error != null) {
+                      showErrorPopup("error", error);
+                      return;
+                    }
+                    _edit.value = false;
                     _statusFocus.unfocus();
-                    controller.setStatus(message: _status.text);
                   },
-                  icon: statusMessage.value == ""
-                      ? Icons.add
-                      : edit.value
+                  icon:
+                      _statusMessage.value == ""
+                          ? Icons.add
+                          : _edit.value
                           ? Icons.done
                           : Icons.close,
                   color: theme.colorScheme.onPrimary,
                 ),
-              )
+              ),
             ],
           ),
           verticalSpacing(defaultSpacing),
 
-          //* Profile settings
+          // Profile settings
           ProfileButton(
             icon: Icons.settings,
             label: 'profile.settings'.tr,
             onTap: () => SettingController.openSettingsPage(),
-            loading: false.obs,
           ),
           verticalSpacing(elementSpacing),
 
-          //* Friends page
-          ProfileButton(
-            icon: Icons.group,
-            label: 'profile.friends'.tr,
-            onTap: () => showModal(const FriendsPage()),
-            loading: false.obs,
-          ),
+          // Friends page
+          ProfileButton(icon: Icons.group, label: 'profile.friends'.tr, onTap: () => showModal(const FriendsPage())),
           verticalSpacing(elementSpacing),
 
           // For debug only database viewer
@@ -285,11 +295,11 @@ class _ProfileState extends State<OwnProfile> {
                 icon: Icons.hardware,
                 label: 'profile.test'.tr,
                 onTap: () async {
-                  testLoading.value = true;
+                  _testLoading.value = true;
                   unawaited(Navigator.of(context).push(MaterialPageRoute(builder: (context) => DriftDbViewer(db))));
-                  testLoading.value = false;
+                  _testLoading.value = false;
                 },
-                loading: testLoading,
+                loading: _testLoading,
               ),
             ),
 
@@ -301,19 +311,14 @@ class _ProfileState extends State<OwnProfile> {
                 icon: Icons.restart_alt,
                 label: 'profile.retry'.tr,
                 onTap: () async {
-                  Get.find<ConnectionController>().restart();
+                  ConnectionController.restart();
                 },
-                loading: testLoading,
+                loading: _testLoading,
               ),
             ),
 
           // Help & resources button
-          ProfileButton(
-            icon: Icons.launch,
-            label: 'help'.tr,
-            onTap: () => launchUrlString(Constants.docsBase),
-            loading: false.obs,
-          ),
+          ProfileButton(icon: Icons.launch, label: 'help'.tr, onTap: () => launchUrlString(Constants.docsBase)),
         ],
       ),
     );

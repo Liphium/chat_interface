@@ -18,9 +18,7 @@ class _SidebarState extends State<ConversationListMobile> {
   Widget build(BuildContext context) {
     //* Sidebar
     return Container(
-      decoration: BoxDecoration(
-        color: Get.theme.colorScheme.onInverseSurface,
-      ),
+      decoration: BoxDecoration(color: Get.theme.colorScheme.onInverseSurface),
 
       //* Sidebar content
       child: Stack(
@@ -38,10 +36,7 @@ class _SidebarState extends State<ConversationListMobile> {
                     padding: const EdgeInsets.all(defaultSpacing * 1.5),
                     child: Row(
                       children: [
-                        SizedBox(
-                          height: 32,
-                          child: Image.asset("assets/tray/icon_linux.png"),
-                        ),
+                        SizedBox(height: 32, child: Image.asset("assets/tray/icon_linux.png")),
                         horizontalSpacing(defaultSpacing * 1.5),
                         Text("Liphium", style: Get.textTheme.labelLarge),
                       ],
@@ -51,16 +46,7 @@ class _SidebarState extends State<ConversationListMobile> {
               ),
 
               // Conversation list and the profile
-              Expanded(
-                child: SafeArea(
-                  top: false,
-                  bottom: false,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-                    child: SidebarConversationList(query: "".obs),
-                  ),
-                ),
-              ),
+              Expanded(child: SafeArea(top: false, bottom: false, child: SidebarConversationList())),
             ],
           ),
           Align(
@@ -77,7 +63,7 @@ class _SidebarState extends State<ConversationListMobile> {
                 color: Get.theme.colorScheme.onPrimary,
               ),
             ),
-          )
+          ),
         ],
       ),
     );

@@ -1,3 +1,4 @@
+import 'package:chat_interface/pages/settings/components/double_selection.dart';
 import 'package:chat_interface/pages/settings/components/list_selection.dart';
 import 'package:chat_interface/pages/settings/data/entities.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
@@ -7,23 +8,17 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class ChatSettings {
+  static final dotAmount = Setting<double>("appearance.chat.dot_amount", 3);
   static const String chatTheme = "appearance.chat.theme";
-  static final Setting<int> chatThemeSetting = Setting<int>(chatTheme, 1);
 
   static final chatThemes = <SelectableItem>[
-    SelectableItem(
-      "appearance.chat.theme.material".tr,
-      Icons.view_list,
-      experimental: true,
-    ),
-    SelectableItem(
-      "appearance.chat.theme.bubbles".tr,
-      Icons.comment,
-    ),
+    SelectableItem("appearance.chat.theme.material".tr, Icons.view_list, experimental: true),
+    SelectableItem("appearance.chat.theme.bubbles".tr, Icons.comment),
   ];
 
-  static void registerSettings(SettingController controller) {
-    controller.settings[chatTheme] = chatThemeSetting;
+  static void addSettings() {
+    SettingController.addSetting(Setting<int>(chatTheme, 1));
+    SettingController.addSetting(dotAmount);
   }
 }
 
@@ -42,13 +37,25 @@ class _ChatSettingsPageState extends State<ChatSettingsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          //* Chat theme
+          // Chat theme
           Text("appearance.chat.theme".tr, style: Get.theme.textTheme.labelLarge),
           verticalSpacing(defaultSpacing),
-
           ListSelectionSetting(
-            settingName: ChatSettings.chatTheme,
+            setting: SettingController.settings[ChatSettings.chatTheme]! as Setting<int>,
             items: ChatSettings.chatThemes,
+          ),
+          verticalSpacing(sectionSpacing),
+
+          Text("appearance.chat.dot_amount.title".tr, style: Get.theme.textTheme.labelLarge),
+          verticalSpacing(defaultSpacing),
+
+          // How many dots appear after Create in the create window (VERY IMPORTANT)
+          DoubleSelectionSetting(
+            settingName: ChatSettings.dotAmount.label,
+            description: "appearance.chat.dot_amount",
+            min: 1,
+            max: 5,
+            rounded: true,
           ),
         ],
       ),

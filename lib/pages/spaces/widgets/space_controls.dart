@@ -1,17 +1,20 @@
 import 'dart:async';
 
-import 'package:chat_interface/controller/spaces/spaces_controller.dart';
+import 'package:chat_interface/controller/conversation/sidebar_controller.dart';
+import 'package:chat_interface/controller/spaces/space_controller.dart';
+import 'package:chat_interface/controller/spaces/studio/studio_controller.dart';
 import 'package:chat_interface/controller/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/controller/spaces/warp_controller.dart';
-import 'package:chat_interface/pages/chat/chat_page_desktop.dart';
-import 'package:chat_interface/pages/spaces/call_page.dart';
+import 'package:chat_interface/pages/settings/app/audio_settings.dart';
 import 'package:chat_interface/pages/spaces/tabletop/tabletop_rotate_window.dart';
+import 'package:chat_interface/pages/spaces/widgets/space_device_selection.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class SpaceControls extends StatefulWidget {
   const SpaceControls({super.key});
@@ -21,8 +24,8 @@ class SpaceControls extends StatefulWidget {
 }
 
 class _SpaceControlsState extends State<SpaceControls> {
-  final GlobalKey tabletopKey = GlobalKey();
-  StreamSubscription<dynamic>? subscription;
+  final GlobalKey _tabletopKey = GlobalKey(), _microphoneKey = GlobalKey(), _outputDeviceKey = GlobalKey();
+  StreamSubscription<dynamic>? _subscription;
 
   @override
   void initState() {
@@ -31,40 +34,27 @@ class _SpaceControlsState extends State<SpaceControls> {
 
   @override
   void dispose() {
-    subscription?.cancel();
+    _subscription?.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     ThemeData theme = Get.theme;
-    final controller = Get.find<SpacesController>();
 
     return Center(
       heightFactor: 1,
       child: Padding(
-        padding: const EdgeInsets.only(
-          right: sectionSpacing,
-          left: sectionSpacing,
-          bottom: sectionSpacing,
-        ),
+        padding: const EdgeInsets.only(right: sectionSpacing, left: sectionSpacing, bottom: sectionSpacing),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Obx(
-              () => LoadingIconButton(
+            Watch(
+              (context) => LoadingIconButton(
                 background: true,
-                loading: false.obs,
-                onTap: () {
-                  controller.hideSidebar.toggle();
-                  if (controller.hideSidebar.value) {
-                    Get.offAll(const CallPage(), transition: Transition.fadeIn);
-                  } else {
-                    Get.offAll(const ChatPageDesktop(), transition: Transition.fadeIn);
-                  }
-                },
-                icon: controller.hideSidebar.value ? Icons.arrow_forward : Icons.arrow_back,
+                onTap: () => SidebarController.toggleSidebar(),
+                icon: SidebarController.hideSidebar.value ? Icons.arrow_forward : Icons.arrow_back,
                 iconSize: 30,
               ),
             ),
@@ -76,8 +66,8 @@ class _SpaceControlsState extends State<SpaceControls> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     // Tabletop rotation button
-                    Obx(
-                      () => Animate(
+                    Watch(
+                      (context) => Animate(
                         effects: [
                           ExpandEffect(
                             customHeightFactor: 1,
@@ -86,25 +76,22 @@ class _SpaceControlsState extends State<SpaceControls> {
                             axis: Axis.horizontal,
                             alignment: Alignment.center,
                           ),
-                          FadeEffect(
-                            duration: 250.ms,
-                          ),
-                          ScaleEffect(
-                            duration: 250.ms,
-                            curve: Curves.ease,
-                          ),
+                          FadeEffect(duration: 250.ms),
+                          ScaleEffect(duration: 250.ms, curve: Curves.ease),
                         ],
-                        onInit: (ac) => ac.value = controller.currentTab.value == SpaceTabType.table.index ? 1 : 0,
-                        target: controller.currentTab.value == SpaceTabType.table.index ? 1 : 0,
+                        onInit: (ac) => ac.value = SpaceController.currentTab.value == SpaceTabType.table.index ? 1 : 0,
+                        target: SpaceController.currentTab.value == SpaceTabType.table.index ? 1 : 0,
                         child: Padding(
                           padding: const EdgeInsets.only(right: defaultSpacing),
                           child: LoadingIconButton(
-                            key: tabletopKey,
+                            key: _tabletopKey,
                             background: true,
                             padding: defaultSpacing,
-                            loading: Get.find<TabletopController>().loading,
+                            loading: TabletopController.loading,
                             onTap: () {
-                              Get.dialog(TabletopRotateWindow(data: ContextMenuData.fromKey(tabletopKey, above: true)));
+                              Get.dialog(
+                                TabletopRotateWindow(data: ContextMenuData.fromKey(_tabletopKey, above: true)),
+                              );
                             },
                             icon: Icons.crop_rotate,
                             iconSize: 28,
@@ -113,24 +100,93 @@ class _SpaceControlsState extends State<SpaceControls> {
                       ),
                     ),
 
-                    // Full screen button
+                    // Full screen button (no reactivity needed cause refresh of the screen happens anyway)
                     LoadingIconButton(
-                      loading: false.obs,
                       background: true,
                       padding: defaultSpacing,
-                      onTap: () => controller.toggleFullScreen(),
-                      icon: controller.fullScreen.value ? Icons.fullscreen_exit : Icons.fullscreen,
+                      onTap: () => SpaceController.toggleFullScreen(),
+                      icon: SpaceController.fullScreen.value ? Icons.fullscreen_exit : Icons.fullscreen,
                       iconSize: 28,
                     ),
 
                     horizontalSpacing(defaultSpacing),
 
+                    // Render mute and deafen buttons in case in Studio
+                    Watch((ctx) {
+                      if (!StudioController.connected.value) {
+                        return SizedBox();
+                      }
+
+                      return Row(
+                        children: [
+                          // Render the mute button
+                          Watch(
+                            (ctx) => LoadingIconButton(
+                              key: _microphoneKey,
+                              loading: StudioController.audioStateLoading,
+                              background: true,
+                              padding: defaultSpacing,
+                              onTap: () => StudioController.toggleMute(),
+                              onSecondaryTap: () {
+                                if (StudioController.getConnection() == null ||
+                                    StudioController.getConnection()!.getEngine() == null) {
+                                  return;
+                                }
+                                Get.dialog(
+                                  SpaceDeviceSelection(
+                                    title: "settings.audio.microphone".tr,
+                                    data: ContextMenuData.fromKey(_microphoneKey, above: true),
+                                    child: MicrophoneSelection(
+                                      engine: StudioController.getConnection()!.getEngine()!,
+                                      secondary: true,
+                                    ),
+                                  ),
+                                );
+                              },
+                              icon: StudioController.audioMuted.value ? Icons.mic_off : Icons.mic,
+                              iconSize: 28,
+                            ),
+                          ),
+                          horizontalSpacing(defaultSpacing),
+
+                          // Render the deafen button
+                          Watch(
+                            (ctx) => LoadingIconButton(
+                              key: _outputDeviceKey,
+                              loading: StudioController.audioStateLoading,
+                              background: true,
+                              padding: defaultSpacing,
+                              onTap: () => StudioController.toggleDeafened(),
+                              onSecondaryTap: () {
+                                if (StudioController.getConnection() == null ||
+                                    StudioController.getConnection()!.getEngine() == null) {
+                                  return;
+                                }
+                                Get.dialog(
+                                  SpaceDeviceSelection(
+                                    title: "settings.audio.output_device".tr,
+                                    data: ContextMenuData.fromKey(_outputDeviceKey, above: true),
+                                    child: OutputDeviceSelection(
+                                      engine: StudioController.getConnection()!.getEngine()!,
+                                      secondary: true,
+                                    ),
+                                  ),
+                                );
+                              },
+                              icon: StudioController.audioDeafened.value ? Icons.headset_off : Icons.headset,
+                              iconSize: 28,
+                            ),
+                          ),
+                          horizontalSpacing(defaultSpacing),
+                        ],
+                      );
+                    }),
+
                     // Warp manager button
                     LoadingIconButton(
-                      loading: false.obs,
                       background: true,
                       padding: defaultSpacing,
-                      onTap: () => Get.find<WarpController>().open(),
+                      onTap: () => WarpController.open(),
                       icon: Icons.cyclone,
                       iconSize: 28,
                     ),
@@ -141,8 +197,7 @@ class _SpaceControlsState extends State<SpaceControls> {
                     LoadingIconButton(
                       background: true,
                       padding: defaultSpacing,
-                      loading: false.obs,
-                      onTap: () => controller.leaveCall(),
+                      onTap: () => SpaceController.leaveSpace(),
                       icon: Icons.call_end,
                       color: theme.colorScheme.error,
                       iconSize: 28,
@@ -152,17 +207,14 @@ class _SpaceControlsState extends State<SpaceControls> {
               ],
             ),
             const Spacer(),
-            Obx(
-              () {
-                return LoadingIconButton(
-                  loading: false.obs,
-                  background: true,
-                  onTap: () => controller.chatOpen.toggle(),
-                  icon: controller.chatOpen.value ? Icons.arrow_forward : Icons.arrow_back,
-                  iconSize: 30,
-                );
-              },
-            ),
+            Watch((context) {
+              return LoadingIconButton(
+                background: true,
+                onTap: () => SpaceController.chatOpen.value = !SpaceController.chatOpen.peek(),
+                icon: SpaceController.chatOpen.value ? Icons.arrow_forward : Icons.arrow_back,
+                iconSize: 30,
+              );
+            }),
           ],
         ),
       ),

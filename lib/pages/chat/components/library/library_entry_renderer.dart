@@ -4,10 +4,7 @@ import 'package:flutter/widgets.dart';
 class LibraryEntryRenderer extends StatefulWidget {
   final LibraryEntryData data;
 
-  const LibraryEntryRenderer({
-    super.key,
-    required this.data,
-  });
+  const LibraryEntryRenderer({super.key, required this.data});
 
   @override
   State<LibraryEntryRenderer> createState() => _LibraryEntryRendererState();

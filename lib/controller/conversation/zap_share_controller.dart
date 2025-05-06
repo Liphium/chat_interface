@@ -2,11 +2,11 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:chat_interface/connection/connection.dart';
-import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
-import 'package:chat_interface/connection/messaging.dart';
+import 'package:chat_interface/controller/conversation/sidebar_controller.dart';
+import 'package:chat_interface/services/connection/connection.dart';
+import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
+import 'package:chat_interface/services/connection/messaging.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
-import 'package:chat_interface/controller/conversation/message_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart' as msg;
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/main.dart';
@@ -22,33 +22,34 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:liphium_bridge/liphium_bridge.dart';
 import 'package:open_file/open_file.dart';
+import 'package:signals/signals_flutter.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 import 'package:path/path.dart' as path;
 
-class ZapShareController extends GetxController {
+class ZapShareController {
   // Current transaction
-  final currentReceiver = Rx<LPHAddress?>(null);
-  final currentConversation = Rx<LPHAddress?>(null);
-  final waiting = false.obs;
-  final step = "loading".tr.obs;
-  final progress = 0.0.obs;
-  bool uploading = false;
-  final currentPart = 0.obs;
-  int endPart = 0;
-  String? transactionId;
-  String? transactionToken;
-  String? uploadToken;
-  String? filePath;
-  SecureKey? key;
-  StreamSubscription<Uint8List>? partSubscription;
+  static final currentReceiver = signal<LPHAddress?>(null);
+  static final currentConversation = signal<LPHAddress?>(null);
+  static final waiting = signal(false);
+  static final step = signal("loading".tr);
+  static final progress = signal(0.0);
+  static bool uploading = false;
+  static final currentPart = signal(0);
+  static int endPart = 0;
+  static String? transactionId;
+  static String? transactionToken;
+  static String? uploadToken;
+  static String? filePath;
+  static SecureKey? key;
+  static StreamSubscription<Uint8List>? partSubscription;
 
   static const chunkSize = 1024 * 1024;
 
-  bool isRunning() {
+  static bool isRunning() {
     return currentReceiver.value != null || currentConversation.value != null || waiting.value;
   }
 
-  void resetControllerState() {
+  static void resetControllerState() {
     step.value = "loading".tr;
     currentReceiver.value = null;
     currentConversation.value = null;
@@ -67,14 +68,12 @@ class ZapShareController extends GetxController {
     partSubscription = null;
   }
 
-  void cancel() {
+  static void cancel() {
     if (!isRunning()) {
       return;
     }
     if (uploading) {
-      connector.sendAction(
-        ServerAction("cancel_transaction", <String, dynamic>{}),
-      );
+      connector.sendAction(ServerAction("cancel_transaction", <String, dynamic>{}));
     } else {
       partSubscription?.cancel();
     }
@@ -82,7 +81,7 @@ class ZapShareController extends GetxController {
   }
 
   /// Open the window for zap share for a conversation
-  Future<void> openWindow(Conversation conversation, ContextMenuData data) async {
+  static Future<void> openWindow(Conversation conversation, ContextMenuData data) async {
     if (GetPlatform.isMobile) {
       showErrorPopup("error", "zap.no_mobile".tr);
       return;
@@ -106,7 +105,7 @@ class ZapShareController extends GetxController {
 
   //* Everything about sending starts here
 
-  Future<void> newTransaction(LPHAddress friend, LPHAddress conversationId, List<XFile> files) async {
+  static Future<void> newTransaction(LPHAddress friend, LPHAddress conversationId, List<XFile> files) async {
     if (files.length > 1) {
       sendLog("zapping multiple files is currently not supported");
       return;
@@ -135,10 +134,7 @@ class ZapShareController extends GetxController {
     endPart = (fileSize.toDouble() / chunkSize.toDouble()).ceil();
     step.value = "chat.zapshare.waiting".tr;
     connector.sendAction(
-      ServerAction("create_transaction", <String, dynamic>{
-        "name": fileName,
-        "size": fileSize,
-      }),
+      ServerAction("create_transaction", <String, dynamic>{"name": fileName, "size": fileSize}),
       handler: (event) {
         if (!event.data["success"]) {
           sendLog("creating transaction failed");
@@ -153,19 +149,31 @@ class ZapShareController extends GetxController {
         uploadToken = event.data["upload_token"];
 
         // Send live share message
-        final container = LiveshareInviteContainer(event.data["url"], transactionId!, transactionToken!, fileName, key!);
-        Get.find<MessageController>().currentProvider.value!.sendMessage(false.obs, msg.MessageType.liveshare, [], container.toJson(), "");
+        final container = LiveshareInviteContainer(
+          event.data["url"],
+          transactionId!,
+          transactionToken!,
+          fileName,
+          key!,
+        );
+        SidebarController.getCurrentProvider()!.sendMessage(
+          signal(false),
+          msg.MessageType.liveshare,
+          [],
+          container.toJson(),
+          "",
+        );
       },
     );
   }
 
   // For the zapper to know what to download
-  int currentlySending = 0;
-  int currentEndPart = 0;
-  bool zapperStarted = false;
+  static int currentlySending = 0;
+  static int currentEndPart = 0;
+  static bool zapperStarted = false;
 
   /// Zap deamon
-  Future<void> _startZapper(int start, int end) async {
+  static Future<void> _startZapper(int start, int end) async {
     if (zapperStarted) {
       return;
     }
@@ -220,7 +228,7 @@ class ZapShareController extends GetxController {
   }
 
   /// Upload the actual file part to the server
-  Future<bool> _sendActualFilePart(int chunk) async {
+  static Future<bool> _sendActualFilePart(int chunk) async {
     if (!isRunning()) {
       sendLog("why would the server ask for parts when zap isn't even running :smug:");
       return false;
@@ -233,7 +241,8 @@ class ZapShareController extends GetxController {
 
     // Calculate the size of the next chunk to prefill the list (optimization)
     final fileSize = await file.length();
-    final Uint8List toEncrypt = chunk * chunkSize >= fileSize ? Uint8List(fileSize - (chunk - 1) * chunkSize) : Uint8List(chunkSize);
+    final Uint8List toEncrypt =
+        chunk * chunkSize >= fileSize ? Uint8List(fileSize - (chunk - 1) * chunkSize) : Uint8List(chunkSize);
 
     // Send the chunk once done
     final completer = Completer<bool>();
@@ -259,12 +268,7 @@ class ZapShareController extends GetxController {
         final res = await dio.post(
           nodePath("/auth/liveshare/upload"),
           data: formData,
-          options: d.Options(
-            validateStatus: (status) => true,
-            headers: {
-              authorizationHeader: authorizationValue(),
-            },
-          ),
+          options: d.Options(validateStatus: (status) => true, headers: {authorizationHeader: authorizationValue()}),
         );
 
         // Could've been stopped at this point
@@ -293,10 +297,10 @@ class ZapShareController extends GetxController {
     return completer.future;
   }
 
-  int sending = 0;
+  static int sending = 0;
 
   /// Called for every file part sending request by the server
-  Future<void> onFilePartRequest(Event event) async {
+  static Future<void> onFilePartRequest(Event event) async {
     if (!isRunning()) {
       sendLog("why would the server ask for parts when zap share isn't even running :smug:");
       return;
@@ -314,7 +318,7 @@ class ZapShareController extends GetxController {
   }
 
   /// Called when a transaction is ended (only when sending)
-  Future<void> onTransactionEnd() async {
+  static Future<void> onTransactionEnd() async {
     waiting.value = false;
     uploading = false;
     progress.value = 0.0;
@@ -333,7 +337,11 @@ class ZapShareController extends GetxController {
   //* Everything about receiving starts here
 
   /// Join a transaction with a given ID and token + start listening for parts
-  Future<void> joinTransaction(LPHAddress conversation, LPHAddress friendAddress, LiveshareInviteContainer container) async {
+  static Future<void> joinTransaction(
+    LPHAddress conversation,
+    LPHAddress friendAddress,
+    LiveshareInviteContainer container,
+  ) async {
     if (isRunning()) {
       sendLog("Already in a transaction");
       return;
@@ -347,10 +355,10 @@ class ZapShareController extends GetxController {
     step.value = "preparing".tr;
 
     // Get info about the file
-    final json = await postAny(
-      "${nodeProtocol()}${container.url}/liveshare/info",
-      {"id": container.id, "token": container.token},
-    );
+    final json = await postAny("${nodeProtocol()}${container.url}/liveshare/info", {
+      "id": container.id,
+      "token": container.token,
+    });
     if (!json["success"]) {
       showErrorPopup("error", "chat.zapshare.not_found".tr);
       return;
@@ -377,19 +385,14 @@ class ZapShareController extends GetxController {
     currentReceiver.value = friendAddress;
 
     // Subscribe to byte stream
-    final formData = d.FormData.fromMap({
-      "id": container.id,
-      "token": container.token,
-    });
+    final formData = d.FormData.fromMap({"id": container.id, "token": container.token});
     final res = await dio.post(
       "${nodeProtocol()}${container.url}/liveshare/subscribe",
       data: formData,
       options: d.Options(
         validateStatus: (status) => status != 404,
         responseType: d.ResponseType.stream,
-        headers: {
-          authorizationHeader: authorizationValue(),
-        },
+        headers: {authorizationHeader: authorizationValue()},
       ),
     );
     final body = res.data as d.ResponseBody;
@@ -445,18 +448,11 @@ class ZapShareController extends GetxController {
             }
 
             // Download stuff
-            final formData = d.FormData.fromMap({
-              "id": container.id,
-              "token": container.token,
-              "chunk": currentChunk,
-            });
+            final formData = d.FormData.fromMap({"id": container.id, "token": container.token, "chunk": currentChunk});
             final res = await dio.get<Uint8List>(
               "${nodeProtocol()}${container.url}/liveshare/download",
               data: formData,
-              options: d.Options(
-                responseType: d.ResponseType.bytes,
-                validateStatus: (status) => true,
-              ),
+              options: d.Options(responseType: d.ResponseType.bytes, validateStatus: (status) => true),
             );
 
             if (res.statusCode != 200) {
@@ -481,21 +477,23 @@ class ZapShareController extends GetxController {
             }
 
             // Tell the server the part was successfully received
-            unawaited(_tellReceived(
-              container.url,
-              container.id,
-              container.token,
-              receiverId,
-              callback: (complete) async {
-                completed = complete;
-                if (completed) {
-                  sendLog("download with zap completed, opening final folder..");
-                  unawaited(OpenFile.open(path.dirname(receiveFile.path)));
-                  await partSubscription?.cancel();
-                }
-              },
-              onError: () => sendLog("error"),
-            ));
+            unawaited(
+              _tellReceived(
+                container.url,
+                container.id,
+                container.token,
+                receiverId,
+                callback: (complete) async {
+                  completed = complete;
+                  if (completed) {
+                    sendLog("download with zap completed, opening final folder..");
+                    unawaited(OpenFile.open(path.dirname(receiveFile.path)));
+                    await partSubscription?.cancel();
+                  }
+                },
+                onError: () => sendLog("error"),
+              ),
+            );
           }
         }
       },
@@ -509,18 +507,19 @@ class ZapShareController extends GetxController {
     );
   }
 
-  Future<void> _tellReceived(String url, String id, String token, String receiverId, {Function(bool)? callback, Function()? onError}) async {
+  static Future<void> _tellReceived(
+    String url,
+    String id,
+    String token,
+    String receiverId, {
+    Function(bool)? callback,
+    Function()? onError,
+  }) async {
     // Send receive confirmation
     final res = await dio.post(
       "${nodeProtocol()}$url/liveshare/received",
-      data: jsonEncode({
-        "id": id,
-        "token": token,
-        "receiver": receiverId,
-      }),
-      options: d.Options(
-        validateStatus: (status) => true,
-      ),
+      data: jsonEncode({"id": id, "token": token, "receiver": receiverId}),
+      options: d.Options(validateStatus: (status) => true),
     );
 
     if (res.statusCode != 200) {
@@ -558,12 +557,6 @@ class LiveshareInviteContainer {
   }
 
   String toJson() {
-    return jsonEncode({
-      "url": url,
-      "id": id,
-      "token": token,
-      "name": fileName,
-      "key": packageSymmetricKey(key),
-    });
+    return jsonEncode({"url": url, "id": id, "token": token, "name": fileName, "key": packageSymmetricKey(key)});
   }
 }

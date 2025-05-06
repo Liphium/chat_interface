@@ -3,9 +3,10 @@ import 'dart:async';
 import 'package:chat_interface/theme/components/forms/fj_textfield.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
+import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 import 'package:unicode_emojis/unicode_emojis.dart';
 
 class EmojiWindow extends StatefulWidget {
@@ -20,23 +21,19 @@ class EmojiWindow extends StatefulWidget {
 class _EmojiWindowState extends State<EmojiWindow> {
   final _scrollController = ScrollController();
   final _controller = TextEditingController();
-  final _currentSearch = "".obs;
-  int currentIndex = 0;
-  final emojis = <Emoji>[].obs;
-  bool gone = false;
-  Timer? currentTimer;
+  late final _emojis = listSignal(UnicodeEmojis.allEmojis.sublist(0, 100));
+  Timer? _currentTimer;
 
   @override
   void initState() {
     super.initState();
-    emojis.value = UnicodeEmojis.allEmojis;
   }
 
   @override
   void dispose() {
-    gone = true;
     _scrollController.dispose();
     _controller.dispose();
+    _emojis.dispose();
     super.dispose();
   }
 
@@ -47,7 +44,7 @@ class _EmojiWindowState extends State<EmojiWindow> {
     return SlidingWindowBase(
       title: const [],
       position: widget.data,
-      maxSize: 500,
+      maxSize: 400,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -58,54 +55,57 @@ class _EmojiWindowState extends State<EmojiWindow> {
             autofocus: true,
             hintText: "Search emojis",
             onChange: (value) {
-              _currentSearch.value = value;
-              if (value == "") {
-                emojis.value = UnicodeEmojis.allEmojis;
-              } else {
-                final search = UnicodeEmojis.search(value);
-                emojis.value = search;
-              }
+              _currentTimer?.cancel();
+              _currentTimer = Timer(const Duration(milliseconds: 300), () {
+                if (value == "") {
+                  _emojis.value = UnicodeEmojis.allEmojis.sublist(0, 100);
+                } else {
+                  final search = UnicodeEmojis.search(value);
+                  _emojis.value = search;
+                }
+              });
             },
           ),
           ConstrainedBox(
-            constraints: BoxConstraints(maxHeight: Get.height * 0.5),
+            constraints: BoxConstraints(maxHeight: 300),
             child: Padding(
               padding: const EdgeInsets.only(top: defaultSpacing),
               child: Material(
                 color: Colors.transparent,
-                child: Obx(
-                  () => GridView.builder(
-                    key: const ValueKey("the grid"),
-                    controller: _scrollController,
-                    gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                      maxCrossAxisExtent: 30 * 1.5,
-                      crossAxisSpacing: elementSpacing,
-                    ),
-                    itemCount: emojis.length,
-                    itemBuilder: (context, index) {
-                      final emoji = emojis[index];
-                      return RepaintBoundary(
-                        child: Tooltip(
-                          key: ValueKey(emoji.shortName),
-                          waitDuration: 500.ms,
-                          exitDuration: 0.ms,
+                child: Watch(
+                  (ctx) => FadingEdgeScrollView.fromScrollView(
+                    child: GridView.builder(
+                      primary: false,
+                      key: const Key("emojiScrollView"),
+                      scrollDirection: Axis.vertical,
+                      controller: _scrollController,
+                      padding: EdgeInsets.all(elementSpacing),
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        childAspectRatio: 1,
+                        crossAxisCount: 6,
+                        mainAxisSpacing: elementSpacing,
+                        crossAxisSpacing: elementSpacing,
+                      ),
+                      itemCount: _emojis.length,
+                      itemBuilder: (context, index) {
+                        final emoji = _emojis[index];
+                        return Tooltip(
+                          waitDuration: const Duration(milliseconds: 500),
+                          exitDuration: const Duration(milliseconds: 0),
                           message: ":${emoji.shortName}:",
                           child: Center(
                             child: InkWell(
                               borderRadius: BorderRadius.circular(1000),
                               onTap: () {
                                 Get.back(result: emoji.emoji);
-                                currentTimer?.cancel();
+                                _currentTimer?.cancel();
                               },
-                              child: Text(
-                                emoji.emoji,
-                                style: emojiTextStyle,
-                              ),
+                              child: Text(emoji.emoji, style: emojiTextStyle),
                             ),
                           ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),

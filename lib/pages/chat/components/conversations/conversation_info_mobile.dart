@@ -6,21 +6,19 @@ import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/theme/ui/profile/profile.dart';
 import 'package:chat_interface/theme/ui/profile/profile_button.dart';
+import 'package:chat_interface/util/constants.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class ConversationInfoMobile extends StatefulWidget {
   final ContextMenuData position;
   final Conversation conversation;
 
-  const ConversationInfoMobile({
-    super.key,
-    required this.position,
-    required this.conversation,
-  });
+  const ConversationInfoMobile({super.key, required this.position, required this.conversation});
 
   @override
   State<ConversationInfoMobile> createState() => _ConversationInfoMobileState();
@@ -28,7 +26,7 @@ class ConversationInfoMobile extends StatefulWidget {
 
 class _ConversationInfoMobileState extends State<ConversationInfoMobile> {
   // Loading states
-  final deleteLoading = false.obs;
+  final deleteLoading = signal(false);
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +35,11 @@ class _ConversationInfoMobileState extends State<ConversationInfoMobile> {
       title: [
         Row(
           children: [
-            Icon(widget.conversation.isGroup ? Icons.group : Icons.person, size: 30, color: Theme.of(context).colorScheme.onPrimary),
+            Icon(
+              widget.conversation.isGroup ? Icons.group : Icons.person,
+              size: 30,
+              color: Theme.of(context).colorScheme.onPrimary,
+            ),
             horizontalSpacing(defaultSpacing),
             Text(
               widget.conversation.isGroup ? widget.conversation.containerSub.value.name : widget.conversation.dmName,
@@ -52,18 +54,13 @@ class _ConversationInfoMobileState extends State<ConversationInfoMobile> {
         children: [
           // Show basic information about the conversation
           Text(
-            "conversation.info.town".trParams({
-              "town": widget.conversation.id.server,
-            }),
+            "conversation.info.town".trParams({"town": widget.conversation.id.server}),
             style: Get.textTheme.bodyMedium,
           ),
           verticalSpacing(sectionSpacing),
 
           // Show things that can be done with the current conversation
-          Text(
-            "Actions",
-            style: Get.theme.textTheme.labelMedium,
-          ),
+          Text("Actions", style: Get.theme.textTheme.labelMedium),
           verticalSpacing(defaultSpacing),
 
           // The conversation search is here to make it easier to access
@@ -71,7 +68,6 @@ class _ConversationInfoMobileState extends State<ConversationInfoMobile> {
             icon: Icons.search,
             label: "chat.search".tr,
             onTap: () => showModal(ConversationDevWindow(conversation: widget.conversation)),
-            loading: false.obs,
           ),
           verticalSpacing(elementSpacing),
 
@@ -83,8 +79,8 @@ class _ConversationInfoMobileState extends State<ConversationInfoMobile> {
               child: ProfileButton(
                 icon: Icons.electric_bolt,
                 label: "chat.zapshare".tr,
-                onTap: () => Get.find<ZapShareController>().openWindow(widget.conversation, ContextMenuData.fromPosition(Offset.zero)),
-                loading: false.obs,
+                onTap:
+                    () => ZapShareController.openWindow(widget.conversation, ContextMenuData.fromPosition(Offset.zero)),
               ),
             ),
           ),
@@ -92,27 +88,18 @@ class _ConversationInfoMobileState extends State<ConversationInfoMobile> {
             visible: widget.conversation.isGroup,
             child: Padding(
               padding: const EdgeInsets.only(bottom: elementSpacing),
-              child: ProfileButton(
-                icon: Icons.edit,
-                label: "Edit title",
-                onTap: () => {},
-                loading: false.obs,
-              ),
+              child: ProfileButton(icon: Icons.edit, label: "Edit title", onTap: () => {}),
             ),
           ),
           ProfileButton(
             icon: Icons.developer_mode,
             label: "dev.details".tr,
             onTap: () => showModal(ConversationDevWindow(conversation: widget.conversation)),
-            loading: false.obs,
           ),
           verticalSpacing(sectionSpacing),
 
           // Show that the conversation is encrypted (to make the user feel safe ig)
-          Text(
-            "Encryption",
-            style: Get.theme.textTheme.labelMedium,
-          ),
+          Text("Encryption", style: Get.theme.textTheme.labelMedium),
           verticalSpacing(defaultSpacing),
           Text("conversation.info.encrypted".tr, style: Get.textTheme.bodyMedium),
           verticalSpacing(defaultSpacing),
@@ -121,15 +108,11 @@ class _ConversationInfoMobileState extends State<ConversationInfoMobile> {
           ProfileButton(
             icon: Icons.launch,
             label: "learn_more".tr,
-            onTap: () => launchUrlString("https://liphium.com"), // TODO: Make a page about encryption
-            loading: false.obs,
+            onTap: () => launchUrlString(Constants.docsEncryptionAndPrivacy),
           ),
 
           verticalSpacing(sectionSpacing),
-          Text(
-            "Danger zone",
-            style: Get.theme.textTheme.labelMedium,
-          ),
+          Text("Danger zone", style: Get.theme.textTheme.labelMedium),
           verticalSpacing(defaultSpacing),
           Visibility(
             visible: !widget.conversation.isGroup,
@@ -150,16 +133,18 @@ class _ConversationInfoMobileState extends State<ConversationInfoMobile> {
             iconColor: Get.theme.colorScheme.error,
             icon: Icons.logout,
             label: "Leave conversation",
-            onTap: () => showConfirmPopup(ConfirmWindow(
-              title: "conversations.leave".tr,
-              text: "conversations.leave.text".tr,
-              onConfirm: () {
-                widget.conversation.delete();
-                Get.back();
-              },
-              onDecline: () => {},
-            )),
-            loading: false.obs,
+            onTap:
+                () => showConfirmPopup(
+                  ConfirmWindow(
+                    title: "conversations.leave".tr,
+                    text: "conversations.leave.text".tr,
+                    onConfirm: () {
+                      widget.conversation.delete();
+                      Get.back();
+                    },
+                    onDecline: () => {},
+                  ),
+                ),
           ),
         ],
       ),

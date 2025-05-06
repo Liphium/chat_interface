@@ -6,23 +6,20 @@ import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class LibraryWindow extends StatefulWidget {
   final ContextMenuData data;
   final MessageProvider provider;
 
-  const LibraryWindow({
-    super.key,
-    required this.data,
-    required this.provider,
-  });
+  const LibraryWindow({super.key, required this.data, required this.provider});
 
   @override
   State<LibraryWindow> createState() => _LibraryWindowState();
 }
 
 class _LibraryWindowState extends State<LibraryWindow> {
-  final _selected = "library.all".tr.obs;
+  final _selected = signal("library.all".tr);
 
   var _tabs = <String, Widget>{};
 
@@ -47,6 +44,12 @@ class _LibraryWindowState extends State<LibraryWindow> {
   }
 
   @override
+  void dispose() {
+    _selected.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return SlidingWindowBase(
       title: const [],
@@ -58,11 +61,7 @@ class _LibraryWindowState extends State<LibraryWindow> {
         children: [
           //* Tabs
           LPHTabElement(
-            tabs: [
-              "library.all".tr,
-              "library.images".tr,
-              "library.gifs".tr,
-            ],
+            tabs: ["library.all".tr, "library.images".tr, "library.gifs".tr],
             onTabSwitch: (newTab) {
               _selected.value = newTab;
             },
@@ -73,7 +72,7 @@ class _LibraryWindowState extends State<LibraryWindow> {
             child: SingleChildScrollView(
               child: Padding(
                 padding: const EdgeInsets.only(top: defaultSpacing),
-                child: Obx(() {
+                child: Watch((ctx) {
                   return _tabs[_selected.value]!;
                 }),
               ),

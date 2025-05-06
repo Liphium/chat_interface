@@ -5,6 +5,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class FileInfoWindow extends StatefulWidget {
   final AttachmentContainer container;
@@ -16,8 +17,8 @@ class FileInfoWindow extends StatefulWidget {
 }
 
 class _ConversationAddWindowState extends State<FileInfoWindow> {
-  final _errorText = "".obs;
-  final _loading = true.obs;
+  final _errorText = signal("");
+  final _loading = signal(true);
   double _size = 0.0;
 
   @override
@@ -26,10 +27,15 @@ class _ConversationAddWindowState extends State<FileInfoWindow> {
     super.initState();
   }
 
+  @override
+  void dispose() {
+    _errorText.dispose();
+    _loading.dispose();
+    super.dispose();
+  }
+
   Future<void> grabFileInfo() async {
-    final json = await postAuthorizedJSON("/account/files/info", {
-      "id": widget.container.id,
-    });
+    final json = await postAuthorizedJSON("/account/files/info", {"id": widget.container.id});
 
     if (!json["success"]) {
       _errorText.value = json["error"];
@@ -43,22 +49,14 @@ class _ConversationAddWindowState extends State<FileInfoWindow> {
   @override
   Widget build(BuildContext context) {
     return DialogBase(
-      child: Obx(() {
+      child: Watch((ctx) {
         // Show loading spinner
         if (_loading.value) {
-          return Center(
-            heightFactor: 1,
-            child: CircularProgressIndicator(
-              color: Get.theme.colorScheme.onPrimary,
-            ),
-          );
+          return Center(heightFactor: 1, child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary));
         }
 
         if (_errorText.value.isNotEmpty) {
-          return Center(
-            heightFactor: 1,
-            child: Text(_errorText.value, style: Get.textTheme.bodyMedium),
-          );
+          return Center(heightFactor: 1, child: Text(_errorText.value, style: Get.textTheme.bodyMedium));
         }
 
         return Column(
@@ -66,10 +64,7 @@ class _ConversationAddWindowState extends State<FileInfoWindow> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              "file.dialog".trParams({
-                "name": widget.container.name,
-                "size": _size.toStringAsFixed(2),
-              }),
+              "file.dialog".trParams({"name": widget.container.name, "size": _size.toStringAsFixed(2)}),
               style: Get.textTheme.bodyMedium,
             ),
             verticalSpacing(defaultSpacing),
@@ -79,7 +74,6 @@ class _ConversationAddWindowState extends State<FileInfoWindow> {
               onTap: () {
                 Get.back();
               },
-              loading: false.obs,
             ),
             verticalSpacing(elementSpacing),
             ProfileButton(
@@ -88,7 +82,6 @@ class _ConversationAddWindowState extends State<FileInfoWindow> {
               onTap: () {
                 Get.back();
               },
-              loading: false.obs,
             ),
           ],
         );

@@ -8,6 +8,7 @@ import 'package:chat_interface/translations/settings/tr_general_settings.dart';
 import 'package:chat_interface/translations/settings/tr_town_settings.dart';
 import 'package:chat_interface/translations/setup.dart';
 import 'package:chat_interface/translations/spaces.dart';
+import 'package:chat_interface/translations/squares.dart';
 import 'package:get/get.dart';
 
 class MainTranslations extends Translations {
@@ -17,6 +18,7 @@ class MainTranslations extends Translations {
       GeneralTranslations(),
       SetupTranslations(),
       ErrorTranslations(),
+      SquareTranslations(),
       ChatPageTranslations(),
       SpacesTranslations(),
 

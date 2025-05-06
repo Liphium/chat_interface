@@ -6,16 +6,13 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:liphium_bridge/liphium_bridge.dart';
+import 'package:signals/signals_flutter.dart';
 
 class ImageAttachmentRenderer extends StatefulWidget {
   final bool hoverCheck;
   final AttachmentContainer image;
 
-  const ImageAttachmentRenderer({
-    super.key,
-    required this.image,
-    this.hoverCheck = false,
-  });
+  const ImageAttachmentRenderer({super.key, required this.image, this.hoverCheck = false});
 
   @override
   State<ImageAttachmentRenderer> createState() => _ImageAttachmentRendererState();
@@ -28,14 +25,12 @@ class _ImageAttachmentRendererState extends State<ImageAttachmentRenderer> {
     final height = widget.image.height!.toDouble();
 
     return ConstrainedBox(
-      constraints: const BoxConstraints(
-        maxHeight: 350,
-      ),
+      constraints: const BoxConstraints(maxHeight: 350),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(defaultSpacing),
         child: AspectRatio(
           aspectRatio: width / height,
-          child: Obx(() {
+          child: Watch((ctx) {
             if (widget.image.downloading.value) {
               return Container(
                 width: width,
@@ -63,7 +58,7 @@ class _ImageAttachmentRendererState extends State<ImageAttachmentRenderer> {
                 child: Center(
                   child: IconButton(
                     onPressed: () {
-                      Get.find<AttachmentController>().downloadAttachment(widget.image, retry: true);
+                      AttachmentController.downloadAttachment(widget.image, retry: true);
                     },
                     icon: const Icon(Icons.refresh, size: 40),
                   ),
@@ -79,7 +74,7 @@ class _ImageAttachmentRendererState extends State<ImageAttachmentRenderer> {
                 child: Center(
                   child: IconButton(
                     onPressed: () {
-                      Get.find<AttachmentController>().downloadAttachment(widget.image);
+                      AttachmentController.downloadAttachment(widget.image);
                     },
                     icon: const Icon(Icons.download, size: 40),
                   ),
@@ -94,11 +89,11 @@ class _ImageAttachmentRendererState extends State<ImageAttachmentRenderer> {
                 container: widget.image,
                 onEnter: () {
                   if (widget.hoverCheck) {
-                    Get.find<MessageController>().hoveredAttachment = widget.image;
+                    MessageController.hoveredAttachment = widget.image;
                   }
                 },
                 onExit: () {
-                  Get.find<MessageController>().hoveredAttachment = widget.image;
+                  MessageController.hoveredAttachment = widget.image;
                 },
                 child: MouseRegion(
                   cursor: SystemMouseCursors.click,

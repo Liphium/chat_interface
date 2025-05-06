@@ -1,10 +1,12 @@
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/database/database.dart';
-import 'package:chat_interface/pages/chat/components/library/library_manager.dart';
+import 'package:chat_interface/services/chat/library_manager.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class LibraryFavoriteButton extends StatefulWidget {
   final AttachmentContainer container;
@@ -26,25 +28,27 @@ class LibraryFavoriteButton extends StatefulWidget {
   State<LibraryFavoriteButton> createState() => _LibraryFavoriteButtonState();
 }
 
-class _LibraryFavoriteButtonState extends State<LibraryFavoriteButton> {
-  final visible = false.obs;
-  final bookmarked = false.obs;
-  LibraryEntry? entry;
+class _LibraryFavoriteButtonState extends State<LibraryFavoriteButton> with SignalsMixin {
+  late final _visible = createSignal(false);
+  late final _bookmarked = createSignal(false);
+  LibraryEntry? _entry;
 
   /// Fetches the bookmark state from the local database
   Future<bool> fetchBookmarkState() async {
-    if (widget.container.attachmentType == AttachmentContainerType.remoteImage) {
-      final dbEntry = await (db.libraryEntry.select()..where((tbl) => tbl.data.equals(widget.container.url))).getSingleOrNull();
-      bookmarked.value = dbEntry != null;
-      if (bookmarked.value) {
-        entry = LibraryEntry.fromData(dbEntry!);
+    // Find identifier for the entry
+    final identifier = LibraryEntry.entryIdentifier(widget.container);
+
+    // Check if there is an entry with this identifier
+    final dbEntry = await (db.libraryEntry.select()..where((tbl) => tbl.identifierHash.equals(identifier))).get();
+    if (dbEntry.length > 1) {
+      sendLog("WARNING: hash collision with identifier of library entry, deleting all entries other than index 0");
+      for (var entry in dbEntry.sublist(1)) {
+        await LibraryManager.removeEntryFromLibrary(await LibraryEntry.fromData(entry));
       }
-    } else {
-      final dbEntry = await (db.libraryEntry.select()..where((tbl) => tbl.data.contains(widget.container.id))).getSingleOrNull();
-      bookmarked.value = dbEntry != null;
-      if (bookmarked.value) {
-        entry = LibraryEntry.fromData(dbEntry!);
-      }
+    }
+    _bookmarked.value = dbEntry.isNotEmpty;
+    if (_bookmarked.value) {
+      _entry = await LibraryEntry.fromData(dbEntry[0]);
     }
 
     // Just so you can await this function
@@ -56,11 +60,11 @@ class _LibraryFavoriteButtonState extends State<LibraryFavoriteButton> {
     return MouseRegion(
       onEnter: (e) async {
         await fetchBookmarkState();
-        visible.value = true;
+        _visible.value = true;
         widget.onEnter?.call();
       },
       onExit: (e) {
-        visible.value = false;
+        _visible.value = false;
         widget.onExit?.call();
       },
       child: Stack(
@@ -69,9 +73,9 @@ class _LibraryFavoriteButtonState extends State<LibraryFavoriteButton> {
           Positioned(
             top: elementSpacing,
             right: elementSpacing,
-            child: Obx(
-              () => Visibility(
-                visible: visible.value,
+            child: Watch(
+              (ctx) => Visibility(
+                visible: _visible.value,
                 child: Material(
                   color: Get.theme.colorScheme.primaryContainer,
                   borderRadius: BorderRadius.circular(elementSpacing),
@@ -82,24 +86,24 @@ class _LibraryFavoriteButtonState extends State<LibraryFavoriteButton> {
                     splashColor: Colors.transparent,
                     overlayColor: const WidgetStatePropertyAll(Colors.transparent),
                     onTap: () async {
-                      if (bookmarked.value) {
-                        final success = await LibraryManager.removeEntryFromLibrary(entry!);
+                      if (_bookmarked.value) {
+                        final success = await LibraryManager.removeEntryFromLibrary(_entry!);
                         if (success) {
-                          bookmarked.value = false;
+                          _bookmarked.value = false;
                         }
                       } else {
                         final success = await LibraryManager.addContainerToLibrary(widget.container);
                         if (success) {
-                          bookmarked.value = true;
+                          _bookmarked.value = true;
                         }
                       }
                     },
                     child: Padding(
                       padding: const EdgeInsets.all(elementSpacing),
-                      child: Obx(
-                        () => Icon(
-                          bookmarked.value ? Icons.bookmark : Icons.bookmark_outline,
-                          color: bookmarked.value ? Get.theme.colorScheme.onPrimary : Get.theme.colorScheme.onSurface,
+                      child: Watch(
+                        (ctx) => Icon(
+                          _bookmarked.value ? Icons.bookmark : Icons.bookmark_outline,
+                          color: _bookmarked.value ? Get.theme.colorScheme.onPrimary : Get.theme.colorScheme.onSurface,
                         ),
                       ),
                     ),
@@ -107,7 +111,7 @@ class _LibraryFavoriteButtonState extends State<LibraryFavoriteButton> {
                 ),
               ),
             ),
-          )
+          ),
         ],
       ),
     );

@@ -17,6 +17,7 @@ import 'package:get/get.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
+import 'package:signals/signals_flutter.dart';
 
 class FileSettings {
   // Auto download
@@ -47,13 +48,13 @@ class FileSettings {
     return imageTypes.contains(ext) || audioTypes.contains(ext) || videoTypes.contains(ext);
   }
 
-  static void addSettings(SettingController controller) {
-    controller.settings[autoDownloadImages] = Setting<bool>(autoDownloadImages, isWeb ? false : true);
-    controller.settings[autoDownloadVideos] = Setting<bool>(autoDownloadVideos, false);
-    controller.settings[autoDownloadAudio] = Setting<bool>(autoDownloadAudio, false);
-    controller.settings[maxFileSize] = Setting<double>(maxFileSize, isWeb ? 1.0 : 5.0);
-    controller.settings[maxCacheSize] = Setting<double>(maxCacheSize, 500.0);
-    controller.settings[fileCacheType] = Setting<int>(fileCacheType, 0);
+  static void addSettings() {
+    SettingController.addSetting(Setting<bool>(autoDownloadImages, isWeb ? false : true));
+    SettingController.addSetting(Setting<bool>(autoDownloadVideos, false));
+    SettingController.addSetting(Setting<bool>(autoDownloadAudio, false));
+    SettingController.addSetting(Setting<double>(maxFileSize, isWeb ? 1.0 : 5.0));
+    SettingController.addSetting(Setting<double>(maxCacheSize, 500.0));
+    SettingController.addSetting(Setting<int>(fileCacheType, 0));
   }
 }
 
@@ -96,13 +97,13 @@ class FileSettingsPage extends StatelessWidget {
           verticalSpacing(defaultSpacing + elementSpacing),
 
           ListSelectionSetting(
-            settingName: FileSettings.fileCacheType,
+            setting: SettingController.settings[FileSettings.fileCacheType]! as Setting<int>,
             items: FileSettings.fileCacheTypes,
           ),
 
-          Obx(
-            () => Visibility(
-              visible: Get.find<SettingController>().settings[FileSettings.fileCacheType]!.getValue() == 1,
+          Watch(
+            (ctx) => Visibility(
+              visible: SettingController.settings[FileSettings.fileCacheType]!.getValue() == 1,
               child: const DoubleSelectionSetting(
                 settingName: FileSettings.maxCacheSize,
                 description: "",
@@ -120,7 +121,10 @@ class FileSettingsPage extends StatelessWidget {
               children: [
                 FJElevatedButton(
                   onTap: () async {
-                    final cacheFolder = path.join((await getApplicationCacheDirectory()).path, ".file_cache_${StatusController.ownAccountId}");
+                    final cacheFolder = path.join(
+                      (await getApplicationCacheDirectory()).path,
+                      ".file_cache_${StatusController.ownAccountId}",
+                    );
                     unawaited(OpenFile.open(cacheFolder));
                   },
                   child: Row(
@@ -134,7 +138,10 @@ class FileSettingsPage extends StatelessWidget {
                 ),
                 FJElevatedButton(
                   onTap: () async {
-                    final fileFolder = path.join((await getApplicationSupportDirectory()).path, "saved_files_${StatusController.ownAccountId}");
+                    final fileFolder = path.join(
+                      (await getApplicationSupportDirectory()).path,
+                      "saved_files_${StatusController.ownAccountId}",
+                    );
                     unawaited(OpenFile.open(fileFolder));
                   },
                   child: Row(
@@ -148,7 +155,10 @@ class FileSettingsPage extends StatelessWidget {
                 ),
                 FJElevatedButton(
                   onTap: () async {
-                    final fileFolder = path.join((await getApplicationSupportDirectory()).path, "cloud_files_${StatusController.ownAccountId}");
+                    final fileFolder = path.join(
+                      (await getApplicationSupportDirectory()).path,
+                      "cloud_files_${StatusController.ownAccountId}",
+                    );
                     unawaited(OpenFile.open(fileFolder));
                   },
                   child: Row(

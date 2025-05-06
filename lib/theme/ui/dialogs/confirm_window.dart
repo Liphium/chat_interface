@@ -18,9 +18,7 @@ class ConfirmWindow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DialogBase(
-      title: [
-        Text(title, style: Get.theme.textTheme.titleMedium),
-      ],
+      title: [Text(title, style: Get.theme.textTheme.titleMedium)],
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -35,9 +33,7 @@ class ConfirmWindow extends StatelessWidget {
                     Get.back(result: true);
                     onConfirm?.call();
                   },
-                  child: Center(
-                    child: Text("yes".tr, style: Get.theme.textTheme.titleMedium),
-                  ),
+                  child: Center(child: Text("yes".tr, style: Get.theme.textTheme.titleMedium)),
                 ),
               ),
               horizontalSpacing(defaultSpacing),
@@ -47,13 +43,11 @@ class ConfirmWindow extends StatelessWidget {
                     Get.back(result: false);
                     onDecline?.call();
                   },
-                  child: Center(
-                    child: Text("no".tr, style: Get.theme.textTheme.titleMedium),
-                  ),
+                  child: Center(child: Text("no".tr, style: Get.theme.textTheme.titleMedium)),
                 ),
               ),
             ],
-          )
+          ),
         ],
       ),
     );

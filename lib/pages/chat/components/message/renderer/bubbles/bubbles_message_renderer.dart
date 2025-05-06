@@ -1,4 +1,4 @@
-import 'package:chat_interface/controller/account/friends/friend_controller.dart';
+import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/attachment_renderer.dart';
@@ -12,6 +12,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class BubblesMessageRenderer extends StatefulWidget {
   final LPHAddress senderAddress;
@@ -59,26 +60,26 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
             final menuData = ContextMenuData.fromPosition(Offset(_mouseX, _mouseY));
 
             // Open the context menu
-            Get.dialog(MessageOptionsWindow(
-              data: menuData,
-              self: widget.message.senderAddress == StatusController.ownAddress,
-              message: widget.message,
-              provider: widget.provider,
-            ));
+            Get.dialog(
+              MessageOptionsWindow(
+                data: menuData,
+                self: widget.message.senderAddress == StatusController.ownAddress,
+                message: widget.message,
+                provider: widget.provider,
+              ),
+            );
           },
           child: Padding(
-            padding: EdgeInsets.symmetric(
-              vertical: elementSpacing,
-            ),
+            padding: EdgeInsets.symmetric(vertical: elementSpacing),
             child: Row(
               textDirection: widget.self ? TextDirection.rtl : TextDirection.ltr,
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                //* Avatar
+                // Avatar with a tooltip to show their name
                 Visibility(
-                  visible: !widget.last,
-                  replacement: const SizedBox(width: 34), //* Show timestamp instead
+                  visible: widget.last,
+                  replacement: const SizedBox(width: 34),
                   child: Tooltip(
                     message: sender.displayName.value,
                     child: InkWell(
@@ -97,9 +98,7 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
                     textDirection: widget.self ? TextDirection.rtl : TextDirection.ltr,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Flexible(
-                        child: renderMessageContent(),
-                      ),
+                      Flexible(child: renderMessageContent()),
 
                       //* Desktop timestamp
                       horizontalSpacing(defaultSpacing),
@@ -107,14 +106,17 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
                       Padding(
                         padding: const EdgeInsets.only(top: defaultSpacing),
                         child: SelectionContainer.disabled(
-                          child: Text(formatMessageTime(widget.message.createdAt), style: Get.theme.textTheme.bodySmall),
+                          child: Text(
+                            formatMessageTime(widget.message.createdAt),
+                            style: Get.theme.textTheme.bodySmall,
+                          ),
                         ),
                       ),
 
                       //* Desktop verified indicator
                       horizontalSpacing(defaultSpacing),
 
-                      Obx(() {
+                      Watch((ctx) {
                         final verified = widget.message.verified.value;
                         return Visibility(
                           visible: !verified,
@@ -122,17 +124,14 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
                             padding: const EdgeInsets.only(top: elementSpacing + elementSpacing / 4),
                             child: Tooltip(
                               message: "chat.not.signed".tr,
-                              child: const Icon(
-                                Icons.warning_rounded,
-                                color: Colors.amber,
-                              ),
+                              child: const Icon(Icons.warning_rounded, color: Colors.amber),
                             ),
                           ),
                         );
-                      })
+                      }),
                     ],
                   ),
-                )
+                ),
               ],
             ),
           ),
@@ -142,41 +141,40 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
   }
 
   Widget renderMessageContent() {
-    return LayoutBuilder(builder: (context, constraints) {
-      return ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: widget.mobileLayout ? Get.width * 0.75 : (Get.width - 350) * 0.5),
-        child: Column(
-          crossAxisAlignment: widget.self ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-          children: [
-            //* Message content (text)
-            Visibility(
-              visible: widget.message.content.isNotEmpty,
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: defaultSpacing * 0.5, horizontal: defaultSpacing),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(defaultSpacing),
-                  color: widget.self ? Get.theme.colorScheme.primary : Get.theme.colorScheme.primaryContainer,
-                ),
-                child: Column(
-                  crossAxisAlignment: widget.self ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-                  children: [
-                    renderReplyMessage(),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: widget.mobileLayout ? Get.width * 0.75 : (Get.width - 350) * 0.5),
+          child: Column(
+            crossAxisAlignment: widget.self ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+            children: [
+              //* Message content (text)
+              Visibility(
+                visible: widget.message.content.isNotEmpty,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: defaultSpacing * 0.5, horizontal: defaultSpacing),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(defaultSpacing),
+                    color: widget.self ? Get.theme.colorScheme.primary : Get.theme.colorScheme.primaryContainer,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: widget.self ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+                    children: [
+                      renderReplyMessage(),
 
-                    //* Actual message (with formatted renderer)
-                    FormattedText(
-                      text: widget.message.content,
-                      baseStyle: Get.theme.textTheme.labelLarge!,
-                    ),
-                  ],
+                      //* Actual message (with formatted renderer)
+                      FormattedText(text: widget.message.content, baseStyle: Get.theme.textTheme.labelLarge!),
+                    ],
+                  ),
                 ),
               ),
-            ),
 
-            renderAttachments(),
-          ],
-        ),
-      );
-    });
+              renderAttachments(),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   Widget renderReplyMessage() {
@@ -187,7 +185,7 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
       padding: const EdgeInsets.only(top: elementSpacing, bottom: elementSpacing),
       child: Material(
         borderRadius: BorderRadius.circular(defaultSpacing),
-        color: widget.self ? Get.theme.colorScheme.onPrimary.withOpacity(0.2) : Get.theme.colorScheme.inverseSurface,
+        color: widget.self ? Get.theme.colorScheme.onPrimary.withAlpha(50) : Get.theme.colorScheme.inverseSurface,
         child: InkWell(
           borderRadius: BorderRadius.circular(defaultSpacing),
           onTap: () => widget.provider.scrollToMessage(widget.message.answer),
@@ -210,7 +208,10 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
                 Flexible(
                   child: Text(
                     AnswerData.answerContent(
-                        widget.message.answerMessage!.type, widget.message.answerMessage!.content, widget.message.answerMessage!.attachments),
+                      widget.message.answerMessage!.type,
+                      widget.message.answerMessage!.content,
+                      widget.message.answerMessage!.attachments,
+                    ),
                     style: Get.theme.textTheme.labelMedium,
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
@@ -234,24 +235,22 @@ class _BubblesMessageRendererState extends State<BubblesMessageRenderer> {
           padding: EdgeInsets.only(top: widget.message.content.isEmpty ? 0 : elementSpacing),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            children: List.generate(widget.message.attachmentsRenderer.length, (index) {
-              final container = widget.message.attachmentsRenderer[index];
+            children:
+                List.generate(widget.message.attachmentsRenderer.length, (index) {
+                  final container = widget.message.attachmentsRenderer[index];
 
-              if (container.width != null && container.height != null) {
-                return Padding(
-                  padding: EdgeInsets.only(top: widget.message.content.isEmpty && index == 0 ? 0 : elementSpacing),
-                  child: ImageAttachmentRenderer(
-                    image: container,
-                    hoverCheck: true,
-                  ),
-                );
-              }
+                  if (container.width != null && container.height != null) {
+                    return Padding(
+                      padding: EdgeInsets.only(top: widget.message.content.isEmpty && index == 0 ? 0 : elementSpacing),
+                      child: ImageAttachmentRenderer(image: container, hoverCheck: true),
+                    );
+                  }
 
-              return Padding(
-                padding: EdgeInsets.only(top: widget.message.content.isEmpty && index == 0 ? 0 : elementSpacing),
-                child: AttachmentRenderer(container: container, message: widget.message, self: widget.self),
-              );
-            }).toList(),
+                  return Padding(
+                    padding: EdgeInsets.only(top: widget.message.content.isEmpty && index == 0 ? 0 : elementSpacing),
+                    child: AttachmentRenderer(container: container, message: widget.message, self: widget.self),
+                  );
+                }).toList(),
           ),
         ),
       ),

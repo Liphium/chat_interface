@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:chat_interface/controller/account/friends/friend_controller.dart';
+import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/controller/current/connection_controller.dart';
@@ -21,6 +21,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:pasteboard/pasteboard.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:signals/signals_flutter.dart';
 import 'package:unicode_emojis/unicode_emojis.dart';
 
 import '../../../theme/components/forms/icon_button.dart';
@@ -47,13 +48,17 @@ class MessageInput extends StatefulWidget {
 }
 
 class _MessageInputState extends State<MessageInput> {
-  final FormattedTextEditingController _message = FormattedTextEditingController(Get.theme.textTheme.labelLarge!, Get.theme.textTheme.bodyLarge!);
-  final loading = false.obs;
+  final FormattedTextEditingController _message = FormattedTextEditingController(
+    Get.theme.textTheme.labelLarge!,
+    Get.theme.textTheme.bodyLarge!,
+  );
+  final _loading = signal(false);
   final FocusNode _inputFocus = FocusNode();
   StreamSubscription<Conversation>? _sub;
   final GlobalKey _libraryKey = GlobalKey();
   // final GlobalKey _emojiKey = GlobalKey();
-  final _emojiSuggestions = <Emoji>[].obs;
+  final _emojiSuggestions = listSignal<Emoji>([]);
+  final _emojiRegex = RegExp(":(.*?)\\s|:(.*\$)|");
 
   // For a little hack to prevent the answers from disappearing instantly
   LPHAddress? _previousAccount;
@@ -62,7 +67,9 @@ class _MessageInputState extends State<MessageInput> {
   void dispose() {
     _message.dispose();
     _sub?.cancel();
+    _loading.dispose();
     _inputFocus.dispose();
+    _emojiSuggestions.dispose();
     super.dispose();
   }
 
@@ -86,15 +93,14 @@ class _MessageInputState extends State<MessageInput> {
       _emojiSuggestions.clear();
 
       // Search for emojis
-      final regex = RegExp(":(.*?)\\s|:(.*\$)|");
       final cursorPos = _message.selection.start;
-      for (var match in regex.allMatches(_message.text)) {
+      for (var match in _emojiRegex.allMatches(_message.text)) {
         // Check if the cursor is inside of the current emoji
         if (match.start < cursorPos && match.end >= cursorPos) {
           final query = _message.text.substring(match.start + 1, cursorPos);
           if (query.length >= 2) {
             sendLog("current emoji query: $query");
-            _emojiSuggestions.value = UnicodeEmojis.search(query, limit: 20);
+            _emojiSuggestions.value = UnicodeEmojis.search(query, limit: 10);
           }
         }
       }
@@ -114,51 +120,51 @@ class _MessageInputState extends State<MessageInput> {
 
   void resetCurrentDraft() {
     if (MessageSendHelper.currentDraft.value != null) {
-      MessageSendHelper.drafts[MessageSendHelper.currentDraft.value!.target] = MessageDraft(MessageSendHelper.currentDraft.value!.target, "");
+      MessageSendHelper.drafts[MessageSendHelper.currentDraft.value!.target] = MessageDraft(
+        MessageSendHelper.currentDraft.value!.target,
+        "",
+      );
       MessageSendHelper.currentDraft.value = MessageDraft(MessageSendHelper.currentDraft.value!.target, "");
       _message.clear();
     }
-    loading.value = false;
+    _loading.value = false;
   }
 
   /// Replace the current selection with a new text
   void replaceSelection(String replacer) {
     // Compute the new offset before the text is changed
     final beforeLeft =
-        _message.selection.baseOffset > _message.selection.extentOffset ? _message.selection.baseOffset : _message.selection.extentOffset;
+        _message.selection.baseOffset > _message.selection.extentOffset
+            ? _message.selection.baseOffset
+            : _message.selection.extentOffset;
     final newOffset = beforeLeft - (_message.selection.end - _message.selection.start) + replacer.length;
 
     // Change the text in the field to include the pasted text
     _message.text =
-        _message.text.substring(0, _message.selection.start) + replacer + _message.text.substring(_message.selection.end, _message.text.length);
+        _message.text.substring(0, _message.selection.start) +
+        replacer +
+        _message.text.substring(_message.selection.end, _message.text.length);
 
     // Change the selection to the calculated offset
-    _message.selection = _message.selection.copyWith(
-      baseOffset: newOffset,
-      extentOffset: newOffset,
-    );
+    _message.selection = _message.selection.copyWith(baseOffset: newOffset, extentOffset: newOffset);
   }
 
   /// Replace the emoji selector in the input with an emoji
   void doEmojiSuggestion(String emoji) {
     // Search for emojis
-    final regex = RegExp(":(.*?)\\s|:(.*\$)|");
     final cursorPos = _message.selection.start;
-    for (var match in regex.allMatches(_message.text)) {
+    for (var match in _emojiRegex.allMatches(_message.text)) {
       // Check if the cursor is inside of the current emoji
       if (match.start < cursorPos && match.end >= cursorPos) {
         final query = _message.text.substring(match.start + 1, cursorPos);
         if (query.length >= 2) {
-          _emojiSuggestions.value = UnicodeEmojis.search(query, limit: 20);
-          _message.text = "${_message.text.substring(0, match.start)}$emoji ${_message.text.substring(cursorPos, _message.text.length)}";
+          _message.text =
+              "${_message.text.substring(0, match.start)}$emoji ${_message.text.substring(cursorPos, _message.text.length)}";
           _emojiSuggestions.clear();
           _inputFocus.requestFocus();
           // Change the selection to the calculated offset
-          final newOffset = cursorPos - query.length + 3;
-          _message.selection = _message.selection.copyWith(
-            baseOffset: newOffset,
-            extentOffset: newOffset,
-          );
+          final newOffset = cursorPos - query.length + 2;
+          _message.selection = _message.selection.copyWith(baseOffset: newOffset, extentOffset: newOffset);
         }
       }
     }
@@ -173,7 +179,7 @@ class _MessageInputState extends State<MessageInput> {
       SendIntent: CallbackAction<SendIntent>(
         onInvoke: (SendIntent intent) async {
           // Check if there is a connection before doing this
-          if (!Get.find<ConnectionController>().connected.value) {
+          if (!ConnectionController.connected.value) {
             showErrorPopup("error", "error.no_connection".tr);
             return;
           }
@@ -187,7 +193,7 @@ class _MessageInputState extends State<MessageInput> {
           // Send a regular text message if there are no files to attach
           if (MessageSendHelper.currentDraft.value!.files.isEmpty) {
             final error = await widget.provider.sendMessage(
-              loading,
+              _loading,
               MessageType.text,
               [],
               _message.text,
@@ -207,7 +213,7 @@ class _MessageInputState extends State<MessageInput> {
 
           // Send a regular text message with files
           final error = await widget.provider.sendTextMessageWithFiles(
-            loading,
+            _loading,
             _message.text,
             MessageSendHelper.currentDraft.value!.files,
             MessageSendHelper.currentDraft.value!.answer.value?.id ?? "",
@@ -261,9 +267,10 @@ class _MessageInputState extends State<MessageInput> {
     };
 
     // Build actual widget
-    final double padding = widget.rectangle
-        ? 0
-        : isMobileMode()
+    final double padding =
+        widget.rectangle
+            ? 0
+            : isMobileMode()
             ? defaultSpacing
             : sectionSpacing;
     return Padding(
@@ -278,142 +285,129 @@ class _MessageInputState extends State<MessageInput> {
               color: widget.secondary ? theme.colorScheme.inverseSurface : theme.colorScheme.onInverseSurface,
               borderRadius: BorderRadius.circular(defaultSpacing * (widget.rectangle ? 0 : 1.5)),
               child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: defaultSpacing,
-                  vertical: elementSpacing,
-                ),
+                padding: EdgeInsets.symmetric(horizontal: defaultSpacing, vertical: elementSpacing),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     //* Reply preview
-                    Obx(
-                      () {
-                        final answer = MessageSendHelper.currentDraft.value?.answer.value;
-                        if (answer != null) {
-                          _previousAccount = answer.senderAddress;
-                        }
+                    Watch((ctx) {
+                      final answer = MessageSendHelper.currentDraft.value?.answer.value;
+                      if (answer != null) {
+                        _previousAccount = answer.senderAddress;
+                      }
 
-                        return Animate(
-                          effects: [
-                            ExpandEffect(
-                              duration: 300.ms,
-                              curve: Curves.easeInOut,
-                              axis: Axis.vertical,
-                              alignment: Alignment.center,
-                            ),
-                            FadeEffect(
-                              duration: 300.ms,
-                            )
-                          ],
-                          target: MessageSendHelper.currentDraft.value == null || answer == null ? 0 : 1,
-                          child: Padding(
-                            padding: const EdgeInsets.all(elementSpacing),
-                            child: Row(
-                              children: [
-                                Icon(Icons.reply, color: theme.colorScheme.tertiary),
-                                horizontalSpacing(defaultSpacing),
-                                Expanded(
-                                  child: Text(
-                                    "message.reply.text".trParams({
-                                      "name": _previousAccount == null
-                                          ? "tf"
-                                          : Get.find<FriendController>().friends[_previousAccount]?.name ?? Friend.unknown(_previousAccount!).name,
-                                    }),
-                                    style: theme.textTheme.labelMedium,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ),
-                                LoadingIconButton(
-                                  iconSize: 22,
-                                  extra: 4,
-                                  padding: 4,
-                                  onTap: () {
-                                    MessageSendHelper.currentDraft.value!.answer.value = null;
-                                  },
-                                  icon: Icons.close,
-                                )
-                              ],
-                            ),
+                      return Animate(
+                        effects: [
+                          ExpandEffect(
+                            duration: 300.ms,
+                            curve: Curves.easeInOut,
+                            axis: Axis.vertical,
+                            alignment: Alignment.center,
                           ),
-                        );
-                      },
-                    ),
+                          FadeEffect(duration: 300.ms),
+                        ],
+                        target: MessageSendHelper.currentDraft.value == null || answer == null ? 0 : 1,
+                        child: Padding(
+                          padding: const EdgeInsets.all(elementSpacing),
+                          child: Row(
+                            children: [
+                              Icon(Icons.reply, color: theme.colorScheme.tertiary),
+                              horizontalSpacing(defaultSpacing),
+                              Expanded(
+                                child: Text(
+                                  "message.reply.text".trParams({
+                                    "name":
+                                        _previousAccount == null
+                                            ? "tf"
+                                            : FriendController.friends[_previousAccount]?.name ??
+                                                Friend.unknown(_previousAccount!).name,
+                                  }),
+                                  style: theme.textTheme.labelMedium,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              LoadingIconButton(
+                                iconSize: 22,
+                                extra: 4,
+                                padding: 4,
+                                onTap: () {
+                                  MessageSendHelper.currentDraft.value!.answer.value = null;
+                                },
+                                icon: Icons.close,
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }),
 
                     //* Emoji suggestions
-                    Obx(
-                      () {
-                        if (_emojiSuggestions.isEmpty) {
-                          return const SizedBox();
-                        }
-                        return Padding(
-                          padding: const EdgeInsets.all(elementSpacing),
-                          child: ScrollConfiguration(
-                            behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
-                            child: SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Row(
-                                children: [
-                                  for (var emoji in _emojiSuggestions)
-                                    Padding(
-                                      padding: const EdgeInsets.only(right: elementSpacing),
-                                      child: Tooltip(
-                                        key: ValueKey(emoji.shortName),
-                                        exitDuration: 0.ms,
-                                        message: ":${emoji.shortName}:",
-                                        child: Center(
-                                          child: InkWell(
-                                            borderRadius: BorderRadius.circular(1000),
-                                            onTap: () {
-                                              doEmojiSuggestion(emoji.emoji);
-                                            },
-                                            child: Text(
-                                              emoji.emoji,
-                                              style: Get.theme.textTheme.titleLarge!.copyWith(/* fontFamily: "Emoji", */ fontSize: 30),
+                    Watch((ctx) {
+                      if (_emojiSuggestions.isEmpty) {
+                        return const SizedBox();
+                      }
+                      return Padding(
+                        padding: const EdgeInsets.all(elementSpacing),
+                        child: ScrollConfiguration(
+                          behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: [
+                                for (var emoji in _emojiSuggestions)
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: elementSpacing),
+                                    child: Tooltip(
+                                      key: ValueKey(emoji.shortName),
+                                      exitDuration: 0.ms,
+                                      message: ":${emoji.shortName}:",
+                                      child: Center(
+                                        child: InkWell(
+                                          borderRadius: BorderRadius.circular(1000),
+                                          onTap: () {
+                                            doEmojiSuggestion(emoji.emoji);
+                                          },
+                                          child: Text(
+                                            emoji.emoji,
+                                            style: Get.theme.textTheme.titleLarge!.copyWith(
+                                              /* fontFamily: "Emoji", */ fontSize: 30,
                                             ),
                                           ),
                                         ),
                                       ),
                                     ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-
-                    //* File preview
-                    Obx(
-                      () {
-                        if (MessageSendHelper.currentDraft.value == null) {
-                          return const SizedBox();
-                        }
-                        return Animate(
-                          effects: [
-                            ExpandEffect(
-                              duration: 250.ms,
-                              curve: Curves.easeInOut,
-                              axis: Axis.vertical,
-                            )
-                          ],
-                          target: MessageSendHelper.currentDraft.value!.files.isEmpty ? 0 : 1,
-                          child: Padding(
-                            padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
-                            child: Row(
-                              children: [
-                                const SizedBox(height: 200 + defaultSpacing),
-                                for (final file in MessageSendHelper.currentDraft.value!.files)
-                                  SquareFileRenderer(
-                                    file: file,
-                                    onRemove: () => MessageSendHelper.currentDraft.value!.files.remove(file),
                                   ),
                               ],
                             ),
                           ),
-                        );
-                      },
-                    ),
+                        ),
+                      );
+                    }),
+
+                    //* File preview
+                    Watch((ctx) {
+                      if (MessageSendHelper.currentDraft.value == null) {
+                        return const SizedBox();
+                      }
+                      return Animate(
+                        effects: [ExpandEffect(duration: 250.ms, curve: Curves.easeInOut, axis: Axis.vertical)],
+                        target: MessageSendHelper.currentDraft.value!.files.isEmpty ? 0 : 1,
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
+                          child: Row(
+                            children: [
+                              const SizedBox(height: 200 + defaultSpacing),
+                              for (final file in MessageSendHelper.currentDraft.value!.files)
+                                SquareFileRenderer(
+                                  file: file,
+                                  onRemove: () => MessageSendHelper.currentDraft.value!.files.remove(file),
+                                ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }),
 
                     //* Input
                     Row(
@@ -459,9 +453,7 @@ class _MessageInputState extends State<MessageInput> {
                                   hintText: 'chat.message'.tr,
                                   hintStyle: theme.textTheme.bodyLarge,
                                 ),
-                                inputFormatters: [
-                                  LengthLimitingTextInputFormatter(1000),
-                                ],
+                                inputFormatters: [LengthLimitingTextInputFormatter(1000)],
                                 focusNode: _inputFocus,
                                 onChanged: (value) {
                                   MessageSendHelper.currentDraft.value!.message = value;
@@ -483,12 +475,13 @@ class _MessageInputState extends State<MessageInput> {
                         ),
                         IconButton(
                           key: _libraryKey,
-                          onPressed: () => showModal(
-                            LibraryWindow(
-                              data: ContextMenuData.fromKey(_libraryKey, above: true, right: true),
-                              provider: widget.provider,
-                            ),
-                          ),
+                          onPressed:
+                              () => showModal(
+                                LibraryWindow(
+                                  data: ContextMenuData.fromKey(_libraryKey, above: true, right: true),
+                                  provider: widget.provider,
+                                ),
+                              ),
                           icon: const Icon(Icons.folder),
                           color: theme.colorScheme.tertiary,
                         ),
@@ -503,7 +496,7 @@ class _MessageInputState extends State<MessageInput> {
                             },
                             icon: Icons.send,
                             color: theme.colorScheme.tertiary,
-                            loading: loading,
+                            loading: _loading,
                           ),
                         ),
                       ],

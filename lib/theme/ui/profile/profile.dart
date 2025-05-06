@@ -1,75 +1,90 @@
-import 'package:chat_interface/controller/account/friends/friend_controller.dart';
+import 'dart:async';
+
+import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
-import 'package:chat_interface/controller/spaces/spaces_controller.dart';
+import 'package:chat_interface/controller/spaces/space_controller.dart';
+import 'package:chat_interface/services/chat/conversation_message_provider.dart';
+import 'package:chat_interface/services/chat/conversation_service.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/theme/ui/profile/profile_button.dart';
+import 'package:chat_interface/util/dispose_hook.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class ProfileDefaults {
-  static Function(Friend, RxBool) deleteAction = (Friend friend, RxBool loading) async {
+  static Function(Friend, Signal<bool>) deleteAction = (Friend friend, Signal<bool> loading) async {
     // Show a confirm popup
-    final result = await showConfirmPopup(ConfirmWindow(
-      title: "friends.remove.confirm".tr,
-      text: "friends.remove.desc".tr,
-    ));
+    final result = await showConfirmPopup(
+      ConfirmWindow(title: "friends.remove.confirm".tr, text: "friends.remove.desc".tr),
+    );
     if (!result) {
       return;
     }
 
-    await friend.remove(loading);
-    Get.back();
-  };
-
-  static Function(Friend, RxBool) openAction = (Friend friend, RxBool loading) async {
+    // Remove the friend
     loading.value = true;
-    await openDirectMessage(friend);
+    final error = await friend.remove();
+    if (error != null) {
+      showErrorPopup("error", error);
+    } else {
+      Get.back();
+    }
     loading.value = false;
-    Get.back();
   };
 
-  static List<ProfileAction> buildDefaultActions(Friend friend) {
-    final removeLoading = false.obs;
+  static Function(Friend, Signal<bool>) openAction = (Friend friend, Signal<bool> loading) async {
+    loading.value = true;
+    final (conv, error) = await ConversationService.openDirectMessage(friend);
+    if (conv != null) {
+      unawaited(MessageController.openConversation(conv));
+      Get.back();
+    }
+    if (error != null) {
+      showErrorPopup("error", error);
+    }
+    loading.value = false;
+  };
+
+  static List<ProfileAction> buildDefaultActions(Friend friend, {bool messageAction = true}) {
+    final removeLoading = signal(false);
 
     if (friend.unknown) {
-      return [
-        ProfileAction(icon: Icons.person_add, category: true, label: 'friends.add'.tr, loading: false.obs, onTap: (f, l) => {}),
-      ];
+      return [ProfileAction(icon: Icons.person_add, category: true, label: 'friends.add'.tr, onTap: (f, l) => {})];
     }
 
     return [
-      ProfileAction(
-        category: true,
-        icon: Icons.message,
-        label: 'friends.message'.tr,
-        onTap: openAction,
-        loading: friend.openConversationLoading,
-      ),
-      if (Get.find<SpacesController>().inSpace.value)
+      if (messageAction)
+        ProfileAction(
+          category: true,
+          icon: Icons.message,
+          label: 'friends.message'.tr,
+          onTap: openAction,
+          loading: friend.openConversationLoading,
+        ),
+      if (SpaceController.connected.value)
         ProfileAction(
           icon: Icons.forward_to_inbox,
           label: 'friends.invite_to_space'.tr,
-          loading: false.obs,
+          loading: signal(false),
           onTap: (friend, l) {
-            final controller = Get.find<ConversationController>();
-
             // Check if there even is a conversation with the guy
-            final conversation = controller.conversations.values.toList().firstWhereOrNull(
-                  (c) => c.members.values.any((m) => m.address == friend.id),
-                );
+            final conversation = ConversationController.conversations.values.toList().firstWhereOrNull(
+              (c) => c.members.values.any((m) => m.address == friend.id),
+            );
             if (conversation == null) {
               showErrorPopup("error", "profile.conversation_not_found".tr);
               return;
             }
 
-            Get.find<SpacesController>().inviteToCall(ConversationMessageProvider(conversation));
+            SpaceController.inviteToCall(ConversationMessageProvider(conversation));
             Get.back();
           },
         ),
@@ -89,24 +104,31 @@ class ProfileDefaults {
 class ProfileAction {
   final IconData icon;
   final bool category;
-  final RxBool loading;
+  final Signal<bool>? loading;
   final String label;
   final Color? color;
   final Color? iconColor;
-  final Function(Friend, RxBool) onTap;
+  final Function(Friend, Signal<bool>) onTap;
 
-  const ProfileAction(
-      {required this.icon, required this.label, required this.loading, required this.onTap, this.category = false, this.color, this.iconColor});
+  const ProfileAction({
+    required this.icon,
+    required this.label,
+    this.loading,
+    required this.onTap,
+    this.category = false,
+    this.color,
+    this.iconColor,
+  });
 }
 
 class Profile extends StatefulWidget {
   final bool leftAligned;
-  final Offset? position;
+  final ContextMenuData? data;
   final Friend friend;
   final int size;
   final List<ProfileAction> Function(Friend)? actions;
 
-  const Profile({super.key, this.position, required this.friend, this.size = 300, this.leftAligned = true, this.actions});
+  const Profile({super.key, this.data, required this.friend, this.size = 350, this.leftAligned = true, this.actions});
 
   @override
   State<Profile> createState() => _ProfileState();
@@ -114,36 +136,27 @@ class Profile extends StatefulWidget {
 
 class _ProfileState extends State<Profile> {
   //* Loading state for buttons
-  final removeLoading = false.obs;
   final List<ProfileAction> actions = [];
 
   @override
   Widget build(BuildContext context) {
     actions.clear();
     if (widget.actions == null) {
-      if (widget.friend.unknown) {
-      } else {
-        actions.addAll(ProfileDefaults.buildDefaultActions(widget.friend));
-      }
+      actions.addAll(ProfileDefaults.buildDefaultActions(widget.friend));
     } else {
       actions.addAll(widget.actions!(widget.friend));
     }
 
     //* Context menu
-    if (widget.position != null) {
+    if (widget.data != null) {
       return SlidingWindowBase(
         title: const [],
-        lessPadding: true,
-        position: ContextMenuData(widget.position!, true, widget.leftAligned),
+        position: widget.data,
         maxSize: widget.size.toDouble(),
         child: buildProfile(),
       );
     } else {
-      return DialogBase(
-        title: const [],
-        maxWidth: widget.size.toDouble(),
-        child: buildProfile(),
-      );
+      return DialogBase(title: const [], maxWidth: widget.size.toDouble(), child: buildProfile());
     }
   }
 
@@ -174,14 +187,8 @@ class _ProfileState extends State<Profile> {
                       padding: const EdgeInsets.only(left: defaultSpacing),
                       child: Tooltip(
                         waitDuration: const Duration(milliseconds: 500),
-                        message: "friends.different_town".trParams({
-                          "town": widget.friend.id.server,
-                        }),
-                        child: Icon(
-                          Icons.sensors,
-                          color: Get.theme.colorScheme.onPrimary,
-                          size: 21,
-                        ),
+                        message: "friends.different_town".trParams({"town": widget.friend.id.server}),
+                        child: Icon(Icons.sensors, color: Get.theme.colorScheme.onPrimary, size: 21),
                       ),
                     ),
                 ],
@@ -190,38 +197,33 @@ class _ProfileState extends State<Profile> {
 
             // Start space button
             LoadingIconButton(
-              loading: false.obs,
               onTap: () {
-                final controller = Get.find<ConversationController>();
-
                 // Check if there even is a conversation with the guy
-                final conversation = controller.conversations.values.toList().firstWhereOrNull(
-                      (c) => c.members.values.any((m) => m.address == widget.friend.id),
-                    );
+                final conversation = ConversationController.conversations.values.toList().firstWhereOrNull(
+                  (c) => c.members.values.any((m) => m.address == widget.friend.id),
+                );
                 if (conversation == null) {
                   showErrorPopup("error", "profile.conversation_not_found".tr);
                   return;
                 }
 
                 // Make sure to invite the guy in case the current user is in a space
-                if (Get.find<SpacesController>().inSpace.value) {
-                  Get.find<SpacesController>().inviteToCall(ConversationMessageProvider(conversation));
+                if (SpaceController.connected.value) {
+                  SpaceController.inviteToCall(ConversationMessageProvider(conversation));
                 } else {
-                  Get.find<SpacesController>().createAndConnect(ConversationMessageProvider(conversation));
+                  SpaceController.createAndConnect(ConversationMessageProvider(conversation));
                 }
                 Get.back();
               },
-              icon: Get.find<SpacesController>().inSpace.value ? Icons.forward_to_inbox : Icons.rocket_launch,
-            )
+              icon: SpaceController.connected.value ? Icons.forward_to_inbox : Icons.rocket_launch,
+            ),
           ],
         ),
-        Obx(
-          () => widget.friend.status.value != ""
-              ? Text(
-                  widget.friend.status.value,
-                  style: Get.theme.textTheme.bodyMedium,
-                )
-              : const SizedBox(),
+        Watch(
+          (ctx) =>
+              widget.friend.status.value != ""
+                  ? Text(widget.friend.status.value, style: Get.theme.textTheme.bodyMedium)
+                  : const SizedBox(),
         ),
         verticalSpacing(defaultSpacing),
         ListView.builder(
@@ -229,22 +231,38 @@ class _ProfileState extends State<Profile> {
           itemCount: actions.length,
           itemBuilder: (context, index) {
             ProfileAction action = actions[index];
-            return Padding(
+
+            // Create a function that takes in a loading signal to create the button
+            button(loading) => Padding(
               padding: EdgeInsets.only(
-                  top: index == 0
-                      ? 0
-                      : action.category
-                          ? defaultSpacing
-                          : elementSpacing),
+                top:
+                    index == 0
+                        ? 0
+                        : action.category
+                        ? defaultSpacing
+                        : elementSpacing,
+              ),
               child: ProfileButton(
                 icon: action.icon,
                 label: action.label,
-                onTap: () => action.onTap.call(widget.friend, action.loading),
+                onTap: () => action.onTap.call(widget.friend, loading),
                 loading: action.loading,
                 color: action.color,
                 iconColor: action.iconColor,
               ),
             );
+
+            // Make sure to manually add the loading state in case not there
+            if (action.loading == null) {
+              return SignalHook(
+                value: false,
+                builder: (loading) {
+                  return button(loading);
+                },
+              );
+            }
+
+            return button(action.loading);
           },
         ),
       ],

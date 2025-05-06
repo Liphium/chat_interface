@@ -15,10 +15,16 @@ class FJSwitch extends StatelessWidget {
       width: 54,
       child: Switch(
         trackColor: WidgetStateColor.resolveWith(
-            (states) => states.contains(WidgetState.selected) ? Get.theme.colorScheme.primary : Get.theme.colorScheme.primaryContainer),
+          (states) =>
+              states.contains(WidgetState.selected)
+                  ? Get.theme.colorScheme.primary
+                  : Get.theme.colorScheme.primaryContainer,
+        ),
         hoverColor: Get.theme.hoverColor,
         thumbColor: WidgetStateColor.resolveWith(
-            (states) => states.contains(WidgetState.selected) ? Get.theme.colorScheme.onPrimary : Get.theme.colorScheme.surface),
+          (states) =>
+              states.contains(WidgetState.selected) ? Get.theme.colorScheme.onPrimary : Get.theme.colorScheme.surface,
+        ),
         value: value,
         onChanged: onChanged,
       ),

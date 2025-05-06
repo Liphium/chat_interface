@@ -6,6 +6,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class ConversationDevWindow extends StatefulWidget {
   final Conversation conversation;
@@ -17,12 +18,12 @@ class ConversationDevWindow extends StatefulWidget {
 }
 
 class _ConversationAddWindowState extends State<ConversationDevWindow> {
-  final messageDeletionLoading = false.obs;
+  final messageDeletionLoading = signal(false);
 
   @override
   Widget build(BuildContext context) {
-    final readDate = DateTime.fromMillisecondsSinceEpoch(widget.conversation.readAt.value.toInt());
-    final updateDate = DateTime.fromMillisecondsSinceEpoch(widget.conversation.updatedAt.value.toInt());
+    final readDate = DateTime.fromMillisecondsSinceEpoch(widget.conversation.reads.getMain());
+    final updateDate = DateTime.fromMillisecondsSinceEpoch(widget.conversation.updatedAt.toInt());
     sendLog(widget.conversation.lastVersion);
 
     return DialogBase(
@@ -31,9 +32,7 @@ class _ConversationAddWindowState extends State<ConversationDevWindow> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "conversation.info.id".trParams({
-              "id": widget.conversation.id.toString(),
-            }),
+            "conversation.info.id".trParams({"id": widget.conversation.id.toString()}),
             style: Get.textTheme.bodyMedium,
           ),
           verticalSpacing(elementSpacing),
@@ -68,16 +67,12 @@ class _ConversationAddWindowState extends State<ConversationDevWindow> {
           ),
           verticalSpacing(elementSpacing),
           Text(
-            "conversation.info.members".trParams({
-              "count": widget.conversation.members.length.toString(),
-            }),
+            "conversation.info.members".trParams({"count": widget.conversation.members.length.toString()}),
             style: Get.textTheme.bodyMedium,
           ),
           verticalSpacing(elementSpacing),
           Text(
-            "conversation.info.version".trParams({
-              "version": widget.conversation.lastVersion.toString(),
-            }),
+            "conversation.info.version".trParams({"version": widget.conversation.lastVersion.toString()}),
             style: Get.textTheme.bodyMedium,
           ),
           verticalSpacing(defaultSpacing),
@@ -88,17 +83,17 @@ class _ConversationAddWindowState extends State<ConversationDevWindow> {
               Clipboard.setData(ClipboardData(text: widget.conversation.id.toString()));
               Get.back();
             },
-            loading: false.obs,
           ),
           verticalSpacing(elementSpacing),
           ProfileButton(
             icon: Icons.copy,
             label: "conversation.info.copy_token".tr,
             onTap: () {
-              Clipboard.setData(ClipboardData(text: "${widget.conversation.token.id}:${widget.conversation.token.token}"));
+              Clipboard.setData(
+                ClipboardData(text: "${widget.conversation.token.id}:${widget.conversation.token.token}"),
+              );
               Get.back();
             },
-            loading: false.obs,
           ),
           verticalSpacing(elementSpacing),
           ProfileButton(
@@ -107,7 +102,6 @@ class _ConversationAddWindowState extends State<ConversationDevWindow> {
             icon: Icons.close,
             label: "close".tr,
             onTap: () => Get.back(),
-            loading: false.obs,
           ),
         ],
       ),

@@ -4,19 +4,20 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class WarpConnectedList extends StatelessWidget {
   const WarpConnectedList({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<WarpController>();
-    return Obx(() {
-      if (controller.activeWarps.isEmpty) {
+    return Watch((context) {
+      final activeWarps = WarpController.activeWarps.value;
+      if (activeWarps.isEmpty) {
         return SizedBox();
       }
 
-      final values = controller.activeWarps.values.toList();
+      final values = WarpController.activeWarps.value.values.toList();
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -53,7 +54,7 @@ class WarpConnectedList extends StatelessWidget {
                           ),
                           const Spacer(),
                           LoadingIconButton(
-                            onTap: () => controller.disconnectWarp(warp),
+                            onTap: () => WarpController.disconnectWarp(warp),
                             extra: 5,
                             icon: Icons.logout,
                           ),

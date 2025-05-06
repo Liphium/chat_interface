@@ -1,8 +1,12 @@
 # Liphium: Decentralization for everyone
 
-Welcome to the repository of the app used to interact with [station](https://github.com/Liphium/station), our decentralized backend service. With this app you can share files of any size, chat with anyone who has a "town" (what we call our servers) and even go into Spaces with them where you can play card games or share Minecraft servers. This is probably the quickest introduction I've ever given about the app and if you want to know more: [Our website exists](https://liphium.com).
+Welcome to the repository of the app used to interact with [station](https://github.com/Liphium/station), our decentralized backend service. With this app you can share files of any size, chat with anyone who has a "town" (what we call our servers) and even go into Spaces with them where you can play card games, share Minecraft servers or just talk with them. This is probably the quickest introduction I've ever given about the app and if you want to know more: [Our website exists](https://liphium.com).
 
-You can find a lot of information about this app [on our help & resources page](https://liphium.com/docs). Be sure to check it out, and if your question isn't answered, you can always contact us through Discord or Email (available on our website).
+You can find a lot of information about the app [in the help & resources page](https://liphium.com/docs). If you want to know what's next for Liphium, check out [the roadmap](https://liphium.dev/roadmap). If your question isn't answered, you can always join the [Discord](https://liphium.dev/discord) or send an E-Mail (both available on our website).
+
+## Download
+
+You can always find up-to-date information about where Liphium is available on [the downloads page](https://liphium.com/docs/general/download/). At the time of writing this Liphium is only available on Windows through the Microsoft Store. We're working on expanding to more platforms, but there's only so much one fellow can do. If you want to help pushing out Liphium to more platforms, join the Discord and contact any developer on there. We'd really appreciate the help. 
 
 ## The goal
 
@@ -10,8 +14,9 @@ With Liphium, the attempt is to hide all of the decentralization magic and give 
 
 ## This repository
 
-With all that said, this repository contains the main app for Liphium. It's one codebase for both mobile and desktop platforms making use of the [Flutter](https://flutter.dev) framework for at least somewhat seamless experiences across platforms. The app looks the same and has the same categories for things like Settings on all platforms to make explaining it easier than ever. All settings are the same in the same order across every platform. This consistency is key to making a good app (in my opinion) and makes writing documentation and more a lot easier. Every single piece of code can be re-used making adding features quite easy across the board.
+This repository contains all of the code available for Liphium's client app.
 
 ## Contributing
 
-Hey, I appreciate that you want to contribute, but I'm sorry to report that all of the guides are just not there yet. If you are really curious about the app, you can reach out to me over on our Discord server (you can find the invite on [our website](https://liphium.com)). Contribution guides and more will be available at some point, but for now I just wanna develop this app alone and make sure there is some documentation because I don't want your experience making contributions to be really bad and I also want you to know where what is and why it's that way. The code quality is also still really bad and rough in some places, I'd also like to fix all of that before allowing contributions. So, just wait for now and let me cook.
+I appreciate that you want to contribute, the problem is just that there are no guides on how to navigate this gigantic codebase and before I sent you down this big rabbit hole I want to actually provide decent information on where things are and how things work. If you just want to help fix some typos, feel free to create a pull request. If you have a feature you want to request or have a bug that's bothering you, open an issue. If you want to help ship Liphium to more platforms, either open an issue or join the Discord server and contact me through there. Once guides and more are available I'll also make an announcement somewhere.
+

@@ -4,6 +4,43 @@
 
 ## 0.6.0
 
+### Major changes
+
+- Compatability with protocol v8
+- Added voice calling in Spaces using Lightwire, our own audio engine
+- Added connecting to Studio, our WebRTC implementation, in Spaces
+- Added a new conversation type called Square
+  - Multiple conversations (called Topics) can be created inside of them
+  - Spaces created inside of it will be displayed in the sidebar
+
+### Minor changes and fixes
+
+- Fixed that you couldn't invite people to a Space
+- Fixed same addresses sometimes not being recognized
+- Rewrote the entire code using new state management for a better structure
+  - It now uses [signals](https://pub.dev/packages/signals) instead of GetX
+  - It's now devided into services and controllers for a better overview
+  - Tabletop's architecture still needs to be improved
+- Fixed Warp crashing when sharing invalid ports
+- Fixed Warp allowing to share already shared ports
+- Fixed being able to add accounts that are already friends as a friend
+- Rewrote the entire vault synchronization for better performance and maintainability
+- Rewrote the text formatting detection to make it more extensible and also more stable (\*\*\*\* no longer breaks the app)
+  - Regression: Links are no longer clickable (TODO: Fix before 1.0.0 Beta)
+- Fixed cards in rotated inventories having an incorrect rotation
+- Fixed not creating a new inventory when the old one has been deleted
+- Fixed the "Edit title" button not actually doing anything
+- Changed member and search sidebar to one consistent design
+- Fixed member and search sidebar both being open when searching in group chats
+- Fixed search not being scoped to individual conversations (and basically unusable)
+- You can now choose how many dots appear
+- All creation buttons are now in one menu in the sidebar
+- Added a right click context menu in the sidebar
+- More reliable notification handling
+- The chat view now opens where the newest messages are
+
+## 0.6.0
+
 ### Architecture changes and new features
 
 - This release of Liphium is compatible with protocol v7

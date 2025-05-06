@@ -1,8 +1,8 @@
 import 'dart:convert';
 
-import 'package:chat_interface/connection/connection.dart';
-import 'package:chat_interface/connection/encryption/aes.dart';
-import 'package:chat_interface/connection/encryption/rsa.dart';
+import 'package:chat_interface/services/connection/connection.dart';
+import 'package:chat_interface/util/encryption/aes.dart';
+import 'package:chat_interface/util/encryption/rsa.dart';
 import 'package:chat_interface/database/trusted_links.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/status/setup/server_setup.dart';
@@ -24,10 +24,7 @@ void loadTokensFromPayload(Map<String, dynamic> payload) {
 }
 
 String tokensToPayload() {
-  Map<String, String> payload = {
-    'token': sessionToken,
-    'refresh_token': refreshToken,
-  };
+  Map<String, String> payload = {'token': sessionToken, 'refresh_token': refreshToken};
 
   return jsonEncode(payload);
 }
@@ -48,6 +45,10 @@ String nodePath(String path) {
 
 String authorizationValue() {
   return "Bearer $sessionToken";
+}
+
+String localeString(Locale locale) {
+  return "${locale.languageCode}_${locale.countryCode ?? "US"}";
 }
 
 /// Get the path to your own server
@@ -92,7 +93,11 @@ class LPHAddress {
   // Needed for hashCode to work
   @override
   bool operator ==(Object other) =>
-      identical(this, other) || other is LPHAddress && runtimeType == other.runtimeType && server == other.server && id == other.id;
+      identical(this, other) ||
+      other is LPHAddress &&
+          runtimeType == other.runtimeType &&
+          TrustedLinkHelper.extractDomain(server) == TrustedLinkHelper.extractDomain(other.server) &&
+          id == other.id;
 
   // So it works properly with HashMaps
   @override
@@ -109,7 +114,11 @@ String serverPath(String server, String path, {bool noApiVersion = false}) {
 }
 
 /// Grab the public key from the server
-Future<String?> grabServerPublicURL(String server, {String defaultError = "server.error", bool checkProtocol = true}) async {
+Future<String?> grabServerPublicURL(
+  String server, {
+  String defaultError = "server.error",
+  bool checkProtocol = true,
+}) async {
   final Response res;
   try {
     res = await post(Uri.parse(serverPath(server, "/pub", noApiVersion: true)));
@@ -149,27 +158,13 @@ Future<Map<String, dynamic>> postJSON(
 }
 
 /// Post request to any server (with Through Cloudflare Protection)
-Future<Map<String, dynamic>> postAddress(String server, String path, Map<String, dynamic> body,
-    {String defaultError = "server.error", String? token, bool noApiVersion = false, bool checkProtocol = true}) async {
-  // Try to get the server public key
-  if (serverPublicKeys[server] == null) {
-    final result = await grabServerPublicURL(server, checkProtocol: checkProtocol);
-    if (result != null) {
-      return {
-        "success": false,
-        "error": result,
-      };
-    }
-  }
-
-  // Do the request
-  return _postTCP(serverPublicKeys[server]!, serverPath(server, path, noApiVersion: noApiVersion).toString(), body,
-      defaultError: defaultError, token: token);
-}
-
-/// Post request to any server (with Through Cloudflare Protection)
-Future<Map<String, dynamic>> _postTCP(RSAPublicKey key, String url, Map<String, dynamic> body,
-    {String defaultError = "server.error", String? token}) async {
+Future<Map<String, dynamic>> _postTCP(
+  RSAPublicKey key,
+  String url,
+  Map<String, dynamic> body, {
+  String defaultError = "server.error",
+  String? token,
+}) async {
   final aesKey = randomAESKey();
   final aesBase64 = base64Encode(aesKey);
   Response? res;
@@ -203,8 +198,32 @@ Future<Map<String, dynamic>> _postTCP(RSAPublicKey key, String url, Map<String, 
   return jsonDecode(utf8.decode(decryptAES(res.bodyBytes, aesBase64)));
 }
 
-String localeString(Locale locale) {
-  return "${locale.languageCode}_${locale.countryCode ?? "US"}";
+/// Post request to any server (with Through Cloudflare Protection)
+Future<Map<String, dynamic>> postAddress(
+  String server,
+  String path,
+  Map<String, dynamic> body, {
+  String defaultError = "server.error",
+  String? token,
+  bool noApiVersion = false,
+  bool checkProtocol = true,
+}) async {
+  // Try to get the server public key
+  if (serverPublicKeys[server] == null) {
+    final result = await grabServerPublicURL(server, checkProtocol: checkProtocol);
+    if (result != null) {
+      return {"success": false, "error": result};
+    }
+  }
+
+  // Do the request
+  return _postTCP(
+    serverPublicKeys[server]!,
+    serverPath(server, path, noApiVersion: noApiVersion).toString(),
+    body,
+    defaultError: defaultError,
+    token: token,
+  );
 }
 
 // Post request to node-backend with any token (new)
@@ -213,12 +232,20 @@ Future<Map<String, dynamic>> postAuthJSON(String path, Map<String, dynamic> body
 }
 
 // Post request to node-backend with session token (new)
-Future<Map<String, dynamic>> postAuthorizedJSON(String path, Map<String, dynamic> body, {bool checkProtocol = true}) async {
+Future<Map<String, dynamic>> postAuthorizedJSON(
+  String path,
+  Map<String, dynamic> body, {
+  bool checkProtocol = true,
+}) async {
   return postJSON(path, body, token: sessionToken, checkProtocol: checkProtocol);
 }
 
 // Post request to chat-node with any token (node needs to be connected already) (new)
-Future<Map<String, dynamic>> postNodeJSON(String path, Map<String, dynamic> body, {String defaultError = "server.error"}) async {
+Future<Map<String, dynamic>> postNodeJSON(
+  String path,
+  Map<String, dynamic> body, {
+  String defaultError = "server.error",
+}) async {
   if (connector.nodePublicKey == null) {
     return <String, dynamic>{"success": false, "error": defaultError.tr};
   }
@@ -229,19 +256,23 @@ Future<Map<String, dynamic>> postNodeJSON(String path, Map<String, dynamic> body
     body["data"] ??= "";
   }
 
-  return _postTCP(connector.nodePublicKey!, "${nodeProtocol()}$nodeDomain$path", body, defaultError: defaultError, token: sessionToken);
+  return _postTCP(
+    connector.nodePublicKey!,
+    "${nodeProtocol()}$nodeDomain$path",
+    body,
+    defaultError: defaultError,
+    token: sessionToken,
+  );
 }
 
 // Post request to any domain
-Future<Map<String, dynamic>> postAny(String url, Map<String, dynamic> body, {String defaultError = "server.error"}) async {
+Future<Map<String, dynamic>> postAny(
+  String url,
+  Map<String, dynamic> body, {
+  String defaultError = "server.error",
+}) async {
   try {
-    final res = await dio.post(
-      url,
-      data: jsonEncode(body),
-      options: d.Options(
-        validateStatus: (status) => true,
-      ),
-    );
+    final res = await dio.post(url, data: jsonEncode(body), options: d.Options(validateStatus: (status) => true));
     if (res.statusCode != 200) {
       return <String, dynamic>{"success": false, "error": defaultError.tr};
     }
@@ -267,9 +298,7 @@ String getSessionFromJWT(String token) {
 
 // Creates a stored action with the given name and payload
 String storedAction(String name, Map<String, dynamic> payload) {
-  final prefixJson = <String, dynamic>{
-    "a": name,
-  };
+  final prefixJson = <String, dynamic>{"a": name};
   prefixJson.addAll(payload);
 
   return jsonEncode(prefixJson);
@@ -277,9 +306,7 @@ String storedAction(String name, Map<String, dynamic> payload) {
 
 // Creates an authenticated stored action with the given name and payload
 Map<String, dynamic> authenticatedStoredAction(String name, Map<String, dynamic> payload) {
-  final prefixJson = <String, dynamic>{
-    "a": name,
-  };
+  final prefixJson = <String, dynamic>{"a": name};
   prefixJson.addAll(payload);
 
   return prefixJson;

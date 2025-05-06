@@ -15,38 +15,26 @@ class StatusRenderer extends StatelessWidget {
     final IconData icon = getStatusIcon(status);
 
     if (!text) {
-      return Icon(
-        icon,
-        color: color,
-        size: 16,
-      );
+      return Icon(icon, color: color, size: 16);
     }
 
     return Container(
-        decoration: BoxDecoration(
-          color: color.withAlpha(100),
-          borderRadius: BorderRadius.circular(50),
-        ),
-        padding: EdgeInsets.symmetric(horizontal: elementSpacing, vertical: text ? elementSpacing * 0.5 : elementSpacing),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              color: color,
-              size: 13,
-            ),
-            if (text)
-              Padding(
-                padding: const EdgeInsets.only(left: elementSpacing, right: elementSpacing * 0.5),
-                child: Text(
-                  "status.${status.toString().toLowerCase()}".tr,
-                  style: theme.textTheme.bodySmall!.copyWith(
-                    color: theme.colorScheme.onSurface,
-                  ),
-                ),
+      decoration: BoxDecoration(color: color.withAlpha(100), borderRadius: BorderRadius.circular(50)),
+      padding: EdgeInsets.symmetric(horizontal: elementSpacing, vertical: text ? elementSpacing * 0.5 : elementSpacing),
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: 13),
+          if (text)
+            Padding(
+              padding: const EdgeInsets.only(left: elementSpacing, right: elementSpacing * 0.5),
+              child: Text(
+                "status.${status.toString().toLowerCase()}".tr,
+                style: theme.textTheme.bodySmall!.copyWith(color: theme.colorScheme.onSurface),
               ),
-          ],
-        ));
+            ),
+        ],
+      ),
+    );
   }
 }
 

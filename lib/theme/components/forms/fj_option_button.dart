@@ -23,10 +23,14 @@ class _FJTextFieldState extends State<FJOptionButton> {
         borderRadius: BorderRadius.circular(defaultSpacing),
         onTap: widget.onTap,
         child: Padding(
-            padding: const EdgeInsets.all(defaultSpacing),
-            child: Row(
-              children: [Expanded(child: Text(widget.text, style: theme.textTheme.labelLarge)), const Icon(Icons.arrow_forward)],
-            )),
+          padding: const EdgeInsets.all(defaultSpacing),
+          child: Row(
+            children: [
+              Expanded(child: Text(widget.text, style: theme.textTheme.labelLarge)),
+              const Icon(Icons.arrow_forward),
+            ],
+          ),
+        ),
       ),
     );
   }

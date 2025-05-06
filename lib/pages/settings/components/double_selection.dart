@@ -4,6 +4,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class DoubleSelectionSetting extends StatefulWidget {
   final String settingName;
@@ -33,26 +34,31 @@ class DoubleSelectionSetting extends StatefulWidget {
 
 class _ListSelectionSettingState extends State<DoubleSelectionSetting> {
   // Current value
-  final current = 0.0.obs;
-  DateTime? lastSet;
+  final _current = signal(0.0);
+
+  @override
+  void dispose() {
+    _current.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    SettingController controller = Get.find();
-    final setting = controller.settings[widget.settingName]!;
-    current.value = setting.getValue() as double;
+    final setting = SettingController.settings[widget.settingName]!;
+    _current.value = setting.getValue() as double;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Visibility(
-            visible: widget.description.isNotEmpty,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: elementSpacing),
-              child: Text(widget.description.tr, style: Get.theme.textTheme.bodyMedium),
-            )),
-        Obx(() {
-          final value = current.value;
+          visible: widget.description.isNotEmpty,
+          child: Padding(
+            padding: const EdgeInsets.only(bottom: elementSpacing),
+            child: Text(widget.description.tr, style: Get.theme.textTheme.bodyMedium),
+          ),
+        ),
+        Watch((ctx) {
+          final value = _current.value;
           final roundedCurrent = widget.rounded ? value.toStringAsFixed(0) : value.toStringAsFixed(1);
           return Row(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -64,11 +70,11 @@ class _ListSelectionSettingState extends State<DoubleSelectionSetting> {
                   max: widget.max,
                   onChanged: (value) {
                     if (widget.rounded) {
-                      current.value = value.roundToDouble();
+                      _current.value = value.roundToDouble();
                     } else {
-                      current.value = value;
+                      _current.value = value;
                     }
-                    widget.onChange?.call(current.value);
+                    widget.onChange?.call(_current.value);
                   },
                   onChangeEnd: (value) {
                     if (widget.rounded) {

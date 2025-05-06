@@ -1,10 +1,12 @@
-import 'package:chat_interface/controller/account/friends/requests_controller.dart';
+import 'package:chat_interface/controller/account/requests_controller.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/util/logging_framework.dart';
+import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class RequestButton extends StatefulWidget {
   final bool self; // If the request was sent by the user
@@ -16,8 +18,8 @@ class RequestButton extends StatefulWidget {
   State<RequestButton> createState() => _RequestButtonState();
 }
 
-class _RequestButtonState extends State<RequestButton> {
-  final requestLoading = false.obs;
+class _RequestButtonState extends State<RequestButton> with SignalsMixin {
+  late final requestLoading = createSignal(false);
 
   @override
   Widget build(BuildContext context) {
@@ -25,8 +27,8 @@ class _RequestButtonState extends State<RequestButton> {
     final children = <Widget>[
       IconButton(
         icon: Icon(Icons.close, color: Theme.of(context).colorScheme.onPrimary),
-        onPressed: () => widget.self ? widget.request.cancel() : widget.request.ignore(),
-      )
+        onPressed: () => widget.request.delete(),
+      ),
     ];
 
     // Add accept button if request is for self
@@ -38,12 +40,15 @@ class _RequestButtonState extends State<RequestButton> {
           loading: requestLoading,
           icon: Icons.check,
           color: Get.theme.colorScheme.onPrimary,
-          onTap: () {
+          onTap: () async {
             requestLoading.value = true;
-            widget.request.accept((p0) {
-              sendLog("Request accepted");
-              requestLoading.value = false;
-            });
+            final (error, result) = await widget.request.accept();
+            if (error != null) {
+              showErrorPopup("error", error);
+              return;
+            }
+            sendLog(result);
+            requestLoading.value = false;
           },
         ),
       );
@@ -70,9 +75,7 @@ class _RequestButtonState extends State<RequestButton> {
                     Padding(
                       padding: const EdgeInsets.only(left: defaultSpacing),
                       child: Tooltip(
-                        message: "friends.different_town".trParams({
-                          "town": widget.request.id.server,
-                        }),
+                        message: "friends.different_town".trParams({"town": widget.request.id.server}),
                         child: Icon(Icons.sensors, color: Get.theme.colorScheme.onPrimary),
                       ),
                     ),
@@ -80,24 +83,20 @@ class _RequestButtonState extends State<RequestButton> {
               ),
 
               //* Request actions
-              Obx(
-                () => widget.request.loading.value
-                    ? const SizedBox(
-                        width: 25,
-                        height: 25,
-                        child: Padding(
-                          padding: EdgeInsets.all(defaultSpacing * 0.25),
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.0,
+              Watch(
+                (ctx) =>
+                    widget.request.loading.value
+                        ? const SizedBox(
+                          width: 25,
+                          height: 25,
+                          child: Padding(
+                            padding: EdgeInsets.all(defaultSpacing * 0.25),
+                            child: CircularProgressIndicator(strokeWidth: 2.0),
                           ),
-                        ),
-                      )
-                    :
-
-                    //* Accept/decline
-                    Row(
-                        children: children,
-                      ),
+                        )
+                        :
+                        //* Accept/decline
+                        Row(children: children),
               ),
             ],
           ),

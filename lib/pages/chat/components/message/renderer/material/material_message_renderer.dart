@@ -1,4 +1,4 @@
-import 'package:chat_interface/controller/account/friends/friend_controller.dart';
+import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/attachment_renderer.dart';
@@ -11,6 +11,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class MaterialMessageRenderer extends StatefulWidget {
   final LPHAddress senderAddress;
@@ -60,12 +61,14 @@ class _MaterialMessageRendererState extends State<MaterialMessageRenderer> {
             final menuData = ContextMenuData.fromPosition(Offset(_mouseX, _mouseY));
 
             // Open the context menu
-            Get.dialog(MessageOptionsWindow(
-              data: menuData,
-              self: widget.message.senderAddress == StatusController.ownAddress,
-              message: widget.message,
-              provider: widget.provider,
-            ));
+            Get.dialog(
+              MessageOptionsWindow(
+                data: menuData,
+                self: widget.message.senderAddress == StatusController.ownAddress,
+                message: widget.message,
+                provider: widget.provider,
+              ),
+            );
           },
           child: Padding(
             padding: EdgeInsets.symmetric(
@@ -83,12 +86,7 @@ class _MaterialMessageRendererState extends State<MaterialMessageRenderer> {
                     horizontalSpacing(defaultSpacing),
 
                     // Render the display name of the user
-                    Obx(
-                      () => Text(
-                        sender.displayName.value,
-                        style: Get.textTheme.labelLarge,
-                      ),
-                    ),
+                    Watch((ctx) => Text(sender.displayName.value, style: Get.textTheme.labelLarge)),
                     const Spacer(),
 
                     // Add some spacing
@@ -100,7 +98,7 @@ class _MaterialMessageRendererState extends State<MaterialMessageRenderer> {
                     ),
 
                     // Render the verified indicator of the message
-                    Obx(() {
+                    Watch((ctx) {
                       final verified = widget.message.verified.value;
                       return Visibility(
                         visible: !verified,
@@ -108,14 +106,11 @@ class _MaterialMessageRendererState extends State<MaterialMessageRenderer> {
                           padding: const EdgeInsets.only(top: elementSpacing + elementSpacing / 4),
                           child: Tooltip(
                             message: "chat.not.signed".tr,
-                            child: const Icon(
-                              Icons.warning_rounded,
-                              color: Colors.amber,
-                            ),
+                            child: const Icon(Icons.warning_rounded, color: Colors.amber),
                           ),
                         ),
                       );
-                    })
+                    }),
                   ],
                 ),
                 verticalSpacing(elementSpacing),
@@ -126,17 +121,11 @@ class _MaterialMessageRendererState extends State<MaterialMessageRenderer> {
                     mainAxisSize: MainAxisSize.min,
                     textDirection: widget.self ? TextDirection.rtl : TextDirection.ltr,
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Flexible(
-                        child: renderMessageContent(),
-                      ),
-                    ],
+                    children: [Flexible(child: renderMessageContent())],
                   ),
                 ),
 
-                Flexible(
-                  child: renderAttachments(),
-                )
+                Flexible(child: renderAttachments()),
               ],
             ),
           ),
@@ -150,10 +139,7 @@ class _MaterialMessageRendererState extends State<MaterialMessageRenderer> {
       visible: widget.message.content.isNotEmpty,
       child: Padding(
         padding: const EdgeInsets.only(left: elementSpacing),
-        child: FormattedText(
-          text: widget.message.content,
-          baseStyle: Get.theme.textTheme.bodyLarge!,
-        ),
+        child: FormattedText(text: widget.message.content, baseStyle: Get.theme.textTheme.bodyLarge!),
       ),
     );
   }
@@ -189,7 +175,10 @@ class _MaterialMessageRendererState extends State<MaterialMessageRenderer> {
                 Flexible(
                   child: Text(
                     AnswerData.answerContent(
-                        widget.message.answerMessage!.type, widget.message.answerMessage!.content, widget.message.answerMessage!.attachments),
+                      widget.message.answerMessage!.type,
+                      widget.message.answerMessage!.content,
+                      widget.message.answerMessage!.attachments,
+                    ),
                     style: Get.theme.textTheme.labelMedium,
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
@@ -211,24 +200,22 @@ class _MaterialMessageRendererState extends State<MaterialMessageRenderer> {
         visible: widget.message.attachmentsRenderer.isNotEmpty,
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          children: List.generate(widget.message.attachmentsRenderer.length, (index) {
-            final container = widget.message.attachmentsRenderer[index];
+          children:
+              List.generate(widget.message.attachmentsRenderer.length, (index) {
+                final container = widget.message.attachmentsRenderer[index];
 
-            if (container.width != null && container.height != null) {
-              return Padding(
-                padding: EdgeInsets.only(top: elementSpacing),
-                child: ImageAttachmentRenderer(
-                  image: container,
-                  hoverCheck: true,
-                ),
-              );
-            }
+                if (container.width != null && container.height != null) {
+                  return Padding(
+                    padding: EdgeInsets.only(top: elementSpacing),
+                    child: ImageAttachmentRenderer(image: container, hoverCheck: true),
+                  );
+                }
 
-            return Padding(
-              padding: EdgeInsets.only(top: elementSpacing),
-              child: AttachmentRenderer(container: container, message: widget.message, self: widget.self),
-            );
-          }).toList(),
+                return Padding(
+                  padding: EdgeInsets.only(top: elementSpacing),
+                  child: AttachmentRenderer(container: container, message: widget.message, self: widget.self),
+                );
+              }).toList(),
         ),
       ),
     );

@@ -11,7 +11,6 @@ import 'package:chat_interface/pages/chat/chat_page_desktop.dart';
 import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/pages/status/setup/settings_setup.dart';
 import 'package:chat_interface/pages/status/setup/server_setup.dart';
-import 'package:chat_interface/pages/status/setup/updates_setup.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -34,7 +33,6 @@ class SetupManager {
   static bool setupFinished = false;
   final _steps = <Setup>[];
   int current = -1;
-  final message = 'setup.loading'.obs;
   SmoothDialogController? controller;
 
   SetupManager() {
@@ -43,9 +41,6 @@ class SetupManager {
     // Setup app
     if (!isWeb) {
       _steps.add(PolicySetup());
-    }
-    if (GetPlatform.isWindows) {
-      _steps.add(UpdateSetup());
     }
     _steps.add(InstanceSetup());
     _steps.add(ServerSetup());
@@ -85,7 +80,6 @@ class SetupManager {
       }
 
       sendLog(setup.name);
-      message.value = setup.name;
 
       Widget? ready;
       if (isDebug) {
@@ -115,7 +109,7 @@ class SetupManager {
       }
       controller = null;
       unawaited(Get.offAll(getChatPage(), transition: Transition.fade, duration: const Duration(milliseconds: 500)));
-      unawaited(Get.find<ConnectionController>().tryConnection());
+      unawaited(ConnectionController.tryConnection());
     }
   }
 

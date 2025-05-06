@@ -4,8 +4,8 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
-import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
+import 'package:chat_interface/util/encryption/asymmetric_sodium.dart';
+import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/database/trusted_links.dart';
@@ -23,14 +23,17 @@ import 'package:dio/dio.dart' as dio_rs;
 import 'package:liphium_bridge/liphium_bridge.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:signals/signals_flutter.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 import 'package:path/path.dart' as path;
 
-class AttachmentController extends GetxController {
-  final attachments = <String, AttachmentContainer>{};
+class AttachmentController {
+  static final attachments = mapSignal(<String, AttachmentContainer>{});
 
-  // Upload a file
-  Future<FileUploadResponse> uploadFile(
+  /// Upload a file.
+  ///
+  /// Returns a response.
+  static Future<FileUploadResponse> uploadFile(
     UploadData data,
     StorageType type,
     String tag, {
@@ -40,35 +43,34 @@ class AttachmentController extends GetxController {
     String? fileName,
   }) async {
     // Check if there is a connection before doing this
-    if (!Get.find<ConnectionController>().connected.value) {
+    if (!ConnectionController.connected.value) {
       if (popups) {
         showErrorPopup("error", "error.no_connection".tr);
       }
       return FileUploadResponse("error.no_connection".tr, null);
     }
 
+    // Encrypt the file
     bytes ??= await data.file.readAsBytes();
     final key = randomSymmetricKey();
     final encrypted = encryptSymmetricBytes(bytes, key);
     final name = encryptSymmetric(fileName ?? path.basename(data.file.path), key);
 
-    // Upload file
+    // Create the data we send to the server
     final formData = dio_rs.FormData.fromMap({
       "file": dio_rs.MultipartFile.fromBytes(encrypted, filename: name),
       "name": name,
       "tag": tag,
       "key": encryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, packageSymmetricKey(key)),
-      "extension": path.extension(data.file.path).substring(1)
+      "extension": path.extension(data.file.path).substring(1),
     });
 
+    // Upload the file to the server
     final res = await dio.post(
       ownServer("/account/files/upload"),
       data: formData,
       options: dio_rs.Options(
-        headers: {
-          "Content-Type": "multipart/form-data",
-          "Authorization": "Bearer $sessionToken",
-        },
+        headers: {"Content-Type": "multipart/form-data", "Authorization": "Bearer $sessionToken"},
         validateStatus: (status) => true,
       ),
       onSendProgress: (count, total) {
@@ -76,11 +78,9 @@ class AttachmentController extends GetxController {
         sendLog(data.progress.value);
       },
     );
-
     if (res.statusCode != 200) {
       return FileUploadResponse("server.error.code".trParams({"code": res.statusCode.toString()}), null);
     }
-
     final json = res.data;
     if (!json["success"]) {
       return FileUploadResponse(json["error"], null);
@@ -103,15 +103,14 @@ class AttachmentController extends GetxController {
       url: json["url"],
       key: key,
     );
-    sendLog("UPLOADED ATTACHMENT: ${container.id}");
     container.downloaded.value = FileSettings.isMediaFile(json["id"]);
     attachments[container.id] = container;
 
     return FileUploadResponse("success", container);
   }
 
-  /// Download an attachment
-  Future<bool> downloadAttachment(
+  /// Download an attachment.
+  static Future<bool> downloadAttachment(
     AttachmentContainer container, {
     bool retry = false,
     bool popups = true,
@@ -144,12 +143,10 @@ class AttachmentController extends GetxController {
     }
 
     sendLog("Downloading ${container.name}...");
-    final maxSize = Get.find<SettingController>().settings[FileSettings.maxFileSize]!.getValue();
+    final maxSize = SettingController.settings[FileSettings.maxFileSize]!.getValue();
 
     // Check the file size to make sure it isn't over the limit
-    final json = await postAddress(container.url, "/account/file_info/info", {
-      "id": container.id,
-    });
+    final json = await postAddress(container.url, "/account/file_info/info", {"id": container.id});
 
     if (!json["success"]) {
       if (popups) {
@@ -181,10 +178,7 @@ class AttachmentController extends GetxController {
     // Download and show progress
     final res = await dio.get<Uint8List>(
       serverPath(container.url, "/account/files_unencrypted/download/${container.id}").toString(),
-      options: dio_rs.Options(
-        responseType: dio_rs.ResponseType.bytes,
-        validateStatus: (status) => true,
-      ),
+      options: dio_rs.Options(responseType: dio_rs.ResponseType.bytes, validateStatus: (status) => true),
       onReceiveProgress: (count, total) {
         container.percentage.value = count / total;
       },
@@ -219,14 +213,14 @@ class AttachmentController extends GetxController {
   }
 
   /// Delete a file
-  Future<bool> deleteFile(AttachmentContainer container, {popup = false}) async {
+  static Future<bool> deleteFile(AttachmentContainer container, {popup = false}) async {
     return await deleteFileFromPath(container.id, container.file, popup: popup);
   }
 
   /// Delete a file based on a path and an id
-  Future<bool> deleteFileFromPath(String id, XFile? file, {popup = false}) async {
+  static Future<bool> deleteFileFromPath(String id, XFile? file, {popup = false}) async {
     // Check if there is a connection before doing this
-    if (!Get.find<ConnectionController>().connected.value) {
+    if (!ConnectionController.connected.value) {
       if (popup) {
         showErrorPopup("error", "error.no_connection".tr);
       }
@@ -239,9 +233,7 @@ class AttachmentController extends GetxController {
     attachments.remove(id);
 
     // Delete from server
-    final json = await postAuthorizedJSON("/account/files/delete", {
-      "id": id,
-    });
+    final json = await postAuthorizedJSON("/account/files/delete", {"id": id});
     if (!json["success"]) {
       if (popup) {
         showErrorPopup("error", json["error"]);
@@ -254,11 +246,11 @@ class AttachmentController extends GetxController {
   }
 
   /// Clean the cache until the size is below the max cache size
-  Future<void> cleanUpCache() async {
+  static Future<void> cleanUpCache() async {
     // Move into isolate in the future?
-    final cacheType = Get.find<SettingController>().settings[FileSettings.fileCacheType]!.getValue();
+    final cacheType = SettingController.settings[FileSettings.fileCacheType]!.getValue();
     if (cacheType == 0) return;
-    final maxSize = Get.find<SettingController>().settings[FileSettings.maxCacheSize]!.getValue() * 1000 * 1000; // Convert to bytes
+    final maxSize = SettingController.settings[FileSettings.maxCacheSize]!.getValue() * 1000 * 1000; // Convert to bytes
     final dir = Directory(getFilePathForType(StorageType.temporary));
     final files = await dir.list().toList();
     var cacheSize = files.fold(0, (previousValue, element) => previousValue + element.statSync().size);
@@ -277,7 +269,7 @@ class AttachmentController extends GetxController {
   }
 
   // Delete all files from the device
-  Future<bool> deleteAllFiles() async {
+  static Future<bool> deleteAllFiles() async {
     var dir = XDirectory(_pathTemporary);
     await dir.delete(recursive: true);
     dir = XDirectory(_pathCache);
@@ -360,8 +352,23 @@ class AttachmentController extends GetxController {
     return null;
   }
 
+  /// Get an attachment container from a string.
+  ///
+  /// Also handles it when the container is a remote image.
+  static Future<AttachmentContainer> fromString(String data) async {
+    // Check if the container is a remote container
+    if (data.isURL) {
+      return AttachmentContainer.remoteImage(data);
+    }
+
+    // Decode the attachment container like regular
+    final json = jsonDecode(data);
+    final type = await AttachmentController.checkLocations(json["i"], StorageType.temporary);
+    return AttachmentController.fromJson(type, json);
+  }
+
   /// Get an attachment container from json
-  AttachmentContainer fromJson(StorageType type, Map<String, dynamic> json, [Sodium? sodium]) {
+  static AttachmentContainer fromJson(StorageType type, Map<String, dynamic> json, [Sodium? sodium]) {
     var container = attachments[json["i"]];
     if (container != null) {
       return container;
@@ -423,11 +430,11 @@ class AttachmentContainer {
   String get name => fileName ?? id;
 
   // Download status
-  final downloading = false.obs;
-  final downloaded = false.obs;
-  final error = false.obs;
-  final unsafeLocation = false.obs;
-  final percentage = 0.0.obs;
+  final downloading = signal(false);
+  final downloaded = signal(false);
+  final error = signal(false);
+  final unsafeLocation = signal(false);
+  final percentage = signal(0.0);
 
   void errorHappened(bool unsafe) {
     error.value = true;
@@ -506,14 +513,7 @@ class AttachmentContainer {
   }
 
   AttachmentContainer.remoteImage(String url)
-      : this(
-          storageType: StorageType.cache,
-          id: "",
-          fileName: "",
-          size: 0,
-          url: url,
-          key: null,
-        );
+    : this(storageType: StorageType.cache, id: "", fileName: "", size: 0, url: url, key: null);
 
   String toAttachment() {
     switch (attachmentType) {

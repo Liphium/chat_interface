@@ -3,5 +3,8 @@
 library liphium_bridge;
 
 export "src/base.dart" show fileUtil;
-export "src/interface.dart" if (dart.library.io) "src/native.dart" if (dart.library.js) "src/web.dart" show XImage, XDirectory, isDirectorySupported;
+export "src/interface.dart"
+    if (dart.library.io) "src/native.dart"
+    if (dart.library.js) "src/web.dart"
+    show XImage, XDirectory, isDirectorySupported;
 export "src/web.dart" show XFileImage;

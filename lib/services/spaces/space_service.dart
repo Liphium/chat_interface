@@ -1,14 +1,20 @@
-import 'package:chat_interface/connection/encryption/signatures.dart';
-import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
-import 'package:chat_interface/connection/spaces/space_connection.dart';
+import 'dart:async';
+
+import 'package:chat_interface/controller/conversation/sidebar_controller.dart';
+import 'package:chat_interface/controller/spaces/studio/studio_controller.dart';
+import 'package:chat_interface/controller/spaces/tabletop/tabletop_controller.dart';
+import 'package:chat_interface/pages/chat/chat_page_desktop.dart';
+import 'package:chat_interface/util/encryption/signatures.dart';
+import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
+import 'package:chat_interface/services/spaces/space_connection.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/controller/current/steps/key_step.dart';
-import 'package:chat_interface/controller/spaces/space_container.dart';
-import 'package:chat_interface/controller/spaces/spaces_controller.dart';
+import 'package:chat_interface/services/spaces/space_container.dart';
+import 'package:chat_interface/controller/spaces/space_controller.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
-import 'package:chat_interface/connection/messaging.dart' as msg;
+import 'package:chat_interface/services/connection/messaging.dart' as msg;
 import 'package:get/get.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
@@ -19,9 +25,7 @@ class SpaceService {
     final spaceJson = await postAddress(
       "${nodeProtocol()}$domain",
       "/enc/join",
-      {
-        "id": spaceId,
-      },
+      {"id": spaceId},
       noApiVersion: true,
       checkProtocol: false,
     );
@@ -41,15 +45,11 @@ class SpaceService {
   /// Create a new space (returns an error if there was one)
   static Future<(SpaceConnectionContainer?, String?)> createSpace() async {
     // Get a connection token for Spaces (required to create a new space)
-    final json = await postAuthorizedJSON(
-      "/node/connect",
-      <String, dynamic>{
-        "tag": appTagSpaces,
-        "token": refreshToken,
-        "extra": "",
-      },
-      checkProtocol: false,
-    );
+    final json = await postAuthorizedJSON("/node/connect", <String, dynamic>{
+      "tag": appTagSpaces,
+      "token": refreshToken,
+      "extra": "",
+    }, checkProtocol: false);
     if (!json["success"]) {
       return (null, json["error"] as String);
     }
@@ -58,9 +58,7 @@ class SpaceService {
     final spaceJson = await postAddress(
       "${nodeProtocol()}${json["domain"]}",
       "/enc/create",
-      {
-        "token": json["token"],
-      },
+      {"token": json["token"]},
       noApiVersion: true,
       checkProtocol: false,
     );
@@ -70,7 +68,13 @@ class SpaceService {
 
     // Connect to the space
     final key = randomSymmetricKey();
-    final error = await _connectToRoom(json["domain"], spaceJson["token"], spaceJson["client"], spaceJson["space"], key);
+    final error = await _connectToRoom(
+      json["domain"],
+      spaceJson["token"],
+      spaceJson["client"],
+      spaceJson["space"],
+      key,
+    );
     if (error != null) {
       return (null, error);
     }
@@ -81,28 +85,49 @@ class SpaceService {
   }
 
   /// Returns an error if there was one
-  static Future<String?> _connectToRoom(String server, String token, String clientId, String spaceId, SecureKey key) async {
+  static Future<String?> _connectToRoom(
+    String server,
+    String token,
+    String clientId,
+    String spaceId,
+    SecureKey key,
+  ) async {
     // Connect to space node
-    final result = await createSpaceConnection(server, token);
+    final result = await SpaceConnection.createSpaceConnection(server, token);
     sendLog("COULD CONNECT TO SPACE NODE");
     if (!result) {
       return "server.error".tr;
     }
 
     // Make everything ready
-    Get.find<SpacesController>().onConnect(spaceId, key);
+    SpaceController.onConnect(server, spaceId, key);
+    TabletopController.resetControllerState();
+    StudioController.resetControllerState();
+
+    // Open the screen
+    if (SpaceController.shouldSwitchToPage) {
+      SidebarController.openTab(SpaceSidebarTab());
+    }
 
     // Send the server all the data required for setup
-    final event = await spaceConnector.sendActionAndWait(msg.ServerAction("setup", {
-      "data": encryptSymmetric(StatusController.ownAddress.encode(), key),
-      "signature": signMessage(signatureKeyPair.secretKey, craftSignature(spaceId, clientId, StatusController.ownAddress.encode())),
-    }));
+    final event = await SpaceConnection.spaceConnector!.sendActionAndWait(
+      msg.ServerAction("setup", {
+        "data": encryptSymmetric(StatusController.ownAddress.encode(), key),
+        "signature": signMessage(
+          signatureKeyPair.secretKey,
+          craftSignature(spaceId, clientId, StatusController.ownAddress.encode()),
+        ),
+      }),
+    );
     if (event == null) {
       return "server.error".tr;
     }
     if (!event.data["success"]) {
       return event.data["message"];
     }
+
+    // Create a Studio connection
+    unawaited(StudioController.connectToStudio());
 
     return null;
   }

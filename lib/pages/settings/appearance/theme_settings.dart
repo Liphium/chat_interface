@@ -14,6 +14,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 part 'color_generator.dart';
 
@@ -24,7 +25,15 @@ class ThemePreset extends SelectableItem {
   final int themeMode;
   final int backgroundMode;
 
-  const ThemePreset(super.label, super.icon, this.primaryHue, this.secondaryHue, this.baseSaturation, this.themeMode, this.backgroundMode);
+  const ThemePreset(
+    super.label,
+    super.icon,
+    this.primaryHue,
+    this.secondaryHue,
+    this.baseSaturation,
+    this.themeMode,
+    this.backgroundMode,
+  );
 }
 
 class ThemeSettings {
@@ -44,10 +53,13 @@ class ThemeSettings {
 
   static final themeModes = [
     -1, // Dark
-    1 // Light
+    1, // Light
   ];
 
-  static final backgroundModes = [SelectableItem("custom.none".tr, Icons.close), SelectableItem("custom.colored".tr, Icons.color_lens)];
+  static final backgroundModes = [
+    SelectableItem("custom.none".tr, Icons.close),
+    SelectableItem("custom.colored".tr, Icons.color_lens),
+  ];
 
   static final themePresets = [
     ThemePreset("theme.default_dark".tr, Icons.dark_mode, 0.54, 0.62, 0.6, 0, 0),
@@ -57,13 +69,13 @@ class ThemeSettings {
   ];
   static const int customThemeIndex = 3;
 
-  static void addThemeSettings(SettingController controller) {
-    controller.addSetting(Setting<int>(themePreset, 0));
-    controller.addSetting(Setting<double>(primaryHue, 0.54));
-    controller.addSetting(Setting<double>(secondaryHue, 0.62));
-    controller.addSetting(Setting<double>(baseSaturation, 0.6));
-    controller.addSetting(Setting<int>(backgroundMode, 0));
-    controller.addSetting(Setting<int>(themeMode, 0));
+  static void addSettings() {
+    SettingController.addSetting((Setting<int>(themePreset, 0)));
+    SettingController.addSetting(Setting<double>(primaryHue, 0.54));
+    SettingController.addSetting(Setting<double>(secondaryHue, 0.62));
+    SettingController.addSetting(Setting<double>(baseSaturation, 0.6));
+    SettingController.addSetting(Setting<int>(backgroundMode, 0));
+    SettingController.addSetting(Setting<int>(themeMode, 0));
   }
 }
 
@@ -75,11 +87,12 @@ class ThemeSettingsPage extends StatefulWidget {
 }
 
 class _ThemeSettingsPageState extends State<ThemeSettingsPage> {
-  final _factory = Rx<ColorFactory?>(null);
+  final _factory = Signal<ColorFactory?>(null);
   Timer? _timer;
 
   @override
   void dispose() {
+    _factory.dispose();
     _timer!.cancel();
     super.dispose();
   }
@@ -92,13 +105,7 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage> {
     });
 
     if (isMobileMode()) {
-      return SettingsPageBase(
-        label: "colors",
-        child: ColorPreview(
-          factory: _factory,
-          mobile: true,
-        ),
-      );
+      return SettingsPageBase(label: "colors", child: ColorPreview(factory: _factory, mobile: true));
     }
 
     return SettingsPageBase(
@@ -106,14 +113,10 @@ class _ThemeSettingsPageState extends State<ThemeSettingsPage> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Expanded(
-            child: ThemeSettingsElement(),
-          ),
+          const Expanded(child: ThemeSettingsElement()),
 
           //* Color preview
-          Expanded(
-            child: ColorPreview(factory: _factory),
-          ),
+          Expanded(child: ColorPreview(factory: _factory)),
         ],
       ),
     );
@@ -136,11 +139,15 @@ class _ThemeSettingsElementState extends State<ThemeSettingsElement> {
       children: [
         Text("theme.presets".tr, style: Get.theme.textTheme.labelLarge),
         verticalSpacing(elementSpacing),
-        ListSelectionSetting(settingName: ThemeSettings.themePreset, items: ThemeSettings.themePresets),
+        ListSelectionSetting(
+          setting: SettingController.settings[ThemeSettings.themePreset]! as Setting<int>,
+          items: ThemeSettings.themePresets,
+        ),
         verticalSpacing(sectionSpacing),
-        Obx(
-          () => Visibility(
-            visible: Get.find<SettingController>().settings[ThemeSettings.themePreset]!.getValue() == ThemeSettings.customThemeIndex,
+        Watch(
+          (ctx) => Visibility(
+            visible:
+                SettingController.settings[ThemeSettings.themePreset]!.getValue() == ThemeSettings.customThemeIndex,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -149,33 +156,50 @@ class _ThemeSettingsElementState extends State<ThemeSettingsElement> {
                 verticalSpacing(defaultSpacing),
 
                 // Sliders
-                const DoubleSelectionSetting(settingName: ThemeSettings.primaryHue, description: "custom.primary_hue", min: 0.0, max: 1.0),
+                const DoubleSelectionSetting(
+                  settingName: ThemeSettings.primaryHue,
+                  description: "custom.primary_hue",
+                  min: 0.0,
+                  max: 1.0,
+                ),
                 verticalSpacing(defaultSpacing),
 
-                const DoubleSelectionSetting(settingName: ThemeSettings.secondaryHue, description: "custom.secondary_hue", min: 0.0, max: 1.0),
+                const DoubleSelectionSetting(
+                  settingName: ThemeSettings.secondaryHue,
+                  description: "custom.secondary_hue",
+                  min: 0.0,
+                  max: 1.0,
+                ),
                 verticalSpacing(defaultSpacing),
 
-                const DoubleSelectionSetting(settingName: ThemeSettings.baseSaturation, description: "custom.base_saturation", min: 0.0, max: 1.0),
+                const DoubleSelectionSetting(
+                  settingName: ThemeSettings.baseSaturation,
+                  description: "custom.base_saturation",
+                  min: 0.0,
+                  max: 1.0,
+                ),
                 verticalSpacing(defaultSpacing),
 
                 // Selections
-                Text(
-                  "custom.theme_mode".tr,
-                ),
+                Text("custom.theme_mode".tr),
                 verticalSpacing(elementSpacing),
                 ListSelectionSetting(
-                  settingName: ThemeSettings.themeMode,
-                  items: [SelectableItem("custom.dark".tr, Icons.dark_mode), SelectableItem("custom.light".tr, Icons.light_mode)],
+                  setting: SettingController.settings[ThemeSettings.themeMode]! as Setting<int>,
+                  items: [
+                    SelectableItem("custom.dark".tr, Icons.dark_mode),
+                    SelectableItem("custom.light".tr, Icons.light_mode),
+                  ],
                 ),
                 verticalSpacing(defaultSpacing),
 
-                Text(
-                  "custom.background_mode".tr,
-                ),
+                Text("custom.background_mode".tr),
                 verticalSpacing(elementSpacing),
-                ListSelectionSetting(settingName: ThemeSettings.backgroundMode, items: ThemeSettings.backgroundModes),
+                ListSelectionSetting(
+                  setting: SettingController.settings[ThemeSettings.backgroundMode]! as Setting<int>,
+                  items: ThemeSettings.backgroundModes,
+                ),
 
-                verticalSpacing(sectionSpacing)
+                verticalSpacing(sectionSpacing),
               ],
             ),
           ),
@@ -183,10 +207,10 @@ class _ThemeSettingsElementState extends State<ThemeSettingsElement> {
         FJElevatedButton(
           onTap: () {
             final ThemeData theme = getThemeData();
-            Get.find<ThemeManager>().changeTheme(theme);
+            ThemeManager.changeTheme(theme);
           },
           child: Text("theme.apply".tr, style: Get.theme.textTheme.labelLarge),
-        )
+        ),
       ],
     );
   }

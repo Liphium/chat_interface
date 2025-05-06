@@ -2,10 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
-import 'package:chat_interface/connection/encryption/hash.dart';
-import 'package:chat_interface/connection/encryption/signatures.dart';
-import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
+import 'package:chat_interface/util/encryption/asymmetric_sodium.dart';
+import 'package:chat_interface/util/encryption/hash.dart';
+import 'package:chat_interface/util/encryption/signatures.dart';
+import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/current/steps/account_step.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/controller/current/steps/key_step.dart';
@@ -20,6 +20,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class KeyRequest {
   final String session;
@@ -28,7 +29,7 @@ class KeyRequest {
   final String payload;
   final String signature;
   final int createdAt;
-  final processing = false.obs;
+  final processing = signal(false);
 
   KeyRequest({
     required this.session,
@@ -59,6 +60,11 @@ class KeyRequest {
       'signature': signature,
       'creation': createdAt,
     };
+  }
+
+  /// Dispose all the signals related to the key request
+  void dispose() {
+    processing.dispose();
   }
 
   Future<void> updateStatus(bool delete, Function() success) async {
@@ -105,10 +111,10 @@ class KeyRequestsWindow extends StatefulWidget {
   State<KeyRequestsWindow> createState() => _KeyRequestsWindowState();
 }
 
-class _KeyRequestsWindowState extends State<KeyRequestsWindow> {
-  final loading = false.obs;
-  final error = "".obs;
-  final requests = <KeyRequest>[].obs;
+class _KeyRequestsWindowState extends State<KeyRequestsWindow> with SignalsMixin {
+  late final _loading = createSignal(false);
+  late final _error = createSignal("");
+  late final _requests = createListSignal(<KeyRequest>[]);
   Timer? _timer;
 
   @override
@@ -122,23 +128,27 @@ class _KeyRequestsWindowState extends State<KeyRequestsWindow> {
 
   @override
   void dispose() {
+    for (var req in _requests) {
+      req.dispose();
+    }
+
     _timer?.cancel();
     super.dispose();
   }
 
   Future<void> requestKeyRequests() async {
-    loading.value = true;
+    _loading.value = true;
 
     // Get the key synchronization requests from the server
     final json = await postAuthorizedJSON("/account/keys/requests/list", {});
     if (!json["success"]) {
-      error.value = (json["error"] as String).tr;
-      loading.value = false;
+      _error.value = (json["error"] as String).tr;
+      _loading.value = false;
       return;
     }
 
-    error.value = "";
-    loading.value = false;
+    _error.value = "";
+    _loading.value = false;
 
     // Parse all the requests
     for (var request in json["requests"]) {
@@ -146,8 +156,8 @@ class _KeyRequestsWindowState extends State<KeyRequestsWindow> {
       if (keyRequest.payload != "") {
         continue;
       }
-      if (!requests.any((element) => keyRequest.session == element.session)) {
-        requests.add(keyRequest);
+      if (!_requests.any((element) => keyRequest.session == element.session)) {
+        _requests.add(keyRequest);
       }
     }
   }
@@ -157,114 +167,106 @@ class _KeyRequestsWindowState extends State<KeyRequestsWindow> {
     return DialogBase(
       title: [
         Expanded(
-            child: Text(
-          "Synchronization requests".tr,
-          style: Get.theme.textTheme.labelLarge,
-          overflow: TextOverflow.ellipsis,
-        )),
-        Obx(
-          () => Visibility(
-            visible: loading.value,
-            child: SizedBox(
-              width: 24,
-              height: 24,
-              child: CircularProgressIndicator(
-                color: Get.theme.colorScheme.onPrimary,
-              ),
-            ),
+          child: Text(
+            "Synchronization requests".tr,
+            style: Get.theme.textTheme.labelLarge,
+            overflow: TextOverflow.ellipsis,
           ),
-        )
+        ),
+        Visibility(
+          visible: _loading.value,
+          child: SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary),
+          ),
+        ),
       ],
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          AnimatedErrorContainer(
-            expand: true,
-            padding: const EdgeInsets.only(bottom: defaultSpacing),
-            message: error,
-          ),
-          Obx(() {
-            // Check if the requests are empty
-            if (requests.isEmpty) {
-              return InfoContainer(
-                expand: true,
-                message: "key_requests.empty".tr,
-              );
-            }
+          AnimatedErrorContainer(expand: true, padding: const EdgeInsets.only(bottom: defaultSpacing), message: _error),
+          Builder(
+            builder: (context) {
+              // Check if the requests are empty
+              if (_requests.isEmpty) {
+                return InfoContainer(expand: true, message: "key_requests.empty".tr);
+              }
 
-            // Render the requests (if not empty)
-            return Column(
-              children: List.generate(requests.length, (index) {
-                final request = requests[index];
-                return Padding(
-                  padding: EdgeInsets.only(top: index == 0 ? 0 : defaultSpacing),
-                  child: Container(
-                    padding: const EdgeInsets.all(defaultSpacing),
-                    decoration: BoxDecoration(
-                      color: Get.theme.colorScheme.inverseSurface,
-                      borderRadius: BorderRadius.circular(defaultSpacing),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.key, color: Get.theme.colorScheme.onPrimary),
-                        horizontalSpacing(defaultSpacing),
-                        Expanded(
-                          child: Text(
-                            formatGeneralTime(DateTime.fromMillisecondsSinceEpoch(request.createdAt)),
-                            style: Get.textTheme.labelMedium,
-                            overflow: TextOverflow.ellipsis,
+              // Render the requests (if not empty)
+              return Column(
+                children: List.generate(_requests.length, (index) {
+                  final request = _requests[index];
+                  return Padding(
+                    padding: EdgeInsets.only(top: index == 0 ? 0 : defaultSpacing),
+                    child: Container(
+                      padding: const EdgeInsets.all(defaultSpacing),
+                      decoration: BoxDecoration(
+                        color: Get.theme.colorScheme.inverseSurface,
+                        borderRadius: BorderRadius.circular(defaultSpacing),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.key, color: Get.theme.colorScheme.onPrimary),
+                          horizontalSpacing(defaultSpacing),
+                          Expanded(
+                            child: Text(
+                              formatGeneralTime(DateTime.fromMillisecondsSinceEpoch(request.createdAt)),
+                              style: Get.textTheme.labelMedium,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
-                        ),
-                        horizontalSpacing(defaultSpacing),
-                        Obx(() {
-                          if (request.processing.value) {
-                            return SizedBox(
-                              width: 31,
-                              height: 31,
-                              child: Padding(
-                                padding: const EdgeInsets.all(6.0),
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 3.0,
-                                  color: Get.theme.colorScheme.onPrimary,
+                          horizontalSpacing(defaultSpacing),
+                          Watch((ctx) {
+                            if (request.processing.value) {
+                              return SizedBox(
+                                width: 31,
+                                height: 31,
+                                child: Padding(
+                                  padding: const EdgeInsets.all(6.0),
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 3.0,
+                                    color: Get.theme.colorScheme.onPrimary,
+                                  ),
                                 ),
-                              ),
-                            );
-                          }
+                              );
+                            }
 
-                          return Row(
-                            children: [
-                              LoadingIconButton(
-                                onTap: () async {
-                                  final result = await Get.dialog(KeyRequestAcceptWindow(request: request));
-                                  if (result != null && result) {
-                                    requests.remove(request);
-                                  }
-                                },
-                                padding: 0,
-                                extra: defaultSpacing,
-                                icon: Icons.check,
-                              ),
-                              horizontalSpacing(elementSpacing),
-                              LoadingIconButton(
-                                onTap: () {
-                                  request.updateStatus(true, () {
-                                    requests.remove(request);
-                                  });
-                                },
-                                padding: 0,
-                                extra: defaultSpacing,
-                                icon: Icons.close,
-                              ),
-                            ],
-                          );
-                        }),
-                      ],
+                            return Row(
+                              children: [
+                                LoadingIconButton(
+                                  onTap: () async {
+                                    final result = await Get.dialog(KeyRequestAcceptWindow(request: request));
+                                    if (result != null && result) {
+                                      _requests.remove(request);
+                                    }
+                                  },
+                                  padding: 0,
+                                  extra: defaultSpacing,
+                                  icon: Icons.check,
+                                ),
+                                horizontalSpacing(elementSpacing),
+                                LoadingIconButton(
+                                  onTap: () {
+                                    request.updateStatus(true, () {
+                                      _requests.remove(request);
+                                    });
+                                  },
+                                  padding: 0,
+                                  extra: defaultSpacing,
+                                  icon: Icons.close,
+                                ),
+                              ],
+                            );
+                          }),
+                        ],
+                      ),
                     ),
-                  ),
-                );
-              }),
-            );
-          })
+                  );
+                }),
+              );
+            },
+          ),
         ],
       ),
     );
@@ -280,8 +282,8 @@ class KeyRequestAcceptWindow extends StatefulWidget {
   State<KeyRequestAcceptWindow> createState() => _KeyRequestAcceptWindowState();
 }
 
-class _KeyRequestAcceptWindowState extends State<KeyRequestAcceptWindow> {
-  final _error = "".obs;
+class _KeyRequestAcceptWindowState extends State<KeyRequestAcceptWindow> with SignalsMixin {
+  late final _error = createSignal("");
   final TextEditingController _codeController = TextEditingController();
 
   @override
@@ -293,18 +295,12 @@ class _KeyRequestAcceptWindowState extends State<KeyRequestAcceptWindow> {
   @override
   Widget build(BuildContext context) {
     return DialogBase(
-      title: [
-        Text("key_requests.code.title".tr, style: Get.theme.textTheme.labelLarge),
-      ],
+      title: [Text("key_requests.code.title".tr, style: Get.theme.textTheme.labelLarge)],
       child: Column(
         children: [
           Text("key_requests.code.description".tr, style: Get.theme.textTheme.bodyMedium),
           verticalSpacing(defaultSpacing),
-          AnimatedErrorContainer(
-            expand: true,
-            padding: const EdgeInsets.only(bottom: defaultSpacing),
-            message: _error,
-          ),
+          AnimatedErrorContainer(expand: true, padding: const EdgeInsets.only(bottom: defaultSpacing), message: _error),
           FJTextField(
             controller: _codeController,
             hintText: "key_requests.code.placeholder".tr, // DRa6KS
@@ -315,8 +311,11 @@ class _KeyRequestAcceptWindowState extends State<KeyRequestAcceptWindow> {
             label: "key_requests.code.button".tr,
             onTap: () {
               // Verify the code
-              if (!checkSignature(widget.request.signature, widget.request.signaturePub,
-                  hashSha(_codeController.text + packagePublicKey(widget.request.encryptionPub)))) {
+              if (!checkSignature(
+                widget.request.signature,
+                widget.request.signaturePub,
+                hashSha(_codeController.text + packagePublicKey(widget.request.encryptionPub)),
+              )) {
                 _error.value = "key_requests.code.error".tr; // JEeSqn
                 return;
               }

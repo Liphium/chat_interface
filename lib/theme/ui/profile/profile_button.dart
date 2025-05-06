@@ -1,22 +1,43 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 import '../../../util/vertical_spacing.dart';
 
-class ProfileButton extends StatelessWidget {
+class ProfileButton extends StatefulWidget {
   final IconData icon;
   final String label;
   final Function() onTap;
   final Color? color;
   final Color? iconColor;
-  final RxBool loading;
+  final Signal<bool>? loading;
 
-  const ProfileButton({super.key, required this.icon, required this.label, required this.onTap, required this.loading, this.color, this.iconColor});
+  const ProfileButton({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    this.loading,
+    this.color,
+    this.iconColor,
+  });
+
+  @override
+  State<ProfileButton> createState() => _ProfileButtonState();
+}
+
+class _ProfileButtonState extends State<ProfileButton> with SignalsMixin {
+  late final Signal<bool> _loading;
+
+  @override
+  void initState() {
+    _loading = widget.loading ?? createSignal(false);
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     ThemeData theme = Theme.of(context);
-    Color backgroundColor = (color ?? theme.colorScheme.primary).withAlpha(150);
+    Color backgroundColor = (widget.color ?? theme.colorScheme.primary).withAlpha(150);
 
     return Material(
       borderRadius: BorderRadius.circular(defaultSpacing),
@@ -26,7 +47,7 @@ class ProfileButton extends StatelessWidget {
         hoverColor: backgroundColor,
 
         //* Button
-        onTap: () => loading.value ? null : onTap(),
+        onTap: () => _loading.value ? null : widget.onTap(),
 
         //* Button content
         child: Padding(
@@ -34,29 +55,32 @@ class ProfileButton extends StatelessWidget {
           child: Row(
             children: [
               //* Loading indicator
-              Obx(() => loading.value
-                  ? SizedBox(
-                      width: 25,
-                      height: 25,
-                      child: Padding(
-                        padding: const EdgeInsets.all(defaultSpacing * 0.25),
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: iconColor ?? theme.colorScheme.onPrimary,
-                        ),
-                      ),
-                    )
-                  : Icon(icon, size: 25, color: iconColor ?? theme.colorScheme.onPrimary)),
+              Watch(
+                (ctx) =>
+                    _loading.value
+                        ? SizedBox(
+                          width: 25,
+                          height: 25,
+                          child: Padding(
+                            padding: const EdgeInsets.all(defaultSpacing * 0.25),
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: widget.iconColor ?? theme.colorScheme.onPrimary,
+                            ),
+                          ),
+                        )
+                        : Icon(widget.icon, size: 25, color: widget.iconColor ?? theme.colorScheme.onPrimary),
+              ),
 
               //* Label
               horizontalSpacing(defaultSpacing),
               Flexible(
                 child: Text(
-                  label,
+                  widget.label,
                   style: theme.textTheme.bodyMedium!.copyWith(color: theme.colorScheme.onSurface),
                   overflow: TextOverflow.ellipsis,
                 ),
-              )
+              ),
             ],
           ),
         ),
