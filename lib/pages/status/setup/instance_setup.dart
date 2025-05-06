@@ -142,7 +142,6 @@ Future<String?> loadEncryptionKeyDbusSecrets(String instance) async {
   final secrets = DBusSecrets(appName: linuxDbusAppName);
   var result = await secrets.initialize();
   if (!result) {
-    await secrets.close();
     return "secure_storage.not_supported".tr;
   }
 
