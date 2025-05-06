@@ -16,8 +16,7 @@ With Liphium, the attempt is to hide all of the decentralization magic and give 
 
 This repository contains all of the code available for Liphium's client app.
 
-With all that said, this repository contains the main app for Liphium. It's one codebase for both mobile and desktop platforms making use of the [Flutter](https://flutter.dev) framework for at least somewhat seamless experiences across platforms. The app looks the same and has the same categories for things like Settings on all platforms to make explaining it easier than ever. All settings are the same in the same order across every platform. This consistency is key to making a good app (in my opinion) and makes writing documentation and more a lot easier. Every single piece of code can be re-used making adding features quite easy across the board.
-
 ## Contributing
 
 I appreciate that you want to contribute, the problem is just that there are no guides on how to navigate this gigantic codebase and before I sent you down this big rabbit hole I want to actually provide decent information on where things are and how things work. If you just want to help fix some typos, feel free to create a pull request. If you have a feature you want to request or have a bug that's bothering you, open an issue. If you want to help ship Liphium to more platforms, either open an issue or join the Discord server and contact me through there. Once guides and more are available I'll also make an announcement somewhere.
+

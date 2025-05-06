@@ -2,7 +2,7 @@
 
 - On every release, update `sqlite3.wasm` in the web folder to the latest version.
 
-## Currently in dev
+## 0.6.0
 
 ### Major changes
 
