@@ -11,9 +11,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class GeneralSettings {
-  // Behavior settings
-  static Setting<bool> minimizeToTray = Setting("behavior.minimize_to_tray", false);
-
   // Language settings
   static const String language = "language";
   static final languages = [
@@ -30,7 +27,6 @@ class GeneralSettings {
   static const String ringIgnoreTray = "ring.ignore_tray";
 
   static void addSettings() {
-    SettingController.addSetting(minimizeToTray);
     SettingController.addSetting(Setting<int>(language, 0));
 
     // Default notification sounds settings
@@ -62,13 +58,7 @@ class _GeneralSettingsPageState extends State<GeneralSettingsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Behavior settings
-          Text("settings.general.behavior".tr, style: Get.textTheme.labelLarge),
-          verticalSpacing(defaultSpacing),
-          BoolSettingSmall(settingName: GeneralSettings.minimizeToTray.label),
-          verticalSpacing(sectionSpacing),
-
-          //* Notification settings
+          //* Notification settings6
           Row(
             children: [
               Text("settings.general.notifications".tr, style: Get.theme.textTheme.labelLarge),
