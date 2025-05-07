@@ -221,7 +221,16 @@ class _RecoveryTokenDeleteWindowState extends State<RecoveryTokenDeleteWindow> w
             hintText: "recovery_tokens.delete.placeholder".tr, // DRa6KS
           ),
           verticalSpacing(defaultSpacing),
-          FJElevatedLoadingButton(loading: _loading, label: "delete".tr, onTap: () {}),
+          FJElevatedLoadingButton(
+            loading: _loading,
+            label: "delete".tr,
+            onTap: () async {
+              if (_loading.peek()) {
+                return;
+              }
+              _loading.value = true;
+            },
+          ),
         ],
       ),
     );

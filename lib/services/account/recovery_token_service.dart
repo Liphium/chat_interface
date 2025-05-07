@@ -24,6 +24,19 @@ class RecoveryTokenService {
     // Return the token based on the standard
     return ("${json["token"]}-${packageSymmetricKey(key)}", null);
   }
+
+  /// Delete a recovery token using the token.
+  ///
+  /// Returns an error if there was one.
+  static Future<String?> deleteToken(String token) async {
+    // Send the requeat
+    final json = await postAuthorizedJSON("/account/keys/recovery/delete", {"token": token.split("-")[0]});
+    if (!json["success"]) {
+      return json["error"];
+    }
+
+    return null;
+  }
 }
 
 class RecoveryKeyStorage {

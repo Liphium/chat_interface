@@ -6,7 +6,6 @@ import 'package:chat_interface/pages/chat/chat_page_mobile.dart';
 import 'package:chat_interface/pages/chat/components/conversations/message_bar.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar.dart';
-import 'package:chat_interface/pages/settings/app/general_settings.dart';
 import 'package:chat_interface/pages/spaces/space_rectangle.dart';
 import 'package:chat_interface/services/chat/conversation_message_provider.dart';
 import 'package:chat_interface/theme/components/forms/fj_button.dart';
