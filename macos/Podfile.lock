@@ -5,9 +5,9 @@ PODS:
     - FlutterMacOS
   - flutter_secure_storage_macos (6.1.3):
     - FlutterMacOS
-  - flutter_webrtc (0.12.6):
+  - flutter_webrtc (0.14.0):
     - FlutterMacOS
-    - WebRTC-SDK (= 125.6422.06)
+    - WebRTC-SDK (= 125.6422.07)
   - FlutterMacOS (1.0.0)
   - just_audio (0.0.1):
     - Flutter
@@ -23,7 +23,7 @@ PODS:
     - FlutterMacOS
   - screen_retriever_macos (0.0.1):
     - FlutterMacOS
-  - "sodium_libs (3.4.3+2)":
+  - "sodium_libs (3.4.4+3)":
     - Flutter
     - FlutterMacOS
   - sqlite3 (3.49.1):
@@ -32,6 +32,8 @@ PODS:
   - sqlite3/dbstatvtab (3.49.1):
     - sqlite3/common
   - sqlite3/fts5 (3.49.1):
+    - sqlite3/common
+  - sqlite3/math (3.49.1):
     - sqlite3/common
   - sqlite3/perf-threadsafe (3.49.1):
     - sqlite3/common
@@ -43,13 +45,12 @@ PODS:
     - sqlite3 (~> 3.49.1)
     - sqlite3/dbstatvtab
     - sqlite3/fts5
+    - sqlite3/math
     - sqlite3/perf-threadsafe
     - sqlite3/rtree
-  - tray_manager (0.0.1):
-    - FlutterMacOS
   - url_launcher_macos (0.0.1):
     - FlutterMacOS
-  - WebRTC-SDK (125.6422.06)
+  - WebRTC-SDK (125.6422.07)
   - window_manager (0.2.0):
     - FlutterMacOS
 
@@ -67,7 +68,6 @@ DEPENDENCIES:
   - screen_retriever_macos (from `Flutter/ephemeral/.symlinks/plugins/screen_retriever_macos/macos`)
   - sodium_libs (from `Flutter/ephemeral/.symlinks/plugins/sodium_libs/darwin`)
   - sqlite3_flutter_libs (from `Flutter/ephemeral/.symlinks/plugins/sqlite3_flutter_libs/darwin`)
-  - tray_manager (from `Flutter/ephemeral/.symlinks/plugins/tray_manager/macos`)
   - url_launcher_macos (from `Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos`)
   - window_manager (from `Flutter/ephemeral/.symlinks/plugins/window_manager/macos`)
 
@@ -103,8 +103,6 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/sodium_libs/darwin
   sqlite3_flutter_libs:
     :path: Flutter/ephemeral/.symlinks/plugins/sqlite3_flutter_libs/darwin
-  tray_manager:
-    :path: Flutter/ephemeral/.symlinks/plugins/tray_manager/macos
   url_launcher_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/url_launcher_macos/macos
   window_manager:
@@ -114,7 +112,7 @@ SPEC CHECKSUMS:
   audio_session: 728ae3823d914f809c485d390274861a24b0904e
   file_selector_macos: cc3858c981fe6889f364731200d6232dac1d812d
   flutter_secure_storage_macos: c2754d3483d20bb207bb9e5a14f1b8e771abcdb9
-  flutter_webrtc: d55fd3f5c75b42940b6b4b2cf376a5797398d1f8
+  flutter_webrtc: 3d98e6b97b60fcb758709b23ab568a1dc181e5c3
   FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
   just_audio: a42c63806f16995daf5b219ae1d679deb76e6a79
   libspaceship: 9a342f1bb5291587e62f20c84f4469e5c3dc511a
@@ -122,12 +120,11 @@ SPEC CHECKSUMS:
   pasteboard: 9b69dba6fedbb04866be632205d532fe2f6b1d99
   path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
   screen_retriever_macos: 776e0fa5d42c6163d2bf772d22478df4b302b161
-  sodium_libs: 7f895e4528eaa251d8e93a38237bc990cc3c73ce
+  sodium_libs: 2cab5161cff438dd7081ee11bec8717d64b0ab0b
   sqlite3: fc1400008a9b3525f5914ed715a5d1af0b8f4983
-  sqlite3_flutter_libs: cc304edcb8e1d8c595d1b08c7aeb46a47691d9db
-  tray_manager: 9064e219c56d75c476e46b9a21182087930baf90
+  sqlite3_flutter_libs: 487032b9008b28de37c72a3aa66849ef3745f3e6
   url_launcher_macos: c82c93949963e55b228a30115bd219499a6fe404
-  WebRTC-SDK: 79942c006ea64f6fb48d7da8a4786dfc820bc1db
+  WebRTC-SDK: dff00a3892bc570b6014e046297782084071657e
   window_manager: 3a1844359a6295ab1e47659b1a777e36773cd6e8
 
 PODFILE CHECKSUM: 7eb978b976557c8c1cd717d8185ec483fd090a82

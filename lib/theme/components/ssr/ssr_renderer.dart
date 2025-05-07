@@ -81,6 +81,7 @@ class _SSRRendererState extends State<SSRRenderer> {
     // Create a new text editing controller to fill in a value
     final controller = TextEditingController();
     controller.text = json["value"] ?? "";
+    widget.ssr.currentInputValues[json["name"]] = json["value"] ?? "";
     toDispose.add(controller); // Make sure the thing is disposed
 
     return Padding(

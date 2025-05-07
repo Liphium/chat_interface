@@ -38,6 +38,7 @@
 - Added a right click context menu in the sidebar
 - More reliable notification handling
 - The chat view now opens where the newest messages are
+- Fixed an error in SSR preventing the resending of mails in the registration process
 
 ## 0.6.0
 
