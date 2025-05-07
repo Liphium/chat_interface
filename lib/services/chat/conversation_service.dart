@@ -525,6 +525,7 @@ class ConversationService extends VaultTarget {
         db.conversation.update()
           ..where((tbl) => tbl.id.equals(conversation.id.encode()) & tbl.updatedAt.isSmallerThanValue(updatedTime));
     unawaited(query.write(ConversationCompanion(updatedAt: drift.Value(updatedTime))));
+    conversation.updatedAt = stamp;
 
     // Re-evaluate order in the sidebar
     ConversationController.reorder(conversation);

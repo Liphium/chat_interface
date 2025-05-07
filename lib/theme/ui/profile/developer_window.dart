@@ -1,7 +1,5 @@
 import 'dart:async';
 
-import 'package:chat_interface/controller/conversation/message_provider.dart';
-import 'package:chat_interface/controller/conversation/sidebar_controller.dart';
 import 'package:chat_interface/services/chat/vault_versioning_service.dart';
 import 'package:chat_interface/services/connection/connection.dart';
 import 'package:chat_interface/controller/account/friend_controller.dart';
@@ -10,6 +8,7 @@ import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
+import 'package:chat_interface/theme/ui/profile/developer_decryptor.dart';
 import 'package:chat_interface/theme/ui/profile/profile_button.dart';
 import 'package:chat_interface/util/constants.dart';
 import 'package:chat_interface/util/popups.dart';
@@ -73,34 +72,19 @@ class _DeveloperWindowState extends State<DeveloperWindow> {
           verticalSpacing(elementSpacing),
           Text("Current account: ${StatusController.ownAddress.encode()}", style: Get.textTheme.bodyMedium),
           verticalSpacing(defaultSpacing),
-          if (SidebarController.getCurrentProvider() != null)
-            Padding(
-              padding: EdgeInsets.all(defaultSpacing),
-              child: ProfileButton(
-                icon: Icons.delete,
-                label: "Load test conversation",
-                onTap: () async {
-                  final timestamp = await SidebarController.getCurrentProvider()!.getTimestamp();
-                  for (int i = 0; i <= 50; i++) {
-                    unawaited(
-                      SidebarController.getCurrentProvider()!.sendMessage(
-                        signal(false),
-                        MessageType.text,
-                        [],
-                        "message $i",
-                        "",
-                        timestampInfo: timestamp,
-                      ),
-                    );
-                  }
-                },
-              ),
-            ),
           ProfileButton(
             icon: Icons.launch,
             label: 'Local database viewer',
             onTap: () async {
               unawaited(Navigator.of(context).push(MaterialPageRoute(builder: (context) => DriftDbViewer(db))));
+            },
+          ),
+          verticalSpacing(defaultSpacing),
+          ProfileButton(
+            icon: Icons.launch,
+            label: 'Vault decryptor',
+            onTap: () {
+              showModal(const DeveloperDecryptor());
             },
           ),
           verticalSpacing(elementSpacing),

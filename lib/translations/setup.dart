@@ -52,11 +52,17 @@ class SetupTranslations extends Translations {
       // Key setup
       'key.sync.title': 'Your keys aren\'t synchronized.',
       'key.sync.desc':
-          'If you are logging in for the first time on this device or changed your keys, this is completely normal. You can ask another device to grab the keys from there, don\'t worry, we\'ll encrypt them in transfer.',
+          'If you are logging in for the first time on this device or changed your keys, this is completely normal. You can ask another device to grab the keys from there or use a recovery token you\'ve generated in the settings before. If loaded from another device, the keys will be encrypted in transfer.',
       'key.sync.ask_device': 'Ask another device',
+      'key.sync.use_recovery': 'Use recovery token',
       'key.code': 'Code: @code',
       'key.code.desc':
           'On any device where you are currently logged in, go to Settings > Data > Synchronization requests. Click on the correct request and then input the code above into the dialog that pops up. We\'ll check if you did automatically.',
+      'key.recovery.title': 'Enter your recovery token.',
+      'key.recovery.desc':
+          'Recovery tokens can only be used once. Make sure to enter everything correctly for it to work.',
+      'key.recovery.decryption_error':
+          'Couldn\'t decrypt your keys. Please make sure everything after "-" matches what you wrote down or saved somewhere.',
     },
   };
 }

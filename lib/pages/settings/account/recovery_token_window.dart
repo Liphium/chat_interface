@@ -229,6 +229,15 @@ class _RecoveryTokenDeleteWindowState extends State<RecoveryTokenDeleteWindow> w
                 return;
               }
               _loading.value = true;
+
+              // Do the actually deletion
+              final error = await RecoveryTokenService.deleteToken(_codeController.text);
+              if (error != null) {
+                _error.value = error;
+              } else {
+                Get.back();
+              }
+              _loading.value = false;
             },
           ),
         ],

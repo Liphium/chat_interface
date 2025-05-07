@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:chat_interface/pages/status/error/error_container.dart';
+import 'package:chat_interface/services/account/recovery_token_service.dart';
+import 'package:chat_interface/theme/components/forms/fj_textfield.dart';
 import 'package:chat_interface/util/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/util/encryption/hash.dart';
 import 'package:chat_interface/util/encryption/signatures.dart';
@@ -18,6 +21,7 @@ import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
 import '../../../pages/status/setup/setup_manager.dart';
@@ -201,6 +205,7 @@ class _KeySetupPageState extends State<KeySetupPage> {
           signature: widget.signature,
           signatureKeyPair: widget.signatureKeyPair,
           encryptionKeyPair: widget.encryptionKeyPair,
+          controller: controller,
         ),
       );
     } else {
@@ -248,6 +253,14 @@ class KeySynchronizationPage extends StatefulWidget {
 }
 
 class _KeySynchronizationPageState extends State<KeySynchronizationPage> {
+  final _loading = signal(false);
+
+  @override
+  void dispose() {
+    _loading.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -260,7 +273,13 @@ class _KeySynchronizationPageState extends State<KeySynchronizationPage> {
         Text("key.sync.desc".tr, style: Get.textTheme.bodyMedium),
         verticalSpacing(sectionSpacing),
         FJElevatedLoadingButton(
+          loading: _loading,
           onTap: () async {
+            if (_loading.peek()) {
+              return;
+            }
+            _loading.value = true;
+
             final json = await postJSON("/account/keys/requests/check", {
               "token": refreshToken,
               "signature": signMessage(
@@ -270,6 +289,7 @@ class _KeySynchronizationPageState extends State<KeySynchronizationPage> {
               "key":
                   "${packagePublicKey(widget.signatureKeyPair.publicKey)}:${packagePublicKey(widget.encryptionKeyPair.publicKey)}",
             });
+            _loading.value = false;
 
             if (!json["success"]) {
               showErrorPopup("error", json["error"]);
@@ -282,11 +302,25 @@ class _KeySynchronizationPageState extends State<KeySynchronizationPage> {
                   encryptionKeyPair: widget.encryptionKeyPair,
                   signatureKeyPair: widget.signatureKeyPair,
                   signature: widget.signature,
+                  controller: widget.controller,
                 ),
               ),
             );
           },
           label: "key.sync.ask_device".tr,
+        ),
+        verticalSpacing(defaultSpacing),
+        FJElevatedLoadingButton(
+          onTap:
+              () => widget.controller.transitionTo(
+                RecoveryTokenPage(
+                  encryptionKeyPair: widget.encryptionKeyPair,
+                  signatureKeyPair: widget.signatureKeyPair,
+                  signature: widget.signature,
+                  controller: widget.controller,
+                ),
+              ),
+          label: "key.sync.use_recovery".tr,
         ),
       ],
     );
@@ -296,12 +330,14 @@ class _KeySynchronizationPageState extends State<KeySynchronizationPage> {
 class KeyCodePage extends StatefulWidget {
   final KeyPair signatureKeyPair, encryptionKeyPair;
   final String signature;
+  final SmoothDialogController controller;
 
   const KeyCodePage({
     super.key,
     required this.signatureKeyPair,
     required this.signature,
     required this.encryptionKeyPair,
+    required this.controller,
   });
 
   @override
@@ -372,6 +408,133 @@ class _KeyCodePageState extends State<KeyCodePage> {
         ),
         verticalSpacing(sectionSpacing),
         Text('key.code.desc'.tr, style: Get.textTheme.bodyMedium),
+        verticalSpacing(defaultSpacing),
+        FJElevatedLoadingButton(
+          onTap:
+              () => widget.controller.transitionTo(
+                KeySynchronizationPage(
+                  signatureKeyPair: widget.signatureKeyPair,
+                  signature: widget.signature,
+                  encryptionKeyPair: widget.encryptionKeyPair,
+                  controller: widget.controller,
+                ),
+              ),
+          label: "back".tr,
+        ),
+      ],
+    );
+  }
+}
+
+class RecoveryTokenPage extends StatefulWidget {
+  final KeyPair signatureKeyPair, encryptionKeyPair;
+  final String signature;
+  final SmoothDialogController controller;
+
+  const RecoveryTokenPage({
+    super.key,
+    required this.signatureKeyPair,
+    required this.encryptionKeyPair,
+    required this.signature,
+    required this.controller,
+  });
+
+  @override
+  State<RecoveryTokenPage> createState() => _RecoveryTokenPageState();
+}
+
+class _RecoveryTokenPageState extends State<RecoveryTokenPage> with SignalsMixin {
+  late final _loading = createSignal(false);
+  late final _error = createSignal("");
+  final _tokenController = TextEditingController();
+
+  @override
+  void dispose() {
+    _tokenController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text("key.recovery.title".tr, style: Get.textTheme.headlineMedium, textAlign: TextAlign.center),
+        verticalSpacing(sectionSpacing),
+        Text('key.recovery.desc'.tr, style: Get.textTheme.bodyMedium),
+        verticalSpacing(sectionSpacing),
+        FJTextField(hintText: "recovery_tokens.delete.placeholder".tr, autofocus: true, controller: _tokenController),
+        verticalSpacing(defaultSpacing),
+        AnimatedErrorContainer(message: _error, padding: const EdgeInsets.only(bottom: defaultSpacing), expand: true),
+        FJElevatedLoadingButton(
+          loading: _loading,
+          onTap: () async {
+            if (_loading.peek()) {
+              return;
+            }
+            _loading.value = true;
+            _error.value = "";
+
+            // Parse the token
+            final args = _tokenController.text.split("-");
+
+            // Get the token to see if it is correct
+            var json = await postJSON("/account/keys/recovery/get", {
+              "session_token": refreshToken,
+              "recovery_token": args[0],
+            });
+            if (!json["success"]) {
+              _loading.value = false;
+              _error.value = json["error"];
+              return;
+            }
+
+            // Try decrypting
+            RecoveryKeyStorage? storage;
+            try {
+              storage = RecoveryKeyStorage.fromEncrypted(json["data"], unpackageSymmetricKey(args[1]));
+            } catch (e) {
+              sendLog("ERROR: couldn't decrypt recovery token: $e");
+              _loading.value = false;
+              _error.value = "key.recovery.decryption_error".tr;
+              return;
+            }
+
+            // Verify the session with the token in case it succeeded
+            json = await postJSON("/account/keys/recovery/use", {
+              "session_token": refreshToken,
+              "recovery_token": args[0],
+            });
+            if (!json["success"]) {
+              _loading.value = false;
+              _error.value = json["error"];
+              return;
+            }
+
+            // Save all the keys to the local database and restart
+            await setEncryptedValue("public_key", packagePublicKey(storage.encryptionKeyPair.publicKey));
+            await setEncryptedValue("private_key", packagePrivateKey(storage.encryptionKeyPair.secretKey));
+            await setEncryptedValue("signature_public_key", packagePublicKey(storage.signatureKeyPair.publicKey));
+            await setEncryptedValue("signature_private_key", packagePrivateKey(storage.signatureKeyPair.secretKey));
+            setupManager.retry();
+          },
+          label: "check".tr,
+        ),
+        verticalSpacing(defaultSpacing),
+        FJElevatedLoadingButton(
+          onTap:
+              () => widget.controller.transitionTo(
+                KeySynchronizationPage(
+                  signatureKeyPair: widget.signatureKeyPair,
+                  signature: widget.signature,
+                  encryptionKeyPair: widget.encryptionKeyPair,
+                  controller: widget.controller,
+                ),
+              ),
+          label: "back".tr,
+        ),
       ],
     );
   }

@@ -60,6 +60,7 @@ class GeneralTranslations extends Translations {
       'liphium_address': 'Your Liphium address',
       'help': 'Help & resources',
       'pinned': 'Pinned',
+      'check': 'Check',
 
       // Spaces
       'shared': 'Shared',

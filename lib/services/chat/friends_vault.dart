@@ -194,9 +194,6 @@ class FriendsVault {
     final requests = <Request>[];
     final requestsSent = <Request>[];
     for (var friend in json["friends"]) {
-      final decrypted = decryptSymmetric(friend["friend"], key, sodium);
-      final data = jsonDecode(decrypted);
-
       // Set the new version
       if (friend["version"] > currentVersion) {
         currentVersion = friend["version"];
@@ -209,6 +206,8 @@ class FriendsVault {
       }
 
       // Check if request or friend
+      final decrypted = decryptSymmetric(friend["friend"], key, sodium);
+      final data = jsonDecode(decrypted);
       if (data["rq"]) {
         if (data["self"]) {
           final rq = Request.fromStoredPayload(friend["id"], friend["updated_at"], data);
