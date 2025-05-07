@@ -9,7 +9,9 @@ import 'package:get/get.dart';
 import 'package:signals/signals_flutter.dart';
 
 class FriendAddWindow extends StatefulWidget {
-  const FriendAddWindow({super.key});
+  final String? name;
+
+  const FriendAddWindow({super.key, this.name});
 
   @override
   State<FriendAddWindow> createState() => _FriendAddWindowState();
@@ -17,6 +19,14 @@ class FriendAddWindow extends StatefulWidget {
 
 class _FriendAddWindowState extends State<FriendAddWindow> {
   final TextEditingController _name = TextEditingController();
+
+  @override
+  void initState() {
+    if (widget.name != null) {
+      _name.text = widget.name ?? "";
+    }
+    super.initState();
+  }
 
   @override
   void dispose() {

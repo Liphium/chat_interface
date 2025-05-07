@@ -7,7 +7,9 @@ import 'package:chat_interface/pages/chat/sidebar/friends/request_button.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/ui/containers/success_container.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
+import 'package:chat_interface/theme/ui/profile/profile.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
@@ -74,13 +76,28 @@ class _FriendsPageState extends State<FriendsPage> {
                           onChanged: (value) {
                             _query.value = value;
                           },
-                          onSubmitted: (value) => {}, // TODO: Think about what do with this
+                          onSubmitted: (value) {
+                            // Check if there is any kind of search result
+                            final found = FriendController.friends.values.firstWhereOrNull(
+                              (friend) =>
+                                  (friend.displayName.value.toLowerCase().contains(_query.value.toLowerCase()) ||
+                                      friend.name.toLowerCase().contains(_query.value.toLowerCase())) &&
+                                  friend.id != StatusController.ownAddress,
+                            );
+                            if (found != null) {
+                              showModal(Profile(friend: found));
+                              return;
+                            }
+
+                            // Otherwise open the friend add window with the thing typed
+                            showModal(FriendAddWindow(name: _query.peek()));
+                          },
                           cursorColor: Get.theme.colorScheme.onPrimary,
                         ),
                       ),
                       LoadingIconButton(
                         loading: FriendsVault.friendsVaultRefreshing,
-                        onTap: () => showModal(const FriendAddWindow()),
+                        onTap: () => showModal(FriendAddWindow(name: _query.peek())),
                         icon: Icons.person_add_alt_1,
                       ),
                     ],

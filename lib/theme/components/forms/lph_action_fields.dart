@@ -2,12 +2,37 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
-class LPHCopyField extends StatelessWidget {
-  final String label;
+class LPHCopyField extends StatefulWidget {
+  final String? label;
   final String value;
+  final bool censor;
+  final String censorPlaceholder;
 
-  const LPHCopyField({super.key, required this.label, required this.value});
+  const LPHCopyField({
+    super.key,
+    this.label,
+    required this.value,
+    this.censor = false,
+    this.censorPlaceholder = "*********",
+  });
+
+  @override
+  State<LPHCopyField> createState() => _LPHCopyFieldState();
+}
+
+class _LPHCopyFieldState extends State<LPHCopyField> with SignalsMixin {
+  late final visible = createSignal(false);
+
+  /// Get the current tooltip for the recovery token.
+  String getCurrentTooltip() {
+    if (widget.label != null) {
+      return widget.censor ? "${widget.label}: ${widget.censorPlaceholder}" : "${widget.label}: ${widget.value}";
+    }
+
+    return widget.censor ? widget.censorPlaceholder : widget.value;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,19 +49,37 @@ class LPHCopyField extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(label, overflow: TextOverflow.ellipsis, style: Get.textTheme.labelSmall),
-                Tooltip(
-                  waitDuration: const Duration(milliseconds: 500),
-                  exitDuration: const Duration(microseconds: 0),
-                  message: "$label: $value",
-                  child: Text(value, overflow: TextOverflow.ellipsis, style: Get.textTheme.bodyLarge),
+                if (widget.label != null)
+                  Text(widget.label!, overflow: TextOverflow.ellipsis, style: Get.textTheme.labelSmall),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Tooltip(
+                    waitDuration: const Duration(milliseconds: 500),
+                    exitDuration: const Duration(microseconds: 0),
+                    message: getCurrentTooltip(),
+                    child: Text(
+                      widget.censor && !visible.value ? widget.censorPlaceholder : widget.value,
+                      style: Get.textTheme.bodyLarge,
+                    ),
+                  ),
                 ),
               ],
             ),
           ),
-          verticalSpacing(defaultSpacing),
+          if (widget.censor)
+            Padding(
+              padding: const EdgeInsets.only(left: defaultSpacing),
+              child: IconButton(
+                onPressed: () => visible.value = !visible.value,
+                icon: Icon(
+                  visible.value ? Icons.visibility : Icons.visibility_off,
+                  color: Get.theme.colorScheme.onPrimary,
+                ),
+              ),
+            ),
+          if (widget.censor) horizontalSpacing(elementSpacing) else horizontalSpacing(defaultSpacing),
           IconButton(
-            onPressed: () => Clipboard.setData(ClipboardData(text: value)),
+            onPressed: () => Clipboard.setData(ClipboardData(text: widget.value)),
             icon: Icon(Icons.copy, color: Get.theme.colorScheme.onPrimary),
           ),
         ],

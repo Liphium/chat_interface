@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:chat_interface/pages/settings/account/recovery_token_window.dart';
 import 'package:chat_interface/services/chat/profile_picture_helper.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/settings/account/change_display_name_window.dart';
@@ -105,11 +106,11 @@ class DataSettingsPage extends StatelessWidget {
           ),
           verticalSpacing(sectionSpacing),
 
-          //* Name settings
+          // Heading for all the settings related to the account
           Text("settings.data.account".tr, style: Get.theme.textTheme.labelLarge),
           verticalSpacing(defaultSpacing),
 
-          //* Key requests
+          // Render a container for managing key requests
           Container(
             decoration: BoxDecoration(
               color: Get.theme.colorScheme.onInverseSurface,
@@ -133,6 +134,37 @@ class DataSettingsPage extends StatelessWidget {
                 FJElevatedButton(
                   smallCorners: true,
                   onTap: () => showModal(const KeyRequestsWindow()),
+                  child: Text("view".tr, style: Get.theme.textTheme.labelMedium),
+                ),
+              ],
+            ),
+          ),
+          verticalSpacing(defaultSpacing),
+
+          // Render a container for managing the recovery tokens
+          Container(
+            decoration: BoxDecoration(
+              color: Get.theme.colorScheme.onInverseSurface,
+              borderRadius: BorderRadius.circular(sectionSpacing),
+            ),
+            padding: const EdgeInsets.all(sectionSpacing),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Flexible(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text("settings.data.recovery_tokens".tr, style: Get.theme.textTheme.labelMedium),
+                      verticalSpacing(elementSpacing),
+                      Text("settings.data.recovery_tokens.description".tr, style: Get.theme.textTheme.bodyMedium),
+                    ],
+                  ),
+                ),
+                horizontalSpacing(defaultSpacing),
+                FJElevatedButton(
+                  smallCorners: true,
+                  onTap: () => showModal(const RecoveryTokenWindow()),
                   child: Text("view".tr, style: Get.theme.textTheme.labelMedium),
                 ),
               ],

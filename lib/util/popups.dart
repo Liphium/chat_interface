@@ -31,7 +31,7 @@ void showSuccessPopupTranslated(String title, String message) {
 Future<bool> showConfirmPopup(ConfirmWindow window) async {
   final result = await showModal(window);
   if (result == null) {
-    return true;
+    return false;
   }
   return result;
 }

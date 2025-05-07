@@ -19,6 +19,9 @@ class AccountSettingsTranslations extends Translations {
       'settings.data.key_requests': 'Synchronization requests',
       'settings.data.key_requests.description':
           'If we ask you to accept a key request on another device, you can find them here.',
+      'settings.data.recovery_tokens': 'Recovery tokens',
+      'settings.data.recovery_tokens.description':
+          'Create a token to recover all encrypted data. DOES NOT RECOVER YOUR ACCOUNT.',
       'settings.data.permissions': 'Permissions',
       'settings.data.permissions.description':
           'If you don\'t know what this is, it\'s fine. This is just data from the server that we can ask you for in case of problems. Here\'s which permissions you have:',
@@ -39,6 +42,7 @@ class AccountSettingsTranslations extends Translations {
           'Want to change your display name? We\'ll handle your request right here.',
 
       // Key sync requests
+      'key_requests.title': 'Synchronization requests',
       'key_requests.empty': 'There are currently no requests to exchange keys with another device.',
       'key_requests.code.title': 'Enter verification code',
       'key_requests.code.description':
@@ -46,6 +50,21 @@ class AccountSettingsTranslations extends Translations {
       'key_requests.code.placeholder': 'abcdef',
       'key_requests.code.error': 'This code is invalid. Please try again.',
       'key_requests.code.button': 'Verify code',
+
+      // Recovery token window
+      'recovery_tokens.title': 'Recovery tokens',
+      'recovery_tokens.description':
+          'Recovery tokens allow you to recover access to all messages, friends and more. THEY DO NOT RECOVER ACCESS TO YOUR ACCOUNT.',
+      'recovery_tokens.empty': 'There are currently no recovery tokens.',
+      'recovery_tokens.creation.confirm': 'Confirm creation',
+      'recovery_tokens.creation.description':
+          'Recovery tokens can only be deleted by entering the original recovery token. Anyone with the recovery token can potentially access all of your account\'s data including messages and everything else. YOU WILL NOT BE ABLE TO RECOVER YOUR PASSWORD WITH THE TOKEN.',
+      'recovery_tokens.created.title': 'Created recovery token',
+      'recovery_tokens.created.description':
+          'Recovery token has been copied to clipboard. Please make sure to save your recovery token in a secure place. Writing it down on paper might also be a good idea.',
+      'recovery_tokens.delete.title': 'Delete recovery token',
+      'recovery_tokens.delete.description': 'Enter the recovery token you want to delete below.',
+      'recovery_tokens.delete.placeholder': 'abcdefg-abcdefg',
 
       // Authentication settings
       'settings.authentication.first_factor': 'First factor',

@@ -167,11 +167,7 @@ class _KeyRequestsWindowState extends State<KeyRequestsWindow> with SignalsMixin
     return DialogBase(
       title: [
         Expanded(
-          child: Text(
-            "Synchronization requests".tr,
-            style: Get.theme.textTheme.labelLarge,
-            overflow: TextOverflow.ellipsis,
-          ),
+          child: Text("key_requests.title".tr, style: Get.theme.textTheme.labelLarge, overflow: TextOverflow.ellipsis),
         ),
         Visibility(
           visible: _loading.value,
@@ -302,6 +298,7 @@ class _KeyRequestAcceptWindowState extends State<KeyRequestAcceptWindow> with Si
           verticalSpacing(defaultSpacing),
           AnimatedErrorContainer(expand: true, padding: const EdgeInsets.only(bottom: defaultSpacing), message: _error),
           FJTextField(
+            autofocus: true,
             controller: _codeController,
             hintText: "key_requests.code.placeholder".tr, // DRa6KS
           ),
