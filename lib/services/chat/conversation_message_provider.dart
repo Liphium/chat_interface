@@ -23,7 +23,8 @@ import 'package:sodium_libs/sodium_libs.dart';
 class ConversationMessageProvider extends MessageProvider {
   final Conversation conversation;
   final String extra;
-  ConversationMessageProvider(this.conversation, {this.extra = ""});
+  final bool offlineMode;
+  ConversationMessageProvider(this.conversation, {this.extra = "", this.offlineMode = false});
 
   /// Generate a new value key related to this conversation and extra.
   String getKey(String identifier) => "${conversation.id.encode()}-$extra-$identifier";
@@ -43,7 +44,7 @@ class ConversationMessageProvider extends MessageProvider {
     // If there aren't enough messages, load more from the server
     if (loadedMessages.length != 30) {
       // Check if the user is even connected to the server (to make sure offline retrieval works)
-      if (!ConnectionController.connected.value) {
+      if (!ConnectionController.connected.value || offlineMode) {
         // Act like the top has been reached
         return (processed, false);
       }
@@ -106,7 +107,7 @@ class ConversationMessageProvider extends MessageProvider {
     final message = await messageQuery.getSingleOrNull();
     if (message == null) {
       // Check if the user is even connected to the server (to make sure offline retrieval works)
-      if (!ConnectionController.connected.value) {
+      if (!ConnectionController.connected.value || offlineMode) {
         // Act like the message doesn't exist
         return null;
       }
@@ -205,6 +206,10 @@ class ConversationMessageProvider extends MessageProvider {
 
   @override
   Future<String?> deleteMessage(Message message) async {
+    if (offlineMode) {
+      return "error.network".tr;
+    }
+
     // Check if the message is sent by the user
     final token = ConversationController.conversations[conversation.id]!.token;
     if (message.senderToken != token.id) {
@@ -238,6 +243,10 @@ class ConversationMessageProvider extends MessageProvider {
 
   @override
   Future<(String, int)?> getTimestamp() async {
+    if (offlineMode) {
+      return null;
+    }
+
     // Grab a new timestamp from the server
     var json = await postNodeJSON("/conversations/timestamp", {"token": conversation.token.toMap(conversation.id)});
     if (!json["success"]) {
@@ -250,6 +259,10 @@ class ConversationMessageProvider extends MessageProvider {
 
   @override
   Future<String?> handleMessageSend(String timeToken, String data, int stamp) async {
+    if (offlineMode) {
+      return "error.network".tr;
+    }
+
     // Send message to the server with conversation token as authentication
     final json = await postNodeJSON("/conversations/message/send", <String, dynamic>{
       "token": conversation.token.toMap(conversation.id),

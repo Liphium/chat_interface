@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:chat_interface/controller/conversation/sidebar_controller.dart';
+import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/pages/chat/chat_page_desktop.dart';
 import 'package:chat_interface/pages/chat/components/conversations/conversation_members_bar.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
@@ -22,26 +23,54 @@ class MessageController {
   static LPHAddress systemSender = LPHAddress("liphium.com", "6969");
 
   static final loaded = signal(false);
+  static Function()? _subscriptionDispose;
 
   /// Open a conversation.
   ///
   /// Transitions to a new page on mobile.
   /// Changes the tab in the sidebar in case on desktop.
   static Future<void> openConversation(Conversation conversation, {String extra = ""}) async {
-    final provider = ConversationMessageProvider(conversation, extra: extra);
+    final provider = ConversationMessageProvider(
+      conversation,
+      extra: extra,
+      offlineMode: !ConnectionController.connected.peek(),
+    );
 
-    // Load the current position for messages
-    final read = conversation.reads.get(extra);
-    await provider.reloadAt(read + 1);
+    // Properly transition between offline mode and online mode
+    if (_subscriptionDispose != null) {
+      _subscriptionDispose!.call();
+    }
+    _subscriptionDispose = ConnectionController.connected.subscribe((connected) {
+      // Check if should switch to online mode
+      if (connected && provider.offlineMode) {
+        openConversation(conversation, extra: extra);
+      }
 
-    if (ConversationController.notificationMap[ConversationService.withExtra(conversation.id.encode(), extra)] == 1) {
-      unawaited(
-        ConversationService.overwriteRead(
-          conversation,
-          provider.messages.values.first.createdAt.millisecondsSinceEpoch,
-          extra: extra,
-        ),
-      );
+      // Check if should switch to offline mode
+      if (!connected && !provider.offlineMode) {
+        openConversation(conversation, extra: extra);
+      }
+    });
+
+    // Load newest message available in case in offline mode
+    if (provider.offlineMode) {
+      await provider.loadNewMessagesTop(date: DateTime.now().millisecondsSinceEpoch);
+    } else {
+      // Otherwise load from read state
+
+      // Load the current position for messages
+      final read = conversation.reads.get(extra);
+      await provider.reloadAt(read + 1);
+
+      if (ConversationController.notificationMap[ConversationService.withExtra(conversation.id.encode(), extra)] == 1) {
+        unawaited(
+          ConversationService.overwriteRead(
+            conversation,
+            provider.messages.values.first.createdAt.millisecondsSinceEpoch,
+            extra: extra,
+          ),
+        );
+      }
     }
 
     // Show the messages once they are fully loaded
@@ -95,7 +124,7 @@ class MessageController {
     }
 
     // Add message to message history if it's the selected one
-    if (tab.provider.conversation.id == conversation.id && tab.provider.extra == extra) {
+    if (tab.provider.conversation.id == conversation.id && tab.provider.extra == extra && !tab.provider.offlineMode) {
       if (!simple) {
         await ConversationService.overwriteRead(
           tab.provider.conversation,
