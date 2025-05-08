@@ -31,16 +31,23 @@ class SettingsSetup extends Setup {
     // Initialize the tabletop settings
     await TabletopSettings.initSettings();
 
-    // Delete old logs
+    // Delete old logs and enable logging
     if (!isWeb) {
       final list = await LogManager.loggingDirectory!.list().toList();
       list.sort((a, b) => a.statSync().modified.compareTo(b.statSync().modified));
-      var index = SettingController.settings[LogSettings.amountOfLogs]!.getValue() as double;
+      final toKeep = SettingController.settings[LogSettings.amountOfLogs]!.getValue() as double;
+      var length = list.length;
       for (final file in list) {
-        if (index <= 0) {
-          await file.delete();
+        if (length <= toKeep) {
+          break;
         }
-        index--;
+        await file.delete();
+        length--;
+      }
+
+      // Enable logging for the current instance (only if enabled)
+      if (toKeep != 0) {
+        await LogManager.enableLogging();
       }
     }
 

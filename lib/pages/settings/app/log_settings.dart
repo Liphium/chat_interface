@@ -18,16 +18,6 @@ class LogManager {
   static Directory? loggingDirectory;
   static File? currentLogFile;
 
-  /// Deletes all current log files except for the current one.
-  static Future<void> deleteAllLogs() async {
-    for (var file in await loggingDirectory!.list().toList()) {
-      if (file.path == currentLogFile!.path) {
-        continue;
-      }
-      await file.delete();
-    }
-  }
-
   /// Enables logging if not currently enabled.
   ///
   /// Returns whether anything changed (if it was successful).
@@ -83,7 +73,7 @@ class LogSettings {
   static String amountOfLogs = "logging.amount";
 
   static void addSettings() {
-    SettingController.addSetting(Setting<double>(amountOfLogs, 5));
+    SettingController.addSetting(Setting<double>(amountOfLogs, 0));
   }
 }
 
@@ -101,7 +91,7 @@ class LogSettingsPage extends StatelessWidget {
             settingName: LogSettings.amountOfLogs,
             description: "logging.amount.desc",
             rounded: true,
-            min: 1,
+            min: 0,
             max: 30,
           ),
           verticalSpacing(elementSpacing),

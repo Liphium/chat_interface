@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
-import 'package:chat_interface/pages/settings/app/log_settings.dart';
 import 'package:chat_interface/pages/status/error/error_page.dart';
 import 'package:chat_interface/pages/status/setup/database/database_init_stub.dart'
     if (dart.library.io) 'package:chat_interface/pages/status/setup/database/database_init_native.dart'
@@ -92,9 +91,6 @@ Future<String?> setupInstance(String name, {bool next = false}) async {
   if (error != null) {
     return error;
   }
-
-  // Enable logging for the current instance
-  await LogManager.enableLogging();
 
   // Open the next setup page
   if (next) {
