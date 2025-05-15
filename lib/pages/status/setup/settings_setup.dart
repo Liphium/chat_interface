@@ -1,14 +1,19 @@
+import 'dart:io';
+
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/settings/app/general_settings.dart';
 import 'package:chat_interface/pages/settings/app/log_settings.dart';
 import 'package:chat_interface/pages/settings/appearance/theme_settings.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/pages/settings/town/tabletop_settings.dart';
+import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/pages/status/setup/setup_manager.dart';
 import 'package:chat_interface/theme/theme_manager.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart' as path;
 
 class SettingsSetup extends Setup {
   SettingsSetup() : super('loading.settings', true);
@@ -33,6 +38,12 @@ class SettingsSetup extends Setup {
 
     // Delete old logs and enable logging
     if (!isWeb) {
+      // Set the logging directory
+      LogManager.loggingDirectory = Directory(
+        path.join((await getApplicationSupportDirectory()).path, "logs_$currentInstance"),
+      );
+      await LogManager.loggingDirectory!.create();
+
       final list = await LogManager.loggingDirectory!.list().toList();
       list.sort((a, b) => a.statSync().modified.compareTo(b.statSync().modified));
       final toKeep = SettingController.settings[LogSettings.amountOfLogs]!.getValue() as double;

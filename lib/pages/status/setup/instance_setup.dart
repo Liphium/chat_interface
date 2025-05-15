@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/pages/status/error/error_page.dart';
@@ -83,7 +82,7 @@ Future<String?> setupInstance(String name, {bool next = false}) async {
 
   // Get the encryption password from secure storage
   String? error;
-  if (Platform.isLinux) {
+  if (GetPlatform.isLinux) {
     error = await loadEncryptionKeyDbusSecrets(name);
   } else {
     error = await loadEncryptionKeySecureStorage(name);

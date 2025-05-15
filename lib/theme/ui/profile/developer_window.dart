@@ -7,6 +7,7 @@ import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/status/setup/instance_setup.dart';
+import 'package:chat_interface/theme/ui/dialogs/upgrade_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/theme/ui/profile/developer_decryptor.dart';
 import 'package:chat_interface/theme/ui/profile/profile_button.dart';
@@ -77,6 +78,14 @@ class _DeveloperWindowState extends State<DeveloperWindow> {
             label: 'Local database viewer',
             onTap: () async {
               unawaited(Navigator.of(context).push(MaterialPageRoute(builder: (context) => DriftDbViewer(db))));
+            },
+          ),
+          verticalSpacing(defaultSpacing),
+          ProfileButton(
+            icon: Icons.launch,
+            label: 'Show upgrade window',
+            onTap: () {
+              showModal(const UpgradeWindow());
             },
           ),
           verticalSpacing(defaultSpacing),

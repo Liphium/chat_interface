@@ -26,10 +26,6 @@ class LogManager {
       return false;
     }
 
-    // Set the logging directory
-    loggingDirectory = Directory(path.join((await getApplicationSupportDirectory()).path, "logs_$currentInstance"));
-    await loggingDirectory!.create();
-
     // Initialize the newest log file
     currentLogFile = File(
       path.join(

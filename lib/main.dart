@@ -43,13 +43,15 @@ var executableArguments = <String>[];
 
 void main(List<String> args) async {
   // Initialize libspaceship
-  await RustLib.init();
-  await stopAllEngines();
+  if (!isWeb) {
+    await RustLib.init();
+    await stopAllEngines();
 
-  // Create a log stream for communication with libspaceship
-  createLogStream().listen((log) {
-    sendLog("rust: $log");
-  });
+    // Create a log stream for communication with libspaceship
+    createLogStream().listen((log) {
+      sendLog("rust: $log");
+    });
+  }
 
   // Handle errors from flutter
   final originalFunction = FlutterError.onError!;
