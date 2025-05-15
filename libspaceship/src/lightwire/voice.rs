@@ -8,7 +8,7 @@ use tokio::sync::{
     Mutex,
 };
 
-use crate::{error, info};
+use crate::binding::{error, info};
 
 use super::get_preferred_host;
 
@@ -103,7 +103,9 @@ impl VoiceInput {
                 .expect("Couldn't create resampler");
 
                 // Error function for printing errors that happen during voice handling
-                let err_fn = move |err| error!("error in cpal: {}", err);
+                let err_fn = move |err| {
+                    error(format!("error in cpal: {}", err));
+                };
 
                 // Create the callback for the voice data received from cpal
                 let callback = {
@@ -172,7 +174,7 @@ impl VoiceInput {
 
                     // Restart in that case
                     if new_device {
-                        info!("new device");
+                        info("new device");
                         VoiceInput::create_task(vc_input.clone(), sender.clone());
                         break;
                     }

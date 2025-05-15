@@ -12,7 +12,7 @@ use tokio::{
     time,
 };
 
-use crate::{error, info};
+use crate::binding::{error, info};
 
 use super::{get_preferred_host, AudioPacket};
 
@@ -60,7 +60,7 @@ impl PlayingEngine {
                     {
                         let mut engine = engine.blocking_lock();
                         if engine.stop {
-                            info!("stopping playing engine.");
+                            info("stopping playing engine");
                             return;
                         }
 
@@ -115,7 +115,7 @@ impl PlayingEngine {
                     let engine = engine.lock().await;
                     let data = data.unwrap();
                     if data.is_none() || engine.stop {
-                        info!("closed playing engine.");
+                        info("closed playing engine");
                         return;
                     }
                     let data: AudioPacket = data.expect("No data found");
@@ -126,7 +126,7 @@ impl PlayingEngine {
                         .as_ref()
                         .expect("No client id in packet for decoding, can't decode this");
                     if !engine.client_map.contains_key(client_id) {
-                        error!("client {} hasn't been added yet", client_id);
+                        error(format!("client {} hasn't been added yet", client_id));
                         continue;
                     }
 
@@ -175,7 +175,7 @@ impl PlayingEngine {
                 // Make sure the engine is actually enabled
                 if !engine.enabled {
                     engine.remove_target(&id);
-                    info!("unused listener for client {}", id);
+                    info(format!("unused listener for client {}", id));
                     client.buffer.clear();
                     return;
                 }
@@ -184,7 +184,7 @@ impl PlayingEngine {
                 seals += 1;
                 if seals > 1000 {
                     engine.remove_target(&id);
-                    info!("unused listener for client {}", id);
+                    info(format!("unused listener for client {}", id));
                     client.buffer.clear();
                     return;
                 }

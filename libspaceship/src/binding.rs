@@ -1,7 +1,8 @@
 use std::collections::HashMap;
 
 use lazy_static::lazy_static;
-use tokio::sync::Mutex;
+use libcgc::crypto::{asymmetric, signature, symmetric};
+use tokio::sync::{Mutex, MutexGuard};
 
 use crate::{
     frb_generated::StreamSink,
@@ -13,8 +14,16 @@ lazy_static! {
     static ref ENGINE_COUNT: Mutex<u32> = Mutex::new(0);
     static ref ENGINE_MAP: Mutex<HashMap<u32, Option<Engine>>> = Mutex::new(HashMap::new());
 
+    // Bindings for the encryption library
+    static ref KEY_COUNT: Mutex<u32> = Mutex::new(0);
+    static ref VERIFY_KEYS: Mutex<HashMap<u32, signature::VerifyingKey>> = Mutex::new(HashMap::new());
+    static ref SIGN_KEYS: Mutex<HashMap<u32, signature::SigningKey>> = Mutex::new(HashMap::new());
+    static ref PUBLIC_KEYS: Mutex<HashMap<u32, asymmetric::PublicKey>> = Mutex::new(HashMap::new());
+    static ref SECRET_KEYS: Mutex<HashMap<u32, asymmetric::SecretKey>> = Mutex::new(HashMap::new());
+    static ref SYMMETRIC_KEYS: Mutex<HashMap<u32, symmetric::SymmetricKey>> = Mutex::new(HashMap::new());
+
     // Bindings for the logging from Rust
-    static ref LOG_SINK: Mutex<Option<StreamSink<String>>> = Mutex::new(None);
+    static ref LOG_SINK: std::sync::Mutex<Option<StreamSink<String>>> = std::sync::Mutex::new(None);
 }
 
 // Create a new engine in global state (needed for the binding to Dart)
@@ -80,48 +89,90 @@ pub async fn stop_all_engines() {
 
 // Set the sink of the log stream
 pub async fn set_log_sink(sink: StreamSink<String>) {
-    let mut stream = LOG_SINK.lock().await;
-    *stream = Some(sink);
+    let stream = LOG_SINK.lock().ok();
+    if stream.is_none() {
+        return;
+    }
+    *stream.unwrap() = Some(sink);
 }
 
-// Log information
-pub fn info_impl(message: &str) {
-    let message = message.to_string();
-    tokio::spawn(async move {
-        let sink = LOG_SINK.lock().await;
-        if let Some(sink) = sink.as_ref() {
-            sink.add(format!("info: {}", message))
-                .expect("Couldn't send log message");
-        } else {
-            println!("info: {}", message);
-        }
-    });
+// Functions for storing the keys in the maps they belong to
+pub async fn store_symmetric_key(key: symmetric::SymmetricKey) -> u32 {
+    let index = next_key().await;
+    let mut map = SYMMETRIC_KEYS.lock().await;
+    map.insert(index, key);
+    return index;
+}
+pub async fn symmetric_key_map() -> MutexGuard<'static, HashMap<u32, symmetric::SymmetricKey>> {
+    SYMMETRIC_KEYS.lock().await
+}
+
+pub async fn store_verifying_key(key: signature::VerifyingKey) -> u32 {
+    let index = next_key().await;
+    let mut map = VERIFY_KEYS.lock().await;
+    map.insert(index, key);
+    return index;
+}
+pub async fn verifying_key_map() -> MutexGuard<'static, HashMap<u32, signature::VerifyingKey>> {
+    VERIFY_KEYS.lock().await
+}
+
+pub async fn store_signing_key(key: signature::SigningKey) -> u32 {
+    let index = next_key().await;
+    let mut map = SIGN_KEYS.lock().await;
+    map.insert(index, key);
+    return index;
+}
+pub async fn signing_keys_map() -> MutexGuard<'static, HashMap<u32, signature::SigningKey>> {
+    SIGN_KEYS.lock().await
+}
+
+pub async fn store_public_key(key: asymmetric::PublicKey) -> u32 {
+    let index = next_key().await;
+    let mut map = PUBLIC_KEYS.lock().await;
+    map.insert(index, key);
+    return index;
+}
+pub async fn public_key_map() -> MutexGuard<'static, HashMap<u32, asymmetric::PublicKey>> {
+    PUBLIC_KEYS.lock().await
+}
+
+pub async fn store_secret_key(key: asymmetric::SecretKey) -> u32 {
+    let index = next_key().await;
+    let mut map = SECRET_KEYS.lock().await;
+    map.insert(index, key);
+    return index;
+}
+pub async fn secret_key_map() -> MutexGuard<'static, HashMap<u32, asymmetric::SecretKey>> {
+    SECRET_KEYS.lock().await
+}
+
+async fn next_key() -> u32 {
+    let mut count = KEY_COUNT.lock().await;
+    *count += 1;
+    count.clone()
+}
+
+// Log info
+pub fn info<M: AsRef<str>>(message: M) {
+    let sink = LOG_SINK.lock().unwrap();
+    let msg = message.as_ref();
+    if let Some(sink) = sink.as_ref() {
+        sink.add(format!("info: {}", msg))
+            .expect("Couldn't send log message");
+    } else {
+        println!("info: {}", msg);
+    }
 }
 
 // Log an error
-pub fn error_impl(message: &str) {
-    let message = message.to_string();
-    tokio::spawn(async move {
-        let sink = LOG_SINK.lock().await;
-        if let Some(sink) = sink.as_ref() {
-            sink.add(format!("error: {}", message))
-                .expect("Couldn't send log message");
-        } else {
-            println!("error: {}", message);
-        }
-    });
-}
-
-#[macro_export]
-macro_rules! info {
-    ($($arg:tt)*) => {
-        $crate::binding::info_impl(&format!($($arg)*))
-    };
-}
-
-#[macro_export]
-macro_rules! error {
-    ($($arg:tt)*) => {
-        $crate::binding::error_impl(&format!($($arg)*))
-    };
+pub fn error<M: AsRef<str>>(message: M) {
+    let sink = LOG_SINK.lock().unwrap();
+    let msg = message.as_ref();
+    if let Some(sink) = sink.as_ref() {
+        sink.add(format!("error: {}", msg))
+            .expect("Couldn't send log message");
+    } else {
+        println!("error: {}", msg);
+    }
 }
