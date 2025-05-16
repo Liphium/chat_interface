@@ -1,4 +1,7 @@
-use libcgc::{container::auth_symmetric, crypto::symmetric};
+use libcgc::{
+    container::auth_symmetric,
+    crypto::{asymmetric, signature, symmetric},
+};
 
 use crate::binding;
 
@@ -64,4 +67,22 @@ pub async fn encrypt_symmetric_container(
     let real_sign_key = map.get_mut(&signing_key.id)?;
 
     return auth_symmetric::pack(real_key, real_sign_key, &message, salt);
+}
+
+/// Generate a new signature key pair.
+pub async fn generate_signature_keypair() -> SignatureKeyPair {
+    let keypair = signature::SignatureKeyPair::generate();
+    SignatureKeyPair {
+        signing_id: binding::store_signing_key(keypair.signature_key).await,
+        verify_id: binding::store_verifying_key(keypair.verify_key).await,
+    }
+}
+
+/// Generate a new asymmetric key pair (public/secret).
+pub async fn generate_asymmetric_keypair() -> AsymmetricKeyPair {
+    let keypair = asymmetric::AsymmetricKeyPair::generate();
+    AsymmetricKeyPair {
+        public_id: binding::store_public_key(keypair.public_key).await,
+        private_id: binding::store_secret_key(keypair.secret_key).await,
+    }
 }
