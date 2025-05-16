@@ -69,6 +69,21 @@ pub async fn encrypt_symmetric_container(
     return auth_symmetric::pack(real_key, real_sign_key, &message, salt);
 }
 
+/// Decrypt a symmetric container
+pub async fn unencrypt_symmetric_container(
+    key: SymmetricKey,
+    verifying_key: VerifyingKey,
+    ciphertext: Vec<u8>,
+    salt: Option<&Vec<u8>>,
+) -> Option<Vec<u8>> {
+    let mut key_map = binding::symmetric_key_map().await;
+    let real_key = key_map.get_mut(&key.id)?;
+    let mut vk_map = binding::verifying_key_map().await;
+    let real_vk = vk_map.get_mut(&verifying_key.id)?;
+
+    auth_symmetric::unpack(real_key, real_vk, &ciphertext, salt)
+}
+
 /// Generate a new signature key pair.
 pub async fn generate_signature_keypair() -> SignatureKeyPair {
     let keypair = signature::SignatureKeyPair::generate();
