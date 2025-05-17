@@ -4,9 +4,11 @@ import 'package:chat_interface/main.dart';
 import 'package:drift/drift.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
+/*
 KeyPair generateSignatureKeyPair([Sodium? sd]) {
   return (sd ?? sodiumLib).crypto.sign.keyPair();
 }
+*/
 
 // Encrypts a message (secret key is the key of the sender and public key is the key of the receiver)
 String signMessage(SecureKey privateKey, String message, [Sodium? sd]) {

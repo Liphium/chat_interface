@@ -23,13 +23,13 @@ pub struct SecretKey {
 }
 
 pub struct SignatureKeyPair {
-    pub signing_id: u32,
-    pub verify_id: u32,
+    pub signing_key: SigningKey,
+    pub verifying_key: VerifyingKey,
 }
 
 pub struct AsymmetricKeyPair {
-    pub public_id: u32,
-    pub private_id: u32,
+    pub public_key: PublicKey,
+    pub secret_key: SecretKey,
 }
 
 /// Generate a new random symmetric key.
@@ -59,37 +59,49 @@ pub async fn encrypt_symmetric_container(
     key: SymmetricKey,
     signing_key: SigningKey,
     message: Vec<u8>,
-    salt: Option<&Vec<u8>>,
+    salt: Option<Vec<u8>>,
 ) -> Option<Vec<u8>> {
     let mut map = binding::symmetric_key_map().await;
     let real_key = map.get_mut(&key.id)?;
     let mut map = binding::signing_keys_map().await;
     let real_sign_key = map.get_mut(&signing_key.id)?;
 
-    return auth_symmetric::pack(real_key, real_sign_key, &message, salt);
+    if let Some(salt) = salt {
+        auth_symmetric::pack(real_key, real_sign_key, &message, Some(&salt))
+    } else {
+        auth_symmetric::pack(real_key, real_sign_key, &message, None)
+    }
 }
 
 /// Decrypt a symmetric container
-pub async fn unencrypt_symmetric_container(
+pub async fn decrypt_symmetric_container(
     key: SymmetricKey,
     verifying_key: VerifyingKey,
     ciphertext: Vec<u8>,
-    salt: Option<&Vec<u8>>,
+    salt: Option<Vec<u8>>,
 ) -> Option<Vec<u8>> {
     let mut key_map = binding::symmetric_key_map().await;
     let real_key = key_map.get_mut(&key.id)?;
     let mut vk_map = binding::verifying_key_map().await;
     let real_vk = vk_map.get_mut(&verifying_key.id)?;
 
-    auth_symmetric::unpack(real_key, real_vk, &ciphertext, salt)
+    if let Some(salt) = salt {
+        auth_symmetric::unpack(real_key, real_vk, &ciphertext, Some(&salt))
+    } else {
+        auth_symmetric::unpack(real_key, real_vk, &ciphertext, None)
+    }
 }
 
 /// Generate a new signature key pair.
 pub async fn generate_signature_keypair() -> SignatureKeyPair {
     let keypair = signature::SignatureKeyPair::generate();
     SignatureKeyPair {
-        signing_id: binding::store_signing_key(keypair.signature_key).await,
-        verify_id: binding::store_verifying_key(keypair.verify_key).await,
+        signing_key: SigningKey {
+            id: binding::store_signing_key(keypair.signature_key).await,
+        },
+        verifying_key: VerifyingKey {
+            id: binding::store_verifying_key(keypair.verify_key).await,
+        },
     }
 }
 
@@ -97,8 +109,12 @@ pub async fn generate_signature_keypair() -> SignatureKeyPair {
 pub async fn generate_asymmetric_keypair() -> AsymmetricKeyPair {
     let keypair = asymmetric::AsymmetricKeyPair::generate();
     AsymmetricKeyPair {
-        public_id: binding::store_public_key(keypair.public_key).await,
-        private_id: binding::store_secret_key(keypair.secret_key).await,
+        public_key: PublicKey {
+            id: binding::store_public_key(keypair.public_key).await,
+        },
+        secret_key: SecretKey {
+            id: binding::store_secret_key(keypair.secret_key).await,
+        },
     }
 }
 
@@ -107,14 +123,18 @@ pub async fn encrypt_asymmetric_container(
     public_key: PublicKey,
     signing_key: SigningKey,
     message: Vec<u8>,
-    salt: Option<&Vec<u8>>,
+    salt: Option<Vec<u8>>,
 ) -> Option<Vec<u8>> {
     let mut public_key_map = binding::public_key_map().await;
     let real_public_key = public_key_map.get_mut(&public_key.id)?;
     let mut signing_key_map = binding::signing_keys_map().await;
     let real_signing_key = signing_key_map.get_mut(&signing_key.id)?;
 
-    auth_asymmetric::pack(real_public_key, real_signing_key, &message, salt)
+    if let Some(salt) = salt {
+        auth_asymmetric::pack(real_public_key, real_signing_key, &message, Some(&salt))
+    } else {
+        auth_asymmetric::pack(real_public_key, real_signing_key, &message, None)
+    }
 }
 
 /// Decrypt an asymmetric container
@@ -122,14 +142,23 @@ pub async fn decrypt_asymmetric_container(
     secret_key: SecretKey,
     verifying_key: VerifyingKey,
     ciphertext: Vec<u8>,
-    salt: Option<&Vec<u8>>,
+    salt: Option<Vec<u8>>,
 ) -> Option<Vec<u8>> {
     let mut secret_key_map = binding::secret_key_map().await;
     let real_secret_key = secret_key_map.get_mut(&secret_key.id)?;
     let mut verifying_key_map = binding::verifying_key_map().await;
     let real_verifying_key = verifying_key_map.get_mut(&verifying_key.id)?;
 
-    auth_asymmetric::unpack(real_secret_key, real_verifying_key, &ciphertext, salt)
+    if let Some(salt) = salt {
+        auth_asymmetric::unpack(
+            real_secret_key,
+            real_verifying_key,
+            &ciphertext,
+            Some(&salt),
+        )
+    } else {
+        auth_asymmetric::unpack(real_secret_key, real_verifying_key, &ciphertext, None)
+    }
 }
 
 /// Encode a symmetric key.

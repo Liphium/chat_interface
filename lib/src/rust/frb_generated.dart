@@ -4,6 +4,7 @@
 // ignore_for_file: unused_import, unused_element, unnecessary_import, duplicate_ignore, invalid_use_of_internal_member, annotate_overrides, non_constant_identifier_names, curly_braces_in_flow_control_structures, prefer_const_literals_to_create_immutables, unused_field
 
 import 'api/audio_devices.dart';
+import 'api/encryption.dart';
 import 'api/engine.dart';
 import 'api/general.dart';
 import 'dart:async';
@@ -64,7 +65,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.9.0';
 
   @override
-  int get rustContentHash => 2025983791;
+  int get rustContentHash => -1690734846;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -78,6 +79,110 @@ abstract class RustLibApi extends BaseApi {
   Future<LightwireEngine> crateApiEngineCreateLightwireEngine();
 
   Stream<String> crateApiGeneralCreateLogStream();
+
+  Future<PublicKey?> crateApiEncryptionDecodePublicKey({
+    required List<int> data,
+  });
+
+  Future<SecretKey?> crateApiEncryptionDecodeSecretKey({
+    required List<int> data,
+  });
+
+  Future<SigningKey?> crateApiEncryptionDecodeSigningKey({
+    required List<int> data,
+  });
+
+  Future<SymmetricKey?> crateApiEncryptionDecodeSymmetricKey({
+    required List<int> data,
+  });
+
+  Future<VerifyingKey?> crateApiEncryptionDecodeVerifyingKey({
+    required List<int> data,
+  });
+
+  Future<Uint8List?> crateApiEncryptionDecryptAsymmetricContainer({
+    required SecretKey secretKey,
+    required VerifyingKey verifyingKey,
+    required List<int> ciphertext,
+    Uint8List? salt,
+  });
+
+  Future<Uint8List?> crateApiEncryptionDecryptSymmetric({
+    required SymmetricKey key,
+    required List<int> ciphertext,
+  });
+
+  Future<Uint8List?> crateApiEncryptionDecryptSymmetricContainer({
+    required SymmetricKey key,
+    required VerifyingKey verifyingKey,
+    required List<int> ciphertext,
+    Uint8List? salt,
+  });
+
+  Future<Uint8List?> crateApiEncryptionEncodeAndDropPublicKey({
+    required PublicKey key,
+  });
+
+  Future<Uint8List?> crateApiEncryptionEncodeAndDropSecretKey({
+    required SecretKey key,
+  });
+
+  Future<Uint8List?> crateApiEncryptionEncodeAndDropSigningKey({
+    required SigningKey key,
+  });
+
+  Future<Uint8List?> crateApiEncryptionEncodeAndDropSymmetricKey({
+    required SymmetricKey key,
+  });
+
+  Future<Uint8List?> crateApiEncryptionEncodeAndDropVerifyingKey({
+    required VerifyingKey key,
+  });
+
+  Future<Uint8List?> crateApiEncryptionEncodePublicKey({
+    required PublicKey key,
+  });
+
+  Future<Uint8List?> crateApiEncryptionEncodeSecretKey({
+    required SecretKey key,
+  });
+
+  Future<Uint8List?> crateApiEncryptionEncodeSigningKey({
+    required SigningKey key,
+  });
+
+  Future<Uint8List?> crateApiEncryptionEncodeSymmetricKey({
+    required SymmetricKey key,
+  });
+
+  Future<Uint8List?> crateApiEncryptionEncodeVerifyingKey({
+    required VerifyingKey key,
+  });
+
+  Future<Uint8List?> crateApiEncryptionEncryptAsymmetricContainer({
+    required PublicKey publicKey,
+    required SigningKey signingKey,
+    required List<int> message,
+    Uint8List? salt,
+  });
+
+  Future<Uint8List?> crateApiEncryptionEncryptSymmetric({
+    required SymmetricKey key,
+    required List<int> message,
+  });
+
+  Future<Uint8List?> crateApiEncryptionEncryptSymmetricContainer({
+    required SymmetricKey key,
+    required SigningKey signingKey,
+    required List<int> message,
+    Uint8List? salt,
+  });
+
+  Future<AsymmetricKeyPair> crateApiEncryptionGenerateAsymmetricKeypair();
+
+  Future<SignatureKeyPair> crateApiEncryptionGenerateSignatureKeypair();
+
+  Future<SymmetricKey> crateApiEncryptionGenerateSymmetricKey();
 
   Future<AudioInputDevice> crateApiAudioDevicesGetDefaultInputDevice();
 
@@ -212,6 +317,790 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       const TaskConstMeta(debugName: "create_log_stream", argNames: ["sink"]);
 
   @override
+  Future<PublicKey?> crateApiEncryptionDecodePublicKey({
+    required List<int> data,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_list_prim_u_8_loose(data, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 3,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_opt_box_autoadd_public_key,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEncryptionDecodePublicKeyConstMeta,
+        argValues: [data],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiEncryptionDecodePublicKeyConstMeta =>
+      const TaskConstMeta(debugName: "decode_public_key", argNames: ["data"]);
+
+  @override
+  Future<SecretKey?> crateApiEncryptionDecodeSecretKey({
+    required List<int> data,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_list_prim_u_8_loose(data, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 4,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_opt_box_autoadd_secret_key,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEncryptionDecodeSecretKeyConstMeta,
+        argValues: [data],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiEncryptionDecodeSecretKeyConstMeta =>
+      const TaskConstMeta(debugName: "decode_secret_key", argNames: ["data"]);
+
+  @override
+  Future<SigningKey?> crateApiEncryptionDecodeSigningKey({
+    required List<int> data,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_list_prim_u_8_loose(data, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 5,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_opt_box_autoadd_signing_key,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEncryptionDecodeSigningKeyConstMeta,
+        argValues: [data],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiEncryptionDecodeSigningKeyConstMeta =>
+      const TaskConstMeta(debugName: "decode_signing_key", argNames: ["data"]);
+
+  @override
+  Future<SymmetricKey?> crateApiEncryptionDecodeSymmetricKey({
+    required List<int> data,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_list_prim_u_8_loose(data, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 6,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_opt_box_autoadd_symmetric_key,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEncryptionDecodeSymmetricKeyConstMeta,
+        argValues: [data],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiEncryptionDecodeSymmetricKeyConstMeta =>
+      const TaskConstMeta(
+        debugName: "decode_symmetric_key",
+        argNames: ["data"],
+      );
+
+  @override
+  Future<VerifyingKey?> crateApiEncryptionDecodeVerifyingKey({
+    required List<int> data,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_list_prim_u_8_loose(data, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 7,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_opt_box_autoadd_verifying_key,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEncryptionDecodeVerifyingKeyConstMeta,
+        argValues: [data],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiEncryptionDecodeVerifyingKeyConstMeta =>
+      const TaskConstMeta(
+        debugName: "decode_verifying_key",
+        argNames: ["data"],
+      );
+
+  @override
+  Future<Uint8List?> crateApiEncryptionDecryptAsymmetricContainer({
+    required SecretKey secretKey,
+    required VerifyingKey verifyingKey,
+    required List<int> ciphertext,
+    Uint8List? salt,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_box_autoadd_secret_key(secretKey, serializer);
+          sse_encode_box_autoadd_verifying_key(verifyingKey, serializer);
+          sse_encode_list_prim_u_8_loose(ciphertext, serializer);
+          sse_encode_opt_list_prim_u_8_strict(salt, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 8,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_opt_list_prim_u_8_strict,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEncryptionDecryptAsymmetricContainerConstMeta,
+        argValues: [secretKey, verifyingKey, ciphertext, salt],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiEncryptionDecryptAsymmetricContainerConstMeta =>
+      const TaskConstMeta(
+        debugName: "decrypt_asymmetric_container",
+        argNames: ["secretKey", "verifyingKey", "ciphertext", "salt"],
+      );
+
+  @override
+  Future<Uint8List?> crateApiEncryptionDecryptSymmetric({
+    required SymmetricKey key,
+    required List<int> ciphertext,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_box_autoadd_symmetric_key(key, serializer);
+          sse_encode_list_prim_u_8_loose(ciphertext, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 9,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_opt_list_prim_u_8_strict,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEncryptionDecryptSymmetricConstMeta,
+        argValues: [key, ciphertext],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiEncryptionDecryptSymmetricConstMeta =>
+      const TaskConstMeta(
+        debugName: "decrypt_symmetric",
+        argNames: ["key", "ciphertext"],
+      );
+
+  @override
+  Future<Uint8List?> crateApiEncryptionDecryptSymmetricContainer({
+    required SymmetricKey key,
+    required VerifyingKey verifyingKey,
+    required List<int> ciphertext,
+    Uint8List? salt,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_box_autoadd_symmetric_key(key, serializer);
+          sse_encode_box_autoadd_verifying_key(verifyingKey, serializer);
+          sse_encode_list_prim_u_8_loose(ciphertext, serializer);
+          sse_encode_opt_list_prim_u_8_strict(salt, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 10,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_opt_list_prim_u_8_strict,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEncryptionDecryptSymmetricContainerConstMeta,
+        argValues: [key, verifyingKey, ciphertext, salt],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiEncryptionDecryptSymmetricContainerConstMeta =>
+      const TaskConstMeta(
+        debugName: "decrypt_symmetric_container",
+        argNames: ["key", "verifyingKey", "ciphertext", "salt"],
+      );
+
+  @override
+  Future<Uint8List?> crateApiEncryptionEncodeAndDropPublicKey({
+    required PublicKey key,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_box_autoadd_public_key(key, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 11,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_opt_list_prim_u_8_strict,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEncryptionEncodeAndDropPublicKeyConstMeta,
+        argValues: [key],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiEncryptionEncodeAndDropPublicKeyConstMeta =>
+      const TaskConstMeta(
+        debugName: "encode_and_drop_public_key",
+        argNames: ["key"],
+      );
+
+  @override
+  Future<Uint8List?> crateApiEncryptionEncodeAndDropSecretKey({
+    required SecretKey key,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_box_autoadd_secret_key(key, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 12,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_opt_list_prim_u_8_strict,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEncryptionEncodeAndDropSecretKeyConstMeta,
+        argValues: [key],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiEncryptionEncodeAndDropSecretKeyConstMeta =>
+      const TaskConstMeta(
+        debugName: "encode_and_drop_secret_key",
+        argNames: ["key"],
+      );
+
+  @override
+  Future<Uint8List?> crateApiEncryptionEncodeAndDropSigningKey({
+    required SigningKey key,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_box_autoadd_signing_key(key, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 13,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_opt_list_prim_u_8_strict,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEncryptionEncodeAndDropSigningKeyConstMeta,
+        argValues: [key],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiEncryptionEncodeAndDropSigningKeyConstMeta =>
+      const TaskConstMeta(
+        debugName: "encode_and_drop_signing_key",
+        argNames: ["key"],
+      );
+
+  @override
+  Future<Uint8List?> crateApiEncryptionEncodeAndDropSymmetricKey({
+    required SymmetricKey key,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_box_autoadd_symmetric_key(key, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 14,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_opt_list_prim_u_8_strict,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEncryptionEncodeAndDropSymmetricKeyConstMeta,
+        argValues: [key],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiEncryptionEncodeAndDropSymmetricKeyConstMeta =>
+      const TaskConstMeta(
+        debugName: "encode_and_drop_symmetric_key",
+        argNames: ["key"],
+      );
+
+  @override
+  Future<Uint8List?> crateApiEncryptionEncodeAndDropVerifyingKey({
+    required VerifyingKey key,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_box_autoadd_verifying_key(key, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 15,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_opt_list_prim_u_8_strict,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEncryptionEncodeAndDropVerifyingKeyConstMeta,
+        argValues: [key],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiEncryptionEncodeAndDropVerifyingKeyConstMeta =>
+      const TaskConstMeta(
+        debugName: "encode_and_drop_verifying_key",
+        argNames: ["key"],
+      );
+
+  @override
+  Future<Uint8List?> crateApiEncryptionEncodePublicKey({
+    required PublicKey key,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_box_autoadd_public_key(key, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 16,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_opt_list_prim_u_8_strict,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEncryptionEncodePublicKeyConstMeta,
+        argValues: [key],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiEncryptionEncodePublicKeyConstMeta =>
+      const TaskConstMeta(debugName: "encode_public_key", argNames: ["key"]);
+
+  @override
+  Future<Uint8List?> crateApiEncryptionEncodeSecretKey({
+    required SecretKey key,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_box_autoadd_secret_key(key, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 17,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_opt_list_prim_u_8_strict,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEncryptionEncodeSecretKeyConstMeta,
+        argValues: [key],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiEncryptionEncodeSecretKeyConstMeta =>
+      const TaskConstMeta(debugName: "encode_secret_key", argNames: ["key"]);
+
+  @override
+  Future<Uint8List?> crateApiEncryptionEncodeSigningKey({
+    required SigningKey key,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_box_autoadd_signing_key(key, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 18,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_opt_list_prim_u_8_strict,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEncryptionEncodeSigningKeyConstMeta,
+        argValues: [key],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiEncryptionEncodeSigningKeyConstMeta =>
+      const TaskConstMeta(debugName: "encode_signing_key", argNames: ["key"]);
+
+  @override
+  Future<Uint8List?> crateApiEncryptionEncodeSymmetricKey({
+    required SymmetricKey key,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_box_autoadd_symmetric_key(key, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 19,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_opt_list_prim_u_8_strict,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEncryptionEncodeSymmetricKeyConstMeta,
+        argValues: [key],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiEncryptionEncodeSymmetricKeyConstMeta =>
+      const TaskConstMeta(debugName: "encode_symmetric_key", argNames: ["key"]);
+
+  @override
+  Future<Uint8List?> crateApiEncryptionEncodeVerifyingKey({
+    required VerifyingKey key,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_box_autoadd_verifying_key(key, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 20,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_opt_list_prim_u_8_strict,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEncryptionEncodeVerifyingKeyConstMeta,
+        argValues: [key],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiEncryptionEncodeVerifyingKeyConstMeta =>
+      const TaskConstMeta(debugName: "encode_verifying_key", argNames: ["key"]);
+
+  @override
+  Future<Uint8List?> crateApiEncryptionEncryptAsymmetricContainer({
+    required PublicKey publicKey,
+    required SigningKey signingKey,
+    required List<int> message,
+    Uint8List? salt,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_box_autoadd_public_key(publicKey, serializer);
+          sse_encode_box_autoadd_signing_key(signingKey, serializer);
+          sse_encode_list_prim_u_8_loose(message, serializer);
+          sse_encode_opt_list_prim_u_8_strict(salt, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 21,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_opt_list_prim_u_8_strict,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEncryptionEncryptAsymmetricContainerConstMeta,
+        argValues: [publicKey, signingKey, message, salt],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiEncryptionEncryptAsymmetricContainerConstMeta =>
+      const TaskConstMeta(
+        debugName: "encrypt_asymmetric_container",
+        argNames: ["publicKey", "signingKey", "message", "salt"],
+      );
+
+  @override
+  Future<Uint8List?> crateApiEncryptionEncryptSymmetric({
+    required SymmetricKey key,
+    required List<int> message,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_box_autoadd_symmetric_key(key, serializer);
+          sse_encode_list_prim_u_8_loose(message, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 22,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_opt_list_prim_u_8_strict,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEncryptionEncryptSymmetricConstMeta,
+        argValues: [key, message],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiEncryptionEncryptSymmetricConstMeta =>
+      const TaskConstMeta(
+        debugName: "encrypt_symmetric",
+        argNames: ["key", "message"],
+      );
+
+  @override
+  Future<Uint8List?> crateApiEncryptionEncryptSymmetricContainer({
+    required SymmetricKey key,
+    required SigningKey signingKey,
+    required List<int> message,
+    Uint8List? salt,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_box_autoadd_symmetric_key(key, serializer);
+          sse_encode_box_autoadd_signing_key(signingKey, serializer);
+          sse_encode_list_prim_u_8_loose(message, serializer);
+          sse_encode_opt_list_prim_u_8_strict(salt, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 23,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_opt_list_prim_u_8_strict,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEncryptionEncryptSymmetricContainerConstMeta,
+        argValues: [key, signingKey, message, salt],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiEncryptionEncryptSymmetricContainerConstMeta =>
+      const TaskConstMeta(
+        debugName: "encrypt_symmetric_container",
+        argNames: ["key", "signingKey", "message", "salt"],
+      );
+
+  @override
+  Future<AsymmetricKeyPair> crateApiEncryptionGenerateAsymmetricKeypair() {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 24,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_asymmetric_key_pair,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEncryptionGenerateAsymmetricKeypairConstMeta,
+        argValues: [],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiEncryptionGenerateAsymmetricKeypairConstMeta =>
+      const TaskConstMeta(
+        debugName: "generate_asymmetric_keypair",
+        argNames: [],
+      );
+
+  @override
+  Future<SignatureKeyPair> crateApiEncryptionGenerateSignatureKeypair() {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 25,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_signature_key_pair,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEncryptionGenerateSignatureKeypairConstMeta,
+        argValues: [],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiEncryptionGenerateSignatureKeypairConstMeta =>
+      const TaskConstMeta(
+        debugName: "generate_signature_keypair",
+        argNames: [],
+      );
+
+  @override
+  Future<SymmetricKey> crateApiEncryptionGenerateSymmetricKey() {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 26,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_symmetric_key,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEncryptionGenerateSymmetricKeyConstMeta,
+        argValues: [],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiEncryptionGenerateSymmetricKeyConstMeta =>
+      const TaskConstMeta(debugName: "generate_symmetric_key", argNames: []);
+
+  @override
   Future<AudioInputDevice> crateApiAudioDevicesGetDefaultInputDevice() {
     return handler.executeNormal(
       NormalTask(
@@ -220,7 +1109,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 3,
+            funcId: 27,
             port: port_,
           );
         },
@@ -247,7 +1136,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 4,
+            funcId: 28,
             port: port_,
           );
         },
@@ -274,7 +1163,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 5,
+            funcId: 29,
             port: port_,
           );
         },
@@ -301,7 +1190,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 6,
+            funcId: 30,
             port: port_,
           );
         },
@@ -335,7 +1224,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 7,
+            funcId: 31,
             port: port_,
           );
         },
@@ -369,7 +1258,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 8,
+            funcId: 32,
             port: port_,
           );
         },
@@ -404,7 +1293,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 9,
+            funcId: 33,
             port: port_,
           );
         },
@@ -439,7 +1328,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 10,
+            funcId: 34,
             port: port_,
           );
         },
@@ -478,7 +1367,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 11,
+            funcId: 35,
             port: port_,
           );
         },
@@ -513,7 +1402,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 12,
+            funcId: 36,
             port: port_,
           );
         },
@@ -548,7 +1437,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 13,
+            funcId: 37,
             port: port_,
           );
         },
@@ -583,7 +1472,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 14,
+            funcId: 38,
             port: port_,
           );
         },
@@ -618,7 +1507,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 15,
+            funcId: 39,
             port: port_,
           );
         },
@@ -657,7 +1546,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             pdeCallFfi(
               generalizedFrbRustBinding,
               serializer,
-              funcId: 16,
+              funcId: 40,
               port: port_,
             );
           },
@@ -689,7 +1578,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 17,
+            funcId: 41,
             port: port_,
           );
         },
@@ -717,7 +1606,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 18,
+            funcId: 42,
             port: port_,
           );
         },
@@ -760,6 +1649,18 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   String dco_decode_String(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw as String;
+  }
+
+  @protected
+  AsymmetricKeyPair dco_decode_asymmetric_key_pair(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 2)
+      throw Exception('unexpected arr length: expect 2 but see ${arr.length}');
+    return AsymmetricKeyPair(
+      publicKey: dco_decode_public_key(arr[0]),
+      secretKey: dco_decode_secret_key(arr[1]),
+    );
   }
 
   @protected
@@ -808,6 +1709,36 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   LightwireEngine dco_decode_box_autoadd_lightwire_engine(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return dco_decode_lightwire_engine(raw);
+  }
+
+  @protected
+  PublicKey dco_decode_box_autoadd_public_key(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return dco_decode_public_key(raw);
+  }
+
+  @protected
+  SecretKey dco_decode_box_autoadd_secret_key(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return dco_decode_secret_key(raw);
+  }
+
+  @protected
+  SigningKey dco_decode_box_autoadd_signing_key(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return dco_decode_signing_key(raw);
+  }
+
+  @protected
+  SymmetricKey dco_decode_box_autoadd_symmetric_key(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return dco_decode_symmetric_key(raw);
+  }
+
+  @protected
+  VerifyingKey dco_decode_box_autoadd_verifying_key(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return dco_decode_verifying_key(raw);
   }
 
   @protected
@@ -868,9 +1799,48 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  PublicKey? dco_decode_opt_box_autoadd_public_key(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw == null ? null : dco_decode_box_autoadd_public_key(raw);
+  }
+
+  @protected
+  SecretKey? dco_decode_opt_box_autoadd_secret_key(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw == null ? null : dco_decode_box_autoadd_secret_key(raw);
+  }
+
+  @protected
+  SigningKey? dco_decode_opt_box_autoadd_signing_key(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw == null ? null : dco_decode_box_autoadd_signing_key(raw);
+  }
+
+  @protected
+  SymmetricKey? dco_decode_opt_box_autoadd_symmetric_key(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw == null ? null : dco_decode_box_autoadd_symmetric_key(raw);
+  }
+
+  @protected
+  VerifyingKey? dco_decode_opt_box_autoadd_verifying_key(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw == null ? null : dco_decode_box_autoadd_verifying_key(raw);
+  }
+
+  @protected
   Uint8List? dco_decode_opt_list_prim_u_8_strict(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw == null ? null : dco_decode_list_prim_u_8_strict(raw);
+  }
+
+  @protected
+  PublicKey dco_decode_public_key(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 1)
+      throw Exception('unexpected arr length: expect 1 but see ${arr.length}');
+    return PublicKey(id: dco_decode_u_32(arr[0]));
   }
 
   @protected
@@ -891,6 +1861,45 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  SecretKey dco_decode_secret_key(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 1)
+      throw Exception('unexpected arr length: expect 1 but see ${arr.length}');
+    return SecretKey(id: dco_decode_u_32(arr[0]));
+  }
+
+  @protected
+  SignatureKeyPair dco_decode_signature_key_pair(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 2)
+      throw Exception('unexpected arr length: expect 2 but see ${arr.length}');
+    return SignatureKeyPair(
+      signingKey: dco_decode_signing_key(arr[0]),
+      verifyingKey: dco_decode_verifying_key(arr[1]),
+    );
+  }
+
+  @protected
+  SigningKey dco_decode_signing_key(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 1)
+      throw Exception('unexpected arr length: expect 1 but see ${arr.length}');
+    return SigningKey(id: dco_decode_u_32(arr[0]));
+  }
+
+  @protected
+  SymmetricKey dco_decode_symmetric_key(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 1)
+      throw Exception('unexpected arr length: expect 1 but see ${arr.length}');
+    return SymmetricKey(id: dco_decode_u_32(arr[0]));
+  }
+
+  @protected
   int dco_decode_u_32(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw as int;
@@ -906,6 +1915,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   void dco_decode_unit(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return;
+  }
+
+  @protected
+  VerifyingKey dco_decode_verifying_key(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 1)
+      throw Exception('unexpected arr length: expect 1 but see ${arr.length}');
+    return VerifyingKey(id: dco_decode_u_32(arr[0]));
   }
 
   @protected
@@ -937,6 +1955,19 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var inner = sse_decode_list_prim_u_8_strict(deserializer);
     return utf8.decoder.convert(inner);
+  }
+
+  @protected
+  AsymmetricKeyPair sse_decode_asymmetric_key_pair(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_publicKey = sse_decode_public_key(deserializer);
+    var var_secretKey = sse_decode_secret_key(deserializer);
+    return AsymmetricKeyPair(
+      publicKey: var_publicKey,
+      secretKey: var_secretKey,
+    );
   }
 
   @protected
@@ -979,6 +2010,40 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return (sse_decode_lightwire_engine(deserializer));
+  }
+
+  @protected
+  PublicKey sse_decode_box_autoadd_public_key(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return (sse_decode_public_key(deserializer));
+  }
+
+  @protected
+  SecretKey sse_decode_box_autoadd_secret_key(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return (sse_decode_secret_key(deserializer));
+  }
+
+  @protected
+  SigningKey sse_decode_box_autoadd_signing_key(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return (sse_decode_signing_key(deserializer));
+  }
+
+  @protected
+  SymmetricKey sse_decode_box_autoadd_symmetric_key(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return (sse_decode_symmetric_key(deserializer));
+  }
+
+  @protected
+  VerifyingKey sse_decode_box_autoadd_verifying_key(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return (sse_decode_verifying_key(deserializer));
   }
 
   @protected
@@ -1065,6 +2130,71 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  PublicKey? sse_decode_opt_box_autoadd_public_key(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    if (sse_decode_bool(deserializer)) {
+      return (sse_decode_box_autoadd_public_key(deserializer));
+    } else {
+      return null;
+    }
+  }
+
+  @protected
+  SecretKey? sse_decode_opt_box_autoadd_secret_key(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    if (sse_decode_bool(deserializer)) {
+      return (sse_decode_box_autoadd_secret_key(deserializer));
+    } else {
+      return null;
+    }
+  }
+
+  @protected
+  SigningKey? sse_decode_opt_box_autoadd_signing_key(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    if (sse_decode_bool(deserializer)) {
+      return (sse_decode_box_autoadd_signing_key(deserializer));
+    } else {
+      return null;
+    }
+  }
+
+  @protected
+  SymmetricKey? sse_decode_opt_box_autoadd_symmetric_key(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    if (sse_decode_bool(deserializer)) {
+      return (sse_decode_box_autoadd_symmetric_key(deserializer));
+    } else {
+      return null;
+    }
+  }
+
+  @protected
+  VerifyingKey? sse_decode_opt_box_autoadd_verifying_key(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    if (sse_decode_bool(deserializer)) {
+      return (sse_decode_box_autoadd_verifying_key(deserializer));
+    } else {
+      return null;
+    }
+  }
+
+  @protected
   Uint8List? sse_decode_opt_list_prim_u_8_strict(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
 
@@ -1073,6 +2203,13 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     } else {
       return null;
     }
+  }
+
+  @protected
+  PublicKey sse_decode_public_key(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_id = sse_decode_u_32(deserializer);
+    return PublicKey(id: var_id);
   }
 
   @protected
@@ -1085,6 +2222,38 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     var var_field1 = sse_decode_opt_box_autoadd_f_32(deserializer);
     var var_field2 = sse_decode_opt_box_autoadd_bool(deserializer);
     return (var_field0, var_field1, var_field2);
+  }
+
+  @protected
+  SecretKey sse_decode_secret_key(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_id = sse_decode_u_32(deserializer);
+    return SecretKey(id: var_id);
+  }
+
+  @protected
+  SignatureKeyPair sse_decode_signature_key_pair(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_signingKey = sse_decode_signing_key(deserializer);
+    var var_verifyingKey = sse_decode_verifying_key(deserializer);
+    return SignatureKeyPair(
+      signingKey: var_signingKey,
+      verifyingKey: var_verifyingKey,
+    );
+  }
+
+  @protected
+  SigningKey sse_decode_signing_key(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_id = sse_decode_u_32(deserializer);
+    return SigningKey(id: var_id);
+  }
+
+  @protected
+  SymmetricKey sse_decode_symmetric_key(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_id = sse_decode_u_32(deserializer);
+    return SymmetricKey(id: var_id);
   }
 
   @protected
@@ -1102,6 +2271,13 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   @protected
   void sse_decode_unit(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
+  }
+
+  @protected
+  VerifyingKey sse_decode_verifying_key(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    var var_id = sse_decode_u_32(deserializer);
+    return VerifyingKey(id: var_id);
   }
 
   @protected
@@ -1156,6 +2332,16 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_asymmetric_key_pair(
+    AsymmetricKeyPair self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_public_key(self.publicKey, serializer);
+    sse_encode_secret_key(self.secretKey, serializer);
+  }
+
+  @protected
   void sse_encode_audio_input_device(
     AudioInputDevice self,
     SseSerializer serializer,
@@ -1200,6 +2386,51 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   ) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_lightwire_engine(self, serializer);
+  }
+
+  @protected
+  void sse_encode_box_autoadd_public_key(
+    PublicKey self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_public_key(self, serializer);
+  }
+
+  @protected
+  void sse_encode_box_autoadd_secret_key(
+    SecretKey self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_secret_key(self, serializer);
+  }
+
+  @protected
+  void sse_encode_box_autoadd_signing_key(
+    SigningKey self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_signing_key(self, serializer);
+  }
+
+  @protected
+  void sse_encode_box_autoadd_symmetric_key(
+    SymmetricKey self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_symmetric_key(self, serializer);
+  }
+
+  @protected
+  void sse_encode_box_autoadd_verifying_key(
+    VerifyingKey self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_verifying_key(self, serializer);
   }
 
   @protected
@@ -1290,6 +2521,71 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_opt_box_autoadd_public_key(
+    PublicKey? self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    sse_encode_bool(self != null, serializer);
+    if (self != null) {
+      sse_encode_box_autoadd_public_key(self, serializer);
+    }
+  }
+
+  @protected
+  void sse_encode_opt_box_autoadd_secret_key(
+    SecretKey? self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    sse_encode_bool(self != null, serializer);
+    if (self != null) {
+      sse_encode_box_autoadd_secret_key(self, serializer);
+    }
+  }
+
+  @protected
+  void sse_encode_opt_box_autoadd_signing_key(
+    SigningKey? self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    sse_encode_bool(self != null, serializer);
+    if (self != null) {
+      sse_encode_box_autoadd_signing_key(self, serializer);
+    }
+  }
+
+  @protected
+  void sse_encode_opt_box_autoadd_symmetric_key(
+    SymmetricKey? self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    sse_encode_bool(self != null, serializer);
+    if (self != null) {
+      sse_encode_box_autoadd_symmetric_key(self, serializer);
+    }
+  }
+
+  @protected
+  void sse_encode_opt_box_autoadd_verifying_key(
+    VerifyingKey? self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    sse_encode_bool(self != null, serializer);
+    if (self != null) {
+      sse_encode_box_autoadd_verifying_key(self, serializer);
+    }
+  }
+
+  @protected
   void sse_encode_opt_list_prim_u_8_strict(
     Uint8List? self,
     SseSerializer serializer,
@@ -1303,6 +2599,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_public_key(PublicKey self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_u_32(self.id, serializer);
+  }
+
+  @protected
   void
   sse_encode_record_opt_list_prim_u_8_strict_opt_box_autoadd_f_32_opt_box_autoadd_bool(
     (Uint8List?, double?, bool?) self,
@@ -1312,6 +2614,34 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_opt_list_prim_u_8_strict(self.$1, serializer);
     sse_encode_opt_box_autoadd_f_32(self.$2, serializer);
     sse_encode_opt_box_autoadd_bool(self.$3, serializer);
+  }
+
+  @protected
+  void sse_encode_secret_key(SecretKey self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_u_32(self.id, serializer);
+  }
+
+  @protected
+  void sse_encode_signature_key_pair(
+    SignatureKeyPair self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_signing_key(self.signingKey, serializer);
+    sse_encode_verifying_key(self.verifyingKey, serializer);
+  }
+
+  @protected
+  void sse_encode_signing_key(SigningKey self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_u_32(self.id, serializer);
+  }
+
+  @protected
+  void sse_encode_symmetric_key(SymmetricKey self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_u_32(self.id, serializer);
   }
 
   @protected
@@ -1329,5 +2659,11 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   @protected
   void sse_encode_unit(void self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
+  }
+
+  @protected
+  void sse_encode_verifying_key(VerifyingKey self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_u_32(self.id, serializer);
   }
 }

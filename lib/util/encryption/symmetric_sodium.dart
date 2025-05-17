@@ -41,12 +41,3 @@ SecureKey randomSymmetricKey([Sodium? sd]) {
   final Sodium sodium = sd ?? sodiumLib;
   return sodium.crypto.secretBox.keygen();
 }
-
-String packageSymmetricKey(SecureKey key) {
-  return base64Encode(key.extractBytes());
-}
-
-SecureKey unpackageSymmetricKey(String key, [Sodium? sd]) {
-  final Sodium sodium = sd ?? sodiumLib;
-  return SecureKey.fromList(sodium, base64Decode(key));
-}

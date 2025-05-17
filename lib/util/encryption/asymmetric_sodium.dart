@@ -2,13 +2,16 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:chat_interface/main.dart';
+import 'package:chat_interface/src/rust/api/encryption.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
+/*
 /// Generates a new asymmetric key pair (secret key = private key)
 KeyPair generateAsymmetricKeyPair([Sodium? sd]) {
   return (sd ?? sodiumLib).crypto.box.keyPair();
 }
+*/
 
 /// Encrypts a message (secret key is the key of the sender and public key is the key of the receiver)
 String encryptAsymmetricAuth(Uint8List publicKey, SecureKey secureKey, String message, [Sodium? sd]) {
@@ -53,23 +56,6 @@ DecryptionResult decryptAsymmetricAuth(Uint8List publicKey, SecureKey secretKey,
   return DecryptionResult(utf8.decode(decrypted), true);
 }
 
-String packagePublicKey(Uint8List publicKey) {
-  return base64Encode(publicKey);
-}
-
-Uint8List unpackagePublicKey(String publicKey) {
-  return base64Decode(publicKey);
-}
-
-String packagePrivateKey(SecureKey privateKey) {
-  return base64Encode(privateKey.extractBytes());
-}
-
-SecureKey unpackagePrivateKey(String privateKey, [Sodium? sd]) {
-  final Sodium sodium = sd ?? sodiumLib;
-  return SecureKey.fromList(sodium, base64Decode(privateKey));
-}
-
 /// For friend requests and other stored actions (that shouldn't be identifiable).
 String encryptAsymmetricAnonymous(Uint8List publicKey, String message, [Sodium? sd]) {
   final Sodium sodium = sd ?? sodiumLib;
@@ -111,7 +97,3 @@ bool verifySignature(Uint8List publicKey, String signature, String message, [Sod
   return sodium.crypto.sign.verifyDetached(signature: signatureBytes, message: plainTextBytes, publicKey: publicKey);
 }
 */
-
-KeyPair toKeyPair(String publicKey, String privateKey, [Sodium? sd]) {
-  return KeyPair(publicKey: unpackagePublicKey(publicKey), secretKey: unpackagePrivateKey(privateKey, sd));
-}

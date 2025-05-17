@@ -6,46 +6,96 @@
 import '../frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-Future<LightwireEngine> createLightwireEngine() => RustLib.instance.api.crateApiEngineCreateLightwireEngine();
+Future<LightwireEngine> createLightwireEngine() =>
+    RustLib.instance.api.crateApiEngineCreateLightwireEngine();
 
-Stream<(Uint8List?, double?, bool?)> startPacketStream({required LightwireEngine engine}) =>
-    RustLib.instance.api.crateApiEngineStartPacketStream(engine: engine);
+Stream<(Uint8List?, double?, bool?)> startPacketStream({
+  required LightwireEngine engine,
+}) => RustLib.instance.api.crateApiEngineStartPacketStream(engine: engine);
 
-Future<void> setVoiceEnabled({required LightwireEngine engine, required bool enabled}) =>
-    RustLib.instance.api.crateApiEngineSetVoiceEnabled(engine: engine, enabled: enabled);
+Future<void> setVoiceEnabled({
+  required LightwireEngine engine,
+  required bool enabled,
+}) => RustLib.instance.api.crateApiEngineSetVoiceEnabled(
+  engine: engine,
+  enabled: enabled,
+);
 
-Future<void> setInputDevice({required LightwireEngine engine, required String device}) =>
-    RustLib.instance.api.crateApiEngineSetInputDevice(engine: engine, device: device);
+Future<void> setInputDevice({
+  required LightwireEngine engine,
+  required String device,
+}) => RustLib.instance.api.crateApiEngineSetInputDevice(
+  engine: engine,
+  device: device,
+);
 
-Future<void> setAudioEnabled({required LightwireEngine engine, required bool enabled}) =>
-    RustLib.instance.api.crateApiEngineSetAudioEnabled(engine: engine, enabled: enabled);
+Future<void> setAudioEnabled({
+  required LightwireEngine engine,
+  required bool enabled,
+}) => RustLib.instance.api.crateApiEngineSetAudioEnabled(
+  engine: engine,
+  enabled: enabled,
+);
 
-Future<void> setOutputDevice({required LightwireEngine engine, required String device}) =>
-    RustLib.instance.api.crateApiEngineSetOutputDevice(engine: engine, device: device);
+Future<void> setOutputDevice({
+  required LightwireEngine engine,
+  required String device,
+}) => RustLib.instance.api.crateApiEngineSetOutputDevice(
+  engine: engine,
+  device: device,
+);
 
-Future<void> setActivityDetection({required LightwireEngine engine, required bool enabled}) =>
-    RustLib.instance.api.crateApiEngineSetActivityDetection(engine: engine, enabled: enabled);
+Future<void> setActivityDetection({
+  required LightwireEngine engine,
+  required bool enabled,
+}) => RustLib.instance.api.crateApiEngineSetActivityDetection(
+  engine: engine,
+  enabled: enabled,
+);
 
-Future<void> setAutomaticDetection({required LightwireEngine engine, required bool enabled}) =>
-    RustLib.instance.api.crateApiEngineSetAutomaticDetection(engine: engine, enabled: enabled);
+Future<void> setAutomaticDetection({
+  required LightwireEngine engine,
+  required bool enabled,
+}) => RustLib.instance.api.crateApiEngineSetAutomaticDetection(
+  engine: engine,
+  enabled: enabled,
+);
 
-Future<void> setTalkingAmplitude({required LightwireEngine engine, required double amplitude}) =>
-    RustLib.instance.api.crateApiEngineSetTalkingAmplitude(engine: engine, amplitude: amplitude);
+Future<void> setTalkingAmplitude({
+  required LightwireEngine engine,
+  required double amplitude,
+}) => RustLib.instance.api.crateApiEngineSetTalkingAmplitude(
+  engine: engine,
+  amplitude: amplitude,
+);
 
 Future<void> setEncodingBitrate({
   required LightwireEngine engine,
   required bool auto,
   required bool max,
   required int bitrate,
-}) => RustLib.instance.api.crateApiEngineSetEncodingBitrate(engine: engine, auto: auto, max: max, bitrate: bitrate);
+}) => RustLib.instance.api.crateApiEngineSetEncodingBitrate(
+  engine: engine,
+  auto: auto,
+  max: max,
+  bitrate: bitrate,
+);
 
-Future<void> handlePacket({required LightwireEngine engine, required String id, required List<int> packet}) =>
-    RustLib.instance.api.crateApiEngineHandlePacket(engine: engine, id: id, packet: packet);
+Future<void> handlePacket({
+  required LightwireEngine engine,
+  required String id,
+  required List<int> packet,
+}) => RustLib.instance.api.crateApiEngineHandlePacket(
+  engine: engine,
+  id: id,
+  packet: packet,
+);
 
 Future<void> stopEngine({required LightwireEngine engine}) =>
     RustLib.instance.api.crateApiEngineStopEngine(engine: engine);
 
-Future<void> stopAllEngines() => RustLib.instance.api.crateApiEngineStopAllEngines();
+Future<void> stopAllEngines() =>
+    RustLib.instance.api.crateApiEngineStopAllEngines();
 
 class LightwireEngine {
   final int id;
@@ -57,5 +107,8 @@ class LightwireEngine {
 
   @override
   bool operator ==(Object other) =>
-      identical(this, other) || other is LightwireEngine && runtimeType == other.runtimeType && id == other.id;
+      identical(this, other) ||
+      other is LightwireEngine &&
+          runtimeType == other.runtimeType &&
+          id == other.id;
 }

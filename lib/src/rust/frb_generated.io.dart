@@ -4,6 +4,7 @@
 // ignore_for_file: unused_import, unused_element, unnecessary_import, duplicate_ignore, invalid_use_of_internal_member, annotate_overrides, non_constant_identifier_names, curly_braces_in_flow_control_structures, prefer_const_literals_to_create_immutables, unused_field
 
 import 'api/audio_devices.dart';
+import 'api/encryption.dart';
 import 'api/engine.dart';
 import 'api/general.dart';
 import 'dart:async';
@@ -36,6 +37,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   String dco_decode_String(dynamic raw);
 
   @protected
+  AsymmetricKeyPair dco_decode_asymmetric_key_pair(dynamic raw);
+
+  @protected
   AudioInputDevice dco_decode_audio_input_device(dynamic raw);
 
   @protected
@@ -52,6 +56,21 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   LightwireEngine dco_decode_box_autoadd_lightwire_engine(dynamic raw);
+
+  @protected
+  PublicKey dco_decode_box_autoadd_public_key(dynamic raw);
+
+  @protected
+  SecretKey dco_decode_box_autoadd_secret_key(dynamic raw);
+
+  @protected
+  SigningKey dco_decode_box_autoadd_signing_key(dynamic raw);
+
+  @protected
+  SymmetricKey dco_decode_box_autoadd_symmetric_key(dynamic raw);
+
+  @protected
+  VerifyingKey dco_decode_box_autoadd_verifying_key(dynamic raw);
 
   @protected
   double dco_decode_f_32(dynamic raw);
@@ -81,13 +100,43 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   double? dco_decode_opt_box_autoadd_f_32(dynamic raw);
 
   @protected
+  PublicKey? dco_decode_opt_box_autoadd_public_key(dynamic raw);
+
+  @protected
+  SecretKey? dco_decode_opt_box_autoadd_secret_key(dynamic raw);
+
+  @protected
+  SigningKey? dco_decode_opt_box_autoadd_signing_key(dynamic raw);
+
+  @protected
+  SymmetricKey? dco_decode_opt_box_autoadd_symmetric_key(dynamic raw);
+
+  @protected
+  VerifyingKey? dco_decode_opt_box_autoadd_verifying_key(dynamic raw);
+
+  @protected
   Uint8List? dco_decode_opt_list_prim_u_8_strict(dynamic raw);
+
+  @protected
+  PublicKey dco_decode_public_key(dynamic raw);
 
   @protected
   (Uint8List?, double?, bool?)
   dco_decode_record_opt_list_prim_u_8_strict_opt_box_autoadd_f_32_opt_box_autoadd_bool(
     dynamic raw,
   );
+
+  @protected
+  SecretKey dco_decode_secret_key(dynamic raw);
+
+  @protected
+  SignatureKeyPair dco_decode_signature_key_pair(dynamic raw);
+
+  @protected
+  SigningKey dco_decode_signing_key(dynamic raw);
+
+  @protected
+  SymmetricKey dco_decode_symmetric_key(dynamic raw);
 
   @protected
   int dco_decode_u_32(dynamic raw);
@@ -97,6 +146,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void dco_decode_unit(dynamic raw);
+
+  @protected
+  VerifyingKey dco_decode_verifying_key(dynamic raw);
 
   @protected
   AnyhowException sse_decode_AnyhowException(SseDeserializer deserializer);
@@ -116,6 +168,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   String sse_decode_String(SseDeserializer deserializer);
 
   @protected
+  AsymmetricKeyPair sse_decode_asymmetric_key_pair(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   AudioInputDevice sse_decode_audio_input_device(SseDeserializer deserializer);
 
   @protected
@@ -132,6 +189,25 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   LightwireEngine sse_decode_box_autoadd_lightwire_engine(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  PublicKey sse_decode_box_autoadd_public_key(SseDeserializer deserializer);
+
+  @protected
+  SecretKey sse_decode_box_autoadd_secret_key(SseDeserializer deserializer);
+
+  @protected
+  SigningKey sse_decode_box_autoadd_signing_key(SseDeserializer deserializer);
+
+  @protected
+  SymmetricKey sse_decode_box_autoadd_symmetric_key(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  VerifyingKey sse_decode_box_autoadd_verifying_key(
     SseDeserializer deserializer,
   );
 
@@ -167,13 +243,53 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   double? sse_decode_opt_box_autoadd_f_32(SseDeserializer deserializer);
 
   @protected
+  PublicKey? sse_decode_opt_box_autoadd_public_key(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  SecretKey? sse_decode_opt_box_autoadd_secret_key(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  SigningKey? sse_decode_opt_box_autoadd_signing_key(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  SymmetricKey? sse_decode_opt_box_autoadd_symmetric_key(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  VerifyingKey? sse_decode_opt_box_autoadd_verifying_key(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   Uint8List? sse_decode_opt_list_prim_u_8_strict(SseDeserializer deserializer);
+
+  @protected
+  PublicKey sse_decode_public_key(SseDeserializer deserializer);
 
   @protected
   (Uint8List?, double?, bool?)
   sse_decode_record_opt_list_prim_u_8_strict_opt_box_autoadd_f_32_opt_box_autoadd_bool(
     SseDeserializer deserializer,
   );
+
+  @protected
+  SecretKey sse_decode_secret_key(SseDeserializer deserializer);
+
+  @protected
+  SignatureKeyPair sse_decode_signature_key_pair(SseDeserializer deserializer);
+
+  @protected
+  SigningKey sse_decode_signing_key(SseDeserializer deserializer);
+
+  @protected
+  SymmetricKey sse_decode_symmetric_key(SseDeserializer deserializer);
 
   @protected
   int sse_decode_u_32(SseDeserializer deserializer);
@@ -183,6 +299,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_decode_unit(SseDeserializer deserializer);
+
+  @protected
+  VerifyingKey sse_decode_verifying_key(SseDeserializer deserializer);
 
   @protected
   void sse_encode_AnyhowException(
@@ -205,6 +324,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_String(String self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_asymmetric_key_pair(
+    AsymmetricKeyPair self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_audio_input_device(
@@ -230,6 +355,36 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_box_autoadd_lightwire_engine(
     LightwireEngine self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_public_key(
+    PublicKey self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_secret_key(
+    SecretKey self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_signing_key(
+    SigningKey self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_symmetric_key(
+    SymmetricKey self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_verifying_key(
+    VerifyingKey self,
     SseSerializer serializer,
   );
 
@@ -273,10 +428,43 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_opt_box_autoadd_f_32(double? self, SseSerializer serializer);
 
   @protected
+  void sse_encode_opt_box_autoadd_public_key(
+    PublicKey? self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_opt_box_autoadd_secret_key(
+    SecretKey? self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_opt_box_autoadd_signing_key(
+    SigningKey? self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_opt_box_autoadd_symmetric_key(
+    SymmetricKey? self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_opt_box_autoadd_verifying_key(
+    VerifyingKey? self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_opt_list_prim_u_8_strict(
     Uint8List? self,
     SseSerializer serializer,
   );
+
+  @protected
+  void sse_encode_public_key(PublicKey self, SseSerializer serializer);
 
   @protected
   void
@@ -286,6 +474,21 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_secret_key(SecretKey self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_signature_key_pair(
+    SignatureKeyPair self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_signing_key(SigningKey self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_symmetric_key(SymmetricKey self, SseSerializer serializer);
+
+  @protected
   void sse_encode_u_32(int self, SseSerializer serializer);
 
   @protected
@@ -293,6 +496,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_unit(void self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_verifying_key(VerifyingKey self, SseSerializer serializer);
 }
 
 // Section: wire_class
