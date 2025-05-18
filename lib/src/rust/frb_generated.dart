@@ -65,7 +65,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.9.0';
 
   @override
-  int get rustContentHash => -1690734846;
+  int get rustContentHash => -1537145379;
 
   static const kDefaultExternalLibraryLoaderConfig =
       ExternalLibraryLoaderConfig(
@@ -101,6 +101,7 @@ abstract class RustLibApi extends BaseApi {
   });
 
   Future<Uint8List?> crateApiEncryptionDecryptAsymmetricContainer({
+    required PublicKey publicKey,
     required SecretKey secretKey,
     required VerifyingKey verifyingKey,
     required List<int> ciphertext,
@@ -180,6 +181,11 @@ abstract class RustLibApi extends BaseApi {
 
   Future<AsymmetricKeyPair> crateApiEncryptionGenerateAsymmetricKeypair();
 
+  Future<Uint8List?> crateApiEncryptionGenerateSignature({
+    required SigningKey key,
+    required List<int> message,
+  });
+
   Future<SignatureKeyPair> crateApiEncryptionGenerateSignatureKeypair();
 
   Future<SymmetricKey> crateApiEncryptionGenerateSymmetricKey();
@@ -247,6 +253,12 @@ abstract class RustLibApi extends BaseApi {
   Future<void> crateApiEngineStopAllEngines();
 
   Future<void> crateApiEngineStopEngine({required LightwireEngine engine});
+
+  Future<bool?> crateApiEncryptionVerifySignature({
+    required VerifyingKey key,
+    required List<int> signature,
+    required List<int> message,
+  });
 }
 
 class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
@@ -474,6 +486,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   @override
   Future<Uint8List?> crateApiEncryptionDecryptAsymmetricContainer({
+    required PublicKey publicKey,
     required SecretKey secretKey,
     required VerifyingKey verifyingKey,
     required List<int> ciphertext,
@@ -483,6 +496,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_box_autoadd_public_key(publicKey, serializer);
           sse_encode_box_autoadd_secret_key(secretKey, serializer);
           sse_encode_box_autoadd_verifying_key(verifyingKey, serializer);
           sse_encode_list_prim_u_8_loose(ciphertext, serializer);
@@ -499,7 +513,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           decodeErrorData: null,
         ),
         constMeta: kCrateApiEncryptionDecryptAsymmetricContainerConstMeta,
-        argValues: [secretKey, verifyingKey, ciphertext, salt],
+        argValues: [publicKey, secretKey, verifyingKey, ciphertext, salt],
         apiImpl: this,
       ),
     );
@@ -508,7 +522,13 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   TaskConstMeta get kCrateApiEncryptionDecryptAsymmetricContainerConstMeta =>
       const TaskConstMeta(
         debugName: "decrypt_asymmetric_container",
-        argNames: ["secretKey", "verifyingKey", "ciphertext", "salt"],
+        argNames: [
+          "publicKey",
+          "secretKey",
+          "verifyingKey",
+          "ciphertext",
+          "salt",
+        ],
       );
 
   @override
@@ -1044,6 +1064,41 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       );
 
   @override
+  Future<Uint8List?> crateApiEncryptionGenerateSignature({
+    required SigningKey key,
+    required List<int> message,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_box_autoadd_signing_key(key, serializer);
+          sse_encode_list_prim_u_8_loose(message, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 25,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_opt_list_prim_u_8_strict,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEncryptionGenerateSignatureConstMeta,
+        argValues: [key, message],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiEncryptionGenerateSignatureConstMeta =>
+      const TaskConstMeta(
+        debugName: "generate_signature",
+        argNames: ["key", "message"],
+      );
+
+  @override
   Future<SignatureKeyPair> crateApiEncryptionGenerateSignatureKeypair() {
     return handler.executeNormal(
       NormalTask(
@@ -1052,7 +1107,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 25,
+            funcId: 26,
             port: port_,
           );
         },
@@ -1082,7 +1137,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 26,
+            funcId: 27,
             port: port_,
           );
         },
@@ -1109,7 +1164,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 27,
+            funcId: 28,
             port: port_,
           );
         },
@@ -1136,7 +1191,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 28,
+            funcId: 29,
             port: port_,
           );
         },
@@ -1163,7 +1218,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 29,
+            funcId: 30,
             port: port_,
           );
         },
@@ -1190,7 +1245,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 30,
+            funcId: 31,
             port: port_,
           );
         },
@@ -1224,7 +1279,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 31,
+            funcId: 32,
             port: port_,
           );
         },
@@ -1258,7 +1313,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 32,
+            funcId: 33,
             port: port_,
           );
         },
@@ -1293,7 +1348,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 33,
+            funcId: 34,
             port: port_,
           );
         },
@@ -1328,7 +1383,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 34,
+            funcId: 35,
             port: port_,
           );
         },
@@ -1367,7 +1422,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 35,
+            funcId: 36,
             port: port_,
           );
         },
@@ -1402,7 +1457,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 36,
+            funcId: 37,
             port: port_,
           );
         },
@@ -1437,7 +1492,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 37,
+            funcId: 38,
             port: port_,
           );
         },
@@ -1472,7 +1527,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 38,
+            funcId: 39,
             port: port_,
           );
         },
@@ -1507,7 +1562,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 39,
+            funcId: 40,
             port: port_,
           );
         },
@@ -1546,7 +1601,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             pdeCallFfi(
               generalizedFrbRustBinding,
               serializer,
-              funcId: 40,
+              funcId: 41,
               port: port_,
             );
           },
@@ -1578,7 +1633,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 41,
+            funcId: 42,
             port: port_,
           );
         },
@@ -1606,7 +1661,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 42,
+            funcId: 43,
             port: port_,
           );
         },
@@ -1623,6 +1678,43 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   TaskConstMeta get kCrateApiEngineStopEngineConstMeta =>
       const TaskConstMeta(debugName: "stop_engine", argNames: ["engine"]);
+
+  @override
+  Future<bool?> crateApiEncryptionVerifySignature({
+    required VerifyingKey key,
+    required List<int> signature,
+    required List<int> message,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_box_autoadd_verifying_key(key, serializer);
+          sse_encode_list_prim_u_8_loose(signature, serializer);
+          sse_encode_list_prim_u_8_loose(message, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 44,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_opt_box_autoadd_bool,
+          decodeErrorData: null,
+        ),
+        constMeta: kCrateApiEncryptionVerifySignatureConstMeta,
+        argValues: [key, signature, message],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiEncryptionVerifySignatureConstMeta =>
+      const TaskConstMeta(
+        debugName: "verify_signature",
+        argNames: ["key", "signature", "message"],
+      );
 
   @protected
   AnyhowException dco_decode_AnyhowException(dynamic raw) {

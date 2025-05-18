@@ -1,11 +1,9 @@
-import 'dart:typed_data';
+import 'dart:convert';
 
-import 'package:chat_interface/util/encryption/asymmetric_sodium.dart';
-import 'package:chat_interface/util/encryption/hash.dart';
-import 'package:chat_interface/util/encryption/signatures.dart';
-import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
+import 'package:chat_interface/src/rust/api/encryption.dart';
+import 'package:chat_interface/util/encryption/packing.dart';
 import 'package:chat_interface/controller/current/steps/key_step.dart';
-import 'package:sodium_libs/sodium_libs.dart';
+import 'package:get/get_utils/get_utils.dart';
 
 class ServerStoredInfo {
   final bool error;
@@ -14,117 +12,87 @@ class ServerStoredInfo {
   ServerStoredInfo(this.text, {this.error = false});
 
   /// Decrypt stored stored info with own public and private key
-  factory ServerStoredInfo.untransform(String transformed, {Sodium? sodium, KeyPair? ownKeyPair}) {
-    final result = decryptAsymmetricAuth(
-      (ownKeyPair ?? asymmetricKeyPair).publicKey,
-      (ownKeyPair ?? asymmetricKeyPair).secretKey,
-      transformed,
-      sodium,
+  static Future<ServerStoredInfo> untransform(String transformed) async {
+    // Make sure the thing is decodable
+    final decoded = decodeFromBase64(transformed);
+    if (decoded == null) {
+      return ServerStoredInfo("", error: true);
+    }
+
+    // Decrypt the container
+    final result = await decryptAsymmetricContainer(
+      publicKey: asymmetricKeyPair.publicKey,
+      secretKey: asymmetricKeyPair.secretKey,
+      verifyingKey: signatureKeyPair.verifyingKey,
+      ciphertext: decoded,
     );
-    return ServerStoredInfo(result.message, error: !result.success);
+    if (result == null) {
+      return ServerStoredInfo("", error: true);
+    }
+    final unpacked = unpackFromBytes(result);
+    return ServerStoredInfo(unpacked ?? "", error: unpacked == null);
   }
 
   /// Get the server stored info in encrypted form with the own public and private key
-  String transform({Sodium? sodium, KeyPair? ownKeyPair}) {
-    return encryptAsymmetricAuth(
-      (ownKeyPair ?? asymmetricKeyPair).publicKey,
-      (ownKeyPair ?? asymmetricKeyPair).secretKey,
-      text,
-      sodium,
+  Future<String?> transform() async {
+    final container = await encryptAsymmetricContainer(
+      publicKey: asymmetricKeyPair.publicKey,
+      signingKey: signatureKeyPair.signingKey,
+      message: packToBytes(text),
     );
-  }
-}
-
-/// A helper class to encrypt a text using asymmetric sodium and sign it (with a sequence number, can also be the time) to prevent replay attacks
-class AsymmetricSequencedInfo {
-  final bool error;
-  final int seq;
-  final String signature;
-  final String text;
-
-  AsymmetricSequencedInfo(this.seq, this.signature, this.text, {this.error = false});
-
-  /// Start building a new sequenced info
-  factory AsymmetricSequencedInfo.builder(String text, int seq) {
-    final hash = hashSha(text + seq.toString());
-    final signature = signMessage(signatureKeyPair.secretKey, hash);
-    return AsymmetricSequencedInfo(seq, signature, text);
-  }
-
-  /// Returns the actual thing that can be sent around
-  String finish(Uint8List publicKey) => "$seq:$signature:${encryptAsymmetricAnonymous(publicKey, text)}";
-
-  /// Untransform time encrypted info using secret keys
-  factory AsymmetricSequencedInfo.extract(String transformed) {
-    final args = transformed.split(":");
-
-    // Check if the thing is in the correct format (somewhat)
-    if (args.length != 3) {
-      return AsymmetricSequencedInfo(0, "", "", error: true);
+    if (container == null) {
+      return null;
     }
-
-    // Check if the sequence number is actually there
-    final seq = int.tryParse(args[0]);
-    if (seq == null) {
-      return AsymmetricSequencedInfo(0, "", "", error: true);
-    }
-
-    // Get all the rest
-    final signature = args[1];
-    final decryptedText = decryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, asymmetricKeyPair.secretKey, args[2]);
-    return AsymmetricSequencedInfo(seq, signature, decryptedText);
-  }
-
-  /// Verifies the signature of the sequenced info
-  bool verifySignature(Uint8List signaturePub) {
-    final computedSignature = hashSha(text + seq.toString());
-    return checkSignature(signature, signaturePub, computedSignature);
+    return base64Encode(container);
   }
 }
 
 /// A helper class to encrypt a text using symmetric sodium and sign it (with a sequence number, can also be the time) to prevent replay attacks
 class SymmetricSequencedInfo {
   final bool error;
-  final int seq;
-  final String signature;
   final String text;
 
-  SymmetricSequencedInfo(this.seq, this.signature, this.text, {this.error = false});
+  SymmetricSequencedInfo(this.text, {this.error = false});
 
-  /// Start building a new sequenced info
-  factory SymmetricSequencedInfo.builder(String text, int seq) {
-    final hash = hashSha(text + seq.toString());
-    final signature = signMessage(signatureKeyPair.secretKey, hash);
-    return SymmetricSequencedInfo(seq, signature, text);
+  /// Generate a new [SymmetricSequenceInfo] in encoded form.
+  static Future<String> generate(int seq, String text, SymmetricKey key) async {
+    return base64Encode(
+      (await encryptSymmetricContainer(
+        key: key,
+        signingKey: signatureKeyPair.signingKey,
+        message: packToBytes(text),
+        salt: packToBytes(seq.toString()),
+      ))!,
+    );
   }
-
-  /// Returns the actual thing that can be sent around
-  String finish(SecureKey key, {Sodium? sodium}) => "$seq:$signature:${encryptSymmetric(text, key, sodium)}";
 
   /// Untransform time encrypted info using the secret key
-  factory SymmetricSequencedInfo.extract(String transformed, SecureKey key, [Sodium? sodium]) {
-    final args = transformed.split(":");
-
-    // Check if the thing is in the correct format (somewhat)
-    if (args.length != 3) {
-      return SymmetricSequencedInfo(0, "", "", error: true);
+  static Future<SymmetricSequencedInfo> extract(
+    String transformed,
+    int seq,
+    SymmetricKey key,
+    VerifyingKey verifyingKey,
+  ) async {
+    // Try untransforming
+    final unpacked = decodeFromBase64(transformed);
+    if (unpacked == null) {
+      return SymmetricSequencedInfo("", error: true);
     }
 
-    // Check if the sequence number is actually there
-    final seq = int.tryParse(args[0]);
-    if (seq == null) {
-      return SymmetricSequencedInfo(0, "", "", error: true);
+    // Try decrypting the container
+    final container = await decryptSymmetricContainer(
+      key: key,
+      verifyingKey: verifyingKey,
+      ciphertext: unpacked,
+      salt: packToBytes(seq.toString()),
+    );
+    if (container == null) {
+      return SymmetricSequencedInfo("encryption.error".tr, error: true);
     }
-
-    // Get all the rest
-    final signature = args[1];
-    final decryptedText = decryptSymmetric(args[2], key, sodium);
-    return SymmetricSequencedInfo(seq, signature, decryptedText);
-  }
-
-  /// Verifies the signature of the sequenced info
-  bool verifySignature(Uint8List signaturePub, [Sodium? sodium]) {
-    final computedSignature = hashSha(text + seq.toString());
-    return checkSignature(signature, signaturePub, computedSignature, sodium);
+    final unpackedText = unpackFromBytes(container);
+    if (unpackedText == null) {
+      return SymmetricSequencedInfo("unpacking.error".tr, error: true);
+    }
+    return SymmetricSequencedInfo(unpackedText);
   }
 }

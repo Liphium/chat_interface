@@ -54,6 +54,25 @@ pub async fn decrypt_symmetric(key: SymmetricKey, ciphertext: Vec<u8>) -> Option
     real_key.decrypt(&ciphertext)
 }
 
+/// Generate a new signature using a signing key.
+pub async fn generate_signature(key: SigningKey, message: Vec<u8>) -> Option<Vec<u8>> {
+    let mut map = binding::signing_keys_map().await;
+    let real_key = map.get_mut(&key.id)?;
+    signature::sign(real_key, &message)
+}
+
+/// Verify a signature. Returns ``bool`` if the signature is valid or invalid.
+/// ``None`` if there was an error during verification.
+pub async fn verify_signature(
+    key: VerifyingKey,
+    signature: Vec<u8>,
+    message: Vec<u8>,
+) -> Option<bool> {
+    let map = binding::verifying_key_map().await;
+    let real_key = map.get(&key.id)?;
+    signature::verify(real_key, &message, &signature)
+}
+
 /// Encrypt using a symmetric container
 pub async fn encrypt_symmetric_container(
     key: SymmetricKey,
@@ -139,11 +158,14 @@ pub async fn encrypt_asymmetric_container(
 
 /// Decrypt an asymmetric container
 pub async fn decrypt_asymmetric_container(
+    public_key: PublicKey,
     secret_key: SecretKey,
     verifying_key: VerifyingKey,
     ciphertext: Vec<u8>,
     salt: Option<Vec<u8>>,
 ) -> Option<Vec<u8>> {
+    let public_key_map = binding::public_key_map().await;
+    let real_public_key = public_key_map.get(&public_key.id)?;
     let mut secret_key_map = binding::secret_key_map().await;
     let real_secret_key = secret_key_map.get_mut(&secret_key.id)?;
     let mut verifying_key_map = binding::verifying_key_map().await;
@@ -151,13 +173,20 @@ pub async fn decrypt_asymmetric_container(
 
     if let Some(salt) = salt {
         auth_asymmetric::unpack(
+            real_public_key,
             real_secret_key,
             real_verifying_key,
             &ciphertext,
             Some(&salt),
         )
     } else {
-        auth_asymmetric::unpack(real_secret_key, real_verifying_key, &ciphertext, None)
+        auth_asymmetric::unpack(
+            &real_public_key,
+            real_secret_key,
+            real_verifying_key,
+            &ciphertext,
+            None,
+        )
     }
 }
 

@@ -5,16 +5,11 @@ import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/services/account/recovery_token_service.dart';
 import 'package:chat_interface/src/rust/api/encryption.dart';
 import 'package:chat_interface/theme/components/forms/fj_textfield.dart';
-import 'package:chat_interface/util/encryption/asymmetric_sodium.dart';
-import 'package:chat_interface/util/encryption/hash.dart';
 import 'package:chat_interface/util/encryption/packing.dart';
-import 'package:chat_interface/util/encryption/signatures.dart';
-import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/pages/status/setup/setup_page.dart';
 import 'package:chat_interface/pages/status/setup/smooth_dialog.dart';
-import 'package:chat_interface/standards/server_stored_information.dart';
 import 'package:chat_interface/theme/components/forms/fj_button.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/popups.dart';
@@ -24,7 +19,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:signals/signals_flutter.dart';
-import 'package:sodium_libs/sodium_libs.dart';
 
 import '../../../pages/status/setup/setup_manager.dart';
 
@@ -211,6 +205,30 @@ class KeySetup extends ConnectionStep {
     );
     return completer.future;
   }
+
+  /// Check the status of the current key request on the server. Returns a json like the server would.
+  static Future<Map<String, dynamic>> checkKeyRequest(
+    AsymmetricKeyPair asymmetricKeyPair,
+    SignatureKeyPair signatureKeyPair,
+    String toSign,
+  ) async {
+    // Generate the signature
+    final pub = await encodePublicKey(key: asymmetricKeyPair.publicKey);
+    final signature = await generateSignature(key: signatureKeyPair.signingKey, message: packToBytes(toSign) + pub!);
+    if (signature == null) {
+      return {"success": false, "error": "encryption.error".tr};
+    }
+
+    // Check the request on the server
+    final packagedVerify = await packageVerifyingKey(signatureKeyPair.verifyingKey);
+    final packagedPub = await packagePublicKey(asymmetricKeyPair.publicKey);
+    assert(packagedVerify != null && packagedPub != null);
+    return await postJSON("/account/keys/requests/check", {
+      "token": refreshToken,
+      "signature": base64Encode(signature),
+      "key": "$packagedVerify:$packagedPub",
+    });
+  }
 }
 
 class KeySetupPage extends StatefulWidget {
@@ -321,15 +339,12 @@ class _KeySynchronizationPageState extends State<KeySynchronizationPage> {
             }
             _loading.value = true;
 
-            final json = await postJSON("/account/keys/requests/check", {
-              "token": refreshToken,
-              "signature": signMessage(
-                widget.signatureKeyPair.secretKey,
-                hashSha(widget.signature + (await packagePublicKey(widget.encryptionKeyPair.publicKey))!),
-              ),
-              "key":
-                  "${packagePublicKey(widget.signatureKeyPair.publicKey)}:${packagePublicKey(widget.encryptionKeyPair.publicKey)}",
-            });
+            // Check the request on the server
+            final json = await KeySetup.checkKeyRequest(
+              widget.encryptionKeyPair,
+              widget.signatureKeyPair,
+              widget.signature,
+            );
             _loading.value = false;
 
             if (!json["success"]) {
@@ -393,37 +408,38 @@ class _KeyCodePageState extends State<KeyCodePage> {
   void initState() {
     // Check state on the server every 5 seconds
     _timer = Timer.periodic(5000.ms, (timer) async {
-      final json = await postJSON("/account/keys/requests/check", {
-        "token": refreshToken,
-        "signature": signMessage(
-          widget.signatureKeyPair.secretKey,
-          hashSha(widget.signature + packagePublicKey(widget.encryptionKeyPair.publicKey)),
-        ),
-        "key":
-            "${packagePublicKey(widget.signatureKeyPair.publicKey)}:${packagePublicKey(widget.encryptionKeyPair.publicKey)}",
-      });
-
+      final json = await KeySetup.checkKeyRequest(widget.encryptionKeyPair, widget.signatureKeyPair, widget.signature);
       if (!json["success"]) {
-        showErrorPopup("error", json["error"]);
+        sendLog("ERROR WHILE CHECKING KEY REQUEST: ${json["error"]}");
         return;
       }
 
       // Add all the keys to the database if there is a payload
-      if (json["payload"] != null && json["payload"] != "") {
-        final payload = decryptAsymmetricAnonymous(
-          widget.encryptionKeyPair.publicKey,
-          widget.encryptionKeyPair.secretKey,
-          json["payload"],
+      final encData = json["payload"];
+      if (encData != null && encData != "" && encData is String) {
+        // Parse the arguments
+        final args = encData.split(":");
+        final verifyKey = await unpackageVerifyingKey(args[0]);
+        if (verifyKey == null) {
+          return;
+        }
+
+        // Decrypt the payload
+        final payload = await decryptAsymmetricContainer(
+          publicKey: widget.encryptionKeyPair.publicKey,
+          secretKey: widget.encryptionKeyPair.secretKey,
+          verifyingKey: verifyKey,
+          ciphertext: base64Decode(json["payload"]),
         );
-        if (payload == "") {
+        if (payload == null) {
           sendLog("couldn't decrypt message ${json["payload"]}");
           return;
         }
-        final jsonPayload = jsonDecode(payload);
-        await setEncryptedValue("public_key", jsonPayload["pub"]);
-        await setEncryptedValue("secret_key", jsonPayload["priv"]);
-        await setEncryptedValue("signature_public_key", jsonPayload["sig_pub"]);
-        await setEncryptedValue("signature_private_key", jsonPayload["sig_priv"]);
+        final jsonPayload = jsonDecode(String.fromCharCodes(payload));
+        await setEncryptedValue(KeySetup.dbPublicKey, jsonPayload["enc_pub"]);
+        await setEncryptedValue(KeySetup.dbSecretKey, jsonPayload["enc_sec"]);
+        await setEncryptedValue(KeySetup.dbVerifyingKey, jsonPayload["sig_ver"]);
+        await setEncryptedValue(KeySetup.dbSigningKey, jsonPayload["sig_sig"]);
         setupManager.retry();
       }
     });
@@ -469,7 +485,8 @@ class _KeyCodePageState extends State<KeyCodePage> {
 }
 
 class RecoveryTokenPage extends StatefulWidget {
-  final KeyPair signatureKeyPair, encryptionKeyPair;
+  final SignatureKeyPair signatureKeyPair;
+  final AsymmetricKeyPair encryptionKeyPair;
   final String signature;
   final SmoothDialogController controller;
 

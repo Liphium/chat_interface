@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
@@ -8,6 +7,7 @@ import 'package:chat_interface/controller/current/steps/key_step.dart';
 import 'package:chat_interface/controller/current/steps/stored_actions_step.dart';
 import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/standards/server_stored_information.dart';
+import 'package:chat_interface/util/encryption/packing.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:sodium_libs/sodium_libs.dart';
@@ -64,6 +64,7 @@ class AccountStep extends ConnectionStep {
     if (profileInfo.error || vaultInfo.error) {
       return SetupResponse(error: "keys.invalid");
     }
+    profileKey = await unpackageSymmetricKey(profileInfo.text);
     profileKey = unpackageSymmetricKey(profileInfo.text);
     vaultKey = unpackageSymmetricKey(vaultInfo.text);
     storedActionKey = body["actions"];

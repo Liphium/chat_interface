@@ -1136,9 +1136,9 @@ checksum = "c19937216e9d3aa9956d9bb8dfc0b0c8beb6058fc4f7a4dc4d850edf86a237d6"
 
 [[package]]
 name = "libcgc"
-version = "0.1.0"
+version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "82839108dbadfe5c82c285df6b463218a0b4c848005d45afb3f7228f311e9116"
+checksum = "84514cfd7d602b67f6dd257335e6cea9639d2338edd62ce16e9467c809ab64fd"
 dependencies = [
  "ml-dsa",
  "ml-kem 0.2.1",

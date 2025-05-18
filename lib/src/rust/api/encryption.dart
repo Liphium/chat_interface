@@ -28,6 +28,27 @@ Future<Uint8List?> decryptSymmetric({
   ciphertext: ciphertext,
 );
 
+/// Generate a new signature using a signing key.
+Future<Uint8List?> generateSignature({
+  required SigningKey key,
+  required List<int> message,
+}) => RustLib.instance.api.crateApiEncryptionGenerateSignature(
+  key: key,
+  message: message,
+);
+
+/// Verify a signature. Returns ``bool`` if the signature is valid or invalid.
+/// ``None`` if there was an error during verification.
+Future<bool?> verifySignature({
+  required VerifyingKey key,
+  required List<int> signature,
+  required List<int> message,
+}) => RustLib.instance.api.crateApiEncryptionVerifySignature(
+  key: key,
+  signature: signature,
+  message: message,
+);
+
 /// Encrypt using a symmetric container
 Future<Uint8List?> encryptSymmetricContainer({
   required SymmetricKey key,
@@ -77,11 +98,13 @@ Future<Uint8List?> encryptAsymmetricContainer({
 
 /// Decrypt an asymmetric container
 Future<Uint8List?> decryptAsymmetricContainer({
+  required PublicKey publicKey,
   required SecretKey secretKey,
   required VerifyingKey verifyingKey,
   required List<int> ciphertext,
   Uint8List? salt,
 }) => RustLib.instance.api.crateApiEncryptionDecryptAsymmetricContainer(
+  publicKey: publicKey,
   secretKey: secretKey,
   verifyingKey: verifyingKey,
   ciphertext: ciphertext,

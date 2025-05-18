@@ -1,7 +1,9 @@
 // Public key packaging
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:chat_interface/src/rust/api/encryption.dart';
+import 'package:sodium_libs/sodium_libs.dart';
 
 Future<String?> packagePublicKey(PublicKey publicKey) async {
   final bytes = await encodePublicKey(key: publicKey);
@@ -75,4 +77,24 @@ Future<String?> packageAndDropSymmetricKey(SymmetricKey symmetricKey) async {
 
 Future<SymmetricKey?> unpackageSymmetricKey(String symmetricKey) async {
   return await decodeSymmetricKey(data: base64Decode(symmetricKey));
+}
+
+Uint8List packToBytes(String message) {
+  return message.toCharArray().unsignedView();
+}
+
+String? unpackFromBytes(Uint8List bytes) {
+  try {
+    return utf8.decode(bytes);
+  } catch (_) {
+    return null;
+  }
+}
+
+Uint8List? decodeFromBase64(String message) {
+  try {
+    return base64Decode(message);
+  } catch (_) {
+    return null;
+  }
 }

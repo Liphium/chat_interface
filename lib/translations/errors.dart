@@ -14,6 +14,8 @@ class ErrorTranslations extends Translations {
       'error.untrusted_server':
           'This action couldn\'t be completed because @domain isn\'t trusted. Check your settings if you want to trust this server.',
       'server.error': 'Something went wrong on the server, please try again later.',
+      'encryption.error': 'Something went wrong during encryption. Please report this issue to Liphium.',
+      'unpacking.error': 'Something went wrong during unpacking. Please report this issue to Liphium.',
       'other.server.error':
           'It seems like the town this conversation is hosted on is currently down. Please try again later. We\'ll automatically try restoring a connection.',
       'server.error.code': 'Something went wrong on the server, please try again later. Status code: @code',

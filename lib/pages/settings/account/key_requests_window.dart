@@ -1,20 +1,14 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 
-import 'package:chat_interface/util/encryption/asymmetric_sodium.dart';
-import 'package:chat_interface/util/encryption/hash.dart';
-import 'package:chat_interface/util/encryption/signatures.dart';
-import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
-import 'package:chat_interface/controller/current/steps/account_step.dart';
+import 'package:chat_interface/src/rust/api/encryption.dart';
+import 'package:chat_interface/util/encryption/packing.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/controller/current/steps/key_step.dart';
-import 'package:chat_interface/controller/current/steps/stored_actions_step.dart';
 import 'package:chat_interface/theme/components/forms/fj_button.dart';
 import 'package:chat_interface/theme/components/forms/fj_textfield.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
-import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
@@ -24,8 +18,8 @@ import 'package:signals/signals_flutter.dart';
 
 class KeyRequest {
   final String session;
-  final Uint8List encryptionPub;
-  final Uint8List signaturePub;
+  final PublicKey publicKey;
+  final VerifyingKey verifyingKey;
   final String payload;
   final String signature;
   final int createdAt;
@@ -33,33 +27,34 @@ class KeyRequest {
 
   KeyRequest({
     required this.session,
-    required this.encryptionPub,
-    required this.signaturePub,
+    required this.publicKey,
+    required this.verifyingKey,
     required this.payload,
     required this.signature,
     required this.createdAt,
   });
 
-  factory KeyRequest.fromJson(Map<String, dynamic> json) {
-    sendLog(json["pub"]);
+  static Future<KeyRequest> fromJson(Map<String, dynamic> json) async {
+    assert(json["pub"] is String);
+    final args = (json["pub"] as String).split(":");
+    final ver = await unpackageVerifyingKey(args[0]);
+    final pub = await unpackagePublicKey(args[1]);
+    assert(ver != null && pub != null);
+
     return KeyRequest(
       session: json['session'],
-      signaturePub: unpackagePublicKey((json['pub'] as String).split(":")[0]),
-      encryptionPub: unpackagePublicKey((json['pub'] as String).split(":")[1]),
+      verifyingKey: ver!,
+      publicKey: pub!,
       payload: json['payload'],
       signature: json['signature'],
       createdAt: json['creation'],
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'session': session,
-      'pub': '${packagePublicKey(signaturePub)}:${packagePublicKey(encryptionPub)}',
-      'payload': payload,
-      'signature': signature,
-      'creation': createdAt,
-    };
+  Future<Map<String, dynamic>> toJson() async {
+    final pub = (await packagePublicKey(publicKey))!;
+    final ver = (await packageVerifyingKey(verifyingKey))!;
+    return {'session': session, 'pub': '$ver:$pub', 'payload': payload, 'signature': signature, 'creation': createdAt};
   }
 
   /// Dispose all the signals related to the key request
@@ -73,17 +68,24 @@ class KeyRequest {
     if (delete) {
       payload = "";
     } else {
-      payload = encryptAsymmetricAnonymous(
-        encryptionPub,
-        jsonEncode({
-          "pub": packagePublicKey(asymmetricKeyPair.publicKey),
-          "priv": packagePrivateKey(asymmetricKeyPair.secretKey),
-          "sig_pub": packagePublicKey(signatureKeyPair.publicKey),
-          "sig_priv": packagePrivateKey(signatureKeyPair.secretKey),
-          "profile": packageSymmetricKey(profileKey),
-          "sa": storedActionKey,
-        }),
+      // Encode the verification key
+      final ver = await packageVerifyingKey(signatureKeyPair.verifyingKey);
+      assert(ver != null);
+
+      // Put together the packet from the verification key and the asymmetric container
+      final container = await encryptAsymmetricContainer(
+        publicKey: publicKey,
+        signingKey: signatureKeyPair.signingKey,
+        message: packToBytes(
+          jsonEncode({
+            "enc_pub": (await packagePublicKey(asymmetricKeyPair.publicKey))!,
+            "enc_sec": (await packageSecretKey(asymmetricKeyPair.secretKey))!,
+            "sig_ver": (await packageVerifyingKey(signatureKeyPair.verifyingKey))!,
+            "sig_sig": (await packageSigningKey(signatureKeyPair.signingKey))!,
+          }),
+        ),
       );
+      payload = "$ver:${base64Encode(container!)}";
     }
 
     // Respond to the key request
@@ -152,7 +154,7 @@ class _KeyRequestsWindowState extends State<KeyRequestsWindow> with SignalsMixin
 
     // Parse all the requests
     for (var request in json["requests"]) {
-      final keyRequest = KeyRequest.fromJson(request);
+      final keyRequest = await KeyRequest.fromJson(request);
       if (keyRequest.payload != "") {
         continue;
       }
@@ -306,20 +308,27 @@ class _KeyRequestAcceptWindowState extends State<KeyRequestAcceptWindow> with Si
           FJElevatedLoadingButton(
             loading: widget.request.processing,
             label: "key_requests.code.button".tr,
-            onTap: () {
+            onTap: () async {
+              // Create everything needed for the signature
+              final packagedPub = await encodePublicKey(key: widget.request.publicKey);
+              assert(packagedPub != null);
+
               // Verify the code
-              if (!checkSignature(
-                widget.request.signature,
-                widget.request.signaturePub,
-                hashSha(_codeController.text + packagePublicKey(widget.request.encryptionPub)),
-              )) {
+              final result = await verifySignature(
+                key: widget.request.verifyingKey,
+                signature: base64Decode(widget.request.signature),
+                message: packToBytes(_codeController.text) + packagedPub!,
+              );
+              if (result == null || !result) {
                 _error.value = "key_requests.code.error".tr; // JEeSqn
                 return;
               }
 
-              widget.request.updateStatus(false, () {
-                Get.back(result: true);
-              });
+              unawaited(
+                widget.request.updateStatus(false, () {
+                  Get.back(result: true);
+                }),
+              );
             },
           ),
         ],

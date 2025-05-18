@@ -37,7 +37,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.9.0";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -1690734846;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -1537145379;
 
 // Section: executor
 
@@ -335,6 +335,7 @@ fn wire__crate__api__encryption__decrypt_asymmetric_container_impl(
             };
             let mut deserializer =
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_public_key = <crate::api::encryption::PublicKey>::sse_decode(&mut deserializer);
             let api_secret_key = <crate::api::encryption::SecretKey>::sse_decode(&mut deserializer);
             let api_verifying_key =
                 <crate::api::encryption::VerifyingKey>::sse_decode(&mut deserializer);
@@ -346,6 +347,7 @@ fn wire__crate__api__encryption__decrypt_asymmetric_container_impl(
                     (move || async move {
                         let output_ok = Result::<_, ()>::Ok(
                             crate::api::encryption::decrypt_asymmetric_container(
+                                api_public_key,
                                 api_secret_key,
                                 api_verifying_key,
                                 api_ciphertext,
@@ -992,6 +994,45 @@ fn wire__crate__api__encryption__generate_asymmetric_keypair_impl(
                     (move || async move {
                         let output_ok = Result::<_, ()>::Ok(
                             crate::api::encryption::generate_asymmetric_keypair().await,
+                        )?;
+                        Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
+fn wire__crate__api__encryption__generate_signature_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "generate_signature",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_key = <crate::api::encryption::SigningKey>::sse_decode(&mut deserializer);
+            let api_message = <Vec<u8>>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| async move {
+                transform_result_sse::<_, ()>(
+                    (move || async move {
+                        let output_ok = Result::<_, ()>::Ok(
+                            crate::api::encryption::generate_signature(api_key, api_message).await,
                         )?;
                         Ok(output_ok)
                     })()
@@ -1689,6 +1730,51 @@ fn wire__crate__api__engine__stop_engine_impl(
         },
     )
 }
+fn wire__crate__api__encryption__verify_signature_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "verify_signature",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_key = <crate::api::encryption::VerifyingKey>::sse_decode(&mut deserializer);
+            let api_signature = <Vec<u8>>::sse_decode(&mut deserializer);
+            let api_message = <Vec<u8>>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| async move {
+                transform_result_sse::<_, ()>(
+                    (move || async move {
+                        let output_ok = Result::<_, ()>::Ok(
+                            crate::api::encryption::verify_signature(
+                                api_key,
+                                api_signature,
+                                api_message,
+                            )
+                            .await,
+                        )?;
+                        Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
 
 // Section: dart2rust
 
@@ -2137,65 +2223,71 @@ fn pde_ffi_dispatcher_primary_impl(
             rust_vec_len,
             data_len,
         ),
-        25 => wire__crate__api__encryption__generate_signature_keypair_impl(
+        25 => {
+            wire__crate__api__encryption__generate_signature_impl(port, ptr, rust_vec_len, data_len)
+        }
+        26 => wire__crate__api__encryption__generate_signature_keypair_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        26 => wire__crate__api__encryption__generate_symmetric_key_impl(
+        27 => wire__crate__api__encryption__generate_symmetric_key_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        27 => wire__crate__api__audio_devices__get_default_input_device_impl(
+        28 => wire__crate__api__audio_devices__get_default_input_device_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        28 => wire__crate__api__audio_devices__get_default_output_device_impl(
+        29 => wire__crate__api__audio_devices__get_default_output_device_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        29 => wire__crate__api__audio_devices__get_input_devices_impl(
+        30 => wire__crate__api__audio_devices__get_input_devices_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        30 => wire__crate__api__audio_devices__get_output_devices_impl(
+        31 => wire__crate__api__audio_devices__get_output_devices_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        31 => wire__crate__api__engine__handle_packet_impl(port, ptr, rust_vec_len, data_len),
-        32 => {
+        32 => wire__crate__api__engine__handle_packet_impl(port, ptr, rust_vec_len, data_len),
+        33 => {
             wire__crate__api__engine__set_activity_detection_impl(port, ptr, rust_vec_len, data_len)
         }
-        33 => wire__crate__api__engine__set_audio_enabled_impl(port, ptr, rust_vec_len, data_len),
-        34 => wire__crate__api__engine__set_automatic_detection_impl(
+        34 => wire__crate__api__engine__set_audio_enabled_impl(port, ptr, rust_vec_len, data_len),
+        35 => wire__crate__api__engine__set_automatic_detection_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        35 => {
+        36 => {
             wire__crate__api__engine__set_encoding_bitrate_impl(port, ptr, rust_vec_len, data_len)
         }
-        36 => wire__crate__api__engine__set_input_device_impl(port, ptr, rust_vec_len, data_len),
-        37 => wire__crate__api__engine__set_output_device_impl(port, ptr, rust_vec_len, data_len),
-        38 => {
+        37 => wire__crate__api__engine__set_input_device_impl(port, ptr, rust_vec_len, data_len),
+        38 => wire__crate__api__engine__set_output_device_impl(port, ptr, rust_vec_len, data_len),
+        39 => {
             wire__crate__api__engine__set_talking_amplitude_impl(port, ptr, rust_vec_len, data_len)
         }
-        39 => wire__crate__api__engine__set_voice_enabled_impl(port, ptr, rust_vec_len, data_len),
-        40 => wire__crate__api__engine__start_packet_stream_impl(port, ptr, rust_vec_len, data_len),
-        41 => wire__crate__api__engine__stop_all_engines_impl(port, ptr, rust_vec_len, data_len),
-        42 => wire__crate__api__engine__stop_engine_impl(port, ptr, rust_vec_len, data_len),
+        40 => wire__crate__api__engine__set_voice_enabled_impl(port, ptr, rust_vec_len, data_len),
+        41 => wire__crate__api__engine__start_packet_stream_impl(port, ptr, rust_vec_len, data_len),
+        42 => wire__crate__api__engine__stop_all_engines_impl(port, ptr, rust_vec_len, data_len),
+        43 => wire__crate__api__engine__stop_engine_impl(port, ptr, rust_vec_len, data_len),
+        44 => {
+            wire__crate__api__encryption__verify_signature_impl(port, ptr, rust_vec_len, data_len)
+        }
         _ => unreachable!(),
     }
 }
