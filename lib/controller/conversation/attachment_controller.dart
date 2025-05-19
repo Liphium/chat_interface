@@ -4,7 +4,9 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:chat_interface/src/rust/api/encryption.dart';
 import 'package:chat_interface/util/encryption/asymmetric_sodium.dart';
+import 'package:chat_interface/util/encryption/packing.dart';
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/controller/current/connection_controller.dart';
@@ -368,25 +370,27 @@ class AttachmentController {
   }
 
   /// Get an attachment container from json
-  static AttachmentContainer fromJson(StorageType type, Map<String, dynamic> json, [Sodium? sodium]) {
+  static Future<AttachmentContainer> fromJson(StorageType type, Map<String, dynamic> json) async {
     var container = attachments[json["i"]];
     if (container != null) {
       return container;
     }
 
     // Create a container and cache it immediately
+    final key = await unpackageSymmetricKey(json["k"]);
     container = AttachmentContainer(
       storageType: type,
+      uploader: LPHAddress.from(json["up"]),
       id: json["i"],
       fileName: json["n"], // The name could be null (if it is null it'll the object in the map will also be null)
       size: json["s"] ?? -1,
       url: json["u"],
-      key: unpackageSymmetricKey(json["k"], sodium),
+      key: key,
     );
     container.width = json["w"];
     container.height = json["h"];
     attachments[container.id] = container;
-    container.initDownloadState();
+    unawaited(container.initDownloadState());
     return container;
   }
 }
@@ -418,13 +422,14 @@ class AttachmentContainer {
   late XFile? file;
   late final AttachmentContainerType attachmentType;
   final StorageType storageType;
+  final LPHAddress uploader;
   final String id;
   final String? fileName;
   final String url;
   final int size;
   int? width;
   int? height;
-  final SecureKey? key;
+  final SymmetricKey? key;
 
   // Get the file name (when name is empty it is the file id)
   String get name => fileName ?? id;
@@ -458,6 +463,7 @@ class AttachmentContainer {
 
   AttachmentContainer({
     required this.storageType,
+    required this.uploader,
     required this.id,
     required this.fileName,
     required this.size,
@@ -485,6 +491,7 @@ class AttachmentContainer {
     }
   }
 
+  /// Pre-calculate the width and height of the image (for caching).
   Future<Size?> precalculateWidthAndHeight() async {
     if (attachmentType != AttachmentContainerType.file || file == null) {
       return null;
@@ -508,12 +515,19 @@ class AttachmentContainer {
     width = size.width.toInt();
     height = size.height.toInt();
 
-    sendLog("PRECALC $width $height");
     return size;
   }
 
   AttachmentContainer.remoteImage(String url)
-    : this(storageType: StorageType.cache, id: "", fileName: "", size: 0, url: url, key: null);
+    : this(
+        storageType: StorageType.cache,
+        uploader: LPHAddress.error(),
+        id: "",
+        fileName: "",
+        size: 0,
+        url: url,
+        key: null,
+      );
 
   String toAttachment() {
     switch (attachmentType) {
@@ -545,13 +559,16 @@ class AttachmentContainer {
     }
   }
 
-  Map<String, dynamic> toJson() {
+  Future<Map<String, dynamic>> toJson() async {
+    final encodedKey = await packageSymmetricKey(key!);
+
     return <String, dynamic>{
+      "up": uploader.encode(),
       "i": id,
       if (fileName != null) "n": fileName!,
       if (size != -1) "s": size,
       "u": url,
-      "k": packageSymmetricKey(key!),
+      "k": encodedKey,
       if (width != null) "w": width,
       if (height != null) "h": height,
     };
