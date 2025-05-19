@@ -1,11 +1,12 @@
-import 'package:chat_interface/controller/account/friends/requests_controller.dart';
-import 'package:chat_interface/controller/current/tasks/friend_sync_task.dart';
+import 'package:chat_interface/controller/account/friend_controller.dart';
+import 'package:chat_interface/controller/account/requests_controller.dart';
 import 'package:chat_interface/theme/components/forms/fj_button.dart';
 import 'package:chat_interface/theme/components/forms/fj_textfield.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class FriendAddWindow extends StatefulWidget {
   const FriendAddWindow({super.key});
@@ -24,7 +25,7 @@ class _FriendAddWindowState extends State<FriendAddWindow> {
   }
 
   void sendRequest() {
-    if (requestsLoading.value || friendsVaultRefreshing.value) {
+    if (RequestController.requestsLoading.value || FriendsVault.friendsVaultRefreshing.value) {
       return;
     }
     newFriendRequest(_name.text, (message) {
@@ -35,18 +36,12 @@ class _FriendAddWindowState extends State<FriendAddWindow> {
   @override
   Widget build(BuildContext context) {
     return DialogBase(
-      title: [
-        Text("friends.add".tr, style: Get.textTheme.labelLarge),
-      ],
+      title: [Text("friends.add".tr, style: Get.textTheme.labelLarge)],
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            "friends.add.desc".tr,
-            style: Get.theme.textTheme.bodyMedium,
-            textAlign: TextAlign.start,
-          ),
+          Text("friends.add.desc".tr, style: Get.theme.textTheme.bodyMedium, textAlign: TextAlign.start),
           verticalSpacing(defaultSpacing),
           FJTextField(
             controller: _name,
@@ -55,11 +50,13 @@ class _FriendAddWindowState extends State<FriendAddWindow> {
             onSubmitted: (t) => sendRequest(),
           ),
           verticalSpacing(defaultSpacing),
-          Obx(
-            () => FJElevatedLoadingButton(
+          Watch(
+            (ctx) => FJElevatedLoadingButton(
               onTap: () => sendRequest(),
               label: 'friends.add.button'.tr,
-              loading: (requestsLoading.value || friendsVaultRefreshing.value).obs,
+              loading: computed(
+                () => RequestController.requestsLoading.value || FriendsVault.friendsVaultRefreshing.value,
+              ),
             ),
           ),
         ],

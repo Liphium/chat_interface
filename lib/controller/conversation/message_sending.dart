@@ -1,12 +1,17 @@
 part of 'message_provider.dart';
 
 class MessageSendHelper {
-  static final currentDraft = Rx<MessageDraft?>(null);
+  static final currentDraft = signal<MessageDraft?>(null);
   static final drafts = <String, MessageDraft>{}; // TargetID -> Message draft
 
   /// Add a reply to the current message draft
   static void addReplyToCurrentDraft(Message message) {
-    currentDraft.value?.answer.value = AnswerData(message.id, message.senderAddress, message.content, message.attachments);
+    currentDraft.value?.answer.value = AnswerData(
+      message.id,
+      message.senderAddress,
+      message.content,
+      message.attachments,
+    );
   }
 
   /// Add a file to the current message draft
@@ -26,9 +31,7 @@ class MessageSendHelper {
     if (size > specialConstants[Constants.specialConstantMaxFileSize]! * 1000 * 1000) {
       showErrorPopup(
         "error",
-        "file.too_large".trParams({
-          "1": specialConstants[Constants.specialConstantMaxFileSize].toString(),
-        }),
+        "file.too_large".trParams({"1": specialConstants[Constants.specialConstantMaxFileSize].toString()}),
       );
       return false;
     }
@@ -49,7 +52,12 @@ class AnswerData {
   AnswerData(this.id, this.senderAddress, this.content, this.attachments);
 
   /// Convert a message to the answer content for the reply container
-  static String answerContent(MessageType type, String content, List<String> attachments, {FriendController? controller}) {
+  static String answerContent(
+    MessageType type,
+    String content,
+    List<String> attachments, {
+    FriendController? controller,
+  }) {
     // Return different information based on every type
     switch (type) {
       case MessageType.text:
@@ -61,7 +69,7 @@ class AnswerData {
           if (attachments.first.isURL) {
             content = attachments.first;
           } else {
-            content = Get.find<AttachmentController>().fromJson(StorageType.cache, jsonDecode(attachments.first)).name;
+            content = AttachmentController.fromJson(StorageType.cache, jsonDecode(attachments.first)).name;
           }
         }
         return content;
@@ -77,9 +85,9 @@ class AnswerData {
 
 class MessageDraft {
   final String target;
-  final answer = Rx<AnswerData?>(null);
+  final answer = signal<AnswerData?>(null);
   String message;
-  final files = <UploadData>[].obs;
+  final files = listSignal(<UploadData>[]);
   final attachments = <String>[];
 
   MessageDraft(this.target, this.message);
@@ -87,7 +95,7 @@ class MessageDraft {
 
 class UploadData {
   final XFile file;
-  final progress = 0.0.obs;
+  final progress = signal(0.0);
 
   UploadData(this.file);
 }

@@ -1,15 +1,18 @@
-import 'package:chat_interface/controller/account/friends/friend_controller.dart';
+import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
-import 'package:chat_interface/controller/conversation/message_provider.dart';
-import 'package:chat_interface/controller/conversation/message_search_controller.dart';
+import 'package:chat_interface/controller/conversation/sidebar_controller.dart';
+import 'package:chat_interface/controller/conversation/square.dart';
 import 'package:chat_interface/controller/conversation/zap_share_controller.dart';
-import 'package:chat_interface/controller/spaces/spaces_controller.dart';
+import 'package:chat_interface/controller/spaces/space_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database_entities.dart' as model;
-import 'package:chat_interface/pages/chat/components/conversations/conversation_edit_window.dart';
+import 'package:chat_interface/pages/chat/components/conversations/conversation_members_bar.dart';
+import 'package:chat_interface/pages/chat/components/conversations/message_search_bar.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/pages/status/error/offline_hider.dart';
+import 'package:chat_interface/services/chat/conversation_message_provider.dart';
+import 'package:chat_interface/services/chat/conversation_service.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/ui/dialogs/conversation_add_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
@@ -19,11 +22,12 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:liphium_bridge/liphium_bridge.dart';
+import 'package:signals/signals_flutter.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
 class MessageBar extends StatefulWidget {
   final Conversation conversation;
-  final MessageProvider provider;
+  final ConversationMessageProvider provider;
 
   const MessageBar({super.key, required this.conversation, required this.provider});
 
@@ -33,13 +37,16 @@ class MessageBar extends StatefulWidget {
 
 class _MessageBarState extends State<MessageBar> {
   final GlobalKey _infoKey = GlobalKey(), _zapShareKey = GlobalKey();
-  final callLoading = false.obs;
+  final additionLoading = signal(false);
+
+  @override
+  void dispose() {
+    additionLoading.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final zapShareController = Get.find<ZapShareController>();
-    final controller = Get.find<SettingController>();
-
     if (widget.conversation.borked) {
       return Material(
         color: Get.theme.colorScheme.onInverseSurface,
@@ -68,10 +75,10 @@ class _MessageBarState extends State<MessageBar> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 // Show a hide sidebar icon for more focus on the current conversation
-                Obx(
-                  () => LoadingIconButton(
-                    onTap: () => Get.find<MessageController>().toggleSidebar(),
-                    icon: Get.find<MessageController>().hideSidebar.value ? Icons.arrow_forward : Icons.arrow_back,
+                Watch(
+                  (ctx) => LoadingIconButton(
+                    onTap: () => SidebarController.toggleSidebar(),
+                    icon: SidebarController.hideSidebar.value ? Icons.arrow_forward : Icons.arrow_back,
                   ),
                 ),
                 horizontalSpacing(elementSpacing),
@@ -85,22 +92,24 @@ class _MessageBarState extends State<MessageBar> {
                     borderRadius: BorderRadius.circular(defaultSpacing),
                     hoverColor: Get.theme.hoverColor,
                     onTap: () {
-                      showModal(ConversationInfoWindow(
-                        conversation: widget.conversation,
-                        position: ContextMenuData.fromKey(_infoKey, below: true),
-                      ));
+                      widget.provider.openDialogForConversation(ContextMenuData.fromKey(_infoKey, below: true));
                     },
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: elementSpacing,
-                        horizontal: defaultSpacing,
-                      ),
+                      padding: const EdgeInsets.symmetric(vertical: elementSpacing, horizontal: defaultSpacing),
                       child: Row(
                         children: [
-                          Icon(widget.conversation.isGroup ? Icons.group : Icons.person, size: 30, color: Theme.of(context).colorScheme.onPrimary),
+                          Icon(
+                            widget.provider.getIconForConversation(),
+                            size: 30,
+                            color: Theme.of(context).colorScheme.onPrimary,
+                          ),
                           horizontalSpacing(defaultSpacing),
-                          Text(widget.conversation.isGroup ? widget.conversation.containerSub.value.name : widget.conversation.dmName,
-                              style: Theme.of(context).textTheme.titleMedium),
+                          Watch(
+                            (ctx) => Text(
+                              widget.provider.getNameForConversation(),
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -110,7 +119,7 @@ class _MessageBarState extends State<MessageBar> {
             ),
 
             //* Conversation actions
-            Obx(() {
+            Watch((ctx) {
               final error = widget.conversation.error.value != null;
 
               return Row(
@@ -122,13 +131,18 @@ class _MessageBarState extends State<MessageBar> {
                     child: Row(
                       children: [
                         //* Zap share
-                        if (widget.conversation.type == model.ConversationType.directMessage && isDirectorySupported && !error)
+                        if (widget.conversation.type == model.ConversationType.directMessage &&
+                            isDirectorySupported &&
+                            !error)
                           Stack(
                             key: _zapShareKey,
                             children: [
                               IconButton(
                                 onPressed: () async {
-                                  await zapShareController.openWindow(widget.conversation, ContextMenuData.fromKey(_zapShareKey, below: true));
+                                  await ZapShareController.openWindow(
+                                    widget.conversation,
+                                    ContextMenuData.fromKey(_zapShareKey, below: true),
+                                  );
                                 },
                                 icon: Icon(Icons.electric_bolt, color: Get.theme.colorScheme.onPrimary),
                                 tooltip: "chat.zapshare".tr,
@@ -139,63 +153,83 @@ class _MessageBarState extends State<MessageBar> {
                                   height: 48 - defaultSpacing,
                                   child: Padding(
                                     padding: const EdgeInsets.all(2.0),
-                                    child: Obx(
-                                      () => CircularProgressIndicator(
-                                        value: zapShareController.waiting.value ? null : zapShareController.progress.value.clamp(0, 1),
+                                    child: Watch(
+                                      (ctx) => CircularProgressIndicator(
+                                        value:
+                                            ZapShareController.waiting.value
+                                                ? null
+                                                : ZapShareController.progress.value.clamp(0, 1),
                                         strokeWidth: 3,
                                         valueColor: AlwaysStoppedAnimation<Color>(Get.theme.colorScheme.onPrimary),
                                       ),
                                     ),
                                   ),
                                 ),
-                              )
+                              ),
                             ],
                           ),
 
-                        if (Get.find<SpacesController>().inSpace.value && areSpacesSupported && !error)
-                          LoadingIconButton(
-                            icon: Icons.forward_to_inbox,
-                            iconSize: 27,
-                            loading: callLoading,
-                            tooltip: "chat.invite_to_space".tr,
-                            onTap: () {
-                              final controller = Get.find<SpacesController>();
-                              controller.inviteToCall(widget.provider);
-                            },
-                          ),
+                        // Render an invite button in case the user is currently in a Space
+                        Watch((context) {
+                          if (SpaceController.connected.value &&
+                              widget.conversation is! Square &&
+                              areSpacesSupported &&
+                              !error) {
+                            return LoadingIconButton(
+                              icon: Icons.forward_to_inbox,
+                              iconSize: 27,
+                              loading: additionLoading,
+                              tooltip: "chat.invite_to_space".tr,
+                              onTap: () {
+                                SpaceController.inviteToCall(widget.provider);
+                              },
+                            );
+                          }
+
+                          return const SizedBox();
+                        }),
 
                         // Only show launch button in case supported
-                        if (areSpacesSupported && !error)
+                        if (areSpacesSupported && widget.conversation is! Square && !error)
                           LoadingIconButton(
                             icon: Icons.rocket_launch,
                             iconSize: 27,
-                            loading: callLoading,
+                            loading: additionLoading,
                             tooltip: "chat.start_space".tr,
                             onTap: () {
-                              final controller = Get.find<SpacesController>();
-                              controller.createAndConnect(widget.provider);
+                              SpaceController.createAndConnect(widget.provider);
                             },
                           ),
 
                         // Give the user the ability to add people to a conversation
-                        if (!error)
-                          ConversationAddButton(
-                            conversation: widget.conversation,
-                            loading: callLoading,
-                          ),
+                        if (!error) ConversationAddButton(conversation: widget.conversation, loading: additionLoading),
 
                         Visibility(
                           visible: widget.conversation.isGroup,
-                          child: Obx(
-                            () => IconButton(
+                          child: Watch(
+                            (ctx) => IconButton(
                               iconSize: 27,
-                              icon: Icon(Icons.group,
-                                  color: controller.settings[AppSettings.showGroupMembers]!.value.value
-                                      ? Theme.of(context).colorScheme.onPrimary
-                                      : Theme.of(context).colorScheme.onSurface),
+                              icon: Icon(
+                                Icons.group,
+                                color:
+                                    SidebarController.rightSidebar[SidebarController.getCurrentKey()]
+                                            is ConversationMembersRightSidebar
+                                        ? Theme.of(context).colorScheme.onPrimary
+                                        : Theme.of(context).colorScheme.onSurface,
+                              ),
                               onPressed: () {
-                                controller.settings[AppSettings.showGroupMembers]!
-                                    .setValue(!controller.settings[AppSettings.showGroupMembers]!.value.value);
+                                if (SidebarController.rightSidebar[SidebarController.getCurrentKey()]
+                                    is ConversationMembersRightSidebar) {
+                                  // Hide the sidebar in case it is currently there
+                                  SettingController.settings[AppSettings.showGroupMembers]!.setValue(false);
+                                  SidebarController.setRightSidebar(null);
+                                } else {
+                                  // Show the sidebar
+                                  SettingController.settings[AppSettings.showGroupMembers]!.setValue(true);
+                                  SidebarController.setRightSidebar(
+                                    ConversationMembersRightSidebar(widget.conversation),
+                                  );
+                                }
                               },
                             ),
                           ),
@@ -204,18 +238,29 @@ class _MessageBarState extends State<MessageBar> {
                     ),
                   ),
 
-                  // Search the entire conversation
-                  Obx(
-                    () => IconButton(
+                  // Search the conversation
+                  Watch(
+                    (ctx) => IconButton(
                       iconSize: 27,
-                      icon: Icon(Icons.search,
-                          color: Get.find<MessageController>().showSearch.value
-                              ? Theme.of(context).colorScheme.onPrimary
-                              : Theme.of(context).colorScheme.onSurface),
+                      icon: Icon(
+                        Icons.search,
+                        color:
+                            SidebarController.rightSidebar[SidebarController.getCurrentKey()]
+                                    is MessageSearchRightSidebar
+                                ? Theme.of(context).colorScheme.onPrimary
+                                : Theme.of(context).colorScheme.onSurface,
+                      ),
                       onPressed: () {
-                        Get.find<MessageController>().toggleSearchView();
-                        if (Get.find<MessageController>().showSearch.value) {
-                          Get.find<MessageSearchController>().currentFocus!.requestFocus();
+                        if (SidebarController.rightSidebar[SidebarController.getCurrentKey()]
+                            is MessageSearchRightSidebar) {
+                          MessageController.restoreRightSidebar();
+                        } else {
+                          SidebarController.setRightSidebar(
+                            MessageSearchRightSidebar(
+                              SidebarController.getCurrentKey(),
+                              widget.conversation.id.encode(),
+                            ),
+                          );
                         }
                       },
                     ),
@@ -241,7 +286,7 @@ class _MessageBarState extends State<MessageBar> {
 
 class ConversationAddButton extends StatefulWidget {
   final Conversation conversation;
-  final RxBool loading;
+  final Signal<bool> loading;
 
   const ConversationAddButton({super.key, required this.conversation, required this.loading});
 
@@ -280,43 +325,50 @@ class _ConversationAddButtonState extends State<ConversationAddButton> {
             }
             initial.add(friend);
           }
-          Get.dialog(ConversationAddWindow(
-            title: "conversations.add",
-            action: "add",
-            nameField: false,
-            position: ContextMenuData(position, true, false),
-            initial: initial,
-            onDone: (friends, name) async {
-              final finalList = <Friend>[];
-              for (var friend in friends) {
-                if (!initial.any((element) => element.id == friend.id)) {
-                  finalList.add(friend);
+          Get.dialog(
+            ConversationAddWindow(
+              title: "conversations.add",
+              action: "add",
+              nameField: false,
+              position: ContextMenuData(position, true, false),
+              initial: initial,
+              onDone: (friends, name) async {
+                final finalList = <Friend>[];
+                for (var friend in friends) {
+                  if (!initial.any((element) => element.id == friend.id)) {
+                    finalList.add(friend);
+                  }
                 }
-              }
 
-              // Add the people to the conversation
-              for (var friend in finalList) {
-                final res = await addToConversation(widget.conversation, friend);
-                if (!res) {
-                  showErrorPopup("error", "server.error".tr);
-                  return null;
+                // Add the people to the conversation
+                for (var friend in finalList) {
+                  final error = await ConversationService.addToConversation(widget.conversation, friend);
+                  if (error != null) {
+                    showErrorPopup("error", error);
+                    return null;
+                  }
                 }
-              }
 
-              return null;
-            },
-          ));
+                return null;
+              },
+            ),
+          );
         } else {
           // Get the friend and open the window
-          final friend = widget.conversation.members.values.firstWhere((element) => element.address != StatusController.ownAddress).getFriend();
+          final friend =
+              widget.conversation.members.values
+                  .firstWhere((element) => element.address != StatusController.ownAddress)
+                  .getFriend();
           if (friend.unknown) {
             return;
           }
-          showModal(ConversationAddWindow(
-            title: "conversations.add.create",
-            position: ContextMenuData(position, true, false),
-            initial: [friend],
-          ));
+          showModal(
+            ConversationAddWindow(
+              title: "conversations.add.create",
+              position: ContextMenuData(position, true, false),
+              initial: [friend],
+            ),
+          );
         }
       },
     );

@@ -11,7 +11,6 @@ import 'package:chat_interface/theme/components/ssr/ssr.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 class TokensSetup extends Setup {
   TokensSetup() : super("loading.tokens", false);
@@ -41,31 +40,35 @@ class TokensSetup extends Setup {
       );
 
       // Start the SSR process
-      unawaited(ssr.start(
-        extra: {
-          "/account/auth/form": ServerSelectorContainer(
-            onSelected: () {
-              setupManager.retry();
-            },
-          ),
-        },
-      ).then((error) async {
-        // You shall waste 750ms of your life to witness this amazing animation better
-        await Future.delayed(const Duration(milliseconds: 750));
+      unawaited(
+        ssr
+            .start(
+              extra: {
+                "/account/auth/form": ServerSelectorContainer(
+                  onSelected: () {
+                    setupManager.retry();
+                  },
+                ),
+              },
+            )
+            .then((error) async {
+              // You shall waste 750ms of your life to witness this amazing animation better
+              await Future.delayed(const Duration(milliseconds: 750));
 
-        // Return error (in here cause cool animation)
-        if (error != null) {
-          setupManager.error(error);
-        }
-      }));
+              // Return error (in here cause cool animation)
+              if (error != null) {
+                setupManager.error(error);
+              }
+            }),
+      );
 
       return const SetupLoadingWidget(text: "rendering");
     }
 
     // Load account stuff from settings
     StatusController.ownAccountId = await retrieveEncryptedValue("cache_account_id") ?? "";
-    Get.find<StatusController>().name.value = await retrieveEncryptedValue("cache_account_uname") ?? "";
-    Get.find<StatusController>().displayName.value = await retrieveEncryptedValue("cache_account_dname") ?? "";
+    StatusController.name.value = await retrieveEncryptedValue("cache_account_uname") ?? "";
+    StatusController.displayName.value = await retrieveEncryptedValue("cache_account_dname") ?? "";
 
     // Init file paths with account id
     await AttachmentController.initFilePath(StatusController.ownAccountId);

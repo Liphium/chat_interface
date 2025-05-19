@@ -7,6 +7,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class ChangeNameWindow extends StatefulWidget {
   const ChangeNameWindow({super.key});
@@ -15,13 +16,13 @@ class ChangeNameWindow extends StatefulWidget {
   State<ChangeNameWindow> createState() => _ChangeNameWindowState();
 }
 
-class _ChangeNameWindowState extends State<ChangeNameWindow> {
+class _ChangeNameWindowState extends State<ChangeNameWindow> with SignalsMixin {
   // Text controllers
   final _usernameController = TextEditingController();
 
   // State
-  final _errorText = ''.obs;
-  final _loading = false.obs;
+  late final _errorText = createSignal('');
+  late final _loading = createSignal(false);
 
   @override
   void dispose() {
@@ -34,9 +35,7 @@ class _ChangeNameWindowState extends State<ChangeNameWindow> {
     _loading.value = true;
     _errorText.value = "";
 
-    final json = await postAuthorizedJSON("/account/settings/change_name", {
-      "name": _usernameController.text,
-    });
+    final json = await postAuthorizedJSON("/account/settings/change_name", {"name": _usernameController.text});
 
     if (!json["success"]) {
       _errorText.value = json["error"].toString().tr;
@@ -44,20 +43,17 @@ class _ChangeNameWindowState extends State<ChangeNameWindow> {
       return;
     }
 
-    Get.find<StatusController>().name.value = _usernameController.text;
+    StatusController.name.value = _usernameController.text;
     _loading.value = false;
     Get.back();
   }
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<StatusController>();
-    _usernameController.text = controller.name.value;
+    _usernameController.text = StatusController.name.value;
 
     return DialogBase(
-      title: [
-        Text("username".tr, style: Get.textTheme.labelLarge),
-      ],
+      title: [Text("username".tr, style: Get.textTheme.labelLarge)],
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -80,7 +76,7 @@ class _ChangeNameWindowState extends State<ChangeNameWindow> {
             loading: _loading,
             onTap: () => save(),
             child: Center(child: Text("save".tr, style: Get.theme.textTheme.labelLarge)),
-          )
+          ),
         ],
       ),
     );

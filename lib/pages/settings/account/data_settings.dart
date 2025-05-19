@@ -1,14 +1,11 @@
 import 'dart:async';
 
-import 'package:chat_interface/controller/account/profile_picture_helper.dart';
+import 'package:chat_interface/services/chat/profile_picture_helper.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/settings/account/change_display_name_window.dart';
 import 'package:chat_interface/pages/settings/account/change_name_window.dart';
 import 'package:chat_interface/pages/settings/account/log_out_window.dart';
 import 'package:chat_interface/pages/settings/account/key_requests_window.dart';
-import 'package:chat_interface/pages/settings/components/bool_selection_small.dart';
-import 'package:chat_interface/pages/settings/data/entities.dart';
-import 'package:chat_interface/pages/settings/data/settings_controller.dart';
 import 'package:chat_interface/pages/settings/settings_page_base.dart';
 import 'package:chat_interface/theme/components/forms/fj_button.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
@@ -19,65 +16,18 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-class DataSettings {
-  static const String socialFeatures = "social.enable";
-
-  static void registerSettings(SettingController controller) {
-    controller.settings[socialFeatures] = Setting<bool>(socialFeatures, false);
-  }
-}
+import 'package:signals/signals_flutter.dart';
 
 class DataSettingsPage extends StatelessWidget {
   const DataSettingsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<StatusController>();
     return SettingsPageBase(
       label: "data",
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          //* Social features
-          if (Get.find<SettingController>().settings[DataSettings.socialFeatures]!.getValue())
-            Padding(
-              padding: const EdgeInsets.only(bottom: sectionSpacing),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    children: [
-                      Text("settings.data.social".tr, style: Get.theme.textTheme.labelLarge),
-                      horizontalSpacing(defaultSpacing),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Get.theme.colorScheme.error.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(defaultSpacing),
-                        ),
-                        padding: const EdgeInsets.all(elementSpacing),
-                        child: Row(
-                          children: [
-                            Icon(Icons.science, color: Get.theme.colorScheme.error),
-                            horizontalSpacing(elementSpacing),
-                            Text(
-                              "settings.experimental".tr,
-                              style: Get.theme.textTheme.bodyMedium!.copyWith(color: Get.theme.colorScheme.error),
-                            ),
-                            horizontalSpacing(elementSpacing)
-                          ],
-                        ),
-                      )
-                    ],
-                  ),
-                  verticalSpacing(defaultSpacing),
-                  Text("settings.data.social.text".tr, style: Get.theme.textTheme.bodyMedium),
-                  verticalSpacing(defaultSpacing),
-                  const BoolSettingSmall(settingName: DataSettings.socialFeatures),
-                ],
-              ),
-            ),
-
           //* Profile picture
           Text("settings.data.profile_picture".tr, style: Get.theme.textTheme.labelLarge),
           verticalSpacing(defaultSpacing),
@@ -127,31 +77,29 @@ class DataSettingsPage extends StatelessWidget {
                           horizontalSpacing(defaultSpacing),
                           IconButton(
                             tooltip: "settings.data.profile_picture.remove".tr,
-                            onPressed: () => showConfirmPopup(
-                              ConfirmWindow(
-                                title: "settings.data.profile_picture.remove".tr,
-                                text: "settings.data.profile_picture.remove.confirm".tr,
-                                onConfirm: () async {
-                                  // Tell the server to remove the picture
-                                  final valid = await ProfileHelper.deleteProfilePicture();
-                                  if (!valid) {
-                                    return;
-                                  }
-                                },
-                                onDecline: () => {},
-                              ),
-                            ),
+                            onPressed:
+                                () => showConfirmPopup(
+                                  ConfirmWindow(
+                                    title: "settings.data.profile_picture.remove".tr,
+                                    text: "settings.data.profile_picture.remove.confirm".tr,
+                                    onConfirm: () async {
+                                      // Tell the server to remove the picture
+                                      final valid = await ProfileHelper.deleteProfilePicture();
+                                      if (!valid) {
+                                        return;
+                                      }
+                                    },
+                                    onDecline: () => {},
+                                  ),
+                                ),
                             icon: Icon(Icons.delete, color: Get.theme.colorScheme.onPrimary),
-                          )
+                          ),
                         ],
-                      )
+                      ),
                     ],
                   ),
                 ),
-                UserAvatar(
-                  id: StatusController.ownAddress,
-                  size: 100,
-                )
+                UserAvatar(id: StatusController.ownAddress, size: 100),
               ],
             ),
           ),
@@ -207,11 +155,11 @@ class DataSettingsPage extends StatelessWidget {
                   children: [
                     Text("display_name".tr, style: Get.theme.textTheme.labelMedium),
                     verticalSpacing(elementSpacing),
-                    Obx(
-                      () => Text(
-                        controller.displayName.value.toLowerCase() == controller.name.value.toLowerCase()
-                            ? List.generate(controller.name.value.length, (index) => "*").join("")
-                            : controller.displayName.value,
+                    Watch(
+                      (ctx) => Text(
+                        StatusController.displayName.value.toLowerCase() == StatusController.name.value.toLowerCase()
+                            ? List.generate(StatusController.name.value.length, (index) => "*").join("")
+                            : StatusController.displayName.value,
                         style: Get.theme.textTheme.bodyMedium,
                       ),
                     ),
@@ -244,7 +192,7 @@ class DataSettingsPage extends StatelessWidget {
                     Text("username".tr, style: Get.theme.textTheme.labelMedium),
                     verticalSpacing(elementSpacing),
                     Text(
-                      List.generate(controller.name.value.length, (index) => "*").join(""),
+                      List.generate(StatusController.name.value.length, (index) => "*").join(""),
                       style: Get.theme.textTheme.bodyMedium,
                     ),
                   ],
@@ -340,12 +288,14 @@ class DataSettingsPage extends StatelessWidget {
           FJElevatedButton(
             smallCorners: true,
             onTap: () {
-              showConfirmPopup(ConfirmWindow(
-                title: "settings.data.danger_zone.delete_account".tr,
-                text: "settings.data.danger_zone.delete_account.confirm".tr,
-                onConfirm: () => {},
-                onDecline: () => {},
-              ));
+              showConfirmPopup(
+                ConfirmWindow(
+                  title: "settings.data.danger_zone.delete_account".tr,
+                  text: "settings.data.danger_zone.delete_account.confirm".tr,
+                  onConfirm: () => {},
+                  onDecline: () => {},
+                ),
+              );
             },
             color: Get.theme.colorScheme.errorContainer,
             child: Row(

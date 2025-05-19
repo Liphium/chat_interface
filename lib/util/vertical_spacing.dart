@@ -4,10 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 
-const noTextHeight = TextHeightBehavior(
-  applyHeightToFirstAscent: false,
-  applyHeightToLastDescent: false,
-);
+const noTextHeight = TextHeightBehavior(applyHeightToFirstAscent: false, applyHeightToLastDescent: false);
 
 Widget verticalSpacing(double height) {
   return SizedBox(height: height);
@@ -27,6 +24,12 @@ bool isMobileMode() {
   return Get.width < 800 || Get.height < 500;
 }
 
+void popAllAndPush<T>(BuildContext context, Route<T> route) {
+  final nav = Navigator.of(context);
+  nav.popUntil((_) => false);
+  nav.push(route);
+}
+
 double fittedIconSize(double size) {
   return Get.mediaQuery.textScaler.scale(size);
 }
@@ -44,10 +47,7 @@ Future<T?>? showModal<T>(Widget widget, {mobileSliding = false}) async {
       builder: (context) {
         return LayoutBuilder(
           builder: (context, constraints) {
-            return Padding(
-              padding: EdgeInsets.only(bottom: Get.mediaQuery.viewInsets.bottom),
-              child: widget,
-            );
+            return Padding(padding: EdgeInsets.only(bottom: Get.mediaQuery.viewInsets.bottom), child: widget);
           },
         );
       },
@@ -75,17 +75,27 @@ String formatDay(DateTime time) {
   } else if (time.day == now.day - 1) {
     return "time.yesterday".tr;
   } else {
-    return "time"
-        .trParams({"day": time.day.toString().padLeft(2, "0"), "month": time.month.toString().padLeft(2, "0"), "year": time.year.toString()});
+    return "time".trParams({
+      "day": time.day.toString().padLeft(2, "0"),
+      "month": time.month.toString().padLeft(2, "0"),
+      "year": time.year.toString(),
+    });
   }
 }
 
 String formatOnlyYear(DateTime time) {
-  return "time".trParams({"day": time.day.toString().padLeft(2, "0"), "month": time.month.toString().padLeft(2, "0"), "year": time.year.toString()});
+  return "time".trParams({
+    "day": time.day.toString().padLeft(2, "0"),
+    "month": time.month.toString().padLeft(2, "0"),
+    "year": time.year.toString(),
+  });
 }
 
 String formatMessageTime(DateTime time) {
-  return "message.time".trParams({"hour": time.hour.toString().padLeft(2, "0"), "minute": time.minute.toString().padLeft(2, "0")});
+  return "message.time".trParams({
+    "hour": time.hour.toString().padLeft(2, "0"),
+    "minute": time.minute.toString().padLeft(2, "0"),
+  });
 }
 
 String formatGeneralTime(DateTime time) {
@@ -100,7 +110,8 @@ String formatGeneralTime(DateTime time) {
 
 class ExpandEffect extends CustomEffect {
   ExpandEffect({super.curve, super.duration, Axis? axis, Alignment? alignment, double? customHeightFactor, super.delay})
-      : super(builder: (context, value, child) {
+    : super(
+        builder: (context, value, child) {
           return ClipRect(
             child: Align(
               alignment: alignment ?? Alignment.topCenter,
@@ -109,23 +120,24 @@ class ExpandEffect extends CustomEffect {
               child: child,
             ),
           );
-        });
+        },
+      );
 }
 
 class ReverseExpandEffect extends CustomEffect {
   ReverseExpandEffect({super.curve, super.duration, Axis? axis, Alignment? alignment, super.delay})
-      : super(
-          builder: (context, value, child) {
-            return ClipRect(
-              child: Align(
-                alignment: alignment ?? Alignment.topCenter,
-                heightFactor: axis == Axis.vertical ? max(1 - value, 0.0) : null,
-                widthFactor: axis == Axis.horizontal ? max(1 - value, 0.0) : null,
-                child: child,
-              ),
-            );
-          },
-        );
+    : super(
+        builder: (context, value, child) {
+          return ClipRect(
+            child: Align(
+              alignment: alignment ?? Alignment.topCenter,
+              heightFactor: axis == Axis.vertical ? max(1 - value, 0.0) : null,
+              widthFactor: axis == Axis.horizontal ? max(1 - value, 0.0) : null,
+              child: child,
+            ),
+          );
+        },
+      );
 }
 
 class DevicePadding extends StatelessWidget {
@@ -177,9 +189,6 @@ class DevicePadding extends StatelessWidget {
       }
     }
 
-    return Padding(
-      padding: finalPadding,
-      child: child,
-    );
+    return Padding(padding: finalPadding, child: child);
   }
 }

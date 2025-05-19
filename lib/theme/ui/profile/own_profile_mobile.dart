@@ -1,16 +1,19 @@
-import 'package:chat_interface/controller/spaces/spaces_controller.dart';
+import 'package:chat_interface/controller/spaces/space_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/settings/account/data_settings.dart';
+import 'package:chat_interface/services/chat/status_service.dart';
 import 'package:chat_interface/theme/components/forms/icon_button.dart';
 import 'package:chat_interface/theme/components/forms/lph_action_fields.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/profile/developer_window.dart';
 import 'package:chat_interface/theme/ui/profile/profile_button.dart';
 import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
+import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class OwnProfileMobile extends StatefulWidget {
   const OwnProfileMobile({super.key});
@@ -20,31 +23,12 @@ class OwnProfileMobile extends StatefulWidget {
 }
 
 class _OwnProfileMobileState extends State<OwnProfileMobile> {
-  //* Edit state for buttons
-  final edit = false.obs;
-
-  final TextEditingController _status = TextEditingController();
-  final statusMessage = "".obs;
-  final FocusNode _statusFocus = FocusNode();
-
   // Developer things
-  final testLoading = false.obs;
-  final _clicks = 0.obs;
-
-  @override
-  void dispose() {
-    _status.dispose();
-    _statusFocus.dispose();
-    super.dispose();
-  }
+  var _clicks = 0;
 
   @override
   Widget build(BuildContext context) {
-    StatusController controller = Get.find();
     ThemeData theme = Theme.of(context);
-
-    _status.text = controller.status.value;
-    statusMessage.value = controller.status.value;
 
     return DevicePadding(
       top: true,
@@ -55,10 +39,7 @@ class _OwnProfileMobileState extends State<OwnProfileMobile> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            "About your profile",
-            style: Get.textTheme.titleMedium,
-          ),
+          Text("About your profile", style: Get.textTheme.titleMedium),
           verticalSpacing(defaultSpacing * 1.5),
 
           SizedBox(
@@ -77,19 +58,12 @@ class _OwnProfileMobileState extends State<OwnProfileMobile> {
                       SizedBox(
                         width: 60,
                         height: 60,
-                        child: Stack(
-                          children: [
-                            UserAvatar(
-                              id: StatusController.ownAddress,
-                              size: 60,
-                            ),
-                          ],
-                        ),
+                        child: Stack(children: [UserAvatar(id: StatusController.ownAddress, size: 60)]),
                       ),
                       horizontalSpacing(sectionSpacing),
                       Expanded(
                         child: Text(
-                          controller.name.value,
+                          StatusController.name.value,
                           overflow: TextOverflow.ellipsis,
                           style: Get.theme.textTheme.headlineMedium,
                         ),
@@ -104,11 +78,11 @@ class _OwnProfileMobileState extends State<OwnProfileMobile> {
                     children: [
                       LoadingIconButton(
                         onTap: () {
-                          _clicks.value++;
-                          if (_clicks.value > 7) {
+                          _clicks++;
+                          if (_clicks > 7) {
                             showModal(const DeveloperWindow());
                           }
-                          Clipboard.setData(ClipboardData(text: controller.name.value));
+                          Clipboard.setData(ClipboardData(text: StatusController.name.value));
                         },
                         background: true,
                         backgroundColor: Get.theme.colorScheme.primary,
@@ -134,28 +108,25 @@ class _OwnProfileMobileState extends State<OwnProfileMobile> {
           verticalSpacing(defaultSpacing),
 
           //* Status
-          Obx(() {
-            if (controller.ownContainer.value != null) {
+          Watch((ctx) {
+            if (StatusController.ownContainer.value != null) {
               return Padding(
                 padding: const EdgeInsets.only(bottom: elementSpacing),
                 child: ProfileButton(
                   icon: Icons.stop,
                   label: 'profile.stop_sharing'.tr,
-                  onTap: () => controller.stopSharing(),
-                  loading: false.obs,
+                  onTap: () => StatusController.stopSharing(),
                 ),
               );
             }
 
-            final spacesController = Get.find<SpacesController>();
-            if (spacesController.connected.value) {
+            if (SpaceController.connected.value) {
               return Padding(
                 padding: const EdgeInsets.only(bottom: elementSpacing),
                 child: ProfileButton(
                   icon: Icons.start,
                   label: 'profile.start_sharing'.tr,
-                  onTap: () => controller.share(spacesController.getContainer()),
-                  loading: false.obs,
+                  onTap: () => StatusController.share(SpaceController.getContainer()),
                 ),
               );
             } else {
@@ -168,14 +139,14 @@ class _OwnProfileMobileState extends State<OwnProfileMobile> {
           Text("Set your status", style: Get.textTheme.titleMedium),
           verticalSpacing(defaultSpacing * 1.5),
           RepaintBoundary(
-            child: GetX<StatusController>(builder: (statusController) {
+            child: Watch((ctx) {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: List.generate(4, (index) {
                   // Get details
                   Color color = getStatusColor(theme, index);
                   IconData icon = getStatusIcon(index);
-                  final bool selected = statusController.type.value == index;
+                  final bool selected = StatusController.type.value == index;
 
                   return Padding(
                     padding: const EdgeInsets.only(bottom: defaultSpacing),
@@ -184,8 +155,13 @@ class _OwnProfileMobileState extends State<OwnProfileMobile> {
                       borderRadius: BorderRadius.circular(defaultSpacing),
                       child: InkWell(
                         borderRadius: BorderRadius.circular(defaultSpacing),
-                        onTap: () {
-                          controller.setStatus(type: index, success: () => Get.back());
+                        onTap: () async {
+                          final error = await StatusService.sendStatus(type: index);
+                          if (error != null) {
+                            showErrorPopup("error", error);
+                            return;
+                          }
+                          Get.back();
                         },
                         child: Padding(
                           padding: const EdgeInsets.all(defaultSpacing),
@@ -211,90 +187,6 @@ class _OwnProfileMobileState extends State<OwnProfileMobile> {
               );
             }),
           ),
-
-          //* Status message
-          if (!isMobileMode())
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                //* Profile id
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () {
-                      edit.value = true;
-                      _statusFocus.requestFocus();
-                    },
-                    child: Obx(
-                      () => Visibility(
-                        visible: edit.value,
-                        replacement: Text(
-                          controller.status.value == "" ? 'status.message.add'.tr : controller.status.value,
-                          style: theme.textTheme.bodyMedium,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          textHeightBehavior: noTextHeight,
-                        ),
-                        child: TextField(
-                          focusNode: _statusFocus,
-                          onChanged: (value) => statusMessage.value = value,
-                          decoration: InputDecoration(
-                            border: InputBorder.none,
-                            hintStyle: theme.textTheme.bodyMedium!,
-                            hintText: 'status.message'.tr,
-                          ),
-                          style: theme.textTheme.bodyMedium!.copyWith(color: theme.colorScheme.onSurface),
-
-                          //* Save status
-                          onEditingComplete: () {
-                            if (_status.text == "") _status.text = "";
-                            controller.setStatus(message: _status.text);
-                            edit.value = false;
-                          },
-
-                          inputFormatters: [
-                            LengthLimitingTextInputFormatter(70),
-                          ],
-                          controller: _status,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
-                //* Close button
-                if (!isMobileMode())
-                  Obx(
-                    () => LoadingIconButton(
-                      loading: controller.statusLoading,
-                      onTap: () {
-                        if (controller.status.value == "" && !edit.value) {
-                          edit.value = true;
-                          _status.text = "";
-                          _statusFocus.requestFocus();
-                          return;
-                        }
-
-                        if (!edit.value) {
-                          controller.setStatus(message: "");
-                          _status.text = "";
-                          return;
-                        }
-
-                        edit.value = false;
-                        _statusFocus.unfocus();
-                        controller.setStatus(message: _status.text);
-                      },
-                      icon: statusMessage.value == ""
-                          ? Icons.add
-                          : edit.value
-                              ? Icons.done
-                              : Icons.close,
-                      color: theme.colorScheme.onPrimary,
-                    ),
-                  )
-              ],
-            ),
         ],
       ),
     );

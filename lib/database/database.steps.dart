@@ -1,3 +1,4 @@
+// dart format width=80
 import 'package:drift/internal/versioned_schema.dart' as i0;
 import 'package:drift/drift.dart' as i1;
 import 'package:drift/drift.dart'; // ignore_for_file: type=lint,unused_import
@@ -19,185 +20,156 @@ final class Schema2 extends i0.VersionedSchema {
     libraryEntry,
   ];
   late final Shape0 conversation = Shape0(
-      source: i0.VersionedTable(
-        entityName: 'conversation',
-        withoutRowId: false,
-        isStrict: false,
-        tableConstraints: [
-          'PRIMARY KEY(id)',
-        ],
-        columns: [
-          _column_0,
-          _column_1,
-          _column_2,
-          _column_3,
-          _column_4,
-          _column_5,
-          _column_6,
-          _column_7,
-          _column_8,
-        ],
-        attachedDatabase: database,
-      ),
-      alias: null);
+    source: i0.VersionedTable(
+      entityName: 'conversation',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_2,
+        _column_3,
+        _column_4,
+        _column_5,
+        _column_6,
+        _column_7,
+        _column_8,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
   late final Shape1 message = Shape1(
-      source: i0.VersionedTable(
-        entityName: 'message',
-        withoutRowId: false,
-        isStrict: false,
-        tableConstraints: [
-          'PRIMARY KEY(id)',
-        ],
-        columns: [
-          _column_0,
-          _column_9,
-          _column_10,
-          _column_11,
-          _column_12,
-          _column_13,
-          _column_14,
-          _column_15,
-        ],
-        attachedDatabase: database,
-      ),
-      alias: null);
+    source: i0.VersionedTable(
+      entityName: 'message',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_9,
+        _column_10,
+        _column_11,
+        _column_12,
+        _column_13,
+        _column_14,
+        _column_15,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
   late final Shape2 member = Shape2(
-      source: i0.VersionedTable(
-        entityName: 'member',
-        withoutRowId: false,
-        isStrict: false,
-        tableConstraints: [
-          'PRIMARY KEY(id)',
-        ],
-        columns: [
-          _column_0,
-          _column_16,
-          _column_17,
-          _column_18,
-        ],
-        attachedDatabase: database,
-      ),
-      alias: null);
+    source: i0.VersionedTable(
+      entityName: 'member',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [_column_0, _column_16, _column_17, _column_18],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
   late final Shape3 setting = Shape3(
-      source: i0.VersionedTable(
-        entityName: 'setting',
-        withoutRowId: false,
-        isStrict: false,
-        tableConstraints: [
-          'PRIMARY KEY("key")',
-        ],
-        columns: [
-          _column_5,
-          _column_19,
-        ],
-        attachedDatabase: database,
-      ),
-      alias: null);
+    source: i0.VersionedTable(
+      entityName: 'setting',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY("key")'],
+      columns: [_column_5, _column_19],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
   late final Shape4 friend = Shape4(
-      source: i0.VersionedTable(
-        entityName: 'friend',
-        withoutRowId: false,
-        isStrict: false,
-        tableConstraints: [
-          'PRIMARY KEY(id)',
-        ],
-        columns: [
-          _column_0,
-          _column_20,
-          _column_21,
-          _column_1,
-          _column_22,
-          _column_7,
-        ],
-        attachedDatabase: database,
-      ),
-      alias: null);
+    source: i0.VersionedTable(
+      entityName: 'friend',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_20,
+        _column_21,
+        _column_1,
+        _column_22,
+        _column_7,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
   late final Shape5 request = Shape5(
-      source: i0.VersionedTable(
-        entityName: 'request',
-        withoutRowId: false,
-        isStrict: false,
-        tableConstraints: [
-          'PRIMARY KEY(id)',
-        ],
-        columns: [
-          _column_0,
-          _column_20,
-          _column_21,
-          _column_23,
-          _column_1,
-          _column_22,
-          _column_7,
-        ],
-        attachedDatabase: database,
-      ),
-      alias: null);
+    source: i0.VersionedTable(
+      entityName: 'request',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_20,
+        _column_21,
+        _column_23,
+        _column_1,
+        _column_22,
+        _column_7,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
   late final Shape6 unknownProfile = Shape6(
-      source: i0.VersionedTable(
-        entityName: 'unknown_profile',
-        withoutRowId: false,
-        isStrict: false,
-        tableConstraints: [
-          'PRIMARY KEY(id)',
-        ],
-        columns: [
-          _column_0,
-          _column_20,
-          _column_21,
-          _column_22,
-        ],
-        attachedDatabase: database,
-      ),
-      alias: null);
+    source: i0.VersionedTable(
+      entityName: 'unknown_profile',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [_column_0, _column_20, _column_21, _column_22],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
   late final Shape7 profile = Shape7(
-      source: i0.VersionedTable(
-        entityName: 'profile',
-        withoutRowId: false,
-        isStrict: false,
-        tableConstraints: [
-          'PRIMARY KEY(id)',
-        ],
-        columns: [
-          _column_0,
-          _column_24,
-          _column_3,
-        ],
-        attachedDatabase: database,
-      ),
-      alias: null);
+    source: i0.VersionedTable(
+      entityName: 'profile',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [_column_0, _column_24, _column_3],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
   late final Shape8 trustedLink = Shape8(
-      source: i0.VersionedTable(
-        entityName: 'trusted_link',
-        withoutRowId: false,
-        isStrict: false,
-        tableConstraints: [
-          'PRIMARY KEY(domain)',
-        ],
-        columns: [
-          _column_25,
-        ],
-        attachedDatabase: database,
-      ),
-      alias: null);
+    source: i0.VersionedTable(
+      entityName: 'trusted_link',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(domain)'],
+      columns: [_column_25],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
   late final Shape9 libraryEntry = Shape9(
-      source: i0.VersionedTable(
-        entityName: 'library_entry',
-        withoutRowId: false,
-        isStrict: false,
-        tableConstraints: [
-          'PRIMARY KEY(id)',
-        ],
-        columns: [
-          _column_0,
-          _column_2,
-          _column_12,
-          _column_3,
-          _column_26,
-          _column_27,
-        ],
-        attachedDatabase: database,
-      ),
-      alias: null);
+    source: i0.VersionedTable(
+      entityName: 'library_entry',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_2,
+        _column_12,
+        _column_3,
+        _column_26,
+        _column_27,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
 }
 
 class Shape0 extends i0.VersionedTable {
@@ -223,32 +195,68 @@ class Shape0 extends i0.VersionedTable {
 }
 
 i1.GeneratedColumn<String> _column_0(String aliasedName) =>
-    i1.GeneratedColumn<String>('id', aliasedName, false,
-        type: i1.DriftSqlType.string);
+    i1.GeneratedColumn<String>(
+      'id',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.string,
+    );
 i1.GeneratedColumn<String> _column_1(String aliasedName) =>
-    i1.GeneratedColumn<String>('vault_id', aliasedName, false,
-        type: i1.DriftSqlType.string);
+    i1.GeneratedColumn<String>(
+      'vault_id',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.string,
+    );
 i1.GeneratedColumn<int> _column_2(String aliasedName) =>
-    i1.GeneratedColumn<int>('type', aliasedName, false,
-        type: i1.DriftSqlType.int);
+    i1.GeneratedColumn<int>(
+      'type',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.int,
+    );
 i1.GeneratedColumn<String> _column_3(String aliasedName) =>
-    i1.GeneratedColumn<String>('data', aliasedName, false,
-        type: i1.DriftSqlType.string);
+    i1.GeneratedColumn<String>(
+      'data',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.string,
+    );
 i1.GeneratedColumn<String> _column_4(String aliasedName) =>
-    i1.GeneratedColumn<String>('token', aliasedName, false,
-        type: i1.DriftSqlType.string);
+    i1.GeneratedColumn<String>(
+      'token',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.string,
+    );
 i1.GeneratedColumn<String> _column_5(String aliasedName) =>
-    i1.GeneratedColumn<String>('key', aliasedName, false,
-        type: i1.DriftSqlType.string);
+    i1.GeneratedColumn<String>(
+      'key',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.string,
+    );
 i1.GeneratedColumn<BigInt> _column_6(String aliasedName) =>
-    i1.GeneratedColumn<BigInt>('last_version', aliasedName, false,
-        type: i1.DriftSqlType.bigInt);
+    i1.GeneratedColumn<BigInt>(
+      'last_version',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.bigInt,
+    );
 i1.GeneratedColumn<BigInt> _column_7(String aliasedName) =>
-    i1.GeneratedColumn<BigInt>('updated_at', aliasedName, false,
-        type: i1.DriftSqlType.bigInt);
+    i1.GeneratedColumn<BigInt>(
+      'updated_at',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.bigInt,
+    );
 i1.GeneratedColumn<BigInt> _column_8(String aliasedName) =>
-    i1.GeneratedColumn<BigInt>('read_at', aliasedName, false,
-        type: i1.DriftSqlType.bigInt);
+    i1.GeneratedColumn<BigInt>(
+      'read_at',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.bigInt,
+    );
 
 class Shape1 extends i0.VersionedTable {
   Shape1({required super.source, required super.alias}) : super.aliased();
@@ -271,30 +279,60 @@ class Shape1 extends i0.VersionedTable {
 }
 
 i1.GeneratedColumn<String> _column_9(String aliasedName) =>
-    i1.GeneratedColumn<String>('content', aliasedName, false,
-        type: i1.DriftSqlType.string);
+    i1.GeneratedColumn<String>(
+      'content',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.string,
+    );
 i1.GeneratedColumn<String> _column_10(String aliasedName) =>
-    i1.GeneratedColumn<String>('sender_token', aliasedName, false,
-        type: i1.DriftSqlType.string);
+    i1.GeneratedColumn<String>(
+      'sender_token',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.string,
+    );
 i1.GeneratedColumn<String> _column_11(String aliasedName) =>
-    i1.GeneratedColumn<String>('sender_address', aliasedName, false,
-        type: i1.DriftSqlType.string);
+    i1.GeneratedColumn<String>(
+      'sender_address',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.string,
+    );
 i1.GeneratedColumn<BigInt> _column_12(String aliasedName) =>
-    i1.GeneratedColumn<BigInt>('created_at', aliasedName, false,
-        type: i1.DriftSqlType.bigInt);
+    i1.GeneratedColumn<BigInt>(
+      'created_at',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.bigInt,
+    );
 i1.GeneratedColumn<String> _column_13(String aliasedName) =>
-    i1.GeneratedColumn<String>('conversation', aliasedName, false,
-        type: i1.DriftSqlType.string);
+    i1.GeneratedColumn<String>(
+      'conversation',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.string,
+    );
 i1.GeneratedColumn<bool> _column_14(String aliasedName) =>
-    i1.GeneratedColumn<bool>('edited', aliasedName, false,
-        type: i1.DriftSqlType.bool,
-        defaultConstraints: i1.GeneratedColumn.constraintIsAlways(
-            'CHECK ("edited" IN (0, 1))'));
+    i1.GeneratedColumn<bool>(
+      'edited',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.bool,
+      defaultConstraints: i1.GeneratedColumn.constraintIsAlways(
+        'CHECK ("edited" IN (0, 1))',
+      ),
+    );
 i1.GeneratedColumn<bool> _column_15(String aliasedName) =>
-    i1.GeneratedColumn<bool>('verified', aliasedName, false,
-        type: i1.DriftSqlType.bool,
-        defaultConstraints: i1.GeneratedColumn.constraintIsAlways(
-            'CHECK ("verified" IN (0, 1))'));
+    i1.GeneratedColumn<bool>(
+      'verified',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.bool,
+      defaultConstraints: i1.GeneratedColumn.constraintIsAlways(
+        'CHECK ("verified" IN (0, 1))',
+      ),
+    );
 
 class Shape2 extends i0.VersionedTable {
   Shape2({required super.source, required super.alias}) : super.aliased();
@@ -309,14 +347,26 @@ class Shape2 extends i0.VersionedTable {
 }
 
 i1.GeneratedColumn<String> _column_16(String aliasedName) =>
-    i1.GeneratedColumn<String>('conversation_id', aliasedName, true,
-        type: i1.DriftSqlType.string);
+    i1.GeneratedColumn<String>(
+      'conversation_id',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.string,
+    );
 i1.GeneratedColumn<String> _column_17(String aliasedName) =>
-    i1.GeneratedColumn<String>('account_id', aliasedName, false,
-        type: i1.DriftSqlType.string);
+    i1.GeneratedColumn<String>(
+      'account_id',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.string,
+    );
 i1.GeneratedColumn<int> _column_18(String aliasedName) =>
-    i1.GeneratedColumn<int>('role_id', aliasedName, false,
-        type: i1.DriftSqlType.int);
+    i1.GeneratedColumn<int>(
+      'role_id',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.int,
+    );
 
 class Shape3 extends i0.VersionedTable {
   Shape3({required super.source, required super.alias}) : super.aliased();
@@ -327,8 +377,12 @@ class Shape3 extends i0.VersionedTable {
 }
 
 i1.GeneratedColumn<String> _column_19(String aliasedName) =>
-    i1.GeneratedColumn<String>('value', aliasedName, false,
-        type: i1.DriftSqlType.string);
+    i1.GeneratedColumn<String>(
+      'value',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.string,
+    );
 
 class Shape4 extends i0.VersionedTable {
   Shape4({required super.source, required super.alias}) : super.aliased();
@@ -347,14 +401,26 @@ class Shape4 extends i0.VersionedTable {
 }
 
 i1.GeneratedColumn<String> _column_20(String aliasedName) =>
-    i1.GeneratedColumn<String>('name', aliasedName, false,
-        type: i1.DriftSqlType.string);
+    i1.GeneratedColumn<String>(
+      'name',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.string,
+    );
 i1.GeneratedColumn<String> _column_21(String aliasedName) =>
-    i1.GeneratedColumn<String>('display_name', aliasedName, false,
-        type: i1.DriftSqlType.string);
+    i1.GeneratedColumn<String>(
+      'display_name',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.string,
+    );
 i1.GeneratedColumn<String> _column_22(String aliasedName) =>
-    i1.GeneratedColumn<String>('keys', aliasedName, false,
-        type: i1.DriftSqlType.string);
+    i1.GeneratedColumn<String>(
+      'keys',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.string,
+    );
 
 class Shape5 extends i0.VersionedTable {
   Shape5({required super.source, required super.alias}) : super.aliased();
@@ -375,10 +441,15 @@ class Shape5 extends i0.VersionedTable {
 }
 
 i1.GeneratedColumn<bool> _column_23(String aliasedName) =>
-    i1.GeneratedColumn<bool>('self', aliasedName, false,
-        type: i1.DriftSqlType.bool,
-        defaultConstraints:
-            i1.GeneratedColumn.constraintIsAlways('CHECK ("self" IN (0, 1))'));
+    i1.GeneratedColumn<bool>(
+      'self',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.bool,
+      defaultConstraints: i1.GeneratedColumn.constraintIsAlways(
+        'CHECK ("self" IN (0, 1))',
+      ),
+    );
 
 class Shape6 extends i0.VersionedTable {
   Shape6({required super.source, required super.alias}) : super.aliased();
@@ -403,8 +474,12 @@ class Shape7 extends i0.VersionedTable {
 }
 
 i1.GeneratedColumn<String> _column_24(String aliasedName) =>
-    i1.GeneratedColumn<String>('picture_container', aliasedName, false,
-        type: i1.DriftSqlType.string);
+    i1.GeneratedColumn<String>(
+      'picture_container',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.string,
+    );
 
 class Shape8 extends i0.VersionedTable {
   Shape8({required super.source, required super.alias}) : super.aliased();
@@ -413,8 +488,12 @@ class Shape8 extends i0.VersionedTable {
 }
 
 i1.GeneratedColumn<String> _column_25(String aliasedName) =>
-    i1.GeneratedColumn<String>('domain', aliasedName, false,
-        type: i1.DriftSqlType.string);
+    i1.GeneratedColumn<String>(
+      'domain',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.string,
+    );
 
 class Shape9 extends i0.VersionedTable {
   Shape9({required super.source, required super.alias}) : super.aliased();
@@ -433,13 +512,701 @@ class Shape9 extends i0.VersionedTable {
 }
 
 i1.GeneratedColumn<int> _column_26(String aliasedName) =>
-    i1.GeneratedColumn<int>('width', aliasedName, false,
-        type: i1.DriftSqlType.int);
+    i1.GeneratedColumn<int>(
+      'width',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.int,
+    );
 i1.GeneratedColumn<int> _column_27(String aliasedName) =>
-    i1.GeneratedColumn<int>('height', aliasedName, false,
-        type: i1.DriftSqlType.int);
+    i1.GeneratedColumn<int>(
+      'height',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.int,
+    );
+
+final class Schema3 extends i0.VersionedSchema {
+  Schema3({required super.database}) : super(version: 3);
+  @override
+  late final List<i1.DatabaseSchemaEntity> entities = [
+    conversation,
+    message,
+    member,
+    setting,
+    friend,
+    request,
+    unknownProfile,
+    profile,
+    trustedLink,
+    libraryEntry,
+    idxConversationUpdated,
+    idxMessageCreated,
+    idxFriendsUpdated,
+    idxLibraryEntryCreated,
+  ];
+  late final Shape0 conversation = Shape0(
+    source: i0.VersionedTable(
+      entityName: 'conversation',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_2,
+        _column_3,
+        _column_4,
+        _column_5,
+        _column_6,
+        _column_7,
+        _column_8,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape1 message = Shape1(
+    source: i0.VersionedTable(
+      entityName: 'message',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_9,
+        _column_10,
+        _column_11,
+        _column_12,
+        _column_13,
+        _column_14,
+        _column_15,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape2 member = Shape2(
+    source: i0.VersionedTable(
+      entityName: 'member',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [_column_0, _column_16, _column_17, _column_18],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape3 setting = Shape3(
+    source: i0.VersionedTable(
+      entityName: 'setting',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY("key")'],
+      columns: [_column_5, _column_19],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape4 friend = Shape4(
+    source: i0.VersionedTable(
+      entityName: 'friend',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_20,
+        _column_21,
+        _column_1,
+        _column_22,
+        _column_7,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape5 request = Shape5(
+    source: i0.VersionedTable(
+      entityName: 'request',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_20,
+        _column_21,
+        _column_23,
+        _column_1,
+        _column_22,
+        _column_7,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape6 unknownProfile = Shape6(
+    source: i0.VersionedTable(
+      entityName: 'unknown_profile',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [_column_0, _column_20, _column_21, _column_22],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape7 profile = Shape7(
+    source: i0.VersionedTable(
+      entityName: 'profile',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [_column_0, _column_24, _column_3],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape8 trustedLink = Shape8(
+    source: i0.VersionedTable(
+      entityName: 'trusted_link',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(domain)'],
+      columns: [_column_25],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape9 libraryEntry = Shape9(
+    source: i0.VersionedTable(
+      entityName: 'library_entry',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_2,
+        _column_12,
+        _column_3,
+        _column_26,
+        _column_27,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index idxConversationUpdated = i1.Index(
+    'idx_conversation_updated',
+    'CREATE INDEX idx_conversation_updated ON conversation (updated_at)',
+  );
+  final i1.Index idxMessageCreated = i1.Index(
+    'idx_message_created',
+    'CREATE INDEX idx_message_created ON message (created_at)',
+  );
+  final i1.Index idxFriendsUpdated = i1.Index(
+    'idx_friends_updated',
+    'CREATE INDEX idx_friends_updated ON friend (updated_at)',
+  );
+  final i1.Index idxLibraryEntryCreated = i1.Index(
+    'idx_library_entry_created',
+    'CREATE INDEX idx_library_entry_created ON library_entry (created_at)',
+  );
+}
+
+final class Schema4 extends i0.VersionedSchema {
+  Schema4({required super.database}) : super(version: 4);
+  @override
+  late final List<i1.DatabaseSchemaEntity> entities = [
+    conversation,
+    message,
+    member,
+    setting,
+    friend,
+    request,
+    unknownProfile,
+    profile,
+    trustedLink,
+    libraryEntry,
+    idxConversationUpdated,
+    idxMessageCreated,
+    idxFriendsUpdated,
+    idxRequestsUpdated,
+    idxUnknownProfilesLastFetched,
+    idxLibraryEntryCreated,
+    idxLibraryEntryIdhash,
+  ];
+  late final Shape0 conversation = Shape0(
+    source: i0.VersionedTable(
+      entityName: 'conversation',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_2,
+        _column_3,
+        _column_4,
+        _column_5,
+        _column_6,
+        _column_7,
+        _column_8,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape1 message = Shape1(
+    source: i0.VersionedTable(
+      entityName: 'message',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_9,
+        _column_10,
+        _column_11,
+        _column_12,
+        _column_13,
+        _column_14,
+        _column_15,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape2 member = Shape2(
+    source: i0.VersionedTable(
+      entityName: 'member',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [_column_0, _column_16, _column_17, _column_18],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape3 setting = Shape3(
+    source: i0.VersionedTable(
+      entityName: 'setting',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY("key")'],
+      columns: [_column_5, _column_19],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape4 friend = Shape4(
+    source: i0.VersionedTable(
+      entityName: 'friend',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_20,
+        _column_21,
+        _column_1,
+        _column_22,
+        _column_7,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape5 request = Shape5(
+    source: i0.VersionedTable(
+      entityName: 'request',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_20,
+        _column_21,
+        _column_23,
+        _column_1,
+        _column_22,
+        _column_7,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape10 unknownProfile = Shape10(
+    source: i0.VersionedTable(
+      entityName: 'unknown_profile',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [_column_0, _column_20, _column_21, _column_22, _column_28],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape7 profile = Shape7(
+    source: i0.VersionedTable(
+      entityName: 'profile',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [_column_0, _column_24, _column_3],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape8 trustedLink = Shape8(
+    source: i0.VersionedTable(
+      entityName: 'trusted_link',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(domain)'],
+      columns: [_column_25],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape11 libraryEntry = Shape11(
+    source: i0.VersionedTable(
+      entityName: 'library_entry',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_2,
+        _column_12,
+        _column_29,
+        _column_3,
+        _column_26,
+        _column_27,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index idxConversationUpdated = i1.Index(
+    'idx_conversation_updated',
+    'CREATE INDEX idx_conversation_updated ON conversation (updated_at)',
+  );
+  final i1.Index idxMessageCreated = i1.Index(
+    'idx_message_created',
+    'CREATE INDEX idx_message_created ON message (created_at)',
+  );
+  final i1.Index idxFriendsUpdated = i1.Index(
+    'idx_friends_updated',
+    'CREATE INDEX idx_friends_updated ON friend (updated_at)',
+  );
+  final i1.Index idxRequestsUpdated = i1.Index(
+    'idx_requests_updated',
+    'CREATE INDEX idx_requests_updated ON request (updated_at)',
+  );
+  final i1.Index idxUnknownProfilesLastFetched = i1.Index(
+    'idx_unknown_profiles_last_fetched',
+    'CREATE INDEX idx_unknown_profiles_last_fetched ON unknown_profile (last_fetched)',
+  );
+  final i1.Index idxLibraryEntryCreated = i1.Index(
+    'idx_library_entry_created',
+    'CREATE INDEX idx_library_entry_created ON library_entry (created_at)',
+  );
+  final i1.Index idxLibraryEntryIdhash = i1.Index(
+    'idx_library_entry_idhash',
+    'CREATE INDEX idx_library_entry_idhash ON library_entry (identifier_hash)',
+  );
+}
+
+class Shape10 extends i0.VersionedTable {
+  Shape10({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<String> get id =>
+      columnsByName['id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get name =>
+      columnsByName['name']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get displayName =>
+      columnsByName['display_name']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get keys =>
+      columnsByName['keys']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<DateTime> get lastFetched =>
+      columnsByName['last_fetched']! as i1.GeneratedColumn<DateTime>;
+}
+
+i1.GeneratedColumn<DateTime> _column_28(String aliasedName) =>
+    i1.GeneratedColumn<DateTime>(
+      'last_fetched',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.dateTime,
+      defaultValue: const CustomExpression('0'),
+    );
+
+class Shape11 extends i0.VersionedTable {
+  Shape11({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<String> get id =>
+      columnsByName['id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get type =>
+      columnsByName['type']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<BigInt> get createdAt =>
+      columnsByName['created_at']! as i1.GeneratedColumn<BigInt>;
+  i1.GeneratedColumn<String> get identifierHash =>
+      columnsByName['identifier_hash']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get data =>
+      columnsByName['data']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get width =>
+      columnsByName['width']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get height =>
+      columnsByName['height']! as i1.GeneratedColumn<int>;
+}
+
+i1.GeneratedColumn<String> _column_29(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'identifier_hash',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.string,
+      defaultValue: const CustomExpression('\'to-migrate\''),
+    );
+
+final class Schema5 extends i0.VersionedSchema {
+  Schema5({required super.database}) : super(version: 5);
+  @override
+  late final List<i1.DatabaseSchemaEntity> entities = [
+    conversation,
+    message,
+    member,
+    setting,
+    friend,
+    request,
+    unknownProfile,
+    profile,
+    trustedLink,
+    libraryEntry,
+    idxConversationUpdated,
+    idxMessageCreated,
+    idxFriendsUpdated,
+    idxRequestsUpdated,
+    idxUnknownProfilesLastFetched,
+    idxLibraryEntryCreated,
+    idxLibraryEntryIdhash,
+  ];
+  late final Shape12 conversation = Shape12(
+    source: i0.VersionedTable(
+      entityName: 'conversation',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_2,
+        _column_3,
+        _column_4,
+        _column_5,
+        _column_6,
+        _column_7,
+        _column_30,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape1 message = Shape1(
+    source: i0.VersionedTable(
+      entityName: 'message',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_9,
+        _column_10,
+        _column_11,
+        _column_12,
+        _column_13,
+        _column_14,
+        _column_15,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape2 member = Shape2(
+    source: i0.VersionedTable(
+      entityName: 'member',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [_column_0, _column_16, _column_17, _column_18],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape3 setting = Shape3(
+    source: i0.VersionedTable(
+      entityName: 'setting',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY("key")'],
+      columns: [_column_5, _column_19],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape4 friend = Shape4(
+    source: i0.VersionedTable(
+      entityName: 'friend',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_20,
+        _column_21,
+        _column_1,
+        _column_22,
+        _column_7,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape5 request = Shape5(
+    source: i0.VersionedTable(
+      entityName: 'request',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_20,
+        _column_21,
+        _column_23,
+        _column_1,
+        _column_22,
+        _column_7,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape10 unknownProfile = Shape10(
+    source: i0.VersionedTable(
+      entityName: 'unknown_profile',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [_column_0, _column_20, _column_21, _column_22, _column_28],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape7 profile = Shape7(
+    source: i0.VersionedTable(
+      entityName: 'profile',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [_column_0, _column_24, _column_3],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape8 trustedLink = Shape8(
+    source: i0.VersionedTable(
+      entityName: 'trusted_link',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(domain)'],
+      columns: [_column_25],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  late final Shape11 libraryEntry = Shape11(
+    source: i0.VersionedTable(
+      entityName: 'library_entry',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: ['PRIMARY KEY(id)'],
+      columns: [
+        _column_0,
+        _column_2,
+        _column_12,
+        _column_29,
+        _column_3,
+        _column_26,
+        _column_27,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+  final i1.Index idxConversationUpdated = i1.Index(
+    'idx_conversation_updated',
+    'CREATE INDEX idx_conversation_updated ON conversation (updated_at)',
+  );
+  final i1.Index idxMessageCreated = i1.Index(
+    'idx_message_created',
+    'CREATE INDEX idx_message_created ON message (created_at)',
+  );
+  final i1.Index idxFriendsUpdated = i1.Index(
+    'idx_friends_updated',
+    'CREATE INDEX idx_friends_updated ON friend (updated_at)',
+  );
+  final i1.Index idxRequestsUpdated = i1.Index(
+    'idx_requests_updated',
+    'CREATE INDEX idx_requests_updated ON request (updated_at)',
+  );
+  final i1.Index idxUnknownProfilesLastFetched = i1.Index(
+    'idx_unknown_profiles_last_fetched',
+    'CREATE INDEX idx_unknown_profiles_last_fetched ON unknown_profile (last_fetched)',
+  );
+  final i1.Index idxLibraryEntryCreated = i1.Index(
+    'idx_library_entry_created',
+    'CREATE INDEX idx_library_entry_created ON library_entry (created_at)',
+  );
+  final i1.Index idxLibraryEntryIdhash = i1.Index(
+    'idx_library_entry_idhash',
+    'CREATE INDEX idx_library_entry_idhash ON library_entry (identifier_hash)',
+  );
+}
+
+class Shape12 extends i0.VersionedTable {
+  Shape12({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<String> get id =>
+      columnsByName['id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get vaultId =>
+      columnsByName['vault_id']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get type =>
+      columnsByName['type']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get data =>
+      columnsByName['data']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get token =>
+      columnsByName['token']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<String> get key =>
+      columnsByName['key']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<BigInt> get lastVersion =>
+      columnsByName['last_version']! as i1.GeneratedColumn<BigInt>;
+  i1.GeneratedColumn<BigInt> get updatedAt =>
+      columnsByName['updated_at']! as i1.GeneratedColumn<BigInt>;
+  i1.GeneratedColumn<String> get reads =>
+      columnsByName['reads']! as i1.GeneratedColumn<String>;
+}
+
+i1.GeneratedColumn<String> _column_30(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'reads',
+      aliasedName,
+      false,
+      type: i1.DriftSqlType.string,
+      defaultValue: const CustomExpression('\'\''),
+    );
 i0.MigrationStepWithVersion migrationSteps({
   required Future<void> Function(i1.Migrator m, Schema2 schema) from1To2,
+  required Future<void> Function(i1.Migrator m, Schema3 schema) from2To3,
+  required Future<void> Function(i1.Migrator m, Schema4 schema) from3To4,
+  required Future<void> Function(i1.Migrator m, Schema5 schema) from4To5,
 }) {
   return (currentVersion, database) async {
     switch (currentVersion) {
@@ -448,6 +1215,21 @@ i0.MigrationStepWithVersion migrationSteps({
         final migrator = i1.Migrator(database, schema);
         await from1To2(migrator, schema);
         return 2;
+      case 2:
+        final schema = Schema3(database: database);
+        final migrator = i1.Migrator(database, schema);
+        await from2To3(migrator, schema);
+        return 3;
+      case 3:
+        final schema = Schema4(database: database);
+        final migrator = i1.Migrator(database, schema);
+        await from3To4(migrator, schema);
+        return 4;
+      case 4:
+        final schema = Schema5(database: database);
+        final migrator = i1.Migrator(database, schema);
+        await from4To5(migrator, schema);
+        return 5;
       default:
         throw ArgumentError.value('Unknown migration from $currentVersion');
     }
@@ -456,8 +1238,14 @@ i0.MigrationStepWithVersion migrationSteps({
 
 i1.OnUpgrade stepByStep({
   required Future<void> Function(i1.Migrator m, Schema2 schema) from1To2,
-}) =>
-    i0.VersionedSchema.stepByStepHelper(
-        step: migrationSteps(
-      from1To2: from1To2,
-    ));
+  required Future<void> Function(i1.Migrator m, Schema3 schema) from2To3,
+  required Future<void> Function(i1.Migrator m, Schema4 schema) from3To4,
+  required Future<void> Function(i1.Migrator m, Schema5 schema) from4To5,
+}) => i0.VersionedSchema.stepByStepHelper(
+  step: migrationSteps(
+    from1To2: from1To2,
+    from2To3: from2To3,
+    from3To4: from3To4,
+    from4To5: from4To5,
+  ),
+);

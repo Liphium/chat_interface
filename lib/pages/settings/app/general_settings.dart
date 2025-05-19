@@ -26,15 +26,15 @@ class GeneralSettings {
   static const String ringOnInvite = "ring.enable";
   static const String ringIgnoreTray = "ring.ignore_tray";
 
-  static void addSettings(SettingController controller) {
-    controller.settings[language] = Setting<int>(language, 0);
+  static void addSettings() {
+    SettingController.addSetting(Setting<int>(language, 0));
 
     // Default notification sounds settings
-    controller.settings[soundsEnabled] = Setting(soundsEnabled, true);
-    controller.settings[soundsDoNotDisturb] = Setting(soundsDoNotDisturb, false);
-    controller.settings[soundsOnlyWhenTray] = Setting(soundsOnlyWhenTray, true);
-    controller.settings[ringOnInvite] = Setting(ringOnInvite, true);
-    controller.settings[ringIgnoreTray] = Setting(ringIgnoreTray, true);
+    SettingController.addSetting(Setting(soundsEnabled, true));
+    SettingController.addSetting(Setting(soundsDoNotDisturb, false));
+    SettingController.addSetting(Setting(soundsOnlyWhenTray, true));
+    SettingController.addSetting(Setting(ringOnInvite, true));
+    SettingController.addSetting(Setting(ringIgnoreTray, true));
   }
 }
 
@@ -58,7 +58,7 @@ class _GeneralSettingsPageState extends State<GeneralSettingsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          //* Notification settings
+          //* Notification settings6
           Row(
             children: [
               Text("settings.general.notifications".tr, style: Get.theme.textTheme.labelLarge),
@@ -104,10 +104,7 @@ class _GeneralSettingsPageState extends State<GeneralSettingsPage> {
             ],
           ),
           verticalSpacing(defaultSpacing),
-          InfoContainer(
-            message: "settings.general.ringtone.disabled".tr,
-            expand: true,
-          ),
+          InfoContainer(message: "settings.general.ringtone.disabled".tr, expand: true),
           verticalSpacing(defaultSpacing),
           Text("ring.desc".tr, style: Get.textTheme.bodyMedium),
           verticalSpacing(defaultSpacing),
@@ -121,7 +118,7 @@ class _GeneralSettingsPageState extends State<GeneralSettingsPage> {
           verticalSpacing(defaultSpacing),
 
           ListSelectionSetting(
-            settingName: "language",
+            setting: SettingController.settings[GeneralSettings.language]! as Setting<int>,
             items: GeneralSettings.languages,
             callback: (language) {
               Get.updateLocale((language as LanguageSelection).locale);

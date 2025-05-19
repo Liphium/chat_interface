@@ -1,11 +1,14 @@
 import 'package:chat_interface/theme/components/forms/fj_slider.dart';
 import 'package:chat_interface/theme/components/forms/fj_switch.dart';
 import 'package:chat_interface/theme/components/lph_tab_element.dart';
+import 'package:chat_interface/util/dispose_hook.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class CategoryData {
   final String name;
@@ -31,13 +34,20 @@ class TownAdminSettings extends StatefulWidget {
 
 class _TownAdminSettingsState extends State<TownAdminSettings> {
   // Error things
-  final error = "".obs;
-  final loading = true.obs;
-  String? currentCategory;
+  final _error = signal("");
+  final _loading = signal(true);
+  String? _currentCategory;
 
   // Current tabs
-  final categories = <CategoryData>[];
-  final currentTab = Rx<List<dynamic>?>(null);
+  final _categories = <CategoryData>[];
+  final _currentTab = listSignal<dynamic>([]);
+
+  @override
+  void dispose() {
+    _error.dispose();
+    _loading.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -47,30 +57,30 @@ class _TownAdminSettingsState extends State<TownAdminSettings> {
 
   /// Get all the categories from the server
   Future<void> fetchCategories() async {
-    loading.value = true;
-    error.value = "";
+    _loading.value = true;
+    _error.value = "";
     final json = await postAuthorizedJSON("/townhall/settings/categories", {});
-    loading.value = false;
     if (!json["success"]) {
-      error.value = json["error"];
+      _error.value = json["error"];
       return;
     }
 
     // Parse all the categories
     for (var category in json["categories"]) {
-      categories.add(CategoryData.fromJson(category));
+      _categories.add(CategoryData.fromJson(category));
     }
+    _loading.value = false;
 
     // Fetch category one
-    await fetchSettings(categories[0].name);
+    await fetchSettings(_categories[0].name);
   }
 
   /// Fetch the settings for a category
   Future<void> fetchSettings(String name) async {
-    final category = categories.firstWhere((c) => c.name == name);
-    currentCategory = category.name;
+    final category = _categories.firstWhere((c) => c.name == name);
+    _currentCategory = category.name;
     final json = await postAuthorizedJSON("/townhall/settings/${category.id}", {});
-    if (currentCategory != category.name) {
+    if (_currentCategory != category.name) {
       return;
     }
 
@@ -81,7 +91,7 @@ class _TownAdminSettingsState extends State<TownAdminSettings> {
     }
 
     // Load the settings
-    currentTab.value = json["settings"];
+    _currentTab.value = json["settings"];
   }
 
   @override
@@ -94,57 +104,52 @@ class _TownAdminSettingsState extends State<TownAdminSettings> {
         Text("settings.town.settings".tr, style: Get.theme.textTheme.labelLarge),
         verticalSpacing(defaultSpacing),
 
-        Obx(() {
+        Watch((ctx) {
           // Render a loading indicator in case the tabs are still loading
-          if (loading.value) {
+          if (_loading.value) {
             return Padding(
               padding: const EdgeInsets.only(top: defaultSpacing),
               child: Padding(
                 padding: const EdgeInsets.all(defaultSpacing),
-                child: Center(
-                  child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary),
-                ),
+                child: Center(child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary)),
               ),
             );
           }
 
           // Render an error message
-          if (error.value != "") {
-            return Text(error.value, style: Get.theme.textTheme.bodyMedium);
+          if (_error.value != "") {
+            return Text(_error.value, style: Get.theme.textTheme.bodyMedium);
           }
 
           // Render the tab overview
-          return LPHTabElement(
-            tabs: categories.map((c) => c.name).toList(),
-            onTabSwitch: (tab) => fetchSettings(tab),
-          );
-        }),
+          return LPHTabElement(tabs: _categories.map((c) => c.name).toList(), onTabSwitch: (tab) => fetchSettings(tab));
+        }, dependencies: [_loading, _error]),
         verticalSpacing(defaultSpacing),
-        Obx(() {
+        Watch((ctx) {
           // Return nothing if there is no tab content
-          if (currentTab.value == null) {
+          if (_currentTab.value.isEmpty) {
             return const SizedBox();
           }
 
           return Column(
-            children: List.generate(
-              currentTab.value!.length,
-              (index) {
-                final setting = currentTab.value![index]!;
-                if (setting["visible"] != null && !setting["visible"]) {
-                  return const SizedBox();
-                }
+            children: List.generate(_currentTab.value.length, (index) {
+              final setting = _currentTab.value[index]!;
+              if (setting["visible"] != null && !setting["visible"]) {
+                return const SizedBox();
+              }
 
-                Widget? settingsWidget;
-                if (setting["value"] is num) {
-                  final devider = (setting["dev"] as num).toDouble();
-                  final currentValue = (setting["value"] as num).toDouble().obs;
-                  settingsWidget = Column(
+              Widget? settingsWidget;
+              if (setting["value"] is num) {
+                final devider = (setting["dev"] as num).toDouble();
+                final currentValue = signal((setting["value"] as num).toDouble());
+                settingsWidget = DisposeHook(
+                  dispose: () => currentValue.dispose(),
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(setting["label"], style: Get.textTheme.bodyMedium),
-                      Obx(
-                        () => FJSliderWithInput(
+                      Watch(
+                        (ctx) => FJSliderWithInput(
                           secondaryColor: true,
                           min: (setting["min"] as num).toDouble() / devider,
                           value: currentValue.value / devider,
@@ -167,15 +172,18 @@ class _TownAdminSettingsState extends State<TownAdminSettings> {
                         ),
                       ),
                     ],
-                  );
-                } else if (setting["value"] is bool) {
-                  final currentValue = (setting["value"] as bool).obs;
-                  settingsWidget = Row(
+                  ),
+                );
+              } else if (setting["value"] is bool) {
+                final currentValue = signal((setting["value"] as bool));
+                settingsWidget = DisposeHook(
+                  dispose: () => currentValue.dispose(),
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(setting["label"], style: Get.textTheme.bodyMedium),
-                      Obx(
-                        () => FJSwitch(
+                      Watch(
+                        (ctx) => FJSwitch(
                           value: currentValue.value,
                           onChanged: (val) async {
                             currentValue.value = val;
@@ -191,15 +199,12 @@ class _TownAdminSettingsState extends State<TownAdminSettings> {
                         ),
                       ),
                     ],
-                  );
-                }
-
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: defaultSpacing),
-                  child: settingsWidget,
+                  ),
                 );
-              },
-            ),
+              }
+
+              return Padding(padding: const EdgeInsets.only(bottom: defaultSpacing), child: settingsWidget);
+            }),
           );
         }),
       ],

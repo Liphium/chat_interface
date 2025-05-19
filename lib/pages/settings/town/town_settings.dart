@@ -10,7 +10,6 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 
@@ -22,8 +21,6 @@ class TownSettingsPage extends StatefulWidget {
 }
 
 class _TownSettingsPageState extends State<TownSettingsPage> {
-  final maxFileSize = 10.0.obs;
-
   @override
   Widget build(BuildContext context) {
     return SettingsPageBase(
@@ -80,10 +77,7 @@ class _TownSettingsPageState extends State<TownSettingsPage> {
                     children: [
                       Text("settings.town.address".tr, style: Get.theme.textTheme.labelMedium),
                       verticalSpacing(elementSpacing),
-                      Text(
-                        "settings.town.address.desc".trParams(),
-                        style: Get.theme.textTheme.bodyMedium,
-                      ),
+                      Text("settings.town.address.desc".trParams(), style: Get.theme.textTheme.bodyMedium),
                     ],
                   ),
                 ),
@@ -92,11 +86,8 @@ class _TownSettingsPageState extends State<TownSettingsPage> {
                     await Clipboard.setData(ClipboardData(text: StatusController.ownAddress.encode()));
                     showSuccessPopup("success", "settings.town.address.copied".tr);
                   },
-                  child: Text(
-                    "copy".tr,
-                    style: Get.textTheme.labelMedium,
-                  ),
-                )
+                  child: Text("copy".tr, style: Get.textTheme.labelMedium),
+                ),
               ],
             ),
           ),

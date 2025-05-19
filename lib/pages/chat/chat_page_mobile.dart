@@ -10,14 +10,12 @@ import 'package:chat_interface/util/platform_callback.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class ChatPageMobile extends StatefulWidget {
   final int selected;
 
-  const ChatPageMobile({
-    super.key,
-    this.selected = 0,
-  });
+  const ChatPageMobile({super.key, this.selected = 0});
 
   @override
   State<ChatPageMobile> createState() => _ChatPageState();
@@ -25,10 +23,10 @@ class ChatPageMobile extends StatefulWidget {
 
 class _ChatPageState extends State<ChatPageMobile> {
   // The currently selected tab
-  final selected = 0.obs;
+  final _selected = signal(0);
 
   // All tabs that can be selected
-  final tabs = <int, Widget>{
+  final _tabs = <int, Widget>{
     0: const ConversationListMobile(),
     1: const OwnProfileMobile(),
     2: const FriendsPage(),
@@ -37,8 +35,14 @@ class _ChatPageState extends State<ChatPageMobile> {
 
   @override
   void initState() {
-    selected.value = widget.selected;
+    _selected.value = widget.selected;
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _selected.dispose();
+    super.dispose();
   }
 
   @override
@@ -51,13 +55,9 @@ class _ChatPageState extends State<ChatPageMobile> {
         },
         child: Column(
           children: [
-            Expanded(
-              child: Obx(() => tabs[selected.value]!),
-            ),
+            Expanded(child: Watch((ctx) => _tabs[_selected.value]!)),
             Container(
-              decoration: BoxDecoration(
-                color: Get.theme.colorScheme.primaryContainer,
-              ),
+              decoration: BoxDecoration(color: Get.theme.colorScheme.primaryContainer),
               child: DevicePadding(
                 bottom: true,
                 right: true,
@@ -75,42 +75,42 @@ class _ChatPageState extends State<ChatPageMobile> {
                           right: defaultSpacing,
                           left: defaultSpacing,
                         ),
-                        message: Get.find<ConnectionController>().error,
+                        message: ConnectionController.error,
                       ),
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
                         SidebarIconButton(
-                          onTap: () => selected.value = 0,
+                          onTap: () => _selected.value = 0,
                           icon: Icons.chat_bubble,
                           index: 0,
-                          selected: selected,
+                          selected: _selected,
                         ),
                         SidebarIconButton(
-                          onTap: () => selected.value = 1,
+                          onTap: () => _selected.value = 1,
                           icon: Icons.public,
                           index: 1,
-                          selected: selected,
+                          selected: _selected,
                         ),
                         SidebarIconButton(
-                          onTap: () => selected.value = 2,
+                          onTap: () => _selected.value = 2,
                           icon: Icons.group,
                           index: 2,
-                          selected: selected,
+                          selected: _selected,
                         ),
                         SidebarIconButton(
-                          onTap: () => selected.value = 3,
+                          onTap: () => _selected.value = 3,
                           icon: Icons.settings,
                           index: 3,
-                          selected: selected,
+                          selected: _selected,
                         ),
                       ],
                     ),
                   ],
                 ),
               ),
-            )
+            ),
           ],
         ),
       ),

@@ -1,17 +1,14 @@
-import 'package:chat_interface/controller/spaces/spaces_controller.dart';
 import 'package:chat_interface/controller/current/connection_controller.dart';
-import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar_conversations.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar_profile.dart';
+import 'package:chat_interface/pages/chat/sidebar/universal_create_window.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
 import 'package:chat_interface/pages/status/error/offline_hider.dart';
-import 'package:chat_interface/theme/ui/dialogs/conversation_add_window.dart';
-import 'package:chat_interface/theme/ui/dialogs/space_add_window.dart';
-import 'package:chat_interface/theme/ui/dialogs/upgrade_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_core.dart';
 
 class Sidebar extends StatefulWidget {
   const Sidebar({super.key});
@@ -21,16 +18,20 @@ class Sidebar extends StatefulWidget {
 }
 
 class _SidebarState extends State<Sidebar> {
-  final query = "".obs;
-  final GlobalKey _addConvKey = GlobalKey(), _addSpaceKey = GlobalKey();
+  final _query = signal("");
+  final _universalKey = GlobalKey();
+
+  @override
+  void dispose() {
+    _query.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    //* Sidebar
+    final theme = Theme.of(context);
     return Container(
-      decoration: BoxDecoration(
-        color: Get.theme.colorScheme.onInverseSurface,
-      ),
+      decoration: BoxDecoration(color: Get.theme.colorScheme.onInverseSurface),
 
       //* Sidebar content
       child: DevicePadding(
@@ -49,16 +50,12 @@ class _SidebarState extends State<Sidebar> {
               top: false,
               bottom: false,
               child: AnimatedErrorContainer(
-                padding: const EdgeInsets.only(
-                  bottom: defaultSpacing,
-                  right: defaultSpacing,
-                  left: defaultSpacing,
-                ),
-                message: Get.find<ConnectionController>().error,
+                padding: const EdgeInsets.only(bottom: defaultSpacing, right: defaultSpacing, left: defaultSpacing),
+                message: ConnectionController.error,
               ),
             ),
 
-            //* Search field
+            // Search field
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
               child: SizedBox(
@@ -90,7 +87,7 @@ class _SidebarState extends State<Sidebar> {
                                     hintStyle: Get.textTheme.bodyMedium,
                                   ),
                                   onChanged: (value) {
-                                    query.value = value;
+                                    _query.value = value;
                                   },
                                   cursorColor: Get.theme.colorScheme.onPrimary,
                                 ),
@@ -100,43 +97,16 @@ class _SidebarState extends State<Sidebar> {
                               OfflineHider(
                                 axis: Axis.horizontal,
                                 alignment: Alignment.center,
-                                child: Row(
-                                  children: [
-                                    horizontalSpacing(defaultSpacing * 0.5),
-                                    Visibility(
-                                      visible: areSpacesSupported,
-                                      child: IconButton(
-                                        key: _addSpaceKey,
-                                        onPressed: () {
-                                          if (isWeb) {
-                                            Get.dialog(UpgradeWindow());
-                                            return;
-                                          }
-
-                                          //* Open space add window
-                                          final RenderBox box = _addSpaceKey.currentContext?.findRenderObject() as RenderBox;
-                                          showModal(SpaceAddWindow(position: box.localToGlobal(box.size.bottomLeft(const Offset(0, 5)))));
-                                        },
-                                        icon: Icon(Icons.rocket_launch, color: Get.theme.colorScheme.onPrimary),
-                                      ),
-                                    ),
-                                    horizontalSpacing(defaultSpacing * 0.5),
-                                    IconButton(
-                                      key: _addConvKey,
-                                      onPressed: () {
-                                        final RenderBox box = _addConvKey.currentContext?.findRenderObject() as RenderBox;
-
-                                        //* Open conversation add window
-                                        showModal(ConversationAddWindow(
-                                          position:
-                                              ContextMenuData(box.localToGlobal(box.size.bottomLeft(const Offset(0, elementSpacing))), true, true),
-                                        ));
-                                      },
-                                      icon: Icon(Icons.chat_bubble, color: Get.theme.colorScheme.onPrimary),
-                                    ),
-                                  ],
+                                child: IconButton(
+                                  key: _universalKey,
+                                  onPressed: () {
+                                    showModal(
+                                      UniversalCreateWindow(data: ContextMenuData.fromKey(_universalKey, below: true)),
+                                    );
+                                  },
+                                  icon: Icon(Icons.add_circle, color: theme.colorScheme.onPrimary),
                                 ),
-                              )
+                              ),
                             ],
                           ),
                         ),
@@ -148,17 +118,8 @@ class _SidebarState extends State<Sidebar> {
             ),
 
             // Conversation list and the profile
-            Expanded(
-              child: SafeArea(
-                top: false,
-                bottom: false,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-                  child: SidebarConversationList(query: query),
-                ),
-              ),
-            ),
-            if (!isMobileMode()) const SidebarProfile()
+            Expanded(child: SafeArea(top: false, bottom: false, child: SidebarConversationList(query: _query))),
+            if (!isMobileMode()) const SidebarProfile(),
           ],
         ),
       ),

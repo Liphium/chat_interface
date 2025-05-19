@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
-import 'package:chat_interface/connection/encryption/hash.dart';
-import 'package:chat_interface/connection/encryption/signatures.dart';
-import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
+import 'package:chat_interface/util/encryption/asymmetric_sodium.dart';
+import 'package:chat_interface/util/encryption/hash.dart';
+import 'package:chat_interface/util/encryption/signatures.dart';
+import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/pages/status/setup/setup_page.dart';
@@ -51,9 +51,7 @@ class KeySetup extends ConnectionStep {
       final genVaultKey = randomSymmetricKey();
 
       // Set public key on the server
-      res = await postAuthorizedJSON("/account/keys/public/set", <String, dynamic>{
-        "key": packagedPub,
-      });
+      res = await postAuthorizedJSON("/account/keys/public/set", <String, dynamic>{"key": packagedPub});
       if (!res["success"]) {
         return SetupResponse(error: "key.error");
       }
@@ -69,9 +67,7 @@ class KeySetup extends ConnectionStep {
       if (!res["success"]) {
         return SetupResponse(error: "key.error");
       }
-      res = await postAuthorizedJSON("/account/keys/signature/set", <String, dynamic>{
-        "key": packagedSignaturePub,
-      });
+      res = await postAuthorizedJSON("/account/keys/signature/set", <String, dynamic>{"key": packagedSignaturePub});
       if (!res["success"]) {
         return SetupResponse(error: "key.error");
       }
@@ -89,19 +85,13 @@ class KeySetup extends ConnectionStep {
       // Open key synchronization if there are no local keys
       if (publicKey == null || privateKey == null) {
         final res = await openKeySynchronization();
-        return SetupResponse(
-          restart: true,
-          error: res,
-        );
+        return SetupResponse(restart: true, error: res);
       }
 
       // Check if the key is the same as on the server
       if (res["key"] != publicKey) {
         final res = await openKeySynchronization();
-        return SetupResponse(
-          restart: true,
-          error: res,
-        );
+        return SetupResponse(restart: true, error: res);
       }
 
       // Set local key pair
@@ -155,9 +145,7 @@ class KeySetup extends ConnectionStep {
     }
 
     // Ask the server whether the request already exists
-    final json = await postJSON("/account/keys/requests/exists", {
-      "token": refreshToken,
-    });
+    final json = await postJSON("/account/keys/requests/exists", {"token": refreshToken});
 
     // Check if there was an error
     if (!json["success"]) {
@@ -165,15 +153,17 @@ class KeySetup extends ConnectionStep {
     }
 
     // Go to the key setup page
-    unawaited(Get.dialog(
-      KeySetupPage(
-        signature: signature,
-        signatureKeyPair: signatureKeyPair,
-        encryptionKeyPair: encryptionKeyPair,
-        exists: json["exists"],
+    unawaited(
+      Get.dialog(
+        KeySetupPage(
+          signature: signature,
+          signatureKeyPair: signatureKeyPair,
+          encryptionKeyPair: encryptionKeyPair,
+          exists: json["exists"],
+        ),
+        barrierDismissible: false,
       ),
-      barrierDismissible: false,
-    ));
+    );
     return completer.future;
   }
 }
@@ -228,6 +218,12 @@ class _KeySetupPageState extends State<KeySetupPage> {
   }
 
   @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return SmoothDialogWindow(controller: controller);
   }
@@ -259,25 +255,20 @@ class _KeySynchronizationPageState extends State<KeySynchronizationPage> {
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          'key.sync.title'.tr,
-          style: Get.textTheme.headlineMedium,
-          textAlign: TextAlign.center,
-        ),
+        Text('key.sync.title'.tr, style: Get.textTheme.headlineMedium, textAlign: TextAlign.center),
         verticalSpacing(sectionSpacing),
-        Text(
-          "key.sync.desc".tr,
-          style: Get.textTheme.bodyMedium,
-        ),
+        Text("key.sync.desc".tr, style: Get.textTheme.bodyMedium),
         verticalSpacing(sectionSpacing),
         FJElevatedLoadingButton(
-          loading: false.obs,
           onTap: () async {
             final json = await postJSON("/account/keys/requests/check", {
               "token": refreshToken,
-              "signature":
-                  signMessage(widget.signatureKeyPair.secretKey, hashSha(widget.signature + packagePublicKey(widget.encryptionKeyPair.publicKey))),
-              "key": "${packagePublicKey(widget.signatureKeyPair.publicKey)}:${packagePublicKey(widget.encryptionKeyPair.publicKey)}",
+              "signature": signMessage(
+                widget.signatureKeyPair.secretKey,
+                hashSha(widget.signature + packagePublicKey(widget.encryptionKeyPair.publicKey)),
+              ),
+              "key":
+                  "${packagePublicKey(widget.signatureKeyPair.publicKey)}:${packagePublicKey(widget.encryptionKeyPair.publicKey)}",
             });
 
             if (!json["success"]) {
@@ -285,11 +276,15 @@ class _KeySynchronizationPageState extends State<KeySynchronizationPage> {
               return;
             }
 
-            unawaited(widget.controller.transitionTo(KeyCodePage(
-              encryptionKeyPair: widget.encryptionKeyPair,
-              signatureKeyPair: widget.signatureKeyPair,
-              signature: widget.signature,
-            )));
+            unawaited(
+              widget.controller.transitionTo(
+                KeyCodePage(
+                  encryptionKeyPair: widget.encryptionKeyPair,
+                  signatureKeyPair: widget.signatureKeyPair,
+                  signature: widget.signature,
+                ),
+              ),
+            );
           },
           label: "key.sync.ask_device".tr,
         ),
@@ -322,8 +317,12 @@ class _KeyCodePageState extends State<KeyCodePage> {
     _timer = Timer.periodic(5000.ms, (timer) async {
       final json = await postJSON("/account/keys/requests/check", {
         "token": refreshToken,
-        "signature": signMessage(widget.signatureKeyPair.secretKey, hashSha(widget.signature + packagePublicKey(widget.encryptionKeyPair.publicKey))),
-        "key": "${packagePublicKey(widget.signatureKeyPair.publicKey)}:${packagePublicKey(widget.encryptionKeyPair.publicKey)}",
+        "signature": signMessage(
+          widget.signatureKeyPair.secretKey,
+          hashSha(widget.signature + packagePublicKey(widget.encryptionKeyPair.publicKey)),
+        ),
+        "key":
+            "${packagePublicKey(widget.signatureKeyPair.publicKey)}:${packagePublicKey(widget.encryptionKeyPair.publicKey)}",
       });
 
       if (!json["success"]) {
@@ -333,7 +332,11 @@ class _KeyCodePageState extends State<KeyCodePage> {
 
       // Add all the keys to the database if there is a payload
       if (json["payload"] != null && json["payload"] != "") {
-        final payload = decryptAsymmetricAnonymous(widget.encryptionKeyPair.publicKey, widget.encryptionKeyPair.secretKey, json["payload"]);
+        final payload = decryptAsymmetricAnonymous(
+          widget.encryptionKeyPair.publicKey,
+          widget.encryptionKeyPair.secretKey,
+          json["payload"],
+        );
         if (payload == "") {
           sendLog("couldn't decrypt message ${json["payload"]}");
           return;
@@ -368,10 +371,7 @@ class _KeyCodePageState extends State<KeyCodePage> {
           textAlign: TextAlign.center,
         ),
         verticalSpacing(sectionSpacing),
-        Text(
-          'key.code.desc'.tr,
-          style: Get.textTheme.bodyMedium,
-        ),
+        Text('key.code.desc'.tr, style: Get.textTheme.bodyMedium),
       ],
     );
   }

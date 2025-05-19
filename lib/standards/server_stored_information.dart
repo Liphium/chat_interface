@@ -1,9 +1,9 @@
 import 'dart:typed_data';
 
-import 'package:chat_interface/connection/encryption/asymmetric_sodium.dart';
-import 'package:chat_interface/connection/encryption/hash.dart';
-import 'package:chat_interface/connection/encryption/signatures.dart';
-import 'package:chat_interface/connection/encryption/symmetric_sodium.dart';
+import 'package:chat_interface/util/encryption/asymmetric_sodium.dart';
+import 'package:chat_interface/util/encryption/hash.dart';
+import 'package:chat_interface/util/encryption/signatures.dart';
+import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/current/steps/key_step.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
@@ -15,14 +15,23 @@ class ServerStoredInfo {
 
   /// Decrypt stored stored info with own public and private key
   factory ServerStoredInfo.untransform(String transformed, {Sodium? sodium, KeyPair? ownKeyPair}) {
-    final result =
-        decryptAsymmetricAuth((ownKeyPair ?? asymmetricKeyPair).publicKey, (ownKeyPair ?? asymmetricKeyPair).secretKey, transformed, sodium);
+    final result = decryptAsymmetricAuth(
+      (ownKeyPair ?? asymmetricKeyPair).publicKey,
+      (ownKeyPair ?? asymmetricKeyPair).secretKey,
+      transformed,
+      sodium,
+    );
     return ServerStoredInfo(result.message, error: !result.success);
   }
 
   /// Get the server stored info in encrypted form with the own public and private key
   String transform({Sodium? sodium, KeyPair? ownKeyPair}) {
-    return encryptAsymmetricAuth((ownKeyPair ?? asymmetricKeyPair).publicKey, (ownKeyPair ?? asymmetricKeyPair).secretKey, text, sodium);
+    return encryptAsymmetricAuth(
+      (ownKeyPair ?? asymmetricKeyPair).publicKey,
+      (ownKeyPair ?? asymmetricKeyPair).secretKey,
+      text,
+      sodium,
+    );
   }
 }
 

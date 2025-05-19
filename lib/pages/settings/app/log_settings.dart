@@ -42,7 +42,11 @@ class LogManager {
 
     // Initialize the newest log file
     currentLogFile = File(
-        path.join(loggingDirectory!.path, "log-${DateTime.now().toUtc().toString().replaceAll(" ", "_").replaceAll(":", "-").split(".")[0]}.txt"));
+      path.join(
+        loggingDirectory!.path,
+        "log-${DateTime.now().toUtc().toString().replaceAll(" ", "_").replaceAll(":", "-").split(".")[0]}.txt",
+      ),
+    );
     await currentLogFile!.create();
 
     return true;
@@ -68,16 +72,18 @@ class LogManager {
 
   /// Custom log function copied from GetUtils.printFunction to write things to the file too
   static void _errorLogFunction(String prefix, dynamic value, String info, {isError = false}) {
-    currentLogFile!
-        .writeAsStringSync("${DateTime.now().toUtc()}: ${isError ? "error" : "info"}: ${value.toString()} ($info) \n", mode: FileMode.append);
+    currentLogFile!.writeAsStringSync(
+      "${DateTime.now().toUtc()}: ${isError ? "error" : "info"}: ${value.toString()} ($info) \n",
+      mode: FileMode.append,
+    );
   }
 }
 
 class LogSettings {
   static String amountOfLogs = "logging.amount";
 
-  static void registerSettings(SettingController controller) {
-    controller.settings[amountOfLogs] = Setting<double>(amountOfLogs, 5);
+  static void addSettings() {
+    SettingController.addSetting(Setting<double>(amountOfLogs, 5));
   }
 }
 
@@ -104,18 +110,12 @@ class LogSettingsPage extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(
-                  Icons.launch,
-                  color: Get.theme.colorScheme.onPrimary,
-                ),
+                Icon(Icons.launch, color: Get.theme.colorScheme.onPrimary),
                 horizontalSpacing(elementSpacing),
-                Text(
-                  "logging.launch".tr,
-                  style: Get.textTheme.labelLarge,
-                ),
+                Text("logging.launch".tr, style: Get.textTheme.labelLarge),
               ],
             ),
-          )
+          ),
         ],
       ),
     );

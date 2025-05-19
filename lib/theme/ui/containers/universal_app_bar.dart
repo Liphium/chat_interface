@@ -8,11 +8,7 @@ class UniversalAppBar extends StatelessWidget {
   final String label;
   final bool applyPadding;
 
-  const UniversalAppBar({
-    super.key,
-    required this.label,
-    this.applyPadding = false,
-  });
+  const UniversalAppBar({super.key, required this.label, this.applyPadding = false});
 
   @override
   Widget build(BuildContext context) {
@@ -23,10 +19,7 @@ class UniversalAppBar extends StatelessWidget {
         top: applyPadding,
         right: true,
         left: true,
-        padding: const EdgeInsets.symmetric(
-          vertical: elementSpacing,
-          horizontal: defaultSpacing,
-        ),
+        padding: const EdgeInsets.symmetric(vertical: elementSpacing, horizontal: defaultSpacing),
         child: Row(
           children: [
             LoadingIconButton(
@@ -36,10 +29,7 @@ class UniversalAppBar extends StatelessWidget {
               color: Get.theme.colorScheme.onPrimary,
             ),
             horizontalSpacing(defaultSpacing),
-            Text(
-              label.tr,
-              style: Get.theme.textTheme.labelLarge,
-            )
+            Text(label.tr, style: Get.theme.textTheme.labelLarge),
           ],
         ),
       ),

@@ -1,19 +1,24 @@
-import 'package:chat_interface/controller/conversation/message_controller.dart';
+import 'dart:math';
+
+import 'package:chat_interface/controller/conversation/sidebar_controller.dart';
+import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/chat_page_mobile.dart';
 import 'package:chat_interface/pages/chat/components/conversations/message_bar.dart';
-import 'package:chat_interface/pages/chat/components/conversations/message_search_window.dart';
 import 'package:chat_interface/pages/chat/components/message/message_feed.dart';
-import 'package:chat_interface/pages/chat/components/townsquare/townsquare_page.dart';
-import 'package:chat_interface/pages/chat/messages_page.dart';
 import 'package:chat_interface/pages/chat/sidebar/sidebar.dart';
+import 'package:chat_interface/pages/settings/app/general_settings.dart';
 import 'package:chat_interface/pages/spaces/space_rectangle.dart';
-import 'package:chat_interface/theme/desktop_widgets.dart';
+import 'package:chat_interface/services/chat/conversation_message_provider.dart';
+import 'package:chat_interface/theme/components/forms/fj_button.dart';
 import 'package:chat_interface/util/platform_callback.dart';
+import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
+/// Get the correct chat page for the current platform
 Widget getChatPage() {
   if (isMobileMode()) {
     return const ChatPageMobile();
@@ -47,136 +52,146 @@ class _ChatPageDesktopState extends State<ChatPageDesktop> {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<MessageController>();
-
     return Scaffold(
       backgroundColor: Get.theme.colorScheme.inverseSurface,
-      body: CloseToTray(
-        child: SafeArea(
-          top: false,
-          bottom: false,
-          left: false,
-          child: PlatformCallback(
-            mobile: () {
-              final controller = Get.find<MessageController>();
-              if (controller.currentProvider.value != null) {
-                Get.off(const ChatPageMobile());
-                Get.to(MessagesPageMobile(provider: controller.currentProvider.value!));
-              } else {
-                Get.off(const ChatPageMobile());
-              }
-            },
-            child: Row(
-              children: [
-                // Render the sidebar (with an animation when it's hidden/shown)
-                SelectionContainer.disabled(
-                  child: Obx(
-                    () => Animate(
-                      effects: [
-                        ExpandEffect(
-                          curve: Curves.easeInOut,
-                          duration: 250.ms,
-                          axis: Axis.horizontal,
-                          alignment: Alignment.centerRight,
-                        ),
-                        FadeEffect(
-                          duration: 250.ms,
-                        )
-                      ],
-                      onInit: (ac) => ac.value = controller.hideSidebar.value ? 0 : 1,
-                      target: controller.hideSidebar.value ? 0 : 1,
-                      child: SizedBox(
-                        width: 350,
-                        child: Sidebar(),
+      body: SafeArea(
+        top: false,
+        bottom: false,
+        left: false,
+        child: PlatformCallback(
+          mobile: () {
+            Get.off(const ChatPageMobile());
+          },
+          child: Row(
+            children: [
+              // Render the sidebar (with an animation when it's hidden/shown)
+              SelectionContainer.disabled(
+                child: Watch(
+                  (ctx) => Animate(
+                    effects: [
+                      ExpandEffect(
+                        curve: Curves.easeInOut,
+                        duration: 250.ms,
+                        axis: Axis.horizontal,
+                        alignment: Alignment.centerRight,
                       ),
-                    ),
+                      FadeEffect(duration: 250.ms),
+                    ],
+                    onInit: (ac) => ac.value = SidebarController.hideSidebar.value ? 0 : 1,
+                    target: SidebarController.hideSidebar.value ? 0 : 1,
+                    child: SizedBox(width: 350, child: Sidebar()),
                   ),
                 ),
+              ),
 
-                // Render the conversation/space/other stuff
-                Expanded(
-                  child: Obx(
-                    () {
-                      // Check if a space is selected (show the page if it is)
-                      final controller = Get.find<MessageController>();
-                      switch (controller.currentOpenType.value) {
-                        case OpenTabType.townsquare:
-                          return const TownsquarePage();
-                        case OpenTabType.conversation:
-                          if (controller.currentProvider.value == null) {
-                            return Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text('app.title'.tr, style: Theme.of(context).textTheme.headlineMedium),
-                                verticalSpacing(sectionSpacing),
-                                Text('app.welcome'.tr, style: Theme.of(context).textTheme.bodyLarge),
-                                verticalSpacing(elementSpacing),
-                                Text('app.build'.trParams({"build": "Alpha"}), style: Theme.of(context).textTheme.bodyLarge),
-                              ],
-                            );
-                          }
-
-                          return Column(
-                            children: [
-                              // Render the message bar for desktop
-                              DevicePadding(
-                                top: true,
-                                padding: const EdgeInsets.all(0),
-                                child: MessageBar(
-                                  conversation: controller.currentProvider.value!.conversation,
-                                  provider: controller.currentProvider.value!,
-                                ),
-                              ),
-
-                              // Render the message feed + search sidebar
-                              Expanded(
-                                child: Row(
-                                  children: [
-                                    // Render the chat messages
-                                    Expanded(
-                                      child: MessageFeed(),
-                                    ),
-
-                                    // Render the search window
-                                    SelectionContainer.disabled(
-                                      child: Obx(
-                                        () => Animate(
-                                          effects: [
-                                            ExpandEffect(
-                                              curve: Curves.easeInOut,
-                                              duration: 250.ms,
-                                              axis: Axis.horizontal,
-                                              alignment: Alignment.centerLeft,
-                                            ),
-                                            FadeEffect(
-                                              duration: 250.ms,
-                                            )
-                                          ],
-                                          onInit: (ac) => ac.value = controller.showSearch.value ? 1 : 0,
-                                          target: controller.showSearch.value ? 1 : 0,
-                                          child: SizedBox(
-                                            width: 350,
-                                            child: MessageSearchWindow(),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          );
-                        default:
-                          return const SpaceRectangle();
-                      }
-                    },
-                  ),
-                ),
-              ],
-            ),
+              // Render the current sidebar tab
+              Expanded(child: Watch((ctx) => SidebarController.currentOpenTab.value.build(ctx))),
+            ],
           ),
         ),
       ),
     );
+  }
+}
+
+/// Default sidebar tab when the app is started
+class DefaultSidebarTab extends SidebarTab {
+  DefaultSidebarTab() : super(SidebarTabType.none, "def");
+
+  @override
+  Widget build(BuildContext context) {
+    final message = Random().nextInt(19) + 1;
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Image.asset("assets/tray/icon_macos.png", width: 150, height: 150),
+        verticalSpacing(sectionSpacing * 2),
+        SizedBox(
+          width: 400,
+          child: Text(
+            'app.welcome.$message'.tr,
+            style: Theme.of(context).textTheme.labelLarge,
+            textAlign: TextAlign.center,
+          ),
+        ),
+        if (message == 8)
+          Padding(
+            padding: const EdgeInsets.only(top: defaultSpacing),
+            child: FJElevatedButton(
+              onTap: () {
+                showErrorPopup("Our AI assistant", "Liph with deez nuts in your mouth :)");
+              },
+              child: Text("What is Liph?", style: Get.textTheme.labelMedium),
+            ),
+          ),
+
+        verticalSpacing(defaultSpacing),
+        Text('app.build'.trParams({"build": currentVersionName}), style: Theme.of(context).textTheme.bodyMedium),
+      ],
+    );
+  }
+}
+
+/// Sidebar tab for a conversation
+class ConversationSidebarTab extends SidebarTab {
+  final ConversationMessageProvider provider;
+
+  ConversationSidebarTab(this.provider)
+    : super(SidebarTabType.conversation, "conv-${provider.conversation.id.encode()}");
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        // Render the message bar for desktop
+        DevicePadding(
+          top: true,
+          padding: const EdgeInsets.all(0),
+          child: MessageBar(conversation: provider.conversation, provider: provider),
+        ),
+
+        // Render the message feed + search sidebar
+        Expanded(
+          child: Row(
+            children: [
+              // Render the chat messages
+              Expanded(child: MessageFeed()),
+
+              // Render the search window
+              SelectionContainer.disabled(
+                child: Watch(
+                  (ctx) => Animate(
+                    key: ValueKey("rsa-${provider.conversation.id.encode()}"),
+                    effects: [
+                      ExpandEffect(
+                        curve: Curves.easeInOut,
+                        duration: 250.ms,
+                        axis: Axis.horizontal,
+                        alignment: Alignment.centerLeft,
+                      ),
+                      FadeEffect(duration: 250.ms),
+                    ],
+                    onInit: (ac) => ac.value = SidebarController.rightSidebar[key] != null ? 1 : 0,
+                    target: SidebarController.rightSidebar[key] != null ? 1 : 0,
+                    child: SizedBox(width: 350, child: SidebarController.rightSidebar[key]?.build(ctx)),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Sidebar tab for the Space the user is currently in
+class SpaceSidebarTab extends SidebarTab {
+  SpaceSidebarTab() : super(SidebarTabType.space, "space");
+
+  @override
+  Widget build(BuildContext context) {
+    return const SpaceRectangle();
   }
 }

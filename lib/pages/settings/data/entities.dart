@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/settings/account/data_settings.dart';
 import 'package:chat_interface/pages/settings/account/invites_page.dart';
+import 'package:chat_interface/pages/settings/app/audio_settings.dart';
 import 'package:chat_interface/pages/settings/app/general_settings.dart';
 import 'package:chat_interface/pages/settings/town/admin_accounts_page.dart';
 import 'package:chat_interface/pages/settings/town/file_settings.dart';
@@ -14,6 +15,7 @@ import 'package:chat_interface/pages/settings/security/trusted_links_settings.da
 import 'package:chat_interface/pages/settings/town/town_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 enum SettingLabel {
   // Account settings (everything to do with the account and stored on the server)
@@ -36,6 +38,7 @@ enum SettingLabel {
   // Everything to do with the app (that's stored locally)
   app("settings.tab.app", [
     SettingCategory("general", Icons.dashboard, GeneralSettingsPage()),
+    SettingCategory("audio", Icons.volume_up, AudioSettingsPage()),
     //SettingCategory("notifications", Icons.notifications, null),
     SettingCategory("logging", Icons.insights, LogSettingsPage()),
   ]),
@@ -47,9 +50,7 @@ enum SettingLabel {
     //SettingCategory("call_app", Icons.cable, CallSettingsPage()),
   ]),
 
-  privacy("settings.tab.security", [
-    SettingCategory("trusted_links", Icons.link, TrustedLinkSettingsPage()),
-  ]);
+  privacy("settings.tab.security", [SettingCategory("trusted_links", Icons.link, TrustedLinkSettingsPage())]);
 
   final String _label;
   final List<SettingCategory> categories;
@@ -69,12 +70,20 @@ class SettingCategory {
   final bool displayTitle;
   final bool web;
 
-  const SettingCategory(this.label, this.icon, this.widget, {this.displayTitle = true, this.mobile = true, this.admin = false, this.web = true});
+  const SettingCategory(
+    this.label,
+    this.icon,
+    this.widget, {
+    this.displayTitle = true,
+    this.mobile = true,
+    this.admin = false,
+    this.web = true,
+  });
 }
 
 class Setting<T> {
   final String label;
-  final Rx<T?> value = Rx<T?>(null);
+  final Signal<T?> value = signal<T?>(null);
   T defaultValue;
 
   Setting(this.label, this.defaultValue);

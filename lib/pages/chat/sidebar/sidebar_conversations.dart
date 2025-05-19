@@ -1,32 +1,36 @@
-import 'dart:math';
-
-import 'package:chat_interface/controller/account/friends/friend_controller.dart';
+import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
-import 'package:chat_interface/controller/conversation/member_controller.dart';
 import 'package:chat_interface/controller/conversation/message_controller.dart';
-import 'package:chat_interface/controller/spaces/space_container.dart';
-import 'package:chat_interface/controller/spaces/spaces_controller.dart';
+import 'package:chat_interface/controller/conversation/sidebar_controller.dart';
+import 'package:chat_interface/controller/conversation/square.dart';
+import 'package:chat_interface/controller/current/connection_controller.dart';
+import 'package:chat_interface/database/database_entities.dart' as model;
+import 'package:chat_interface/pages/chat/components/conversations/notification_dot.dart';
+import 'package:chat_interface/pages/chat/components/squares/square_topic_list.dart';
+import 'package:chat_interface/pages/chat/components/squares/topic_manage_window.dart';
+import 'package:chat_interface/services/chat/conversation_member.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
-import 'package:chat_interface/pages/chat/components/message/renderer/space_renderer.dart';
+import 'package:chat_interface/services/chat/conversation_message_provider.dart';
+import 'package:chat_interface/services/chat/conversation_service.dart';
+import 'package:chat_interface/services/squares/square_container.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
+import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
+import 'package:chat_interface/util/dispose_hook.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:fading_edge_scrollview/fading_edge_scrollview.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class SidebarConversationList extends StatefulWidget {
-  final RxString query;
+  final Signal<String>? query;
 
-  const SidebarConversationList({
-    super.key,
-    required this.query,
-  });
+  const SidebarConversationList({super.key, this.query});
 
   @override
   State<SidebarConversationList> createState() => _SidebarConversationListState();
@@ -34,78 +38,94 @@ class SidebarConversationList extends StatefulWidget {
 
 class _SidebarConversationListState extends State<SidebarConversationList> {
   final ScrollController _controller = ScrollController();
+  late Signal<String> _query;
+
+  @override
+  void initState() {
+    _query = widget.query ?? signal("");
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _query.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<ConversationController>();
-    final spacesController = Get.find<SpacesController>();
-    final messageController = Get.find<MessageController>();
-    final friendController = Get.find<FriendController>();
+    return Watch((ctx) {
+      return ListView.builder(
+        controller: _controller,
+        itemCount: ConversationController.order.length,
+        addRepaintBoundaries: true,
+        padding: const EdgeInsets.only(top: defaultSpacing, right: defaultSpacing, left: defaultSpacing),
+        itemBuilder: (context, index) {
+          // Normal conversation renderer
+          Conversation conversation =
+              ConversationController.conversations[ConversationController.order.elementAt(index)]!;
 
-    return Obx(
-      () {
-        final statusController = Get.find<StatusController>();
-        return FadingEdgeScrollView.fromScrollView(
-          child: ListView.builder(
-            controller: _controller,
-            itemCount: controller.order.length,
-            addRepaintBoundaries: true,
-            padding: const EdgeInsets.only(top: defaultSpacing),
-            itemBuilder: (context, index) {
-              //* Normal conversation renderer
-              Conversation conversation = controller.conversations[controller.order.elementAt(index)]!;
-
-              Friend? friend;
-              if (!conversation.isGroup) {
-                // Fetch the member that isn't the own account
-                LPHAddress id = conversation.members.values
+          Friend? friend;
+          if (!conversation.isGroup) {
+            // Fetch the member that isn't the own account
+            LPHAddress id =
+                conversation.members.values
                     .firstWhere(
                       (element) => element.address != StatusController.ownAddress,
                       orElse: () => Member(LPHAddress.error(), LPHAddress.error(), MemberRole.user),
                     )
                     .address;
 
-                // If not found, just use own friend as a backup plan
-                if (id.id == "-") {
-                  sendLog("THIS SHOULD NOT HAPPEN, rendering me as member of conversation");
-                  friend = Friend.me();
-                } else {
-                  // If found, use the actual friend of course
-                  friend = friendController.friends[id];
-                }
+            // If not found, just use own friend as a backup plan
+            if (id.id == "-") {
+              sendLog("THIS SHOULD NOT HAPPEN, rendering me as member of conversation");
+              friend = Friend.me();
+            } else {
+              // If found, use the actual friend of course
+              friend = FriendController.friends[id];
+            }
+          }
+
+          // Hover menu
+          return Watch(key: ValueKey("${conversation.id.encode()}-sb"), (ctx) {
+            // Determine the title of the conversation based on the type
+            String title;
+            if (conversation.isGroup || friend == null) {
+              title = conversation.containerSub.value.name;
+            } else {
+              title = conversation.dmName;
+            }
+
+            // Make sure to mark the conversation as archived in case the friend doesn't exist
+            if (friend == null && !conversation.isGroup) {
+              title = ".$title";
+            }
+
+            // Handle when hidden by search
+            if (_query.value != "") {
+              if (!title.toLowerCase().startsWith(_query.value.toLowerCase())) {
+                return const SizedBox();
               }
+            } else if (friend == null && !conversation.isGroup) {
+              return const SizedBox();
+            }
 
-              // Hover menu
-              final hover = false.obs;
+            return SignalHook(
+              value: false,
+              builder:
+                  (hover) => Padding(
+                    padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
+                    child: Watch((ctx) {
+                      final provider = SidebarController.getCurrentProviderReactive();
 
-              return Column(
-                key: ValueKey(conversation),
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  //* Conversation item
-                  Obx(
-                    () {
-                      var title = conversation.isGroup || friend == null ? conversation.containerSub.value.name : conversation.dmName;
-                      if (friend == null && !conversation.isGroup) {
-                        title = ".$title";
-                      }
-
-                      if (widget.query.value != "") {
-                        if (!title.toLowerCase().startsWith(widget.query.value.toLowerCase())) {
-                          return const SizedBox.shrink();
-                        }
-                      } else if (friend == null && !conversation.isGroup) {
-                        return const SizedBox.shrink();
-                      }
-
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: defaultSpacing * 0.5),
-                        child: Obx(
-                          () => Material(
+                      return Column(
+                        children: [
+                          Material(
                             borderRadius: BorderRadius.circular(defaultSpacing),
-                            color: messageController.currentProvider.value?.conversation == conversation && !isMobileMode()
-                                ? Get.theme.colorScheme.onSurface.withOpacity(0.075)
-                                : Colors.transparent,
+                            color:
+                                provider?.conversation == conversation && provider?.extra == "" && !isMobileMode()
+                                    ? Get.theme.colorScheme.onSurface.withAlpha(20)
+                                    : Colors.transparent,
                             child: InkWell(
                               borderRadius: BorderRadius.circular(defaultSpacing),
                               hoverColor: Get.theme.hoverColor,
@@ -114,233 +134,358 @@ class _SidebarConversationListState extends State<SidebarConversationList> {
                                 hover.value = value;
                               },
 
-                              //* When conversation is tapped (open conversation)
+                              // When conversation is tapped (open conversation)
                               onTap: () {
-                                if (messageController.currentProvider.value?.conversation == conversation && !isMobileMode()) return;
-                                messageController.selectConversation(conversation);
+                                // Make sure to not open the conversation again
+                                if (provider?.conversation == conversation &&
+                                    provider?.extra == "" &&
+                                    !isMobileMode()) {
+                                  return;
+                                }
+                                MessageController.openConversation(conversation);
+                              },
+                              onSecondaryTapDown: (details) {
+                                ConversationMessageProvider(
+                                  conversation,
+                                ).openDialogForConversation(ContextMenuData.fromPosition(details.globalPosition));
                               },
 
-                              //* Conversation item content
-                              child: Padding(
-                                padding: const EdgeInsets.all(elementSpacing2),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    //* Conversation info
-                                    Expanded(
-                                      child: Row(
-                                        children: [
-                                          if (conversation.isGroup || friend == null)
-                                            Padding(
-                                              padding: const EdgeInsets.symmetric(horizontal: elementSpacing * 0.5),
-                                              child: Icon(
-                                                conversation.isGroup
-                                                    ? Icons.group
-                                                    : friend == null
-                                                        ? Icons.person_off
-                                                        : Icons.person,
-                                                size: 35,
-                                                color: Get.theme.colorScheme.onPrimary,
-                                              ),
-                                            )
-                                          else
-                                            UserAvatar(id: friend.id, size: 40),
-                                          horizontalSpacing(defaultSpacing * 0.75),
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment: CrossAxisAlignment.start,
-                                              children: [
-                                                //* Conversation title
-                                                if (conversation.isGroup)
-                                                  Row(
-                                                    children: [
-                                                      Flexible(
-                                                        child: Text(
-                                                          conversation.containerSub.value.name,
-                                                          style: messageController.currentProvider.value?.conversation == conversation
-                                                              ? Get.theme.textTheme.labelMedium
-                                                              : Get.theme.textTheme.bodyMedium,
-                                                          textHeightBehavior: noTextHeight,
-                                                        ),
-                                                      ),
-                                                      if (conversation.id.server != basePath && friend == null)
-                                                        Padding(
-                                                          padding: const EdgeInsets.only(left: defaultSpacing),
-                                                          child: Tooltip(
-                                                            waitDuration: const Duration(milliseconds: 500),
-                                                            message: "conversations.different_town".trParams({
-                                                              "town": conversation.id.server,
-                                                            }),
-                                                            child: Icon(
-                                                              Icons.sensors,
-                                                              color: Get.theme.colorScheme.onPrimary,
-                                                              size: 21,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                    ],
-                                                  )
-                                                else
-                                                  Obx(() {
-                                                    return Row(
-                                                      children: [
-                                                        Flexible(
-                                                          child: Text(
-                                                            friend != null ? conversation.dmName : conversation.containerSub.value.name,
-                                                            style: messageController.currentProvider.value?.conversation == conversation
-                                                                ? Get.theme.textTheme.labelMedium
-                                                                : Get.theme.textTheme.bodyMedium,
-                                                            maxLines: 1,
-                                                            overflow: TextOverflow.ellipsis,
-                                                            textHeightBehavior: noTextHeight,
-                                                          ),
-                                                        ),
-                                                        if (friend != null && friend.id.server != basePath)
-                                                          Padding(
-                                                            padding: const EdgeInsets.only(left: defaultSpacing),
-                                                            child: Tooltip(
-                                                              waitDuration: const Duration(milliseconds: 500),
-                                                              message: "friends.different_town".trParams({
-                                                                "town": friend.id.server,
-                                                              }),
-                                                              child: Icon(
-                                                                Icons.sensors,
-                                                                color: Get.theme.colorScheme.onPrimary,
-                                                                size: 21,
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        horizontalSpacing(defaultSpacing),
-                                                        if (friend != null) StatusRenderer(status: friend.statusType.value),
-                                                      ],
-                                                    );
-                                                  }),
-
-                                                friend == null
-                                                    ? verticalSpacing(elementSpacing * 0.5)
-                                                    : Visibility(
-                                                        visible: conversation.isGroup || friend.status.value != "",
-                                                        child: verticalSpacing(elementSpacing * 0.5),
-                                                      ),
-
-                                                // Conversation description
-                                                conversation.isGroup
-                                                    ? Text(
-                                                        //* Conversation status message
-                                                        "chat.members".trParams(<String, String>{'count': conversation.members.length.toString()}),
-
-                                                        style: Get.textTheme.bodySmall,
-                                                        maxLines: 1,
-                                                        overflow: TextOverflow.ellipsis,
-                                                      )
-                                                    :
-
-                                                    //* Friend status message
-                                                    friend == null
-                                                        ? Text(
-                                                            friend != null ? friend.status.value : "friend.removed".tr,
-                                                            style: Get.textTheme.bodySmall,
-                                                            maxLines: 1,
-                                                            overflow: TextOverflow.ellipsis,
-                                                            textHeightBehavior: noTextHeight,
-                                                          )
-                                                        : Obx(
-                                                            () => Visibility(
-                                                              visible: friend!.status.value != "" && friend.statusType.value != statusOffline,
-                                                              child: Text(
-                                                                friend.status.value,
-                                                                style: Get.textTheme.bodySmall,
-                                                                maxLines: 1,
-                                                                overflow: TextOverflow.ellipsis,
-                                                                textHeightBehavior: noTextHeight,
-                                                              ),
-                                                            ),
-                                                          ),
-                                              ],
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Obx(
-                                      () {
-                                        final notifications = conversation.notificationCount.value;
-                                        if (hover.value) {
-                                          return IconButton(
-                                            onPressed: () => showConfirmPopup(ConfirmWindow(
-                                              title: "conversations.leave".tr,
-                                              text: "conversations.leave.text".tr,
-                                              onConfirm: () => conversation.delete(),
-                                              onDecline: () => {},
-                                            )),
-                                            icon: const Icon(Icons.close),
-                                          );
-                                        }
-
-                                        return Visibility(
-                                          visible: notifications > 0,
-                                          child: Container(
-                                            decoration: BoxDecoration(
-                                              shape: BoxShape.circle,
-                                              color: Get.theme.colorScheme.error,
-                                            ),
-                                            child: Padding(
-                                              padding: const EdgeInsets.only(left: 5, right: 5, top: 2, bottom: 3),
-                                              child: Center(child: Text(min(notifications, 99).toString(), style: Get.textTheme.labelSmall)),
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              ),
+                              // Conversation item content
+                              child: renderConversationItem(conversation, title, provider, friend, hover),
                             ),
                           ),
-                        ),
+
+                          // Render the topic list in case open and square
+                          if (conversation.type == model.ConversationType.square)
+                            SquareTopicList(square: conversation as Square),
+                        ],
                       );
-                    },
-                  ),
-                  //* Render shared content
-                  if (friend != null)
-                    Obx(() {
-                      final content = statusController.sharedContent[friend!.id];
-                      if (content == null) {
-                        return const SizedBox();
-                      }
-                      switch (content.type) {
-                        case ShareType.space:
-                          final container = content as SpaceConnectionContainer;
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: elementSpacing),
-                            child: Obx(
-                              () => Animate(
-                                effects: [
-                                  ExpandEffect(
-                                    duration: 250.ms,
-                                    curve: Curves.easeInOut,
-                                    axis: Axis.vertical,
-                                    alignment: Alignment.topLeft,
-                                  ),
-                                ],
-                                target: spacesController.id.value == container.roomId ? 0.0 : 1.0,
-                                child: SpaceRenderer(
-                                  container: container,
-                                  pollNewData: true,
-                                  clickable: true,
-                                  sidebar: true,
-                                ),
-                              ),
-                            ),
-                          );
-                      }
                     }),
-                ],
+                  ),
+            );
+          });
+        },
+      );
+    });
+  }
+
+  /// Render the item for one conversation in the list
+  Padding renderConversationItem(
+    Conversation conversation,
+    String title,
+    ConversationMessageProvider? provider,
+    Friend? friend,
+    Signal<bool> hover,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.all(elementSpacing2),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Conversation info
+          if (conversation.type == model.ConversationType.group)
+            renderGroup(title, conversation, provider)
+          else if (conversation.type == model.ConversationType.square)
+            renderSquare(title, conversation, provider)
+          else
+            renderDirectMessage(friend, title, conversation, provider),
+
+          Watch((ctx) {
+            // Make sure the user is actually connected
+            if (!ConnectionController.connected.value) {
+              return const SizedBox();
+            }
+
+            final notifications = ConversationController.notificationMap[conversation.id.encode()] ?? 0;
+            if (hover.value) {
+              // Show the create topic button in case it's a square
+              if (conversation.type == model.ConversationType.square) {
+                return Row(
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        showModal(TopicManageWindow(square: conversation as Square));
+                      },
+                      icon: Icon(Icons.add),
+                    ),
+                  ],
+                );
+              }
+
+              // Show a remove button to leave the current conversation for all other types
+              return IconButton(
+                onPressed:
+                    () => showConfirmPopup(
+                      ConfirmWindow(
+                        title: "conversations.leave".tr,
+                        text: "conversations.leave.text".tr,
+                        onConfirm: () => conversation.delete(),
+                        onDecline: () => {},
+                      ),
+                    ),
+                icon: const Icon(Icons.close),
               );
-            },
+            }
+
+            return Visibility(visible: notifications > 0, child: NotificationDot(amount: notifications));
+          }),
+
+          // Show a collapse/expand topics button when it's a square
+          if (conversation is Square)
+            Padding(
+              padding: EdgeInsets.only(left: elementSpacing),
+              child: Watch((ctx) {
+                final squareContainer = conversation.container as SquareContainer;
+                final toggled = conversation.topicsShown.value;
+                bool notifications = false;
+                for (var topic in squareContainer.topics) {
+                  if (ConversationController.notificationMap[ConversationService.withExtra(
+                        conversation.id.encode(),
+                        topic.id,
+                      )] !=
+                      0) {
+                    notifications = true;
+                    break;
+                  }
+                }
+
+                return Stack(
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        conversation.topicsShown.value = !conversation.topicsShown.peek();
+                      },
+                      icon: Icon(toggled ? Icons.expand_less : Icons.expand_more),
+                    ),
+                    Visibility(
+                      visible: notifications,
+                      child: Positioned(
+                        right: defaultSpacing,
+                        bottom: defaultSpacing,
+                        child: Container(
+                          decoration: BoxDecoration(shape: BoxShape.circle, color: Get.theme.colorScheme.error),
+                          width: defaultSpacing,
+                          height: defaultSpacing,
+                        ),
+                      ),
+                    ),
+                  ],
+                );
+              }),
+            ),
+        ],
+      ),
+    );
+  }
+
+  /// Render a direct message preview for the sidebar
+  Widget renderDirectMessage(
+    Friend? friend,
+    String title,
+    Conversation conversation,
+    ConversationMessageProvider? provider,
+  ) {
+    return Expanded(
+      child: Row(
+        children: [
+          // Render the avatar of the friend or a placeholder (if broken conversation)
+          if (friend == null)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: elementSpacing * 0.5),
+              child: Icon(Icons.person_off, size: 35, color: Get.theme.colorScheme.onPrimary),
+            )
+          else
+            UserAvatar(id: friend.id, size: 40),
+          horizontalSpacing(defaultSpacing * 0.75),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Render the name of the friend
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        conversation.dmName,
+                        style:
+                            provider?.conversation == conversation
+                                ? Get.theme.textTheme.labelMedium
+                                : Get.theme.textTheme.bodyMedium,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textHeightBehavior: noTextHeight,
+                      ),
+                    ),
+
+                    // Render the foreign town indicator (in case needed)
+                    if (friend != null && friend.id.server != basePath)
+                      Padding(
+                        padding: const EdgeInsets.only(left: defaultSpacing),
+                        child: Tooltip(
+                          waitDuration: const Duration(milliseconds: 500),
+                          message: "friends.different_town".trParams({"town": friend.id.server}),
+                          child: Icon(Icons.sensors, color: Get.theme.colorScheme.onPrimary, size: 21),
+                        ),
+                      ),
+                    horizontalSpacing(defaultSpacing),
+
+                    // Render status
+                    if (friend != null) StatusRenderer(status: friend.statusType.value),
+                  ],
+                ),
+
+                friend == null
+                    ? verticalSpacing(elementSpacing * 0.5)
+                    : Visibility(
+                      visible: conversation.isGroup || friend.status.value != "",
+                      child: verticalSpacing(elementSpacing * 0.5),
+                    ),
+
+                // Friend status message (if available)
+                if (friend == null)
+                  Text(
+                    friend != null ? friend.status.value : "friend.removed".tr,
+                    style: Get.textTheme.bodySmall,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textHeightBehavior: noTextHeight,
+                  )
+                else
+                  Watch(
+                    (ctx) => Visibility(
+                      visible: friend.status.value != "" && friend.statusType.value != statusOffline,
+                      child: Text(
+                        friend.status.value,
+                        style: Get.textTheme.bodySmall,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textHeightBehavior: noTextHeight,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
-        );
-      },
+        ],
+      ),
+    );
+  }
+
+  /// Render a group preview for the sidebar
+  Widget renderGroup(String title, Conversation conversation, ConversationMessageProvider? provider) {
+    return Expanded(
+      child: Row(
+        children: [
+          // Render a group icon
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: elementSpacing * 0.5),
+            child: Icon(Icons.group, size: 35, color: Get.theme.colorScheme.onPrimary),
+          ),
+          horizontalSpacing(defaultSpacing * 0.75),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Render the title of the group
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        conversation.containerSub.value.name,
+                        style:
+                            provider?.conversation == conversation
+                                ? Get.theme.textTheme.labelMedium
+                                : Get.theme.textTheme.bodyMedium,
+                        textHeightBehavior: noTextHeight,
+                      ),
+                    ),
+
+                    // Render remote indicator (in case needed)
+                    if (conversation.id.server != basePath)
+                      Padding(
+                        padding: const EdgeInsets.only(left: defaultSpacing),
+                        child: Tooltip(
+                          waitDuration: const Duration(milliseconds: 500),
+                          message: "conversations.different_town".trParams({"town": conversation.id.server}),
+                          child: Icon(Icons.sensors, color: Get.theme.colorScheme.onPrimary, size: 21),
+                        ),
+                      ),
+                  ],
+                ),
+
+                verticalSpacing(elementSpacing * 0.5),
+
+                // Render the amount of members of the conversation
+                Text(
+                  "chat.members".trParams(<String, String>{"count": conversation.members.length.toString()}),
+                  style: Get.textTheme.bodySmall,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Render a square preview for the sidebar
+  Widget renderSquare(String title, Conversation conversation, ConversationMessageProvider? provider) {
+    return Expanded(
+      child: Row(
+        children: [
+          // Render a square icon
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: elementSpacing * 0.5),
+            child: Icon(Icons.public, size: 35, color: Get.theme.colorScheme.onPrimary),
+          ),
+          horizontalSpacing(defaultSpacing * 0.75),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Render the title of the group
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        conversation.containerSub.value.name,
+                        style:
+                            provider?.conversation == conversation && provider?.extra == ""
+                                ? Get.theme.textTheme.labelMedium
+                                : Get.theme.textTheme.bodyMedium,
+                        textHeightBehavior: noTextHeight,
+                      ),
+                    ),
+
+                    // Render remote indicator (in case needed)
+                    if (conversation.id.server != basePath)
+                      Padding(
+                        padding: const EdgeInsets.only(left: defaultSpacing),
+                        child: Tooltip(
+                          waitDuration: const Duration(milliseconds: 500),
+                          message: "conversations.different_town".trParams({"town": conversation.id.server}),
+                          child: Icon(Icons.sensors, color: Get.theme.colorScheme.onPrimary, size: 21),
+                        ),
+                      ),
+                  ],
+                ),
+
+                verticalSpacing(elementSpacing * 0.5),
+
+                // Render the amount of members of the conversation
+                Text(
+                  "chat.members".trParams(<String, String>{"count": conversation.members.length.toString()}),
+                  style: Get.textTheme.bodySmall,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

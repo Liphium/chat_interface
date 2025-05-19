@@ -9,6 +9,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
+import 'package:signals/signals_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../util/vertical_spacing.dart';
@@ -54,15 +55,11 @@ class PolicySetup extends Setup {
     // Check if the agreements file has already been created and contains the latest date
     file = File(path.join(supportDir.path, agreeFile));
     if (!file.existsSync()) {
-      return PolicyAcceptPage(
-        versionToWrite: uncoveredDate,
-      );
+      return PolicyAcceptPage(versionToWrite: uncoveredDate);
     }
     final content = await file.readAsString();
     if (content.trim() != uncoveredDate) {
-      return PolicyAcceptPage(
-        versionToWrite: uncoveredDate,
-      );
+      return PolicyAcceptPage(versionToWrite: uncoveredDate);
     }
 
     return null;
@@ -78,16 +75,9 @@ class PolicyAcceptPage extends StatefulWidget {
   State<PolicyAcceptPage> createState() => _PolicyAcceptPageState();
 }
 
-class _PolicyAcceptPageState extends State<PolicyAcceptPage> {
-  final error = "".obs;
-  final clicked = false.obs;
-  final TextEditingController _controller = TextEditingController();
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
+class _PolicyAcceptPageState extends State<PolicyAcceptPage> with SignalsMixin {
+  late final _error = createSignal("");
+  late final _clicked = createSignal(false);
 
   @override
   Widget build(BuildContext context) {
@@ -96,64 +86,43 @@ class _PolicyAcceptPageState extends State<PolicyAcceptPage> {
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          'setup.policy'.tr,
-          style: Get.textTheme.headlineMedium,
-        ),
+        Text('setup.policy'.tr, style: Get.textTheme.headlineMedium),
         verticalSpacing(sectionSpacing),
         Text("setup.policy.text".tr, style: Get.textTheme.bodyMedium),
         verticalSpacing(sectionSpacing),
-        AnimatedErrorContainer(
-          padding: const EdgeInsets.only(bottom: defaultSpacing),
-          message: error,
-          expand: true,
-        ),
+        AnimatedErrorContainer(padding: const EdgeInsets.only(bottom: defaultSpacing), message: _error, expand: true),
         FJElevatedButton(
           onTap: () async {
             const url = "https://liphium.com/legal/terms";
             if (await canLaunchUrl(Uri.parse(url))) {
               final result = await launchUrl(Uri.parse(url));
               if (result) {
-                clicked.value = true;
+                _clicked.value = true;
                 return;
               }
             }
-            error.value = "setup.policy.error".tr;
+            _error.value = "setup.policy.error".tr;
           },
-          child: Center(
-            child: Text(
-              "View agreements",
-              style: Get.textTheme.labelLarge,
-              textAlign: TextAlign.center,
-            ),
-          ),
+          child: Center(child: Text("View agreements", style: Get.textTheme.labelLarge, textAlign: TextAlign.center)),
         ),
-        Obx(
-          () => Animate(
-            effects: [
-              ExpandEffect(
-                axis: Axis.vertical,
-                curve: scaleAnimationCurve,
-                duration: 500.ms,
-              ),
-              FadeEffect(
-                duration: 500.ms,
-              )
-            ],
-            target: clicked.value ? 1 : 0,
-            child: Padding(
-              padding: const EdgeInsets.only(top: defaultSpacing),
-              child: FJElevatedButton(
-                onTap: () async {
-                  final supportDir = await getApplicationSupportDirectory();
+        Animate(
+          effects: [
+            ExpandEffect(axis: Axis.vertical, curve: scaleAnimationCurve, duration: 500.ms),
+            FadeEffect(duration: 500.ms),
+          ],
+          target: _clicked.value ? 1 : 0,
+          child: Padding(
+            padding: const EdgeInsets.only(top: defaultSpacing),
+            child: FJElevatedButton(
+              onTap: () async {
+                final supportDir = await getApplicationSupportDirectory();
 
-                  // Add a file to document that the privacy policy has been accepted
-                  final file = await File(path.join(supportDir.path, agreeFile)).create();
-                  await file.writeAsString(widget.versionToWrite);
-                  await setupManager.next();
-                },
-                child: Center(child: Text("accept".tr, style: Get.textTheme.labelLarge)),
-              ),
+                // Add a file to document that the privacy policy has been accepted
+                final file = await File(path.join(supportDir.path, agreeFile)).create();
+                await file.writeAsString(widget.versionToWrite);
+                await setupManager.next();
+              },
+              child: Center(child: Text("accept".tr, style: Get.textTheme.labelLarge)),
             ),
           ),
         ),

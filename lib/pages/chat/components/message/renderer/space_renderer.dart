@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:chat_interface/controller/spaces/space_container.dart';
-import 'package:chat_interface/controller/spaces/spaces_controller.dart';
+import 'package:chat_interface/services/spaces/space_container.dart';
+import 'package:chat_interface/controller/spaces/space_controller.dart';
 import 'package:chat_interface/theme/components/duration_renderer.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
@@ -10,6 +10,7 @@ import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class SpaceRenderer extends StatefulWidget {
   final bool requestOnInit;
@@ -35,10 +36,10 @@ class SpaceRenderer extends StatefulWidget {
   State<SpaceRenderer> createState() => _SpaceRendererState();
 }
 
-class _SpaceRendererState extends State<SpaceRenderer> {
-  final _loading = true.obs;
-  final _info = Rx<SpaceInfo?>(null);
-  StreamSubscription<SpaceInfo?>? _sub;
+class _SpaceRendererState extends State<SpaceRenderer> with SignalsMixin {
+  late final _loading = createSignal(true);
+  late final _info = createSignal<SpaceInfo?>(null);
+  Function()? _disposeInfoSub;
 
   @override
   void initState() {
@@ -56,29 +57,34 @@ class _SpaceRendererState extends State<SpaceRenderer> {
   }
 
   Future<void> loadState() async {
-    _info.value = await widget.container.getInfo(timer: widget.pollNewData);
-    _sub = widget.container.info.listen((info) {
+    final info = await widget.container.getInfo(timer: widget.pollNewData);
+    batch(() {
+      _info.value = info;
+      if (_info.value!.exists || _info.value!.error || !widget.pollNewData) {
+        _loading.value = false;
+      }
+    });
+
+    // Subscribe for future changes
+    _disposeInfoSub = widget.container.info.subscribe((info) {
       if (widget.container.cancelled) {
         _loading.value = false;
       }
       _info.value = info;
     });
-    if (_info.value!.exists || _info.value!.error || !widget.pollNewData) {
-      _loading.value = false;
-    }
   }
 
   @override
   void dispose() {
     widget.container.onDrop();
-    _sub?.cancel();
+    _disposeInfoSub?.call();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return RepaintBoundary(
-      child: Obx(() {
+      child: Watch((ctx) {
         if (_loading.value || _info.value == null) {
           return Container(
             decoration: BoxDecoration(
@@ -96,9 +102,7 @@ class _SpaceRendererState extends State<SpaceRenderer> {
                     child: SizedBox(
                       width: 30,
                       height: 30,
-                      child: CircularProgressIndicator(
-                        color: Get.theme.colorScheme.onPrimary,
-                      ),
+                      child: CircularProgressIndicator(color: Get.theme.colorScheme.onPrimary),
                     ),
                   ),
                   horizontalSpacing(defaultSpacing),
@@ -174,81 +178,83 @@ class _SpaceRendererState extends State<SpaceRenderer> {
         final renderAmount = min(info.friends.length, 3);
 
         return Material(
-          color: widget.background ??
+          color:
+              widget.background ??
               (widget.sidebar
                   ? Get.theme.colorScheme.primary.withAlpha(100)
                   : widget.clickable
-                      ? Get.theme.colorScheme.primaryContainer
-                      : Colors.transparent),
+                  ? Get.theme.colorScheme.primaryContainer
+                  : Colors.transparent),
           borderRadius: BorderRadius.circular(defaultSpacing),
           child: InkWell(
             borderRadius: BorderRadius.circular(defaultSpacing),
-            onTap: widget.clickable
-                ? () {
-                    showConfirmPopup(
-                      ConfirmWindow(
-                        title: "join.space".tr,
-                        text: "join.space.popup".tr,
-                        onConfirm: () {
-                          Get.find<SpacesController>().join(widget.container);
-                        },
-                      ),
-                    );
-                  }
-                : null,
+            onTap:
+                widget.clickable
+                    ? () {
+                      showConfirmPopup(
+                        ConfirmWindow(
+                          title: "join.space".tr,
+                          text: "join.space.popup".tr,
+                          onConfirm: () {
+                            SpaceController.join(widget.container);
+                          },
+                        ),
+                      );
+                    }
+                    : null,
             child: Padding(
               padding: widget.clickable ? const EdgeInsets.all(defaultSpacing) : const EdgeInsets.all(0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
-                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Visibility(
-                            visible: renderAmount > 0,
-                            child: Flexible(
-                              child: SizedBox(
-                                width: 44 + 25 * (renderAmount - 1),
-                                height: 44,
-                                child: Stack(
-                                  children: List.generate(renderAmount, (index) {
-                                    return Positioned(
-                                      left: index * 25,
-                                      child: Tooltip(
-                                        message: info.friends[index].displayName.value,
-                                        child: SizedBox(
-                                          width: 44,
-                                          height: 44,
-                                          child: UserAvatar(
-                                            id: info.friends[index].id,
-                                            size: 44,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Visibility(
+                              visible: renderAmount > 0,
+                              child: Flexible(
+                                child: SizedBox(
+                                  width: 44 + 25 * (renderAmount - 1),
+                                  height: 44,
+                                  child: Stack(
+                                    children: List.generate(renderAmount, (index) {
+                                      return Positioned(
+                                        left: index * 25,
+                                        child: Tooltip(
+                                          message: info.friends[index].displayName.value,
+                                          child: SizedBox(
+                                            width: 44,
+                                            height: 44,
+                                            child: UserAvatar(id: info.friends[index].id, size: 44),
                                           ),
                                         ),
-                                      ),
-                                    );
-                                  }),
+                                      );
+                                    }),
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                          Visibility(
-                            visible: partyAmount >= renderAmount && renderAmount > 0 && partyAmount != renderAmount,
-                            child: Padding(
-                              padding: const EdgeInsets.only(left: defaultSpacing),
-                              child: Text("+${partyAmount - renderAmount}", style: Get.theme.textTheme.bodyLarge),
+                            Visibility(
+                              visible: partyAmount >= renderAmount && renderAmount > 0 && partyAmount != renderAmount,
+                              child: Padding(
+                                padding: const EdgeInsets.only(left: defaultSpacing),
+                                child: Text("+${partyAmount - renderAmount}", style: Get.theme.textTheme.bodyLarge),
+                              ),
                             ),
-                          ),
-                          Visibility(
-                            visible: renderAmount == 0,
-                            child: Text("$partyAmount members", style: Get.theme.textTheme.bodyLarge),
-                          )
-                        ],
-                      )
-                    ]),
+                            Visibility(
+                              visible: renderAmount == 0,
+                              child: Text("$partyAmount members", style: Get.theme.textTheme.bodyLarge),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                  DurationRenderer(info.start, style: Get.theme.textTheme.bodyLarge)
+                  DurationRenderer(info.start, style: Get.theme.textTheme.bodyLarge),
                 ],
               ),
             ),

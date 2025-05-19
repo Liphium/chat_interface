@@ -1,9 +1,9 @@
 import 'package:chat_interface/controller/spaces/tabletop/tabletop_controller.dart';
+import 'package:chat_interface/services/spaces/tabletop/tabletop_object.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class TabletopPainter extends CustomPainter {
-  final TabletopController controller;
   final Offset offset;
   final Offset mousePosition;
   final Offset mousePositionUnmodified;
@@ -11,7 +11,6 @@ class TabletopPainter extends CustomPainter {
   final double rotation;
 
   TabletopPainter({
-    required this.controller,
     required this.offset,
     required this.mousePosition,
     required this.mousePositionUnmodified,
@@ -112,28 +111,28 @@ class TabletopPainter extends CustomPainter {
     */
 
     final now = DateTime.now();
-    controller.hoveringObjects = controller.raycast(mousePosition);
-    for (var i in controller.orderSorted) {
+    TabletopController.hoveringObjects = TabletopController.raycast(mousePosition);
+    for (var i in TabletopController.orderSorted) {
       // Get the object at the current drawing layer
-      final objectId = controller.objectOrder[i];
+      final objectId = TabletopController.objectOrder[i];
       if (objectId == null) {
         continue;
       }
 
       // Render the object
-      final object = controller.objects[objectId]!;
-      if (controller.hoveringObjects.contains(object)) {
+      final object = TabletopController.objects[objectId]!;
+      if (TabletopController.hoveringObjects.contains(object)) {
         object.hoverRotation(-rotation);
       } else {
         object.scale.setValue(1.0);
         object.unhoverRotation();
       }
-      final location = controller.heldObject == object ? object.location : object.interpolatedLocation(now);
+      final location = TabletopController.heldObject == object ? object.location : object.interpolatedLocation(now);
       drawObject(canvas, location, object, now);
     }
 
     // Render cursors
-    for (var cursor in controller.cursors.values) {
+    for (var cursor in TabletopController.cursors.value.values) {
       cursor.render(canvas);
     }
 
@@ -146,13 +145,15 @@ class TabletopPainter extends CustomPainter {
   }
 
   /// Apply the nessecary scaling and rotation for object drawing (called before object rendering)
-  static void preDraw(Canvas canvas, Offset location, TableObject object, DateTime now) {
+  static void preDraw(Canvas canvas, Offset location, TableObject object, DateTime now, {bool rotation = true}) {
     final scale = object.scale.value(now);
     canvas.save();
     final focalX = location.dx + object.size.width / 2;
     final focalY = location.dy + object.size.height / 2;
     canvas.translate(focalX, focalY);
-    canvas.rotate(object.rotation.value(now));
+    if (rotation) {
+      canvas.rotate(object.rotation.value(now));
+    }
     canvas.scale(scale);
     canvas.translate(-focalX, -focalY);
   }
@@ -165,7 +166,7 @@ class TabletopPainter extends CustomPainter {
   /// Draw an object to the table
   void drawObject(Canvas canvas, Offset location, TableObject object, DateTime now) {
     preDraw(canvas, location, object, now);
-    object.render(canvas, location, controller);
+    object.render(canvas, location);
     postDraw(canvas);
   }
 }

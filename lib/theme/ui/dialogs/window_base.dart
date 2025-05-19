@@ -14,15 +14,7 @@ class WindowBase extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        Positioned(
-          left: position.dx,
-          top: position.dy,
-          child: child,
-        ),
-      ],
-    );
+    return Stack(children: [Positioned(left: position.dx, top: position.dy, child: child)]);
   }
 }
 
@@ -56,12 +48,7 @@ class DialogBase extends StatelessWidget {
             if (title.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.all(elementSpacing),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    ...title,
-                  ],
-                ),
+                child: Row(crossAxisAlignment: CrossAxisAlignment.center, children: [...title]),
               ),
             if (title.isNotEmpty) verticalSpacing(defaultSpacing),
             child,
@@ -75,11 +62,7 @@ class DialogBase extends StatelessWidget {
         top: true,
         right: true,
         left: true,
-        padding: EdgeInsets.only(
-          top: defaultSpacing * 1.5,
-          right: defaultSpacing * 1.5,
-          left: defaultSpacing * 1.5,
-        ),
+        padding: EdgeInsets.only(top: defaultSpacing * 1.5, right: defaultSpacing * 1.5, left: defaultSpacing * 1.5),
         child: child,
       );
     }
@@ -103,15 +86,14 @@ class DialogBase extends StatelessWidget {
             delay: 100.ms,
             duration: 400.ms,
             hz: randomHz,
-            offset: Offset(random.nextBool() ? randomOffset : -randomOffset, random.nextBool() ? randomOffset : -randomOffset),
+            offset: Offset(
+              random.nextBool() ? randomOffset : -randomOffset,
+              random.nextBool() ? randomOffset : -randomOffset,
+            ),
             rotation: 0,
             curve: Curves.decelerate,
           ),
-          FadeEffect(
-            delay: 100.ms,
-            duration: 250.ms,
-            curve: Curves.easeOut,
-          )
+          FadeEffect(delay: 100.ms, duration: 250.ms, curve: Curves.easeOut),
         ],
         target: 1,
         child: Material(
@@ -125,12 +107,7 @@ class DialogBase extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (showTitleDesktop && title.isNotEmpty)
-                    Row(
-                      children: [
-                        ...title,
-                      ],
-                    ),
+                  if (showTitleDesktop && title.isNotEmpty) Row(children: [...title]),
                   if (showTitleDesktop && title.isNotEmpty) verticalSpacing(defaultSpacing),
                   child,
                 ],
@@ -144,8 +121,8 @@ class DialogBase extends StatelessWidget {
 }
 
 class SlidingWindowBase extends StatelessWidget {
-  final ContextMenuData position;
-  final bool lessPadding;
+  final ContextMenuData? position;
+  final double padding;
   final Widget child;
   final List<Widget> title;
   final double maxSize;
@@ -154,13 +131,29 @@ class SlidingWindowBase extends StatelessWidget {
     super.key,
     required this.title,
     required this.position,
-    this.lessPadding = false,
+    this.padding = dialogPadding,
     required this.child,
     this.maxSize = 350,
   });
 
   @override
   Widget build(BuildContext context) {
+    // Return only the child in case there is no position data
+    if (position == null) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (title.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: elementSpacing),
+              child: Row(crossAxisAlignment: CrossAxisAlignment.center, children: [...title]),
+            ),
+          if (title.isNotEmpty) verticalSpacing(defaultSpacing),
+          child,
+        ],
+      );
+    }
+
     // Return without animation on mobile
     if (isMobileMode()) {
       return LPHBottomSheet(
@@ -170,12 +163,7 @@ class SlidingWindowBase extends StatelessWidget {
             if (title.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: elementSpacing),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    ...title,
-                  ],
-                ),
+                child: Row(crossAxisAlignment: CrossAxisAlignment.center, children: [...title]),
               ),
             if (title.isNotEmpty) verticalSpacing(defaultSpacing),
             child,
@@ -191,17 +179,24 @@ class SlidingWindowBase extends StatelessWidget {
     return Stack(
       children: [
         Positioned(
-          left: position.fromLeft ? position.start.dx : null,
-          right: position.fromLeft ? null : position.start.dx,
-          top: position.fromTop ? position.start.dy : null,
-          bottom: position.fromTop ? null : position.start.dy,
+          left: position!.fromLeft ? position!.start.dx : null,
+          right: position!.fromLeft ? null : position!.start.dx,
+          top: position!.fromTop ? position!.start.dy : null,
+          bottom: position!.fromTop ? null : position!.start.dy,
           child: Animate(
             effects: [
-              MoveEffect(duration: 400.ms, begin: Offset(0, -100 * (position.fromTop ? 1 : -1)), curve: scaleAnimationCurve),
+              MoveEffect(
+                duration: 400.ms,
+                begin: Offset(0, -100 * (position!.fromTop ? 1 : -1)),
+                curve: scaleAnimationCurve,
+              ),
               ShakeEffect(
                 duration: 350.ms,
                 hz: randomHz,
-                offset: Offset(random.nextBool() ? randomOffset : -randomOffset, random.nextBool() ? randomOffset : -randomOffset),
+                offset: Offset(
+                  random.nextBool() ? randomOffset : -randomOffset,
+                  random.nextBool() ? randomOffset : -randomOffset,
+                ),
                 rotation: 0,
                 curve: Curves.decelerate,
               ),
@@ -214,16 +209,10 @@ class SlidingWindowBase extends StatelessWidget {
                 color: Get.theme.colorScheme.onInverseSurface,
                 borderRadius: BorderRadius.circular(dialogBorderRadius),
                 child: Padding(
-                  padding: EdgeInsets.all(lessPadding ? defaultSpacing : dialogPadding),
+                  padding: EdgeInsets.all(padding),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Row(
-                        children: title,
-                      ),
-                      if (title.isNotEmpty) verticalSpacing(defaultSpacing),
-                      child,
-                    ],
+                    children: [Row(children: title), if (title.isNotEmpty) verticalSpacing(defaultSpacing), child],
                   ),
                 ),
               ),
@@ -238,10 +227,7 @@ class SlidingWindowBase extends StatelessWidget {
 class LPHBottomSheet extends StatelessWidget {
   final Widget child;
 
-  const LPHBottomSheet({
-    super.key,
-    required this.child,
-  });
+  const LPHBottomSheet({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {
@@ -258,15 +244,14 @@ class LPHBottomSheet extends StatelessWidget {
             ShakeEffect(
               duration: 400.ms,
               hz: randomHz,
-              offset: Offset(random.nextBool() ? randomOffset : -randomOffset, random.nextBool() ? randomOffset : -randomOffset),
+              offset: Offset(
+                random.nextBool() ? randomOffset : -randomOffset,
+                random.nextBool() ? randomOffset : -randomOffset,
+              ),
               rotation: 0,
               curve: Curves.decelerate,
             ),
-            ScaleEffect(
-              duration: 250.ms,
-              curve: Curves.decelerate,
-              begin: Offset(0.8, 0.8),
-            ),
+            ScaleEffect(duration: 250.ms, curve: Curves.decelerate, begin: Offset(0.8, 0.8)),
           ],
           child: Material(
             color: Get.theme.colorScheme.onInverseSurface,
@@ -282,7 +267,10 @@ class LPHBottomSheet extends StatelessWidget {
                     right: sectionSpacing,
                     left: sectionSpacing,
                     top: sectionSpacing,
-                    bottom: Get.mediaQuery.padding.bottom != 0 && GetPlatform.isMobile ? Get.mediaQuery.padding.bottom : sectionSpacing,
+                    bottom:
+                        Get.mediaQuery.padding.bottom != 0 && GetPlatform.isMobile
+                            ? Get.mediaQuery.padding.bottom
+                            : sectionSpacing,
                   ),
                   child: child,
                 ),
@@ -336,9 +324,11 @@ class ContextMenuData {
       }
     } else {
       fromLeft = true;
-      position = above || below ? Offset(position.dx, position.dy) : Offset(position.dx + widgetDimensions.width + defaultSpacing, position.dy);
+      position =
+          above || below
+              ? Offset(position.dx, position.dy)
+              : Offset(position.dx + widgetDimensions.width + defaultSpacing, position.dy);
     }
-    sendLog(fromLeft);
 
     return ContextMenuData(position, fromTop, fromLeft);
   }

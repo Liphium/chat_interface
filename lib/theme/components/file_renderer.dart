@@ -6,14 +6,9 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:get/get.dart';
 import 'package:liphium_bridge/liphium_bridge.dart';
 import 'package:path/path.dart' as path;
+import 'package:signals/signals_flutter.dart';
 
-enum FileTypes {
-  image,
-  video,
-  audio,
-  document,
-  unidentified,
-}
+enum FileTypes { image, video, audio, document, unidentified }
 
 const extensionToType = {
   "png": FileTypes.image,
@@ -64,35 +59,17 @@ class FilePreview extends StatelessWidget {
 
     switch (type) {
       case FileTypes.image:
-        return XImage(
-          file: file,
-          fit: BoxFit.cover,
-        );
+        return XImage(file: file, fit: BoxFit.cover);
 
       case FileTypes.audio:
-        return const Center(
-          child: Icon(
-            size: 50,
-            Icons.library_music,
-          ),
-        );
+        return const Center(child: Icon(size: 50, Icons.library_music));
 
       case FileTypes.document:
-        return const Center(
-          child: Icon(
-            size: 50,
-            Icons.text_snippet,
-          ),
-        );
+        return const Center(child: Icon(size: 50, Icons.text_snippet));
 
       case FileTypes.video:
       case FileTypes.unidentified:
-        return const Center(
-          child: Icon(
-            size: 50,
-            Icons.insert_drive_file,
-          ),
-        );
+        return const Center(child: Icon(size: 50, Icons.insert_drive_file));
     }
   }
 }
@@ -116,14 +93,17 @@ class _SquareFileRendererState extends State<SquareFileRenderer> {
       child: Container(
         width: 200,
         height: 200,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(defaultSpacing),
-        ),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(defaultSpacing)),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(defaultSpacing),
           child: Stack(
             children: [
-              Container(color: Get.theme.colorScheme.primaryContainer, width: 200, height: 200, child: FilePreview(file: widget.file.file)),
+              Container(
+                color: Get.theme.colorScheme.primaryContainer,
+                width: 200,
+                height: 200,
+                child: FilePreview(file: widget.file.file),
+              ),
               Align(
                 alignment: Alignment.topRight,
                 child: Padding(
@@ -137,15 +117,10 @@ class _SquareFileRendererState extends State<SquareFileRenderer> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         horizontalSpacing(defaultSpacing),
-                        Expanded(
-                          child: Text(
-                            path.basename(widget.file.file.path),
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
+                        Expanded(child: Text(path.basename(widget.file.file.path), overflow: TextOverflow.ellipsis)),
                         horizontalSpacing(defaultSpacing),
-                        Obx(
-                          () => Visibility(
+                        Watch(
+                          (ctx) => Visibility(
                             visible: widget.file.progress.value == 0,
                             replacement: Padding(
                               padding: const EdgeInsets.all(defaultSpacing),

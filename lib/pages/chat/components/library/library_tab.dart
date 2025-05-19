@@ -1,85 +1,83 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
-import 'package:chat_interface/database/database_entities.dart';
+import 'package:chat_interface/database/database_entities.dart' as model;
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/chat/components/library/library_favorite_button.dart';
 import 'package:chat_interface/pages/status/error/error_container.dart';
+import 'package:chat_interface/services/chat/library_manager.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:liphium_bridge/liphium_bridge.dart';
+import 'package:signals/signals_flutter.dart';
 
 class LibraryTab extends StatefulWidget {
-  final LibraryEntryType? filter;
+  final model.LibraryEntryType? filter;
   final MessageProvider provider;
 
-  const LibraryTab({
-    super.key,
-    this.filter,
-    required this.provider,
-  });
+  const LibraryTab({super.key, this.filter, required this.provider});
 
   @override
   State<LibraryTab> createState() => _LibraryTabState();
 }
 
 class _LibraryTabState extends State<LibraryTab> {
-  LibraryEntryType? _lastFilter;
-  final _containerList = <AttachmentContainer>[].obs;
-  BigInt lastDate = BigInt.from(0);
-  final _show = false.obs;
+  model.LibraryEntryType? _lastFilter;
+  final _entryList = listSignal(<LibraryEntry>[]);
+  BigInt _lastDate = BigInt.from(0);
+  final _show = signal(false);
+
+  @override
+  void dispose() {
+    _show.dispose();
+    _entryList.dispose();
+    super.dispose();
+  }
 
   Future<void> loadMoreItems() async {
     // Make sure to start from the top again when a new filter is set
     if (widget.filter != _lastFilter) {
-      lastDate = BigInt.from(0);
+      _lastDate = BigInt.from(0);
     }
 
     // Get all the library entries that match the current filter
     List<LibraryEntryData> entries;
     if (widget.filter != null) {
-      entries = await (db.libraryEntry.select()
-            ..orderBy([(tbl) => OrderingTerm.asc(tbl.createdAt)])
-            ..where((tbl) => tbl.createdAt.isBiggerThan(Variable(lastDate)))
-            ..where((tbl) => tbl.type.equals(widget.filter!.index))
-            ..limit(30))
-          .get();
+      entries =
+          await (db.libraryEntry.select()
+                ..orderBy([(tbl) => OrderingTerm.asc(tbl.createdAt)])
+                ..where((tbl) => tbl.createdAt.isBiggerThan(Variable(_lastDate)))
+                ..where((tbl) => tbl.type.equals(widget.filter!.index))
+                ..limit(30))
+              .get();
     } else {
-      entries = await (db.libraryEntry.select()
-            ..orderBy([(tbl) => OrderingTerm.asc(tbl.createdAt)])
-            ..where((tbl) => tbl.createdAt.isBiggerThan(Variable(lastDate)))
-            ..limit(30))
-          .get();
+      entries =
+          await (db.libraryEntry.select()
+                ..orderBy([(tbl) => OrderingTerm.asc(tbl.createdAt)])
+                ..where((tbl) => tbl.createdAt.isBiggerThan(Variable(_lastDate)))
+                ..limit(30))
+              .get();
     }
     if (entries.isNotEmpty) {
-      lastDate = entries.last.createdAt;
+      _lastDate = entries.last.createdAt;
     }
 
     // Get all the attachment containers from the library entries for displaying them
-    final controller = Get.find<AttachmentController>();
-    final newContainerList = <AttachmentContainer>[];
-    for (var entry in entries) {
-      if (entry.data.isURL) {
-        newContainerList.add(AttachmentContainer.remoteImage(entry.data));
-      } else {
-        final json = jsonDecode(entry.data);
-        final type = await AttachmentController.getStorageTypeFor(json["i"]);
-        if (type == null) {
-          continue;
-        }
-        newContainerList.add(controller.fromJson(type, json));
-      }
+    final newEntryList = <LibraryEntry>[];
+    for (var dbEntry in entries) {
+      final entry = await LibraryEntry.fromData(dbEntry);
+      await entry.initForUI();
+      newEntryList.add(entry);
     }
 
     // Add the containers to the list of entries
     if (_lastFilter != widget.filter) {
-      _containerList.value = newContainerList;
+      _entryList.value = newEntryList;
     } else {
-      _containerList.addAll(newContainerList);
+      _entryList.addAll(newEntryList);
     }
 
     // Set what's nessecary for the next iteration
@@ -91,51 +89,42 @@ class _LibraryTabState extends State<LibraryTab> {
   Widget build(BuildContext context) {
     unawaited(loadMoreItems());
 
-    return Obx(() {
+    return Watch((ctx) {
       if (!_show.value) {
         return const SizedBox();
       }
 
-      if (_containerList.isEmpty) {
-        return InfoContainer(
-          message: "library.empty".tr,
-          expand: true,
-        );
+      if (_entryList.isEmpty) {
+        return InfoContainer(message: "library.empty".tr, expand: true);
       }
 
       return GridView.builder(
         shrinkWrap: true,
-        itemCount: _containerList.length,
+        itemCount: _entryList.length,
         gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
           maxCrossAxisExtent: 200,
           mainAxisSpacing: defaultSpacing,
           crossAxisSpacing: defaultSpacing,
         ),
         itemBuilder: (context, index) {
-          final container = _containerList[index];
-          container.downloaded.value = true;
+          final entry = _entryList[index];
+          entry.container!.downloaded.value = true;
 
           // Render attachment container
           Widget image;
-          if (container.attachmentType == AttachmentContainerType.remoteImage) {
-            image = Image.network(
-              container.url,
-              fit: BoxFit.cover,
-            );
+          if (entry.container!.attachmentType == AttachmentContainerType.remoteImage) {
+            image = Image.network(entry.container!.url, fit: BoxFit.cover);
           } else {
-            image = XImage(
-              file: container.file!,
-              fit: BoxFit.cover,
-            );
+            image = XImage(file: entry.container!.file!, fit: BoxFit.cover);
           }
           return Material(
-            key: ValueKey(container.id),
+            key: ValueKey(entry.container!.id),
             borderRadius: BorderRadius.circular(defaultSpacing),
             child: InkWell(
               borderRadius: BorderRadius.circular(defaultSpacing),
               onTap: () {
                 //* Send message with the library element
-                widget.provider.sendMessage(false.obs, MessageType.text, [container.toAttachment()], "", "");
+                widget.provider.sendMessage(signal(false), MessageType.text, [entry.container!.toAttachment()], "", "");
                 Get.back();
               },
               child: ClipRRect(
@@ -143,8 +132,8 @@ class _LibraryTabState extends State<LibraryTab> {
                 child: LayoutBuilder(
                   builder: (context, constraints) {
                     return LibraryFavoriteButton(
-                      callback: () => _containerList.removeAt(index),
-                      container: container,
+                      callback: () => _entryList.removeAt(index),
+                      container: entry.container!,
                       child: SizedBox(
                         width: constraints.biggest.width,
                         height: constraints.biggest.height,

@@ -1,0 +1,14 @@
+import 'package:chat_interface/services/connection/connection.dart';
+import 'package:chat_interface/controller/conversation/zap_share_controller.dart';
+import 'package:chat_interface/util/logging_framework.dart';
+
+void setupLiveshareListening() {
+  connector.listen("transaction_send_part", (event) {
+    ZapShareController.onFilePartRequest(event);
+  });
+
+  connector.listen("transaction_end", (event) {
+    sendLog("transaction cancelled :sad:");
+    ZapShareController.onTransactionEnd();
+  });
+}

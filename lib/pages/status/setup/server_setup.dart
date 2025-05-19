@@ -10,6 +10,7 @@ import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 const apiVersion = "v1";
@@ -41,9 +42,19 @@ class ServerSelectorPage extends StatefulWidget {
 }
 
 class _ServerSelectorPageState extends State<ServerSelectorPage> {
-  final _error = "".obs;
-  final _loading = false.obs;
+  // Controller for the server name
   final TextEditingController _name = TextEditingController();
+
+  // State
+  final _error = signal("");
+  final _loading = signal(false);
+
+  @override
+  void dispose() {
+    _error.dispose();
+    _loading.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,19 +63,11 @@ class _ServerSelectorPageState extends State<ServerSelectorPage> {
       crossAxisAlignment: CrossAxisAlignment.center,
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(
-          "setup.choose.town".tr,
-          style: Get.textTheme.headlineMedium,
-          textAlign: TextAlign.center,
-        ),
+        Text("setup.choose.town".tr, style: Get.textTheme.headlineMedium, textAlign: TextAlign.center),
         verticalSpacing(sectionSpacing),
-        Text(
-          "setup.choose.town.desc".tr,
-          style: Get.textTheme.bodyMedium,
-        ),
+        Text("setup.choose.town.desc".tr, style: Get.textTheme.bodyMedium),
         verticalSpacing(defaultSpacing),
         FJElevatedLoadingButton(
-          loading: false.obs,
           onTap: () async {
             await launchUrl(Uri.parse("https://liphium.com/docs/concepts/towns"));
           },
@@ -73,27 +76,20 @@ class _ServerSelectorPageState extends State<ServerSelectorPage> {
         verticalSpacing(sectionSpacing),
         Align(
           alignment: Alignment.centerLeft,
-          child: Text(
-            "setup.choose.town.selector".tr,
-            style: Get.textTheme.titleMedium,
-          ),
+          child: Text("setup.choose.town.selector".tr, style: Get.textTheme.titleMedium),
         ),
         verticalSpacing(defaultSpacing),
-        FJTextField(
-          controller: _name,
-          hintText: "placeholder.domain".tr,
-        ),
+        FJTextField(controller: _name, hintText: "placeholder.domain".tr),
         verticalSpacing(defaultSpacing),
-        AnimatedErrorContainer(
-          padding: const EdgeInsets.only(bottom: defaultSpacing),
-          message: _error,
-          expand: true,
-        ),
+        AnimatedErrorContainer(padding: const EdgeInsets.only(bottom: defaultSpacing), message: _error, expand: true),
         FJElevatedLoadingButton(
           loading: _loading,
           onTap: () async {
             _loading.value = true;
-            final json = await postAny("${formatPath(_name.text)}/pub", {}); // Send a request to get the public key (good test ig)
+            final json = await postAny(
+              "${formatPath(_name.text)}/pub",
+              {},
+            ); // Send a request to get the public key (good test ig)
             _loading.value = false;
             if (json["pub"] == null) {
               _error.value = "server.not_found".tr;

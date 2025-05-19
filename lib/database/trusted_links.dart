@@ -21,9 +21,8 @@ class TrustedLinkHelper {
   static late Setting _unsafeSetting;
 
   static void init() {
-    final controller = Get.find<SettingController>();
-    _unsafeSetting = controller.settings[TrustedLinkSettings.unsafeSources]!;
-    _trustModeSetting = controller.settings[TrustedLinkSettings.trustMode]!;
+    _unsafeSetting = SettingController.settings[TrustedLinkSettings.unsafeSources]!;
+    _trustModeSetting = SettingController.settings[TrustedLinkSettings.trustMode]!;
   }
 
   /// Show a confirm popup to confirm the user wants to add a new domain (returns whether the domain was trusted)
@@ -42,12 +41,9 @@ class TrustedLinkHelper {
       return false;
     }
 
-    final result = await showConfirmPopup(ConfirmWindow(
-      title: "file.links.title".tr,
-      text: "file.links.description".trParams({
-        "domain": domain,
-      }),
-    ));
+    final result = await showConfirmPopup(
+      ConfirmWindow(title: "file.links.title".tr, text: "file.links.description".trParams({"domain": domain})),
+    );
 
     if (result) {
       await db.trustedLink.insertOnConflictUpdate(TrustedLinkData(domain: domain));
@@ -128,7 +124,7 @@ void main() {
     "http://www.domain.co.uk",
     "http://something.domain.com",
     "http://some.some.some.domain.com/hello_world",
-    "hello.domain.com/something"
+    "hello.domain.com/something",
   ];
   for (var testCase in testCases) {
     sendLog(TrustedLinkHelper.extractDomain(testCase));

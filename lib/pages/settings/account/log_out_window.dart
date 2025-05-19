@@ -1,10 +1,11 @@
-import 'package:chat_interface/controller/current/status_controller.dart';
+import 'package:chat_interface/services/chat/status_service.dart';
 import 'package:chat_interface/theme/components/forms/fj_button.dart';
 import 'package:chat_interface/theme/components/forms/fj_switch.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class LogOutWindow extends StatefulWidget {
   const LogOutWindow({super.key});
@@ -14,7 +15,7 @@ class LogOutWindow extends StatefulWidget {
 }
 
 class _ChangeNameWindowState extends State<LogOutWindow> {
-  final _deleteFiles = false.obs;
+  final _deleteFiles = signal(false);
 
   @override
   Widget build(BuildContext context) {
@@ -30,12 +31,7 @@ class _ChangeNameWindowState extends State<LogOutWindow> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text("log_out.delete_files".tr, style: Get.theme.textTheme.bodyMedium),
-              Obx(
-                () => FJSwitch(
-                  value: _deleteFiles.value,
-                  onChanged: (value) => _deleteFiles.value = value,
-                ),
-              ),
+              Watch((ctx) => FJSwitch(value: _deleteFiles.value, onChanged: (value) => _deleteFiles.value = value)),
             ],
           ),
           verticalSpacing(defaultSpacing),
@@ -44,7 +40,7 @@ class _ChangeNameWindowState extends State<LogOutWindow> {
               Expanded(
                 child: FJElevatedButton(
                   onTap: () async {
-                    await Get.find<StatusController>().logOut(deleteEverything: true, deleteFiles: _deleteFiles.value);
+                    await StatusService.logOut(deleteEverything: true, deleteFiles: _deleteFiles.value);
                   },
                   child: Center(child: Text("yes".tr, style: Get.theme.textTheme.labelLarge)),
                 ),
@@ -57,7 +53,7 @@ class _ChangeNameWindowState extends State<LogOutWindow> {
                 ),
               ),
             ],
-          )
+          ),
         ],
       ),
     );

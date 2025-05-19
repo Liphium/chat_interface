@@ -7,11 +7,7 @@ class LPHCopyField extends StatelessWidget {
   final String label;
   final String value;
 
-  const LPHCopyField({
-    super.key,
-    required this.label,
-    required this.value,
-  });
+  const LPHCopyField({super.key, required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -28,20 +24,12 @@ class LPHCopyField extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  label,
-                  overflow: TextOverflow.ellipsis,
-                  style: Get.textTheme.labelSmall,
-                ),
+                Text(label, overflow: TextOverflow.ellipsis, style: Get.textTheme.labelSmall),
                 Tooltip(
                   waitDuration: const Duration(milliseconds: 500),
                   exitDuration: const Duration(microseconds: 0),
                   message: "$label: $value",
-                  child: Text(
-                    value,
-                    overflow: TextOverflow.ellipsis,
-                    style: Get.textTheme.bodyLarge,
-                  ),
+                  child: Text(value, overflow: TextOverflow.ellipsis, style: Get.textTheme.bodyLarge),
                 ),
               ],
             ),
@@ -70,12 +58,7 @@ class LPHActionField extends StatelessWidget {
   final String secondary;
   final List<LPHActionData> actions;
 
-  const LPHActionField({
-    super.key,
-    required this.primary,
-    required this.secondary,
-    required this.actions,
-  });
+  const LPHActionField({super.key, required this.primary, required this.secondary, required this.actions});
 
   @override
   Widget build(BuildContext context) {
@@ -92,20 +75,12 @@ class LPHActionField extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  primary,
-                  overflow: TextOverflow.ellipsis,
-                  style: Get.textTheme.labelSmall,
-                ),
+                Text(primary, overflow: TextOverflow.ellipsis, style: Get.textTheme.labelSmall),
                 Tooltip(
                   waitDuration: const Duration(milliseconds: 500),
                   exitDuration: const Duration(microseconds: 0),
                   message: "$primary: $secondary",
-                  child: Text(
-                    secondary,
-                    overflow: TextOverflow.ellipsis,
-                    style: Get.textTheme.bodyLarge,
-                  ),
+                  child: Text(secondary, overflow: TextOverflow.ellipsis, style: Get.textTheme.bodyLarge),
                 ),
               ],
             ),

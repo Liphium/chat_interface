@@ -28,10 +28,7 @@ Future<String?> loadInstance(String name) async {
   }
 
   // Open the encrypted database (code was taken from the drift encrypted example)
-  db = Database(NativeDatabase.createInBackground(
-    file,
-    logStatements: driftLogger,
-  ));
+  db = Database(NativeDatabase.createInBackground(file, logStatements: driftLogger));
   currentInstance = name;
 
   return null;

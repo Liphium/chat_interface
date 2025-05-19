@@ -1,16 +1,18 @@
 import 'dart:convert';
 
-import 'package:chat_interface/controller/account/friends/friend_controller.dart';
+import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
-import 'package:chat_interface/controller/spaces/space_container.dart';
+import 'package:chat_interface/services/spaces/space_container.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/chat/components/message/renderer/space_renderer.dart';
 import 'package:chat_interface/theme/components/user_renderer.dart';
 import 'package:chat_interface/theme/ui/dialogs/message_options_window.dart';
 import 'package:chat_interface/theme/ui/dialogs/window_base.dart';
+import 'package:chat_interface/theme/ui/profile/profile.dart';
 import 'package:chat_interface/util/vertical_spacing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:signals/signals_flutter.dart';
 
 class BubblesSpaceMessageRenderer extends StatefulWidget {
   final Message message;
@@ -35,8 +37,14 @@ class BubblesSpaceMessageRenderer extends StatefulWidget {
 }
 
 class _CallMessageRendererState extends State<BubblesSpaceMessageRenderer> {
-  final loading = false.obs;
+  final _loading = signal(false);
   double _mouseX = 0, _mouseY = 0;
+
+  @override
+  void dispose() {
+    _loading.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,26 +67,34 @@ class _CallMessageRendererState extends State<BubblesSpaceMessageRenderer> {
             final menuData = ContextMenuData.fromPosition(Offset(_mouseX, _mouseY));
 
             // Open the context menu
-            Get.dialog(MessageOptionsWindow(
-              data: menuData,
-              self: widget.message.senderAddress == StatusController.ownAddress,
-              message: widget.message,
-              provider: widget.provider,
-            ));
+            Get.dialog(
+              MessageOptionsWindow(
+                data: menuData,
+                self: widget.message.senderAddress == StatusController.ownAddress,
+                message: widget.message,
+                provider: widget.provider,
+              ),
+            );
           },
           child: Padding(
-            padding: EdgeInsets.symmetric(
-              vertical: elementSpacing,
-            ),
+            padding: EdgeInsets.symmetric(vertical: elementSpacing),
             child: Row(
               textDirection: widget.self ? TextDirection.rtl : TextDirection.ltr,
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
                 // Avatar of the message sender with a tooltip to know their name
-                Tooltip(
-                  message: sender.displayName.value,
-                  child: UserAvatar(id: sender.id, size: 34),
+                Visibility(
+                  visible: widget.last,
+                  replacement: const SizedBox(width: 34), //* Show timestamp instead
+                  child: Tooltip(
+                    message: sender.displayName.value,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(100),
+                      onTap: () => showModal(Profile(friend: sender)),
+                      child: UserAvatar(id: sender.id, size: 34),
+                    ),
+                  ),
                 ),
                 horizontalSpacing(defaultSpacing),
 
@@ -97,7 +113,10 @@ class _CallMessageRendererState extends State<BubblesSpaceMessageRenderer> {
                               padding: const EdgeInsets.all(defaultSpacing),
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(defaultSpacing),
-                                color: widget.self ? Get.theme.colorScheme.primary : Get.theme.colorScheme.primaryContainer,
+                                color:
+                                    widget.self
+                                        ? Get.theme.colorScheme.primary
+                                        : Get.theme.colorScheme.primaryContainer,
                               ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -108,10 +127,7 @@ class _CallMessageRendererState extends State<BubblesSpaceMessageRenderer> {
                                       Icon(Icons.public, color: Get.theme.colorScheme.onPrimary),
                                       horizontalSpacing(elementSpacing),
                                       Flexible(
-                                        child: Text(
-                                          "chat.space_invite".tr,
-                                          style: Get.theme.textTheme.labelLarge,
-                                        ),
+                                        child: Text("chat.space_invite".tr, style: Get.theme.textTheme.labelLarge),
                                       ),
                                     ],
                                   ),
@@ -119,15 +135,15 @@ class _CallMessageRendererState extends State<BubblesSpaceMessageRenderer> {
                                   // Render the member preview for Spaces
                                   verticalSpacing(defaultSpacing),
                                   ConstrainedBox(
-                                    constraints: const BoxConstraints(
-                                      maxWidth: 350,
-                                    ),
+                                    constraints: const BoxConstraints(maxWidth: 350),
                                     child: SpaceRenderer(
                                       container: container,
                                       clickable: true,
                                       pollNewData: true,
                                       background:
-                                          widget.self ? Get.theme.colorScheme.onPrimary.withOpacity(0.13) : Get.theme.colorScheme.inverseSurface,
+                                          widget.self
+                                              ? Get.theme.colorScheme.onPrimary.withOpacity(0.13)
+                                              : Get.theme.colorScheme.inverseSurface,
                                     ),
                                   ),
                                 ],
@@ -140,13 +156,16 @@ class _CallMessageRendererState extends State<BubblesSpaceMessageRenderer> {
                           Padding(
                             padding: const EdgeInsets.only(top: defaultSpacing),
                             child: SelectionContainer.disabled(
-                              child: Text(formatMessageTime(widget.message.createdAt), style: Get.theme.textTheme.bodySmall),
+                              child: Text(
+                                formatMessageTime(widget.message.createdAt),
+                                style: Get.theme.textTheme.bodySmall,
+                              ),
                             ),
                           ),
 
                           // Show a warning in case the message couldn't be verified
                           horizontalSpacing(defaultSpacing),
-                          Obx(() {
+                          Watch((ctx) {
                             final verified = widget.message.verified.value;
                             return Visibility(
                               visible: !verified,
@@ -154,14 +173,11 @@ class _CallMessageRendererState extends State<BubblesSpaceMessageRenderer> {
                                 padding: const EdgeInsets.only(top: elementSpacing + elementSpacing / 4),
                                 child: Tooltip(
                                   message: "chat.not.signed".tr,
-                                  child: const Icon(
-                                    Icons.warning_rounded,
-                                    color: Colors.amber,
-                                  ),
+                                  child: const Icon(Icons.warning_rounded, color: Colors.amber),
                                 ),
                               ),
                             );
-                          })
+                          }),
                         ],
                       ),
                     ],

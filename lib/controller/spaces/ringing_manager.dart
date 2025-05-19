@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
-import 'package:chat_interface/controller/spaces/space_container.dart';
+import 'package:chat_interface/services/spaces/space_container.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/pages/chat/components/conversations/conversation_ringing_window.dart';
 import 'package:chat_interface/pages/settings/app/general_settings.dart';
@@ -33,10 +33,7 @@ class RingingManager {
     });
 
     // Wait for the dialog to be closed and potentially stop the ringtone after that
-    await Get.dialog(ConversationRingingWindow(
-      conversation: conversation,
-      container: container,
-    ));
+    await Get.dialog(ConversationRingingWindow(conversation: conversation, container: container));
     await stopRingtone();
   }
 
@@ -64,20 +61,21 @@ class RingingManager {
   /// Checks whether the client can currently be ringed
   static Future<bool> _canRing() async {
     // Don't ring when the setting is turned off
-    if (!Get.find<SettingController>().settings[GeneralSettings.ringOnInvite]!.getValue()) {
+    if (!SettingController.settings[GeneralSettings.ringOnInvite]!.getValue()) {
       return false;
     }
 
     // Only ring when the status is online or away
-    final doNotDisturb = Get.find<StatusController>().type.value == statusDoNotDisturb || Get.find<StatusController>().type.value == statusOffline;
-    if (doNotDisturb && !Get.find<SettingController>().settings[GeneralSettings.soundsDoNotDisturb]!.getValue()) {
+    final doNotDisturb =
+        StatusController.type.value == statusDoNotDisturb || StatusController.type.value == statusOffline;
+    if (doNotDisturb && !SettingController.settings[GeneralSettings.soundsDoNotDisturb]!.getValue()) {
       return false;
     }
 
     // Check if ring should only be played when Liphium is minimized
     final inTray = await windowManager.isVisible();
-    final ignoreTray = Get.find<SettingController>().settings[GeneralSettings.ringIgnoreTray]!.getValue();
-    final playOnlyInTray = Get.find<SettingController>().settings[GeneralSettings.soundsOnlyWhenTray]!.getValue();
+    final ignoreTray = SettingController.settings[GeneralSettings.ringIgnoreTray]!.getValue();
+    final playOnlyInTray = SettingController.settings[GeneralSettings.soundsOnlyWhenTray]!.getValue();
     if (inTray && playOnlyInTray && !ignoreTray) {
       return false;
     }
@@ -88,19 +86,20 @@ class RingingManager {
   /// Checks whether a notification sound can currently be played
   static Future<bool> _canPlayNotificationSound() async {
     // Don't play a sound when the setting is turned off
-    if (!Get.find<SettingController>().settings[GeneralSettings.soundsEnabled]!.getValue()) {
+    if (!SettingController.settings[GeneralSettings.soundsEnabled]!.getValue()) {
       return false;
     }
 
     // Check if it should play a sound when the status is do not disturb
-    final doNotDisturb = Get.find<StatusController>().type.value == statusDoNotDisturb || Get.find<StatusController>().type.value == statusOffline;
-    if (doNotDisturb && !Get.find<SettingController>().settings[GeneralSettings.soundsDoNotDisturb]!.getValue()) {
+    final doNotDisturb =
+        StatusController.type.value == statusDoNotDisturb || StatusController.type.value == statusOffline;
+    if (doNotDisturb && !SettingController.settings[GeneralSettings.soundsDoNotDisturb]!.getValue()) {
       return false;
     }
 
     // Check if notification sound should only be played when in tray
     final inTray = await windowManager.isVisible();
-    final playOnlyInTray = Get.find<SettingController>().settings[GeneralSettings.soundsOnlyWhenTray]!.getValue();
+    final playOnlyInTray = SettingController.settings[GeneralSettings.soundsOnlyWhenTray]!.getValue();
     if (inTray && playOnlyInTray) {
       return false;
     }
