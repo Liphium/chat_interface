@@ -1,6 +1,6 @@
 # Liphium: Decentralization for everyone
 
-Welcome to the repository of the app used to interact with [station](https://github.com/Liphium/station), our decentralized backend service. With this app you can share files of any size, chat with anyone who has a "town" (what we call our servers) and even go into Spaces with them where you can play card games or share Minecraft servers. This is probably the quickest introduction I've ever given about the app and if you want to know more: [Our website exists](https://liphium.com).
+Welcome to the repository of the app used to interact with the backend (currently closed source, but publicly available). With this app you can share files of any size, chat with anyone who has a "town" (what we call our servers) and even go into Spaces with them where you can play card games or share Minecraft servers. This is probably the quickest introduction I've ever given about the app and if you want to know more: [Our website exists](https://liphium.com).
 
 You can find a lot of information about this app [on our help & resources page](https://liphium.com/docs). Be sure to check it out, and if your question isn't answered, you can always contact us through Discord or Email (available on our website).
 
