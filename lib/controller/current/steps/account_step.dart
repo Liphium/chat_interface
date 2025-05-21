@@ -6,14 +6,14 @@ import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/controller/current/steps/key_step.dart';
 import 'package:chat_interface/controller/current/steps/stored_actions_step.dart';
 import 'package:chat_interface/pages/status/setup/instance_setup.dart';
+import 'package:chat_interface/src/rust/api/encryption.dart';
 import 'package:chat_interface/standards/server_stored_information.dart';
 import 'package:chat_interface/util/encryption/packing.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
-import 'package:sodium_libs/sodium_libs.dart';
 
-late SecureKey vaultKey;
-late SecureKey profileKey;
+late SymmetricKey vaultKey;
+late SymmetricKey profileKey;
 
 class AccountStep extends ConnectionStep {
   AccountStep() : super('loading.account');
@@ -44,9 +44,9 @@ class AccountStep extends ConnectionStep {
         dNameChanged ||
         StatusController.ownAccountId != account["id"]) {
       sendLog("setting account id");
-      await setEncryptedValue("cache_account_id", account["id"]);
-      await setEncryptedValue("cache_account_uname", account["username"]);
-      await setEncryptedValue("cache_account_dname", account["display_name"]);
+      await setSetting("cache_account_id", account["id"]);
+      await setSetting("cache_account_uname", account["username"]);
+      await setSetting("cache_account_dname", account["display_name"]);
 
       // Restart to migrate to the new account id
       return SetupResponse(restart: true);
@@ -59,14 +59,18 @@ class AccountStep extends ConnectionStep {
     }
 
     // Decrypt the profile and vault key
-    final vaultInfo = ServerStoredInfo.untransform(body["vault"]);
-    final profileInfo = ServerStoredInfo.untransform(body["profile"]);
+    final vaultInfo = await ServerStoredInfo.untransform(body["vault"]);
+    final profileInfo = await ServerStoredInfo.untransform(body["profile"]);
     if (profileInfo.error || vaultInfo.error) {
       return SetupResponse(error: "keys.invalid");
     }
-    profileKey = await unpackageSymmetricKey(profileInfo.text);
-    profileKey = unpackageSymmetricKey(profileInfo.text);
-    vaultKey = unpackageSymmetricKey(vaultInfo.text);
+    final encProfileKey = await unpackageSymmetricKey(profileInfo.text);
+    final encVaultKey = await unpackageSymmetricKey(vaultInfo.text);
+    if (encProfileKey == null || encVaultKey == null) {
+      return SetupResponse(error: "keys.invalid");
+    }
+    profileKey = encProfileKey;
+    vaultKey = encVaultKey;
     storedActionKey = body["actions"];
 
     // Set own key pair as cached (in the friend that represents this account)

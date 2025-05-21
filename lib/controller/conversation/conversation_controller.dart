@@ -3,7 +3,6 @@ import 'dart:convert';
 
 import 'package:chat_interface/services/chat/conversation_member.dart';
 import 'package:chat_interface/services/chat/conversation_service.dart';
-import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database_entities.dart' as model;

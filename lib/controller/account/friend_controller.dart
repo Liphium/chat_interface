@@ -2,12 +2,13 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:ui' as ui;
 
+import 'package:chat_interface/controller/current/steps/key_step.dart';
 import 'package:chat_interface/main.dart';
 import 'package:chat_interface/services/chat/friends_service.dart';
 import 'package:chat_interface/services/chat/requests_service.dart';
 import 'package:chat_interface/services/chat/vault_versioning_service.dart';
-import 'package:chat_interface/util/encryption/asymmetric_sodium.dart';
-import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
+import 'package:chat_interface/src/rust/api/encryption.dart';
+import 'package:chat_interface/util/encryption/packing.dart';
 import 'package:chat_interface/services/chat/profile_picture_helper.dart';
 import 'package:chat_interface/controller/account/requests_controller.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
@@ -21,7 +22,6 @@ import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
 import 'package:get/get.dart';
 import 'package:signals/signals_flutter.dart';
-import 'package:sodium_libs/sodium_libs.dart';
 
 part '../../services/chat/friends_vault.dart';
 
@@ -30,7 +30,12 @@ class FriendController {
 
   static Future<bool> loadFriends() async {
     for (FriendData data in await db.friend.select().get()) {
-      friends[LPHAddress.from(data.id)] = Friend.fromEntity(data);
+      final friend = await Friend.fromEntity(data);
+      if (friend == null) {
+        sendLog("ERROR: Couldn't decrypt friend from local database");
+        continue;
+      }
+      friends[LPHAddress.from(data.id)] = friend;
     }
     return true;
   }
@@ -131,13 +136,20 @@ class Friend {
   }
 
   /// Convert the database entity to the actual type
-  factory Friend.fromEntity(FriendData data) {
+  static Future<Friend?> fromEntity(FriendData data) async {
+    final name = await fromDbEncrypted(data.name);
+    final displayName = await fromDbEncrypted(data.displayName);
+    final vaultId = await fromDbEncrypted(data.vaultId);
+    final keys = await fromDbEncrypted(data.keys);
+    if (name == null || displayName == null || vaultId == null || keys == null) {
+      return null;
+    }
     return Friend(
       LPHAddress.from(data.id),
-      fromDbEncrypted(data.name),
-      fromDbEncrypted(data.displayName),
-      fromDbEncrypted(data.vaultId),
-      KeyStorage.fromJson(jsonDecode(fromDbEncrypted(data.keys))),
+      name,
+      displayName,
+      vaultId,
+      KeyStorage.fromJson(jsonDecode(keys)),
       data.updatedAt.toInt(),
     );
   }
@@ -181,10 +193,10 @@ class Friend {
   Future<FriendData> entity() async {
     return FriendData(
       id: id.encode(),
-      name: dbEncrypted(name),
-      displayName: dbEncrypted(displayName.value),
-      vaultId: dbEncrypted(vaultId),
-      keys: dbEncrypted(jsonEncode((await getKeys()).toJson())),
+      name: await dbEncrypted(name),
+      displayName: await dbEncrypted(displayName.value),
+      vaultId: await dbEncrypted(vaultId),
+      keys: await dbEncrypted(jsonEncode((await getKeys()).toJson())),
       updatedAt: BigInt.from(updatedAt),
     );
   }
@@ -195,7 +207,20 @@ class Friend {
   final statusType = signal(0);
 
   Future<void> loadStatus(String message) async {
-    message = decryptSymmetric(message, (await getKeys()).profileKey);
+    final unpacked = decodeFromBase64(message);
+    if (unpacked == null) {
+      return;
+    }
+    final decoded = await decryptSymmetricContainer(
+      key: vaultKey,
+      verifyingKey: signatureKeyPair.verifyingKey,
+      ciphertext: unpacked,
+    );
+    if (decoded == null) {
+      return;
+    }
+
+    message = await decryptSymmetric(ciphertext: decoded, key: (await getKeys()).profileKey);
     final data = jsonDecode(message);
     try {
       status.value = utf8.decode(base64Decode(data["s"]));
@@ -230,7 +255,7 @@ class Friend {
   Future<void> updateProfilePicture(AttachmentContainer? picture) async {
     if (picture == null) {
       // Delete the profile picture if it is null
-      await db.profile.insertOnConflictUpdate(ProfileData(id: id.encode(), pictureContainer: "", data: ""));
+      await db.profile.insertOnConflictUpdate(ProfileData(id: id.encode(), pictureContainer: null, data: null));
 
       // Update the friend as well
       profilePicture = null;
@@ -239,7 +264,7 @@ class Friend {
     } else {
       // Set a new profile picture if it is valid
       await db.profile.insertOnConflictUpdate(
-        ProfileData(id: id.encode(), pictureContainer: dbEncrypted(jsonEncode(picture.toJson())), data: ""),
+        ProfileData(id: id.encode(), pictureContainer: await dbEncrypted(jsonEncode(picture.toJson())), data: null),
       );
 
       // Update in the local cache (for this friend)
@@ -281,15 +306,21 @@ class Friend {
     profilePictureDataNull = false;
 
     // Check if there is a profile picture
-    if (data.pictureContainer == "") {
+    if (data.pictureContainer == null) {
       profilePictureDataNull = true;
       return;
     }
 
     // Load the profile picture
-    final json = jsonDecode(fromDbEncrypted(data.pictureContainer));
+    final unpacked = await fromDbEncrypted(data.pictureContainer!);
+    if (unpacked == null) {
+      sendLog("WARNING: Couldn't decrypt profile picture container");
+      profilePictureDataNull = true;
+      return;
+    }
+    final json = jsonDecode(unpacked);
     final type = await AttachmentController.checkLocations(json["i"], StorageType.permanent);
-    profilePicture = AttachmentController.fromJson(type, json);
+    profilePicture = await AttachmentController.fromJson(type, json);
 
     // Make sure the file actually exists
     if (!await doesFileExist(profilePicture!.file!)) {

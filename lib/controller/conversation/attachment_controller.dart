@@ -4,10 +4,9 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
+import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/src/rust/api/encryption.dart';
-import 'package:chat_interface/util/encryption/asymmetric_sodium.dart';
 import 'package:chat_interface/util/encryption/packing.dart';
-import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart';
 import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/database/trusted_links.dart';
@@ -26,7 +25,6 @@ import 'package:liphium_bridge/liphium_bridge.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:signals/signals_flutter.dart';
-import 'package:sodium_libs/sodium_libs.dart';
 import 'package:path/path.dart' as path;
 
 class AttachmentController {
@@ -52,18 +50,36 @@ class AttachmentController {
       return FileUploadResponse("error.no_connection".tr, null);
     }
 
-    // Encrypt the file
+    // Encrypt the file and its name
     bytes ??= await data.file.readAsBytes();
-    final key = randomSymmetricKey();
-    final encrypted = encryptSymmetricBytes(bytes, key);
-    final name = encryptSymmetric(fileName ?? path.basename(data.file.path), key);
+    final key = await generateSymmetricKey();
+    final encrypted = await encryptSymmetric(key: key, message: bytes); // TODO: Use libcgc's file encryption
+    if (encrypted == null) {
+      return FileUploadResponse("encryption.error".tr, null);
+    }
+    final nameEncrypted = await encryptSymmetric(
+      message: packToBytes(fileName ?? path.basename(data.file.path)),
+      key: key,
+    );
+    if (nameEncrypted == null) {
+      return FileUploadResponse("encryption.error".tr, null);
+    }
+    final name = base64Encode(nameEncrypted);
+    final keys = await encryptAsymmetricContainer(
+      publicKey: asymmetricKeyPair.publicKey,
+      signingKey: signatureKeyPair.signingKey,
+      message: (await encodeSymmetricKey(key: key))!,
+    );
+    if (keys == null) {
+      return FileUploadResponse("encryption.error".tr, null);
+    }
 
     // Create the data we send to the server
     final formData = dio_rs.FormData.fromMap({
       "file": dio_rs.MultipartFile.fromBytes(encrypted, filename: name),
       "name": name,
       "tag": tag,
-      "key": encryptAsymmetricAnonymous(asymmetricKeyPair.publicKey, packageSymmetricKey(key)),
+      "key": base64Encode(keys),
       "extension": path.extension(data.file.path).substring(1),
     });
 
@@ -98,6 +114,7 @@ class AttachmentController {
       }
     }
     final container = AttachmentContainer(
+      uploader: StatusController.ownAddress,
       storageType: type,
       id: json["id"],
       fileName: containerNameNull ? null : fileName ?? path.basename(data.file.path),
@@ -192,7 +209,11 @@ class AttachmentController {
     }
 
     // Decrypt file
-    final decrypted = decryptSymmetricBytes(res.data!, container.key!);
+    final decrypted = await decryptSymmetric(key: container.key!, ciphertext: res.data!);
+    if (decrypted == null) {
+      container.errorHappened(false);
+      return false;
+    }
     container.file = XFile(container.file!.path, bytes: decrypted);
     if (!isWeb) {
       if (location != null) {

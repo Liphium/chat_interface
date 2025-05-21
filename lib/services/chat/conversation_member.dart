@@ -1,8 +1,6 @@
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
-import 'package:chat_interface/database/database.dart';
-import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/util/web.dart';
 
 class Member {
@@ -17,19 +15,7 @@ class Member {
       address = LPHAddress.from(json['address']),
       role = MemberRole.fromValue(json['role']);
 
-  Member.fromData(MemberData data)
-    : this(
-        LPHAddress.from(data.id),
-        LPHAddress.from(fromDbEncrypted(data.accountId)),
-        MemberRole.fromValue(data.roleId),
-      );
-
-  MemberData toData(LPHAddress conversation) => MemberData(
-    id: tokenId.encode(),
-    accountId: dbEncrypted(address.encode()),
-    roleId: role.value,
-    conversationId: conversation.encode(),
-  );
+  Map<String, dynamic> toJson() => {"id": tokenId.encode(), "address": address.encode(), "role": role.value};
 
   Friend getFriend() {
     if (StatusController.ownAddress == address) return Friend.me();
@@ -87,8 +73,8 @@ class Member {
 }
 
 enum MemberRole {
-  admin(2),
-  moderator(1),
+  admin(200),
+  moderator(100),
   user(0);
 
   final int value;

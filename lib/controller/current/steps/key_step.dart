@@ -47,8 +47,8 @@ class KeySetup extends ConnectionStep {
     var res = await postAuthorizedJSON("/account/keys/public/get", <String, dynamic>{});
 
     // Get keys from the local database (or an empty string)
-    var publicKey = await retrieveEncryptedValue("public_key");
-    var secretKey = await retrieveEncryptedValue("secret_key");
+    var publicKey = await retrieveSetting("public_key");
+    var secretKey = await retrieveSetting("secret_key");
 
     // If there is no public key on the server, generate new keys
     bool set = false;
@@ -98,12 +98,12 @@ class KeySetup extends ConnectionStep {
       }
 
       // Insert private key into the database
-      await setEncryptedValue(dbSecretKey, base64Encode(packagedPriv!));
-      await setEncryptedValue(dbPublicKey, base64Encode(packagedPub));
+      await setSetting(dbSecretKey, base64Encode(packagedPriv!));
+      await setSetting(dbPublicKey, base64Encode(packagedPub));
 
       // Set the signature keys
-      await setEncryptedValue(dbSigningKey, base64Encode(packagedSign!));
-      await setEncryptedValue(dbPublicKey, base64Encode(packagedVerify));
+      await setSetting(dbSigningKey, base64Encode(packagedSign!));
+      await setSetting(dbPublicKey, base64Encode(packagedVerify));
     } else {
       // Open key synchronization if there are no local keys
       if (publicKey == null || secretKey == null) {
@@ -125,8 +125,8 @@ class KeySetup extends ConnectionStep {
 
     // Grab signature key from client database (in case not set by previous if statement)
     if (!set) {
-      final signingKey = await retrieveEncryptedValue(dbSigningKey);
-      final verifyingKey = await retrieveEncryptedValue(dbVerifyingKey);
+      final signingKey = await retrieveSetting(dbSigningKey);
+      final verifyingKey = await retrieveSetting(dbVerifyingKey);
       if (signingKey == null || verifyingKey == null) {
         return SetupResponse(error: "key.error");
       }
@@ -147,7 +147,7 @@ class KeySetup extends ConnectionStep {
     late final String signature;
     late final SignatureKeyPair signatureKeyPair;
     late final AsymmetricKeyPair encryptionKeyPair;
-    final syncPub = await retrieveEncryptedValue(KeySetup.dbKeySyncPublicKey);
+    final syncPub = await retrieveSetting(KeySetup.dbKeySyncPublicKey);
     if (syncPub == null) {
       // Generate the key pairs for key sync exchange
       encryptionKeyPair = await generateAsymmetricKeypair();
@@ -155,32 +155,29 @@ class KeySetup extends ConnectionStep {
       signature = getRandomString(8);
 
       // Insert all the values using the defined constants
-      await setEncryptedValue(KeySetup.dbKeySyncPublicKey, (await packagePublicKey(encryptionKeyPair.publicKey))!);
-      await setEncryptedValue(KeySetup.dbKeySyncSecretKey, (await packageSecretKey(encryptionKeyPair.secretKey))!);
-      await setEncryptedValue(
-        KeySetup.dbKeySyncVerifyingKey,
-        (await packageVerifyingKey(signatureKeyPair.verifyingKey))!,
-      );
-      await setEncryptedValue(KeySetup.dbKeySyncSigningKey, (await packageSigningKey(signatureKeyPair.signingKey))!);
-      await setEncryptedValue(KeySetup.dbKeySyncSignature, signature);
+      await setSetting(KeySetup.dbKeySyncPublicKey, (await packagePublicKey(encryptionKeyPair.publicKey))!);
+      await setSetting(KeySetup.dbKeySyncSecretKey, (await packageSecretKey(encryptionKeyPair.secretKey))!);
+      await setSetting(KeySetup.dbKeySyncVerifyingKey, (await packageVerifyingKey(signatureKeyPair.verifyingKey))!);
+      await setSetting(KeySetup.dbKeySyncSigningKey, (await packageSigningKey(signatureKeyPair.signingKey))!);
+      await setSetting(KeySetup.dbKeySyncSignature, signature);
     } else {
       // Load the key pair and signature using the defined constants
-      final syncSecret = (await retrieveEncryptedValue(KeySetup.dbKeySyncSecretKey))!;
+      final syncSecret = (await retrieveSetting(KeySetup.dbKeySyncSecretKey))!;
       encryptionKeyPair = AsymmetricKeyPair(
         publicKey: (await unpackagePublicKey(syncPub))!,
         secretKey: (await unpackageSecretKey(syncSecret))!,
       );
 
       // Get the signature key pair using the defined constants
-      final syncSigVerify = (await retrieveEncryptedValue(KeySetup.dbKeySyncVerifyingKey))!;
-      final syncSigSign = (await retrieveEncryptedValue(KeySetup.dbKeySyncSigningKey))!;
+      final syncSigVerify = (await retrieveSetting(KeySetup.dbKeySyncVerifyingKey))!;
+      final syncSigSign = (await retrieveSetting(KeySetup.dbKeySyncSigningKey))!;
       signatureKeyPair = SignatureKeyPair(
         signingKey: (await unpackageSigningKey(syncSigSign))!,
         verifyingKey: (await unpackageVerifyingKey(syncSigVerify))!,
       );
 
       // Get the signature
-      signature = (await retrieveEncryptedValue("key_sync_sig"))!;
+      signature = (await retrieveSetting("key_sync_sig"))!;
     }
 
     // Ask the server whether the request already exists
@@ -436,10 +433,10 @@ class _KeyCodePageState extends State<KeyCodePage> {
           return;
         }
         final jsonPayload = jsonDecode(String.fromCharCodes(payload));
-        await setEncryptedValue(KeySetup.dbPublicKey, jsonPayload["enc_pub"]);
-        await setEncryptedValue(KeySetup.dbSecretKey, jsonPayload["enc_sec"]);
-        await setEncryptedValue(KeySetup.dbVerifyingKey, jsonPayload["sig_ver"]);
-        await setEncryptedValue(KeySetup.dbSigningKey, jsonPayload["sig_sig"]);
+        await setSetting(KeySetup.dbPublicKey, jsonPayload["enc_pub"]);
+        await setSetting(KeySetup.dbSecretKey, jsonPayload["enc_sec"]);
+        await setSetting(KeySetup.dbVerifyingKey, jsonPayload["sig_ver"]);
+        await setSetting(KeySetup.dbSigningKey, jsonPayload["sig_sig"]);
         setupManager.retry();
       }
     });
@@ -578,22 +575,13 @@ class _RecoveryTokenPageState extends State<RecoveryTokenPage> with SignalsMixin
             }
 
             // Save all the keys to the local database and restart
-            await setEncryptedValue(
-              KeySetup.dbPublicKey,
-              (await packagePublicKey(storage.encryptionKeyPair.publicKey))!,
-            );
-            await setEncryptedValue(
-              KeySetup.dbSecretKey,
-              (await packageSecretKey(storage.encryptionKeyPair.secretKey))!,
-            );
-            await setEncryptedValue(
+            await setSetting(KeySetup.dbPublicKey, (await packagePublicKey(storage.encryptionKeyPair.publicKey))!);
+            await setSetting(KeySetup.dbSecretKey, (await packageSecretKey(storage.encryptionKeyPair.secretKey))!);
+            await setSetting(
               KeySetup.dbVerifyingKey,
               (await packageVerifyingKey(storage.signatureKeyPair.verifyingKey))!,
             );
-            await setEncryptedValue(
-              KeySetup.dbSigningKey,
-              (await packageSigningKey(storage.signatureKeyPair.signingKey))!,
-            );
+            await setSetting(KeySetup.dbSigningKey, (await packageSigningKey(storage.signatureKeyPair.signingKey))!);
             setupManager.retry();
           },
           label: "check".tr,

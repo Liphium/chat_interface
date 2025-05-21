@@ -6,14 +6,15 @@ enum ConversationType { directMessage, group, square }
 @TableIndex(name: "idx_conversation_updated", columns: {#updatedAt})
 class Conversation extends Table {
   TextColumn get id => text()();
-  TextColumn get vaultId => text()();
+  BlobColumn get vaultId => blob()();
   IntColumn get type => intEnum<ConversationType>()();
-  TextColumn get data => text()();
-  TextColumn get token => text()();
-  TextColumn get key => text()();
+  BlobColumn get data => blob()();
+  BlobColumn get members => blob()();
+  BlobColumn get token => blob()();
+  BlobColumn get key => blob()();
   Int64Column get lastVersion => int64()();
   Int64Column get updatedAt => int64()();
-  TextColumn get reads => text().withDefault(Constant(""))();
+  BlobColumn get reads => blob()();
 
   @override
   Set<Column<Object>>? get primaryKey => {id};
@@ -22,9 +23,9 @@ class Conversation extends Table {
 @TableIndex(name: "idx_message_created", columns: {#createdAt})
 class Message extends Table {
   TextColumn get id => text()();
-  TextColumn get content => text()();
+  BlobColumn get content => blob()();
   TextColumn get senderToken => text()();
-  TextColumn get senderAddress => text()();
+  BlobColumn get senderAddress => blob()();
   Int64Column get createdAt => int64()();
   TextColumn get conversation => text()();
   BoolColumn get edited => boolean()();
@@ -34,25 +35,13 @@ class Message extends Table {
   Set<Column<Object>>? get primaryKey => {id};
 }
 
-class Member extends Table {
-  TextColumn get id => text()();
-  TextColumn get conversationId => text().nullable()();
-  TextColumn get accountId => text()();
-
-  // 1 - member, 2 - admin, 3 - owner
-  IntColumn get roleId => integer()();
-
-  @override
-  Set<Column<Object>>? get primaryKey => {id};
-}
-
 @TableIndex(name: "idx_friends_updated", columns: {#updatedAt})
 class Friend extends Table {
   TextColumn get id => text()();
-  TextColumn get name => text()();
-  TextColumn get displayName => text()();
-  TextColumn get vaultId => text()();
-  TextColumn get keys => text()();
+  BlobColumn get name => blob()();
+  BlobColumn get displayName => blob()();
+  BlobColumn get vaultId => blob()();
+  BlobColumn get keys => blob()();
   Int64Column get updatedAt => int64()();
 
   @override
@@ -66,7 +55,7 @@ class LibraryEntry extends Table {
   IntColumn get type => intEnum<LibraryEntryType>()();
   Int64Column get createdAt => int64()();
   TextColumn get identifierHash => text().withDefault(Constant("to-migrate"))();
-  TextColumn get data => text()();
+  BlobColumn get data => blob()();
   IntColumn get width => integer()();
   IntColumn get height => integer()();
 
@@ -92,9 +81,9 @@ class Profile extends Table {
   TextColumn get id => text()();
 
   // Profile picture data
-  TextColumn get pictureContainer => text()();
+  BlobColumn get pictureContainer => blob().nullable()();
 
-  TextColumn get data => text()();
+  BlobColumn get data => blob().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -103,11 +92,11 @@ class Profile extends Table {
 @TableIndex(name: "idx_requests_updated", columns: {#updatedAt})
 class Request extends Table {
   TextColumn get id => text()();
-  TextColumn get name => text()();
-  TextColumn get displayName => text()();
+  BlobColumn get name => blob()();
+  BlobColumn get displayName => blob()();
   BoolColumn get self => boolean()(); // Whether the request is sent by the current user
-  TextColumn get vaultId => text()();
-  TextColumn get keys => text()();
+  BlobColumn get vaultId => blob()();
+  BlobColumn get keys => blob()();
   Int64Column get updatedAt => int64()();
 
   @override
@@ -116,7 +105,7 @@ class Request extends Table {
 
 class Setting extends Table {
   TextColumn get key => text()();
-  TextColumn get value => text()();
+  BlobColumn get value => blob()();
 
   @override
   Set<Column<Object>>? get primaryKey => {key};
@@ -125,9 +114,9 @@ class Setting extends Table {
 @TableIndex(name: "idx_unknown_profiles_last_fetched", columns: {#lastFetched})
 class UnknownProfile extends Table {
   TextColumn get id => text()();
-  TextColumn get name => text()();
-  TextColumn get displayName => text()();
-  TextColumn get keys => text()();
+  BlobColumn get name => blob()();
+  BlobColumn get displayName => blob()();
+  BlobColumn get keys => blob()();
   DateTimeColumn get lastFetched => dateTime().withDefault(Constant(DateTime.fromMillisecondsSinceEpoch(0)))();
 
   @override

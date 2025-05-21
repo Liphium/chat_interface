@@ -1,18 +1,20 @@
 import 'dart:async';
+import 'dart:typed_data';
 
-import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/pages/status/error/error_page.dart';
 import 'package:chat_interface/pages/status/setup/database/database_init_stub.dart'
     if (dart.library.io) 'package:chat_interface/pages/status/setup/database/database_init_native.dart'
     if (dart.library.js) 'package:chat_interface/pages/status/setup/database/database_init_web.dart';
+import 'package:chat_interface/src/rust/api/encryption.dart';
 import 'package:chat_interface/theme/components/forms/fj_button.dart';
 import 'package:chat_interface/theme/components/forms/fj_textfield.dart';
+import 'package:chat_interface/util/encryption/packing.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:dbus_secrets/dbus_secrets.dart';
 import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get/get.dart';
-import 'package:sodium_libs/sodium_libs.dart';
 
 import '../../../database/database.dart';
 import '../../../main.dart';
@@ -54,16 +56,24 @@ class InstanceSetup extends Setup {
 
 /// Convert data to a local database encrypted string.
 ///
-/// Encrypts using the database key stored in secure storage.
-String dbEncrypted(String data, [Sodium? sodium, SecureKey? key]) {
-  return encryptSymmetric(data, key ?? databaseKey, sodium);
+/// Encrypts using [databaseKey].
+Future<Uint8List> dbEncrypted(String data) async {
+  return (await encryptSymmetric(key: databaseKey, message: packToBytes(data)))!;
 }
 
-String fromDbEncrypted(String cipher) {
-  return decryptSymmetric(cipher, databaseKey);
+/// Decrypt a string encrypted for the local database using the [dbEncrypted]
+/// helper function.
+///
+/// Decrypts using [databaseKey].
+Future<String?> fromDbEncrypted(Uint8List ciphertext) async {
+  final decrypted = await decryptSymmetric(key: databaseKey, ciphertext: ciphertext);
+  if (decrypted == null) {
+    return null;
+  }
+  return unpackFromBytes(decrypted);
 }
 
-late SecureKey databaseKey;
+late SymmetricKey databaseKey;
 String currentInstance = "";
 
 /// Open an instance by name (on web, the name parameter will be ignored)
@@ -108,22 +118,34 @@ Future<String?> loadEncryptionKeySecureStorage(String instance) async {
   try {
     encryptionKey = await secureStorage.read(key: databaseKeyField);
   } catch (_) {
+    sendLog("ERROR: Secure storage coulnd't read the database key.");
     return "secure_storage.not_supported".tr;
   }
 
   // Generate a new encryption key in case there isn't one yet
   if (encryptionKey == null) {
     // Create a new random encryption key (with sodium so it's secure)
-    databaseKey = randomSymmetricKey();
+    databaseKey = await generateSymmetricKey();
 
     // Insert the key into secure storage
-    await secureStorage.write(key: databaseKeyField, value: packageSymmetricKey(databaseKey));
+    final packed = await packageSymmetricKey(databaseKey);
+    if (packed == null) {
+      sendLog("ERROR: Secure storage key packing not supported.");
+      return "secure_storage.not_supported".tr;
+    }
+    await secureStorage.write(key: databaseKeyField, value: await packageSymmetricKey(databaseKey));
     encryptionKey = await secureStorage.read(key: databaseKeyField);
     if (encryptionKey == null) {
+      sendLog("ERROR: Secure storage couldn't write database encryption key.");
       return "secure_storage.not_supported".tr;
     }
   } else {
-    databaseKey = unpackageSymmetricKey(encryptionKey);
+    final unpacked = await unpackageSymmetricKey(encryptionKey);
+    if (unpacked == null) {
+      sendLog("ERROR: Secure storage key unpacking failed.");
+      return "secure_storage.not_supported".tr;
+    }
+    databaseKey = unpacked;
   }
 
   return null;
@@ -153,7 +175,11 @@ Future<String?> loadEncryptionKeyDbusSecrets(String instance) async {
 
   // Create a new database encryption key in case it isn't there yet
   if (encryptionKey == null) {
-    encryptionKey = packageSymmetricKey(randomSymmetricKey());
+    encryptionKey = await packageSymmetricKey(await generateSymmetricKey());
+    if (encryptionKey == null) {
+      sendLog("ERROR: Couldn't generate encoded database key");
+      return "secure_storage.not_supported".tr;
+    }
     result = await secrets.set(databaseKeyField, encryptionKey);
     if (!result) {
       await secrets.close();
@@ -162,7 +188,12 @@ Future<String?> loadEncryptionKeyDbusSecrets(String instance) async {
   }
 
   // Set the database key
-  databaseKey = unpackageSymmetricKey(encryptionKey);
+  final unpacked = await unpackageSymmetricKey(encryptionKey);
+  if (unpacked == null) {
+    sendLog("ERROR: Couldn't unpack encoded database key (secure storage)");
+    return "secure_storage.not_supported".tr;
+  }
+  databaseKey = unpacked;
 
   // Close the dbus session
   await secrets.close();
@@ -170,20 +201,20 @@ Future<String?> loadEncryptionKeyDbusSecrets(String instance) async {
   return null;
 }
 
-/// Get the value of a specified field store in the settings table
-Future<String?> retrieveEncryptedValue(String field) async {
+/// Get the value of a specified field stored in the settings table.
+Future<String?> retrieveSetting(String field) async {
   final value = await (db.setting.select()..where((tbl) => tbl.key.equals(field))).getSingleOrNull();
   if (value == null) {
     return null;
   }
 
   // Decrypt the thing
-  return decryptSymmetric(value.value, databaseKey);
+  return fromDbEncrypted(value.value);
 }
 
 /// Get the value of a specified field store in the settings table
-Future<int> setEncryptedValue(String field, String value) {
-  return db.setting.insertOnConflictUpdate(SettingData(key: field, value: encryptSymmetric(value, databaseKey)));
+Future<int> setSetting(String field, String value) async {
+  return db.setting.insertOnConflictUpdate(SettingData(key: field, value: await dbEncrypted(value)));
 }
 
 class InstanceSelectionPage extends StatefulWidget {

@@ -13,7 +13,7 @@ class RefreshTokenStep extends ConnectionStep {
   @override
   Future<SetupResponse> load() async {
     // Check if the user has logged in already
-    final profile = await retrieveEncryptedValue("tokens");
+    final profile = await retrieveSetting("tokens");
     if (profile == null) {
       return SetupResponse(restart: true);
     }
@@ -30,7 +30,7 @@ class RefreshTokenStep extends ConnectionStep {
     // Set new token (if refreshed)
     if (body["success"]) {
       loadTokensFromPayload(body);
-      await setEncryptedValue("tokens", tokensToPayload());
+      await setSetting("tokens", tokensToPayload());
     } else {
       // Check if the status code isn't 200 (set by the _postTCP method)
       if (body["code"] != null && body["code"] != 200) {

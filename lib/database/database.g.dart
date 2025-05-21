@@ -22,11 +22,11 @@ class $ConversationTable extends Conversation
     'vaultId',
   );
   @override
-  late final GeneratedColumn<String> vaultId = GeneratedColumn<String>(
+  late final GeneratedColumn<Uint8List> vaultId = GeneratedColumn<Uint8List>(
     'vault_id',
     aliasedName,
     false,
-    type: DriftSqlType.string,
+    type: DriftSqlType.blob,
     requiredDuringInsert: true,
   );
   @override
@@ -40,29 +40,40 @@ class $ConversationTable extends Conversation
       ).withConverter<ConversationType>($ConversationTable.$convertertype);
   static const VerificationMeta _dataMeta = const VerificationMeta('data');
   @override
-  late final GeneratedColumn<String> data = GeneratedColumn<String>(
+  late final GeneratedColumn<Uint8List> data = GeneratedColumn<Uint8List>(
     'data',
     aliasedName,
     false,
-    type: DriftSqlType.string,
+    type: DriftSqlType.blob,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _membersMeta = const VerificationMeta(
+    'members',
+  );
+  @override
+  late final GeneratedColumn<Uint8List> members = GeneratedColumn<Uint8List>(
+    'members',
+    aliasedName,
+    false,
+    type: DriftSqlType.blob,
     requiredDuringInsert: true,
   );
   static const VerificationMeta _tokenMeta = const VerificationMeta('token');
   @override
-  late final GeneratedColumn<String> token = GeneratedColumn<String>(
+  late final GeneratedColumn<Uint8List> token = GeneratedColumn<Uint8List>(
     'token',
     aliasedName,
     false,
-    type: DriftSqlType.string,
+    type: DriftSqlType.blob,
     requiredDuringInsert: true,
   );
   static const VerificationMeta _keyMeta = const VerificationMeta('key');
   @override
-  late final GeneratedColumn<String> key = GeneratedColumn<String>(
+  late final GeneratedColumn<Uint8List> key = GeneratedColumn<Uint8List>(
     'key',
     aliasedName,
     false,
-    type: DriftSqlType.string,
+    type: DriftSqlType.blob,
     requiredDuringInsert: true,
   );
   static const VerificationMeta _lastVersionMeta = const VerificationMeta(
@@ -89,13 +100,12 @@ class $ConversationTable extends Conversation
   );
   static const VerificationMeta _readsMeta = const VerificationMeta('reads');
   @override
-  late final GeneratedColumn<String> reads = GeneratedColumn<String>(
+  late final GeneratedColumn<Uint8List> reads = GeneratedColumn<Uint8List>(
     'reads',
     aliasedName,
     false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-    defaultValue: Constant(""),
+    type: DriftSqlType.blob,
+    requiredDuringInsert: true,
   );
   @override
   List<GeneratedColumn> get $columns => [
@@ -103,6 +113,7 @@ class $ConversationTable extends Conversation
     vaultId,
     type,
     data,
+    members,
     token,
     key,
     lastVersion,
@@ -141,6 +152,14 @@ class $ConversationTable extends Conversation
       );
     } else if (isInserting) {
       context.missing(_dataMeta);
+    }
+    if (data.containsKey('members')) {
+      context.handle(
+        _membersMeta,
+        members.isAcceptableOrUnknown(data['members']!, _membersMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_membersMeta);
     }
     if (data.containsKey('token')) {
       context.handle(
@@ -182,6 +201,8 @@ class $ConversationTable extends Conversation
         _readsMeta,
         reads.isAcceptableOrUnknown(data['reads']!, _readsMeta),
       );
+    } else if (isInserting) {
+      context.missing(_readsMeta);
     }
     return context;
   }
@@ -199,7 +220,7 @@ class $ConversationTable extends Conversation
           )!,
       vaultId:
           attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
+            DriftSqlType.blob,
             data['${effectivePrefix}vault_id'],
           )!,
       type: $ConversationTable.$convertertype.fromSql(
@@ -210,17 +231,22 @@ class $ConversationTable extends Conversation
       ),
       data:
           attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
+            DriftSqlType.blob,
             data['${effectivePrefix}data'],
+          )!,
+      members:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.blob,
+            data['${effectivePrefix}members'],
           )!,
       token:
           attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
+            DriftSqlType.blob,
             data['${effectivePrefix}token'],
           )!,
       key:
           attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
+            DriftSqlType.blob,
             data['${effectivePrefix}key'],
           )!,
       lastVersion:
@@ -235,7 +261,7 @@ class $ConversationTable extends Conversation
           )!,
       reads:
           attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
+            DriftSqlType.blob,
             data['${effectivePrefix}reads'],
           )!,
     );
@@ -253,19 +279,21 @@ class $ConversationTable extends Conversation
 class ConversationData extends DataClass
     implements Insertable<ConversationData> {
   final String id;
-  final String vaultId;
+  final Uint8List vaultId;
   final ConversationType type;
-  final String data;
-  final String token;
-  final String key;
+  final Uint8List data;
+  final Uint8List members;
+  final Uint8List token;
+  final Uint8List key;
   final BigInt lastVersion;
   final BigInt updatedAt;
-  final String reads;
+  final Uint8List reads;
   const ConversationData({
     required this.id,
     required this.vaultId,
     required this.type,
     required this.data,
+    required this.members,
     required this.token,
     required this.key,
     required this.lastVersion,
@@ -276,18 +304,19 @@ class ConversationData extends DataClass
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
-    map['vault_id'] = Variable<String>(vaultId);
+    map['vault_id'] = Variable<Uint8List>(vaultId);
     {
       map['type'] = Variable<int>(
         $ConversationTable.$convertertype.toSql(type),
       );
     }
-    map['data'] = Variable<String>(data);
-    map['token'] = Variable<String>(token);
-    map['key'] = Variable<String>(key);
+    map['data'] = Variable<Uint8List>(data);
+    map['members'] = Variable<Uint8List>(members);
+    map['token'] = Variable<Uint8List>(token);
+    map['key'] = Variable<Uint8List>(key);
     map['last_version'] = Variable<BigInt>(lastVersion);
     map['updated_at'] = Variable<BigInt>(updatedAt);
-    map['reads'] = Variable<String>(reads);
+    map['reads'] = Variable<Uint8List>(reads);
     return map;
   }
 
@@ -297,6 +326,7 @@ class ConversationData extends DataClass
       vaultId: Value(vaultId),
       type: Value(type),
       data: Value(data),
+      members: Value(members),
       token: Value(token),
       key: Value(key),
       lastVersion: Value(lastVersion),
@@ -312,16 +342,17 @@ class ConversationData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return ConversationData(
       id: serializer.fromJson<String>(json['id']),
-      vaultId: serializer.fromJson<String>(json['vaultId']),
+      vaultId: serializer.fromJson<Uint8List>(json['vaultId']),
       type: $ConversationTable.$convertertype.fromJson(
         serializer.fromJson<int>(json['type']),
       ),
-      data: serializer.fromJson<String>(json['data']),
-      token: serializer.fromJson<String>(json['token']),
-      key: serializer.fromJson<String>(json['key']),
+      data: serializer.fromJson<Uint8List>(json['data']),
+      members: serializer.fromJson<Uint8List>(json['members']),
+      token: serializer.fromJson<Uint8List>(json['token']),
+      key: serializer.fromJson<Uint8List>(json['key']),
       lastVersion: serializer.fromJson<BigInt>(json['lastVersion']),
       updatedAt: serializer.fromJson<BigInt>(json['updatedAt']),
-      reads: serializer.fromJson<String>(json['reads']),
+      reads: serializer.fromJson<Uint8List>(json['reads']),
     );
   }
   @override
@@ -329,34 +360,37 @@ class ConversationData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
-      'vaultId': serializer.toJson<String>(vaultId),
+      'vaultId': serializer.toJson<Uint8List>(vaultId),
       'type': serializer.toJson<int>(
         $ConversationTable.$convertertype.toJson(type),
       ),
-      'data': serializer.toJson<String>(data),
-      'token': serializer.toJson<String>(token),
-      'key': serializer.toJson<String>(key),
+      'data': serializer.toJson<Uint8List>(data),
+      'members': serializer.toJson<Uint8List>(members),
+      'token': serializer.toJson<Uint8List>(token),
+      'key': serializer.toJson<Uint8List>(key),
       'lastVersion': serializer.toJson<BigInt>(lastVersion),
       'updatedAt': serializer.toJson<BigInt>(updatedAt),
-      'reads': serializer.toJson<String>(reads),
+      'reads': serializer.toJson<Uint8List>(reads),
     };
   }
 
   ConversationData copyWith({
     String? id,
-    String? vaultId,
+    Uint8List? vaultId,
     ConversationType? type,
-    String? data,
-    String? token,
-    String? key,
+    Uint8List? data,
+    Uint8List? members,
+    Uint8List? token,
+    Uint8List? key,
     BigInt? lastVersion,
     BigInt? updatedAt,
-    String? reads,
+    Uint8List? reads,
   }) => ConversationData(
     id: id ?? this.id,
     vaultId: vaultId ?? this.vaultId,
     type: type ?? this.type,
     data: data ?? this.data,
+    members: members ?? this.members,
     token: token ?? this.token,
     key: key ?? this.key,
     lastVersion: lastVersion ?? this.lastVersion,
@@ -369,6 +403,7 @@ class ConversationData extends DataClass
       vaultId: data.vaultId.present ? data.vaultId.value : this.vaultId,
       type: data.type.present ? data.type.value : this.type,
       data: data.data.present ? data.data.value : this.data,
+      members: data.members.present ? data.members.value : this.members,
       token: data.token.present ? data.token.value : this.token,
       key: data.key.present ? data.key.value : this.key,
       lastVersion:
@@ -385,6 +420,7 @@ class ConversationData extends DataClass
           ..write('vaultId: $vaultId, ')
           ..write('type: $type, ')
           ..write('data: $data, ')
+          ..write('members: $members, ')
           ..write('token: $token, ')
           ..write('key: $key, ')
           ..write('lastVersion: $lastVersion, ')
@@ -397,46 +433,50 @@ class ConversationData extends DataClass
   @override
   int get hashCode => Object.hash(
     id,
-    vaultId,
+    $driftBlobEquality.hash(vaultId),
     type,
-    data,
-    token,
-    key,
+    $driftBlobEquality.hash(data),
+    $driftBlobEquality.hash(members),
+    $driftBlobEquality.hash(token),
+    $driftBlobEquality.hash(key),
     lastVersion,
     updatedAt,
-    reads,
+    $driftBlobEquality.hash(reads),
   );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is ConversationData &&
           other.id == this.id &&
-          other.vaultId == this.vaultId &&
+          $driftBlobEquality.equals(other.vaultId, this.vaultId) &&
           other.type == this.type &&
-          other.data == this.data &&
-          other.token == this.token &&
-          other.key == this.key &&
+          $driftBlobEquality.equals(other.data, this.data) &&
+          $driftBlobEquality.equals(other.members, this.members) &&
+          $driftBlobEquality.equals(other.token, this.token) &&
+          $driftBlobEquality.equals(other.key, this.key) &&
           other.lastVersion == this.lastVersion &&
           other.updatedAt == this.updatedAt &&
-          other.reads == this.reads);
+          $driftBlobEquality.equals(other.reads, this.reads));
 }
 
 class ConversationCompanion extends UpdateCompanion<ConversationData> {
   final Value<String> id;
-  final Value<String> vaultId;
+  final Value<Uint8List> vaultId;
   final Value<ConversationType> type;
-  final Value<String> data;
-  final Value<String> token;
-  final Value<String> key;
+  final Value<Uint8List> data;
+  final Value<Uint8List> members;
+  final Value<Uint8List> token;
+  final Value<Uint8List> key;
   final Value<BigInt> lastVersion;
   final Value<BigInt> updatedAt;
-  final Value<String> reads;
+  final Value<Uint8List> reads;
   final Value<int> rowid;
   const ConversationCompanion({
     this.id = const Value.absent(),
     this.vaultId = const Value.absent(),
     this.type = const Value.absent(),
     this.data = const Value.absent(),
+    this.members = const Value.absent(),
     this.token = const Value.absent(),
     this.key = const Value.absent(),
     this.lastVersion = const Value.absent(),
@@ -446,33 +486,37 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
   });
   ConversationCompanion.insert({
     required String id,
-    required String vaultId,
+    required Uint8List vaultId,
     required ConversationType type,
-    required String data,
-    required String token,
-    required String key,
+    required Uint8List data,
+    required Uint8List members,
+    required Uint8List token,
+    required Uint8List key,
     required BigInt lastVersion,
     required BigInt updatedAt,
-    this.reads = const Value.absent(),
+    required Uint8List reads,
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        vaultId = Value(vaultId),
        type = Value(type),
        data = Value(data),
+       members = Value(members),
        token = Value(token),
        key = Value(key),
        lastVersion = Value(lastVersion),
-       updatedAt = Value(updatedAt);
+       updatedAt = Value(updatedAt),
+       reads = Value(reads);
   static Insertable<ConversationData> custom({
     Expression<String>? id,
-    Expression<String>? vaultId,
+    Expression<Uint8List>? vaultId,
     Expression<int>? type,
-    Expression<String>? data,
-    Expression<String>? token,
-    Expression<String>? key,
+    Expression<Uint8List>? data,
+    Expression<Uint8List>? members,
+    Expression<Uint8List>? token,
+    Expression<Uint8List>? key,
     Expression<BigInt>? lastVersion,
     Expression<BigInt>? updatedAt,
-    Expression<String>? reads,
+    Expression<Uint8List>? reads,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -480,6 +524,7 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
       if (vaultId != null) 'vault_id': vaultId,
       if (type != null) 'type': type,
       if (data != null) 'data': data,
+      if (members != null) 'members': members,
       if (token != null) 'token': token,
       if (key != null) 'key': key,
       if (lastVersion != null) 'last_version': lastVersion,
@@ -491,14 +536,15 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
 
   ConversationCompanion copyWith({
     Value<String>? id,
-    Value<String>? vaultId,
+    Value<Uint8List>? vaultId,
     Value<ConversationType>? type,
-    Value<String>? data,
-    Value<String>? token,
-    Value<String>? key,
+    Value<Uint8List>? data,
+    Value<Uint8List>? members,
+    Value<Uint8List>? token,
+    Value<Uint8List>? key,
     Value<BigInt>? lastVersion,
     Value<BigInt>? updatedAt,
-    Value<String>? reads,
+    Value<Uint8List>? reads,
     Value<int>? rowid,
   }) {
     return ConversationCompanion(
@@ -506,6 +552,7 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
       vaultId: vaultId ?? this.vaultId,
       type: type ?? this.type,
       data: data ?? this.data,
+      members: members ?? this.members,
       token: token ?? this.token,
       key: key ?? this.key,
       lastVersion: lastVersion ?? this.lastVersion,
@@ -522,7 +569,7 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
       map['id'] = Variable<String>(id.value);
     }
     if (vaultId.present) {
-      map['vault_id'] = Variable<String>(vaultId.value);
+      map['vault_id'] = Variable<Uint8List>(vaultId.value);
     }
     if (type.present) {
       map['type'] = Variable<int>(
@@ -530,13 +577,16 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
       );
     }
     if (data.present) {
-      map['data'] = Variable<String>(data.value);
+      map['data'] = Variable<Uint8List>(data.value);
+    }
+    if (members.present) {
+      map['members'] = Variable<Uint8List>(members.value);
     }
     if (token.present) {
-      map['token'] = Variable<String>(token.value);
+      map['token'] = Variable<Uint8List>(token.value);
     }
     if (key.present) {
-      map['key'] = Variable<String>(key.value);
+      map['key'] = Variable<Uint8List>(key.value);
     }
     if (lastVersion.present) {
       map['last_version'] = Variable<BigInt>(lastVersion.value);
@@ -545,7 +595,7 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
       map['updated_at'] = Variable<BigInt>(updatedAt.value);
     }
     if (reads.present) {
-      map['reads'] = Variable<String>(reads.value);
+      map['reads'] = Variable<Uint8List>(reads.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -560,6 +610,7 @@ class ConversationCompanion extends UpdateCompanion<ConversationData> {
           ..write('vaultId: $vaultId, ')
           ..write('type: $type, ')
           ..write('data: $data, ')
+          ..write('members: $members, ')
           ..write('token: $token, ')
           ..write('key: $key, ')
           ..write('lastVersion: $lastVersion, ')
@@ -589,11 +640,11 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
     'content',
   );
   @override
-  late final GeneratedColumn<String> content = GeneratedColumn<String>(
+  late final GeneratedColumn<Uint8List> content = GeneratedColumn<Uint8List>(
     'content',
     aliasedName,
     false,
-    type: DriftSqlType.string,
+    type: DriftSqlType.blob,
     requiredDuringInsert: true,
   );
   static const VerificationMeta _senderTokenMeta = const VerificationMeta(
@@ -611,13 +662,14 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
     'senderAddress',
   );
   @override
-  late final GeneratedColumn<String> senderAddress = GeneratedColumn<String>(
-    'sender_address',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
+  late final GeneratedColumn<Uint8List> senderAddress =
+      GeneratedColumn<Uint8List>(
+        'sender_address',
+        aliasedName,
+        false,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: true,
+      );
   static const VerificationMeta _createdAtMeta = const VerificationMeta(
     'createdAt',
   );
@@ -775,7 +827,7 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
           )!,
       content:
           attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
+            DriftSqlType.blob,
             data['${effectivePrefix}content'],
           )!,
       senderToken:
@@ -785,7 +837,7 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
           )!,
       senderAddress:
           attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
+            DriftSqlType.blob,
             data['${effectivePrefix}sender_address'],
           )!,
       createdAt:
@@ -819,9 +871,9 @@ class $MessageTable extends Message with TableInfo<$MessageTable, MessageData> {
 
 class MessageData extends DataClass implements Insertable<MessageData> {
   final String id;
-  final String content;
+  final Uint8List content;
   final String senderToken;
-  final String senderAddress;
+  final Uint8List senderAddress;
   final BigInt createdAt;
   final String conversation;
   final bool edited;
@@ -840,9 +892,9 @@ class MessageData extends DataClass implements Insertable<MessageData> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
-    map['content'] = Variable<String>(content);
+    map['content'] = Variable<Uint8List>(content);
     map['sender_token'] = Variable<String>(senderToken);
-    map['sender_address'] = Variable<String>(senderAddress);
+    map['sender_address'] = Variable<Uint8List>(senderAddress);
     map['created_at'] = Variable<BigInt>(createdAt);
     map['conversation'] = Variable<String>(conversation);
     map['edited'] = Variable<bool>(edited);
@@ -870,9 +922,9 @@ class MessageData extends DataClass implements Insertable<MessageData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return MessageData(
       id: serializer.fromJson<String>(json['id']),
-      content: serializer.fromJson<String>(json['content']),
+      content: serializer.fromJson<Uint8List>(json['content']),
       senderToken: serializer.fromJson<String>(json['senderToken']),
-      senderAddress: serializer.fromJson<String>(json['senderAddress']),
+      senderAddress: serializer.fromJson<Uint8List>(json['senderAddress']),
       createdAt: serializer.fromJson<BigInt>(json['createdAt']),
       conversation: serializer.fromJson<String>(json['conversation']),
       edited: serializer.fromJson<bool>(json['edited']),
@@ -884,9 +936,9 @@ class MessageData extends DataClass implements Insertable<MessageData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
-      'content': serializer.toJson<String>(content),
+      'content': serializer.toJson<Uint8List>(content),
       'senderToken': serializer.toJson<String>(senderToken),
-      'senderAddress': serializer.toJson<String>(senderAddress),
+      'senderAddress': serializer.toJson<Uint8List>(senderAddress),
       'createdAt': serializer.toJson<BigInt>(createdAt),
       'conversation': serializer.toJson<String>(conversation),
       'edited': serializer.toJson<bool>(edited),
@@ -896,9 +948,9 @@ class MessageData extends DataClass implements Insertable<MessageData> {
 
   MessageData copyWith({
     String? id,
-    String? content,
+    Uint8List? content,
     String? senderToken,
-    String? senderAddress,
+    Uint8List? senderAddress,
     BigInt? createdAt,
     String? conversation,
     bool? edited,
@@ -951,9 +1003,9 @@ class MessageData extends DataClass implements Insertable<MessageData> {
   @override
   int get hashCode => Object.hash(
     id,
-    content,
+    $driftBlobEquality.hash(content),
     senderToken,
-    senderAddress,
+    $driftBlobEquality.hash(senderAddress),
     createdAt,
     conversation,
     edited,
@@ -964,9 +1016,9 @@ class MessageData extends DataClass implements Insertable<MessageData> {
       identical(this, other) ||
       (other is MessageData &&
           other.id == this.id &&
-          other.content == this.content &&
+          $driftBlobEquality.equals(other.content, this.content) &&
           other.senderToken == this.senderToken &&
-          other.senderAddress == this.senderAddress &&
+          $driftBlobEquality.equals(other.senderAddress, this.senderAddress) &&
           other.createdAt == this.createdAt &&
           other.conversation == this.conversation &&
           other.edited == this.edited &&
@@ -975,9 +1027,9 @@ class MessageData extends DataClass implements Insertable<MessageData> {
 
 class MessageCompanion extends UpdateCompanion<MessageData> {
   final Value<String> id;
-  final Value<String> content;
+  final Value<Uint8List> content;
   final Value<String> senderToken;
-  final Value<String> senderAddress;
+  final Value<Uint8List> senderAddress;
   final Value<BigInt> createdAt;
   final Value<String> conversation;
   final Value<bool> edited;
@@ -996,9 +1048,9 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
   });
   MessageCompanion.insert({
     required String id,
-    required String content,
+    required Uint8List content,
     required String senderToken,
-    required String senderAddress,
+    required Uint8List senderAddress,
     required BigInt createdAt,
     required String conversation,
     required bool edited,
@@ -1014,9 +1066,9 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
        verified = Value(verified);
   static Insertable<MessageData> custom({
     Expression<String>? id,
-    Expression<String>? content,
+    Expression<Uint8List>? content,
     Expression<String>? senderToken,
-    Expression<String>? senderAddress,
+    Expression<Uint8List>? senderAddress,
     Expression<BigInt>? createdAt,
     Expression<String>? conversation,
     Expression<bool>? edited,
@@ -1038,9 +1090,9 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
 
   MessageCompanion copyWith({
     Value<String>? id,
-    Value<String>? content,
+    Value<Uint8List>? content,
     Value<String>? senderToken,
-    Value<String>? senderAddress,
+    Value<Uint8List>? senderAddress,
     Value<BigInt>? createdAt,
     Value<String>? conversation,
     Value<bool>? edited,
@@ -1067,13 +1119,13 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
       map['id'] = Variable<String>(id.value);
     }
     if (content.present) {
-      map['content'] = Variable<String>(content.value);
+      map['content'] = Variable<Uint8List>(content.value);
     }
     if (senderToken.present) {
       map['sender_token'] = Variable<String>(senderToken.value);
     }
     if (senderAddress.present) {
-      map['sender_address'] = Variable<String>(senderAddress.value);
+      map['sender_address'] = Variable<Uint8List>(senderAddress.value);
     }
     if (createdAt.present) {
       map['created_at'] = Variable<BigInt>(createdAt.value);
@@ -1110,325 +1162,6 @@ class MessageCompanion extends UpdateCompanion<MessageData> {
   }
 }
 
-class $MemberTable extends Member with TableInfo<$MemberTable, MemberData> {
-  @override
-  final GeneratedDatabase attachedDatabase;
-  final String? _alias;
-  $MemberTable(this.attachedDatabase, [this._alias]);
-  static const VerificationMeta _idMeta = const VerificationMeta('id');
-  @override
-  late final GeneratedColumn<String> id = GeneratedColumn<String>(
-    'id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _conversationIdMeta = const VerificationMeta(
-    'conversationId',
-  );
-  @override
-  late final GeneratedColumn<String> conversationId = GeneratedColumn<String>(
-    'conversation_id',
-    aliasedName,
-    true,
-    type: DriftSqlType.string,
-    requiredDuringInsert: false,
-  );
-  static const VerificationMeta _accountIdMeta = const VerificationMeta(
-    'accountId',
-  );
-  @override
-  late final GeneratedColumn<String> accountId = GeneratedColumn<String>(
-    'account_id',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  static const VerificationMeta _roleIdMeta = const VerificationMeta('roleId');
-  @override
-  late final GeneratedColumn<int> roleId = GeneratedColumn<int>(
-    'role_id',
-    aliasedName,
-    false,
-    type: DriftSqlType.int,
-    requiredDuringInsert: true,
-  );
-  @override
-  List<GeneratedColumn> get $columns => [id, conversationId, accountId, roleId];
-  @override
-  String get aliasedName => _alias ?? actualTableName;
-  @override
-  String get actualTableName => $name;
-  static const String $name = 'member';
-  @override
-  VerificationContext validateIntegrity(
-    Insertable<MemberData> instance, {
-    bool isInserting = false,
-  }) {
-    final context = VerificationContext();
-    final data = instance.toColumns(true);
-    if (data.containsKey('id')) {
-      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
-    } else if (isInserting) {
-      context.missing(_idMeta);
-    }
-    if (data.containsKey('conversation_id')) {
-      context.handle(
-        _conversationIdMeta,
-        conversationId.isAcceptableOrUnknown(
-          data['conversation_id']!,
-          _conversationIdMeta,
-        ),
-      );
-    }
-    if (data.containsKey('account_id')) {
-      context.handle(
-        _accountIdMeta,
-        accountId.isAcceptableOrUnknown(data['account_id']!, _accountIdMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_accountIdMeta);
-    }
-    if (data.containsKey('role_id')) {
-      context.handle(
-        _roleIdMeta,
-        roleId.isAcceptableOrUnknown(data['role_id']!, _roleIdMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_roleIdMeta);
-    }
-    return context;
-  }
-
-  @override
-  Set<GeneratedColumn> get $primaryKey => {id};
-  @override
-  MemberData map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return MemberData(
-      id:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}id'],
-          )!,
-      conversationId: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}conversation_id'],
-      ),
-      accountId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}account_id'],
-          )!,
-      roleId:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.int,
-            data['${effectivePrefix}role_id'],
-          )!,
-    );
-  }
-
-  @override
-  $MemberTable createAlias(String alias) {
-    return $MemberTable(attachedDatabase, alias);
-  }
-}
-
-class MemberData extends DataClass implements Insertable<MemberData> {
-  final String id;
-  final String? conversationId;
-  final String accountId;
-  final int roleId;
-  const MemberData({
-    required this.id,
-    this.conversationId,
-    required this.accountId,
-    required this.roleId,
-  });
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    map['id'] = Variable<String>(id);
-    if (!nullToAbsent || conversationId != null) {
-      map['conversation_id'] = Variable<String>(conversationId);
-    }
-    map['account_id'] = Variable<String>(accountId);
-    map['role_id'] = Variable<int>(roleId);
-    return map;
-  }
-
-  MemberCompanion toCompanion(bool nullToAbsent) {
-    return MemberCompanion(
-      id: Value(id),
-      conversationId:
-          conversationId == null && nullToAbsent
-              ? const Value.absent()
-              : Value(conversationId),
-      accountId: Value(accountId),
-      roleId: Value(roleId),
-    );
-  }
-
-  factory MemberData.fromJson(
-    Map<String, dynamic> json, {
-    ValueSerializer? serializer,
-  }) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return MemberData(
-      id: serializer.fromJson<String>(json['id']),
-      conversationId: serializer.fromJson<String?>(json['conversationId']),
-      accountId: serializer.fromJson<String>(json['accountId']),
-      roleId: serializer.fromJson<int>(json['roleId']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<String>(id),
-      'conversationId': serializer.toJson<String?>(conversationId),
-      'accountId': serializer.toJson<String>(accountId),
-      'roleId': serializer.toJson<int>(roleId),
-    };
-  }
-
-  MemberData copyWith({
-    String? id,
-    Value<String?> conversationId = const Value.absent(),
-    String? accountId,
-    int? roleId,
-  }) => MemberData(
-    id: id ?? this.id,
-    conversationId:
-        conversationId.present ? conversationId.value : this.conversationId,
-    accountId: accountId ?? this.accountId,
-    roleId: roleId ?? this.roleId,
-  );
-  MemberData copyWithCompanion(MemberCompanion data) {
-    return MemberData(
-      id: data.id.present ? data.id.value : this.id,
-      conversationId:
-          data.conversationId.present
-              ? data.conversationId.value
-              : this.conversationId,
-      accountId: data.accountId.present ? data.accountId.value : this.accountId,
-      roleId: data.roleId.present ? data.roleId.value : this.roleId,
-    );
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('MemberData(')
-          ..write('id: $id, ')
-          ..write('conversationId: $conversationId, ')
-          ..write('accountId: $accountId, ')
-          ..write('roleId: $roleId')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode => Object.hash(id, conversationId, accountId, roleId);
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is MemberData &&
-          other.id == this.id &&
-          other.conversationId == this.conversationId &&
-          other.accountId == this.accountId &&
-          other.roleId == this.roleId);
-}
-
-class MemberCompanion extends UpdateCompanion<MemberData> {
-  final Value<String> id;
-  final Value<String?> conversationId;
-  final Value<String> accountId;
-  final Value<int> roleId;
-  final Value<int> rowid;
-  const MemberCompanion({
-    this.id = const Value.absent(),
-    this.conversationId = const Value.absent(),
-    this.accountId = const Value.absent(),
-    this.roleId = const Value.absent(),
-    this.rowid = const Value.absent(),
-  });
-  MemberCompanion.insert({
-    required String id,
-    this.conversationId = const Value.absent(),
-    required String accountId,
-    required int roleId,
-    this.rowid = const Value.absent(),
-  }) : id = Value(id),
-       accountId = Value(accountId),
-       roleId = Value(roleId);
-  static Insertable<MemberData> custom({
-    Expression<String>? id,
-    Expression<String>? conversationId,
-    Expression<String>? accountId,
-    Expression<int>? roleId,
-    Expression<int>? rowid,
-  }) {
-    return RawValuesInsertable({
-      if (id != null) 'id': id,
-      if (conversationId != null) 'conversation_id': conversationId,
-      if (accountId != null) 'account_id': accountId,
-      if (roleId != null) 'role_id': roleId,
-      if (rowid != null) 'rowid': rowid,
-    });
-  }
-
-  MemberCompanion copyWith({
-    Value<String>? id,
-    Value<String?>? conversationId,
-    Value<String>? accountId,
-    Value<int>? roleId,
-    Value<int>? rowid,
-  }) {
-    return MemberCompanion(
-      id: id ?? this.id,
-      conversationId: conversationId ?? this.conversationId,
-      accountId: accountId ?? this.accountId,
-      roleId: roleId ?? this.roleId,
-      rowid: rowid ?? this.rowid,
-    );
-  }
-
-  @override
-  Map<String, Expression> toColumns(bool nullToAbsent) {
-    final map = <String, Expression>{};
-    if (id.present) {
-      map['id'] = Variable<String>(id.value);
-    }
-    if (conversationId.present) {
-      map['conversation_id'] = Variable<String>(conversationId.value);
-    }
-    if (accountId.present) {
-      map['account_id'] = Variable<String>(accountId.value);
-    }
-    if (roleId.present) {
-      map['role_id'] = Variable<int>(roleId.value);
-    }
-    if (rowid.present) {
-      map['rowid'] = Variable<int>(rowid.value);
-    }
-    return map;
-  }
-
-  @override
-  String toString() {
-    return (StringBuffer('MemberCompanion(')
-          ..write('id: $id, ')
-          ..write('conversationId: $conversationId, ')
-          ..write('accountId: $accountId, ')
-          ..write('roleId: $roleId, ')
-          ..write('rowid: $rowid')
-          ..write(')'))
-        .toString();
-  }
-}
-
 class $SettingTable extends Setting with TableInfo<$SettingTable, SettingData> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -1445,11 +1178,11 @@ class $SettingTable extends Setting with TableInfo<$SettingTable, SettingData> {
   );
   static const VerificationMeta _valueMeta = const VerificationMeta('value');
   @override
-  late final GeneratedColumn<String> value = GeneratedColumn<String>(
+  late final GeneratedColumn<Uint8List> value = GeneratedColumn<Uint8List>(
     'value',
     aliasedName,
     false,
-    type: DriftSqlType.string,
+    type: DriftSqlType.blob,
     requiredDuringInsert: true,
   );
   @override
@@ -1498,7 +1231,7 @@ class $SettingTable extends Setting with TableInfo<$SettingTable, SettingData> {
           )!,
       value:
           attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
+            DriftSqlType.blob,
             data['${effectivePrefix}value'],
           )!,
     );
@@ -1512,13 +1245,13 @@ class $SettingTable extends Setting with TableInfo<$SettingTable, SettingData> {
 
 class SettingData extends DataClass implements Insertable<SettingData> {
   final String key;
-  final String value;
+  final Uint8List value;
   const SettingData({required this.key, required this.value});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['key'] = Variable<String>(key);
-    map['value'] = Variable<String>(value);
+    map['value'] = Variable<Uint8List>(value);
     return map;
   }
 
@@ -1533,7 +1266,7 @@ class SettingData extends DataClass implements Insertable<SettingData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return SettingData(
       key: serializer.fromJson<String>(json['key']),
-      value: serializer.fromJson<String>(json['value']),
+      value: serializer.fromJson<Uint8List>(json['value']),
     );
   }
   @override
@@ -1541,11 +1274,11 @@ class SettingData extends DataClass implements Insertable<SettingData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'key': serializer.toJson<String>(key),
-      'value': serializer.toJson<String>(value),
+      'value': serializer.toJson<Uint8List>(value),
     };
   }
 
-  SettingData copyWith({String? key, String? value}) =>
+  SettingData copyWith({String? key, Uint8List? value}) =>
       SettingData(key: key ?? this.key, value: value ?? this.value);
   SettingData copyWithCompanion(SettingCompanion data) {
     return SettingData(
@@ -1564,18 +1297,18 @@ class SettingData extends DataClass implements Insertable<SettingData> {
   }
 
   @override
-  int get hashCode => Object.hash(key, value);
+  int get hashCode => Object.hash(key, $driftBlobEquality.hash(value));
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is SettingData &&
           other.key == this.key &&
-          other.value == this.value);
+          $driftBlobEquality.equals(other.value, this.value));
 }
 
 class SettingCompanion extends UpdateCompanion<SettingData> {
   final Value<String> key;
-  final Value<String> value;
+  final Value<Uint8List> value;
   final Value<int> rowid;
   const SettingCompanion({
     this.key = const Value.absent(),
@@ -1584,13 +1317,13 @@ class SettingCompanion extends UpdateCompanion<SettingData> {
   });
   SettingCompanion.insert({
     required String key,
-    required String value,
+    required Uint8List value,
     this.rowid = const Value.absent(),
   }) : key = Value(key),
        value = Value(value);
   static Insertable<SettingData> custom({
     Expression<String>? key,
-    Expression<String>? value,
+    Expression<Uint8List>? value,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1602,7 +1335,7 @@ class SettingCompanion extends UpdateCompanion<SettingData> {
 
   SettingCompanion copyWith({
     Value<String>? key,
-    Value<String>? value,
+    Value<Uint8List>? value,
     Value<int>? rowid,
   }) {
     return SettingCompanion(
@@ -1619,7 +1352,7 @@ class SettingCompanion extends UpdateCompanion<SettingData> {
       map['key'] = Variable<String>(key.value);
     }
     if (value.present) {
-      map['value'] = Variable<String>(value.value);
+      map['value'] = Variable<Uint8List>(value.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -1654,42 +1387,43 @@ class $FriendTable extends Friend with TableInfo<$FriendTable, FriendData> {
   );
   static const VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
-  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+  late final GeneratedColumn<Uint8List> name = GeneratedColumn<Uint8List>(
     'name',
     aliasedName,
     false,
-    type: DriftSqlType.string,
+    type: DriftSqlType.blob,
     requiredDuringInsert: true,
   );
   static const VerificationMeta _displayNameMeta = const VerificationMeta(
     'displayName',
   );
   @override
-  late final GeneratedColumn<String> displayName = GeneratedColumn<String>(
-    'display_name',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
+  late final GeneratedColumn<Uint8List> displayName =
+      GeneratedColumn<Uint8List>(
+        'display_name',
+        aliasedName,
+        false,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: true,
+      );
   static const VerificationMeta _vaultIdMeta = const VerificationMeta(
     'vaultId',
   );
   @override
-  late final GeneratedColumn<String> vaultId = GeneratedColumn<String>(
+  late final GeneratedColumn<Uint8List> vaultId = GeneratedColumn<Uint8List>(
     'vault_id',
     aliasedName,
     false,
-    type: DriftSqlType.string,
+    type: DriftSqlType.blob,
     requiredDuringInsert: true,
   );
   static const VerificationMeta _keysMeta = const VerificationMeta('keys');
   @override
-  late final GeneratedColumn<String> keys = GeneratedColumn<String>(
+  late final GeneratedColumn<Uint8List> keys = GeneratedColumn<Uint8List>(
     'keys',
     aliasedName,
     false,
-    type: DriftSqlType.string,
+    type: DriftSqlType.blob,
     requiredDuringInsert: true,
   );
   static const VerificationMeta _updatedAtMeta = const VerificationMeta(
@@ -1788,22 +1522,22 @@ class $FriendTable extends Friend with TableInfo<$FriendTable, FriendData> {
           )!,
       name:
           attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
+            DriftSqlType.blob,
             data['${effectivePrefix}name'],
           )!,
       displayName:
           attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
+            DriftSqlType.blob,
             data['${effectivePrefix}display_name'],
           )!,
       vaultId:
           attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
+            DriftSqlType.blob,
             data['${effectivePrefix}vault_id'],
           )!,
       keys:
           attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
+            DriftSqlType.blob,
             data['${effectivePrefix}keys'],
           )!,
       updatedAt:
@@ -1822,10 +1556,10 @@ class $FriendTable extends Friend with TableInfo<$FriendTable, FriendData> {
 
 class FriendData extends DataClass implements Insertable<FriendData> {
   final String id;
-  final String name;
-  final String displayName;
-  final String vaultId;
-  final String keys;
+  final Uint8List name;
+  final Uint8List displayName;
+  final Uint8List vaultId;
+  final Uint8List keys;
   final BigInt updatedAt;
   const FriendData({
     required this.id,
@@ -1839,10 +1573,10 @@ class FriendData extends DataClass implements Insertable<FriendData> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
-    map['name'] = Variable<String>(name);
-    map['display_name'] = Variable<String>(displayName);
-    map['vault_id'] = Variable<String>(vaultId);
-    map['keys'] = Variable<String>(keys);
+    map['name'] = Variable<Uint8List>(name);
+    map['display_name'] = Variable<Uint8List>(displayName);
+    map['vault_id'] = Variable<Uint8List>(vaultId);
+    map['keys'] = Variable<Uint8List>(keys);
     map['updated_at'] = Variable<BigInt>(updatedAt);
     return map;
   }
@@ -1865,10 +1599,10 @@ class FriendData extends DataClass implements Insertable<FriendData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return FriendData(
       id: serializer.fromJson<String>(json['id']),
-      name: serializer.fromJson<String>(json['name']),
-      displayName: serializer.fromJson<String>(json['displayName']),
-      vaultId: serializer.fromJson<String>(json['vaultId']),
-      keys: serializer.fromJson<String>(json['keys']),
+      name: serializer.fromJson<Uint8List>(json['name']),
+      displayName: serializer.fromJson<Uint8List>(json['displayName']),
+      vaultId: serializer.fromJson<Uint8List>(json['vaultId']),
+      keys: serializer.fromJson<Uint8List>(json['keys']),
       updatedAt: serializer.fromJson<BigInt>(json['updatedAt']),
     );
   }
@@ -1877,20 +1611,20 @@ class FriendData extends DataClass implements Insertable<FriendData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
-      'name': serializer.toJson<String>(name),
-      'displayName': serializer.toJson<String>(displayName),
-      'vaultId': serializer.toJson<String>(vaultId),
-      'keys': serializer.toJson<String>(keys),
+      'name': serializer.toJson<Uint8List>(name),
+      'displayName': serializer.toJson<Uint8List>(displayName),
+      'vaultId': serializer.toJson<Uint8List>(vaultId),
+      'keys': serializer.toJson<Uint8List>(keys),
       'updatedAt': serializer.toJson<BigInt>(updatedAt),
     };
   }
 
   FriendData copyWith({
     String? id,
-    String? name,
-    String? displayName,
-    String? vaultId,
-    String? keys,
+    Uint8List? name,
+    Uint8List? displayName,
+    Uint8List? vaultId,
+    Uint8List? keys,
     BigInt? updatedAt,
   }) => FriendData(
     id: id ?? this.id,
@@ -1926,26 +1660,32 @@ class FriendData extends DataClass implements Insertable<FriendData> {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, name, displayName, vaultId, keys, updatedAt);
+  int get hashCode => Object.hash(
+    id,
+    $driftBlobEquality.hash(name),
+    $driftBlobEquality.hash(displayName),
+    $driftBlobEquality.hash(vaultId),
+    $driftBlobEquality.hash(keys),
+    updatedAt,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is FriendData &&
           other.id == this.id &&
-          other.name == this.name &&
-          other.displayName == this.displayName &&
-          other.vaultId == this.vaultId &&
-          other.keys == this.keys &&
+          $driftBlobEquality.equals(other.name, this.name) &&
+          $driftBlobEquality.equals(other.displayName, this.displayName) &&
+          $driftBlobEquality.equals(other.vaultId, this.vaultId) &&
+          $driftBlobEquality.equals(other.keys, this.keys) &&
           other.updatedAt == this.updatedAt);
 }
 
 class FriendCompanion extends UpdateCompanion<FriendData> {
   final Value<String> id;
-  final Value<String> name;
-  final Value<String> displayName;
-  final Value<String> vaultId;
-  final Value<String> keys;
+  final Value<Uint8List> name;
+  final Value<Uint8List> displayName;
+  final Value<Uint8List> vaultId;
+  final Value<Uint8List> keys;
   final Value<BigInt> updatedAt;
   final Value<int> rowid;
   const FriendCompanion({
@@ -1959,10 +1699,10 @@ class FriendCompanion extends UpdateCompanion<FriendData> {
   });
   FriendCompanion.insert({
     required String id,
-    required String name,
-    required String displayName,
-    required String vaultId,
-    required String keys,
+    required Uint8List name,
+    required Uint8List displayName,
+    required Uint8List vaultId,
+    required Uint8List keys,
     required BigInt updatedAt,
     this.rowid = const Value.absent(),
   }) : id = Value(id),
@@ -1973,10 +1713,10 @@ class FriendCompanion extends UpdateCompanion<FriendData> {
        updatedAt = Value(updatedAt);
   static Insertable<FriendData> custom({
     Expression<String>? id,
-    Expression<String>? name,
-    Expression<String>? displayName,
-    Expression<String>? vaultId,
-    Expression<String>? keys,
+    Expression<Uint8List>? name,
+    Expression<Uint8List>? displayName,
+    Expression<Uint8List>? vaultId,
+    Expression<Uint8List>? keys,
     Expression<BigInt>? updatedAt,
     Expression<int>? rowid,
   }) {
@@ -1993,10 +1733,10 @@ class FriendCompanion extends UpdateCompanion<FriendData> {
 
   FriendCompanion copyWith({
     Value<String>? id,
-    Value<String>? name,
-    Value<String>? displayName,
-    Value<String>? vaultId,
-    Value<String>? keys,
+    Value<Uint8List>? name,
+    Value<Uint8List>? displayName,
+    Value<Uint8List>? vaultId,
+    Value<Uint8List>? keys,
     Value<BigInt>? updatedAt,
     Value<int>? rowid,
   }) {
@@ -2018,16 +1758,16 @@ class FriendCompanion extends UpdateCompanion<FriendData> {
       map['id'] = Variable<String>(id.value);
     }
     if (name.present) {
-      map['name'] = Variable<String>(name.value);
+      map['name'] = Variable<Uint8List>(name.value);
     }
     if (displayName.present) {
-      map['display_name'] = Variable<String>(displayName.value);
+      map['display_name'] = Variable<Uint8List>(displayName.value);
     }
     if (vaultId.present) {
-      map['vault_id'] = Variable<String>(vaultId.value);
+      map['vault_id'] = Variable<Uint8List>(vaultId.value);
     }
     if (keys.present) {
-      map['keys'] = Variable<String>(keys.value);
+      map['keys'] = Variable<Uint8List>(keys.value);
     }
     if (updatedAt.present) {
       map['updated_at'] = Variable<BigInt>(updatedAt.value);
@@ -2069,24 +1809,25 @@ class $RequestTable extends Request with TableInfo<$RequestTable, RequestData> {
   );
   static const VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
-  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+  late final GeneratedColumn<Uint8List> name = GeneratedColumn<Uint8List>(
     'name',
     aliasedName,
     false,
-    type: DriftSqlType.string,
+    type: DriftSqlType.blob,
     requiredDuringInsert: true,
   );
   static const VerificationMeta _displayNameMeta = const VerificationMeta(
     'displayName',
   );
   @override
-  late final GeneratedColumn<String> displayName = GeneratedColumn<String>(
-    'display_name',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
+  late final GeneratedColumn<Uint8List> displayName =
+      GeneratedColumn<Uint8List>(
+        'display_name',
+        aliasedName,
+        false,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: true,
+      );
   static const VerificationMeta _selfMeta = const VerificationMeta('self');
   @override
   late final GeneratedColumn<bool> self = GeneratedColumn<bool>(
@@ -2103,20 +1844,20 @@ class $RequestTable extends Request with TableInfo<$RequestTable, RequestData> {
     'vaultId',
   );
   @override
-  late final GeneratedColumn<String> vaultId = GeneratedColumn<String>(
+  late final GeneratedColumn<Uint8List> vaultId = GeneratedColumn<Uint8List>(
     'vault_id',
     aliasedName,
     false,
-    type: DriftSqlType.string,
+    type: DriftSqlType.blob,
     requiredDuringInsert: true,
   );
   static const VerificationMeta _keysMeta = const VerificationMeta('keys');
   @override
-  late final GeneratedColumn<String> keys = GeneratedColumn<String>(
+  late final GeneratedColumn<Uint8List> keys = GeneratedColumn<Uint8List>(
     'keys',
     aliasedName,
     false,
-    type: DriftSqlType.string,
+    type: DriftSqlType.blob,
     requiredDuringInsert: true,
   );
   static const VerificationMeta _updatedAtMeta = const VerificationMeta(
@@ -2224,12 +1965,12 @@ class $RequestTable extends Request with TableInfo<$RequestTable, RequestData> {
           )!,
       name:
           attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
+            DriftSqlType.blob,
             data['${effectivePrefix}name'],
           )!,
       displayName:
           attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
+            DriftSqlType.blob,
             data['${effectivePrefix}display_name'],
           )!,
       self:
@@ -2239,12 +1980,12 @@ class $RequestTable extends Request with TableInfo<$RequestTable, RequestData> {
           )!,
       vaultId:
           attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
+            DriftSqlType.blob,
             data['${effectivePrefix}vault_id'],
           )!,
       keys:
           attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
+            DriftSqlType.blob,
             data['${effectivePrefix}keys'],
           )!,
       updatedAt:
@@ -2263,11 +2004,11 @@ class $RequestTable extends Request with TableInfo<$RequestTable, RequestData> {
 
 class RequestData extends DataClass implements Insertable<RequestData> {
   final String id;
-  final String name;
-  final String displayName;
+  final Uint8List name;
+  final Uint8List displayName;
   final bool self;
-  final String vaultId;
-  final String keys;
+  final Uint8List vaultId;
+  final Uint8List keys;
   final BigInt updatedAt;
   const RequestData({
     required this.id,
@@ -2282,11 +2023,11 @@ class RequestData extends DataClass implements Insertable<RequestData> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
-    map['name'] = Variable<String>(name);
-    map['display_name'] = Variable<String>(displayName);
+    map['name'] = Variable<Uint8List>(name);
+    map['display_name'] = Variable<Uint8List>(displayName);
     map['self'] = Variable<bool>(self);
-    map['vault_id'] = Variable<String>(vaultId);
-    map['keys'] = Variable<String>(keys);
+    map['vault_id'] = Variable<Uint8List>(vaultId);
+    map['keys'] = Variable<Uint8List>(keys);
     map['updated_at'] = Variable<BigInt>(updatedAt);
     return map;
   }
@@ -2310,11 +2051,11 @@ class RequestData extends DataClass implements Insertable<RequestData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return RequestData(
       id: serializer.fromJson<String>(json['id']),
-      name: serializer.fromJson<String>(json['name']),
-      displayName: serializer.fromJson<String>(json['displayName']),
+      name: serializer.fromJson<Uint8List>(json['name']),
+      displayName: serializer.fromJson<Uint8List>(json['displayName']),
       self: serializer.fromJson<bool>(json['self']),
-      vaultId: serializer.fromJson<String>(json['vaultId']),
-      keys: serializer.fromJson<String>(json['keys']),
+      vaultId: serializer.fromJson<Uint8List>(json['vaultId']),
+      keys: serializer.fromJson<Uint8List>(json['keys']),
       updatedAt: serializer.fromJson<BigInt>(json['updatedAt']),
     );
   }
@@ -2323,22 +2064,22 @@ class RequestData extends DataClass implements Insertable<RequestData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
-      'name': serializer.toJson<String>(name),
-      'displayName': serializer.toJson<String>(displayName),
+      'name': serializer.toJson<Uint8List>(name),
+      'displayName': serializer.toJson<Uint8List>(displayName),
       'self': serializer.toJson<bool>(self),
-      'vaultId': serializer.toJson<String>(vaultId),
-      'keys': serializer.toJson<String>(keys),
+      'vaultId': serializer.toJson<Uint8List>(vaultId),
+      'keys': serializer.toJson<Uint8List>(keys),
       'updatedAt': serializer.toJson<BigInt>(updatedAt),
     };
   }
 
   RequestData copyWith({
     String? id,
-    String? name,
-    String? displayName,
+    Uint8List? name,
+    Uint8List? displayName,
     bool? self,
-    String? vaultId,
-    String? keys,
+    Uint8List? vaultId,
+    Uint8List? keys,
     BigInt? updatedAt,
   }) => RequestData(
     id: id ?? this.id,
@@ -2377,28 +2118,35 @@ class RequestData extends DataClass implements Insertable<RequestData> {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, name, displayName, self, vaultId, keys, updatedAt);
+  int get hashCode => Object.hash(
+    id,
+    $driftBlobEquality.hash(name),
+    $driftBlobEquality.hash(displayName),
+    self,
+    $driftBlobEquality.hash(vaultId),
+    $driftBlobEquality.hash(keys),
+    updatedAt,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is RequestData &&
           other.id == this.id &&
-          other.name == this.name &&
-          other.displayName == this.displayName &&
+          $driftBlobEquality.equals(other.name, this.name) &&
+          $driftBlobEquality.equals(other.displayName, this.displayName) &&
           other.self == this.self &&
-          other.vaultId == this.vaultId &&
-          other.keys == this.keys &&
+          $driftBlobEquality.equals(other.vaultId, this.vaultId) &&
+          $driftBlobEquality.equals(other.keys, this.keys) &&
           other.updatedAt == this.updatedAt);
 }
 
 class RequestCompanion extends UpdateCompanion<RequestData> {
   final Value<String> id;
-  final Value<String> name;
-  final Value<String> displayName;
+  final Value<Uint8List> name;
+  final Value<Uint8List> displayName;
   final Value<bool> self;
-  final Value<String> vaultId;
-  final Value<String> keys;
+  final Value<Uint8List> vaultId;
+  final Value<Uint8List> keys;
   final Value<BigInt> updatedAt;
   final Value<int> rowid;
   const RequestCompanion({
@@ -2413,11 +2161,11 @@ class RequestCompanion extends UpdateCompanion<RequestData> {
   });
   RequestCompanion.insert({
     required String id,
-    required String name,
-    required String displayName,
+    required Uint8List name,
+    required Uint8List displayName,
     required bool self,
-    required String vaultId,
-    required String keys,
+    required Uint8List vaultId,
+    required Uint8List keys,
     required BigInt updatedAt,
     this.rowid = const Value.absent(),
   }) : id = Value(id),
@@ -2429,11 +2177,11 @@ class RequestCompanion extends UpdateCompanion<RequestData> {
        updatedAt = Value(updatedAt);
   static Insertable<RequestData> custom({
     Expression<String>? id,
-    Expression<String>? name,
-    Expression<String>? displayName,
+    Expression<Uint8List>? name,
+    Expression<Uint8List>? displayName,
     Expression<bool>? self,
-    Expression<String>? vaultId,
-    Expression<String>? keys,
+    Expression<Uint8List>? vaultId,
+    Expression<Uint8List>? keys,
     Expression<BigInt>? updatedAt,
     Expression<int>? rowid,
   }) {
@@ -2451,11 +2199,11 @@ class RequestCompanion extends UpdateCompanion<RequestData> {
 
   RequestCompanion copyWith({
     Value<String>? id,
-    Value<String>? name,
-    Value<String>? displayName,
+    Value<Uint8List>? name,
+    Value<Uint8List>? displayName,
     Value<bool>? self,
-    Value<String>? vaultId,
-    Value<String>? keys,
+    Value<Uint8List>? vaultId,
+    Value<Uint8List>? keys,
     Value<BigInt>? updatedAt,
     Value<int>? rowid,
   }) {
@@ -2478,19 +2226,19 @@ class RequestCompanion extends UpdateCompanion<RequestData> {
       map['id'] = Variable<String>(id.value);
     }
     if (name.present) {
-      map['name'] = Variable<String>(name.value);
+      map['name'] = Variable<Uint8List>(name.value);
     }
     if (displayName.present) {
-      map['display_name'] = Variable<String>(displayName.value);
+      map['display_name'] = Variable<Uint8List>(displayName.value);
     }
     if (self.present) {
       map['self'] = Variable<bool>(self.value);
     }
     if (vaultId.present) {
-      map['vault_id'] = Variable<String>(vaultId.value);
+      map['vault_id'] = Variable<Uint8List>(vaultId.value);
     }
     if (keys.present) {
-      map['keys'] = Variable<String>(keys.value);
+      map['keys'] = Variable<Uint8List>(keys.value);
     }
     if (updatedAt.present) {
       map['updated_at'] = Variable<BigInt>(updatedAt.value);
@@ -2534,31 +2282,32 @@ class $UnknownProfileTable extends UnknownProfile
   );
   static const VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
-  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+  late final GeneratedColumn<Uint8List> name = GeneratedColumn<Uint8List>(
     'name',
     aliasedName,
     false,
-    type: DriftSqlType.string,
+    type: DriftSqlType.blob,
     requiredDuringInsert: true,
   );
   static const VerificationMeta _displayNameMeta = const VerificationMeta(
     'displayName',
   );
   @override
-  late final GeneratedColumn<String> displayName = GeneratedColumn<String>(
-    'display_name',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
+  late final GeneratedColumn<Uint8List> displayName =
+      GeneratedColumn<Uint8List>(
+        'display_name',
+        aliasedName,
+        false,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: true,
+      );
   static const VerificationMeta _keysMeta = const VerificationMeta('keys');
   @override
-  late final GeneratedColumn<String> keys = GeneratedColumn<String>(
+  late final GeneratedColumn<Uint8List> keys = GeneratedColumn<Uint8List>(
     'keys',
     aliasedName,
     false,
-    type: DriftSqlType.string,
+    type: DriftSqlType.blob,
     requiredDuringInsert: true,
   );
   static const VerificationMeta _lastFetchedMeta = const VerificationMeta(
@@ -2650,17 +2399,17 @@ class $UnknownProfileTable extends UnknownProfile
           )!,
       name:
           attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
+            DriftSqlType.blob,
             data['${effectivePrefix}name'],
           )!,
       displayName:
           attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
+            DriftSqlType.blob,
             data['${effectivePrefix}display_name'],
           )!,
       keys:
           attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
+            DriftSqlType.blob,
             data['${effectivePrefix}keys'],
           )!,
       lastFetched:
@@ -2680,9 +2429,9 @@ class $UnknownProfileTable extends UnknownProfile
 class UnknownProfileData extends DataClass
     implements Insertable<UnknownProfileData> {
   final String id;
-  final String name;
-  final String displayName;
-  final String keys;
+  final Uint8List name;
+  final Uint8List displayName;
+  final Uint8List keys;
   final DateTime lastFetched;
   const UnknownProfileData({
     required this.id,
@@ -2695,9 +2444,9 @@ class UnknownProfileData extends DataClass
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
-    map['name'] = Variable<String>(name);
-    map['display_name'] = Variable<String>(displayName);
-    map['keys'] = Variable<String>(keys);
+    map['name'] = Variable<Uint8List>(name);
+    map['display_name'] = Variable<Uint8List>(displayName);
+    map['keys'] = Variable<Uint8List>(keys);
     map['last_fetched'] = Variable<DateTime>(lastFetched);
     return map;
   }
@@ -2719,9 +2468,9 @@ class UnknownProfileData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return UnknownProfileData(
       id: serializer.fromJson<String>(json['id']),
-      name: serializer.fromJson<String>(json['name']),
-      displayName: serializer.fromJson<String>(json['displayName']),
-      keys: serializer.fromJson<String>(json['keys']),
+      name: serializer.fromJson<Uint8List>(json['name']),
+      displayName: serializer.fromJson<Uint8List>(json['displayName']),
+      keys: serializer.fromJson<Uint8List>(json['keys']),
       lastFetched: serializer.fromJson<DateTime>(json['lastFetched']),
     );
   }
@@ -2730,18 +2479,18 @@ class UnknownProfileData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
-      'name': serializer.toJson<String>(name),
-      'displayName': serializer.toJson<String>(displayName),
-      'keys': serializer.toJson<String>(keys),
+      'name': serializer.toJson<Uint8List>(name),
+      'displayName': serializer.toJson<Uint8List>(displayName),
+      'keys': serializer.toJson<Uint8List>(keys),
       'lastFetched': serializer.toJson<DateTime>(lastFetched),
     };
   }
 
   UnknownProfileData copyWith({
     String? id,
-    String? name,
-    String? displayName,
-    String? keys,
+    Uint8List? name,
+    Uint8List? displayName,
+    Uint8List? keys,
     DateTime? lastFetched,
   }) => UnknownProfileData(
     id: id ?? this.id,
@@ -2775,23 +2524,29 @@ class UnknownProfileData extends DataClass
   }
 
   @override
-  int get hashCode => Object.hash(id, name, displayName, keys, lastFetched);
+  int get hashCode => Object.hash(
+    id,
+    $driftBlobEquality.hash(name),
+    $driftBlobEquality.hash(displayName),
+    $driftBlobEquality.hash(keys),
+    lastFetched,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is UnknownProfileData &&
           other.id == this.id &&
-          other.name == this.name &&
-          other.displayName == this.displayName &&
-          other.keys == this.keys &&
+          $driftBlobEquality.equals(other.name, this.name) &&
+          $driftBlobEquality.equals(other.displayName, this.displayName) &&
+          $driftBlobEquality.equals(other.keys, this.keys) &&
           other.lastFetched == this.lastFetched);
 }
 
 class UnknownProfileCompanion extends UpdateCompanion<UnknownProfileData> {
   final Value<String> id;
-  final Value<String> name;
-  final Value<String> displayName;
-  final Value<String> keys;
+  final Value<Uint8List> name;
+  final Value<Uint8List> displayName;
+  final Value<Uint8List> keys;
   final Value<DateTime> lastFetched;
   final Value<int> rowid;
   const UnknownProfileCompanion({
@@ -2804,9 +2559,9 @@ class UnknownProfileCompanion extends UpdateCompanion<UnknownProfileData> {
   });
   UnknownProfileCompanion.insert({
     required String id,
-    required String name,
-    required String displayName,
-    required String keys,
+    required Uint8List name,
+    required Uint8List displayName,
+    required Uint8List keys,
     this.lastFetched = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
@@ -2815,9 +2570,9 @@ class UnknownProfileCompanion extends UpdateCompanion<UnknownProfileData> {
        keys = Value(keys);
   static Insertable<UnknownProfileData> custom({
     Expression<String>? id,
-    Expression<String>? name,
-    Expression<String>? displayName,
-    Expression<String>? keys,
+    Expression<Uint8List>? name,
+    Expression<Uint8List>? displayName,
+    Expression<Uint8List>? keys,
     Expression<DateTime>? lastFetched,
     Expression<int>? rowid,
   }) {
@@ -2833,9 +2588,9 @@ class UnknownProfileCompanion extends UpdateCompanion<UnknownProfileData> {
 
   UnknownProfileCompanion copyWith({
     Value<String>? id,
-    Value<String>? name,
-    Value<String>? displayName,
-    Value<String>? keys,
+    Value<Uint8List>? name,
+    Value<Uint8List>? displayName,
+    Value<Uint8List>? keys,
     Value<DateTime>? lastFetched,
     Value<int>? rowid,
   }) {
@@ -2856,13 +2611,13 @@ class UnknownProfileCompanion extends UpdateCompanion<UnknownProfileData> {
       map['id'] = Variable<String>(id.value);
     }
     if (name.present) {
-      map['name'] = Variable<String>(name.value);
+      map['name'] = Variable<Uint8List>(name.value);
     }
     if (displayName.present) {
-      map['display_name'] = Variable<String>(displayName.value);
+      map['display_name'] = Variable<Uint8List>(displayName.value);
     }
     if (keys.present) {
-      map['keys'] = Variable<String>(keys.value);
+      map['keys'] = Variable<Uint8List>(keys.value);
     }
     if (lastFetched.present) {
       map['last_fetched'] = Variable<DateTime>(lastFetched.value);
@@ -2905,21 +2660,22 @@ class $ProfileTable extends Profile with TableInfo<$ProfileTable, ProfileData> {
     'pictureContainer',
   );
   @override
-  late final GeneratedColumn<String> pictureContainer = GeneratedColumn<String>(
-    'picture_container',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
+  late final GeneratedColumn<Uint8List> pictureContainer =
+      GeneratedColumn<Uint8List>(
+        'picture_container',
+        aliasedName,
+        true,
+        type: DriftSqlType.blob,
+        requiredDuringInsert: false,
+      );
   static const VerificationMeta _dataMeta = const VerificationMeta('data');
   @override
-  late final GeneratedColumn<String> data = GeneratedColumn<String>(
+  late final GeneratedColumn<Uint8List> data = GeneratedColumn<Uint8List>(
     'data',
     aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
+    true,
+    type: DriftSqlType.blob,
+    requiredDuringInsert: false,
   );
   @override
   List<GeneratedColumn> get $columns => [id, pictureContainer, data];
@@ -2948,16 +2704,12 @@ class $ProfileTable extends Profile with TableInfo<$ProfileTable, ProfileData> {
           _pictureContainerMeta,
         ),
       );
-    } else if (isInserting) {
-      context.missing(_pictureContainerMeta);
     }
     if (data.containsKey('data')) {
       context.handle(
         _dataMeta,
         this.data.isAcceptableOrUnknown(data['data']!, _dataMeta),
       );
-    } else if (isInserting) {
-      context.missing(_dataMeta);
     }
     return context;
   }
@@ -2973,16 +2725,14 @@ class $ProfileTable extends Profile with TableInfo<$ProfileTable, ProfileData> {
             DriftSqlType.string,
             data['${effectivePrefix}id'],
           )!,
-      pictureContainer:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}picture_container'],
-          )!,
-      data:
-          attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
-            data['${effectivePrefix}data'],
-          )!,
+      pictureContainer: attachedDatabase.typeMapping.read(
+        DriftSqlType.blob,
+        data['${effectivePrefix}picture_container'],
+      ),
+      data: attachedDatabase.typeMapping.read(
+        DriftSqlType.blob,
+        data['${effectivePrefix}data'],
+      ),
     );
   }
 
@@ -2994,27 +2744,30 @@ class $ProfileTable extends Profile with TableInfo<$ProfileTable, ProfileData> {
 
 class ProfileData extends DataClass implements Insertable<ProfileData> {
   final String id;
-  final String pictureContainer;
-  final String data;
-  const ProfileData({
-    required this.id,
-    required this.pictureContainer,
-    required this.data,
-  });
+  final Uint8List? pictureContainer;
+  final Uint8List? data;
+  const ProfileData({required this.id, this.pictureContainer, this.data});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
-    map['picture_container'] = Variable<String>(pictureContainer);
-    map['data'] = Variable<String>(data);
+    if (!nullToAbsent || pictureContainer != null) {
+      map['picture_container'] = Variable<Uint8List>(pictureContainer);
+    }
+    if (!nullToAbsent || data != null) {
+      map['data'] = Variable<Uint8List>(data);
+    }
     return map;
   }
 
   ProfileCompanion toCompanion(bool nullToAbsent) {
     return ProfileCompanion(
       id: Value(id),
-      pictureContainer: Value(pictureContainer),
-      data: Value(data),
+      pictureContainer:
+          pictureContainer == null && nullToAbsent
+              ? const Value.absent()
+              : Value(pictureContainer),
+      data: data == null && nullToAbsent ? const Value.absent() : Value(data),
     );
   }
 
@@ -3025,8 +2778,10 @@ class ProfileData extends DataClass implements Insertable<ProfileData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return ProfileData(
       id: serializer.fromJson<String>(json['id']),
-      pictureContainer: serializer.fromJson<String>(json['pictureContainer']),
-      data: serializer.fromJson<String>(json['data']),
+      pictureContainer: serializer.fromJson<Uint8List?>(
+        json['pictureContainer'],
+      ),
+      data: serializer.fromJson<Uint8List?>(json['data']),
     );
   }
   @override
@@ -3034,17 +2789,23 @@ class ProfileData extends DataClass implements Insertable<ProfileData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
-      'pictureContainer': serializer.toJson<String>(pictureContainer),
-      'data': serializer.toJson<String>(data),
+      'pictureContainer': serializer.toJson<Uint8List?>(pictureContainer),
+      'data': serializer.toJson<Uint8List?>(data),
     };
   }
 
-  ProfileData copyWith({String? id, String? pictureContainer, String? data}) =>
-      ProfileData(
-        id: id ?? this.id,
-        pictureContainer: pictureContainer ?? this.pictureContainer,
-        data: data ?? this.data,
-      );
+  ProfileData copyWith({
+    String? id,
+    Value<Uint8List?> pictureContainer = const Value.absent(),
+    Value<Uint8List?> data = const Value.absent(),
+  }) => ProfileData(
+    id: id ?? this.id,
+    pictureContainer:
+        pictureContainer.present
+            ? pictureContainer.value
+            : this.pictureContainer,
+    data: data.present ? data.value : this.data,
+  );
   ProfileData copyWithCompanion(ProfileCompanion data) {
     return ProfileData(
       id: data.id.present ? data.id.value : this.id,
@@ -3067,20 +2828,27 @@ class ProfileData extends DataClass implements Insertable<ProfileData> {
   }
 
   @override
-  int get hashCode => Object.hash(id, pictureContainer, data);
+  int get hashCode => Object.hash(
+    id,
+    $driftBlobEquality.hash(pictureContainer),
+    $driftBlobEquality.hash(data),
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is ProfileData &&
           other.id == this.id &&
-          other.pictureContainer == this.pictureContainer &&
-          other.data == this.data);
+          $driftBlobEquality.equals(
+            other.pictureContainer,
+            this.pictureContainer,
+          ) &&
+          $driftBlobEquality.equals(other.data, this.data));
 }
 
 class ProfileCompanion extends UpdateCompanion<ProfileData> {
   final Value<String> id;
-  final Value<String> pictureContainer;
-  final Value<String> data;
+  final Value<Uint8List?> pictureContainer;
+  final Value<Uint8List?> data;
   final Value<int> rowid;
   const ProfileCompanion({
     this.id = const Value.absent(),
@@ -3090,16 +2858,14 @@ class ProfileCompanion extends UpdateCompanion<ProfileData> {
   });
   ProfileCompanion.insert({
     required String id,
-    required String pictureContainer,
-    required String data,
+    this.pictureContainer = const Value.absent(),
+    this.data = const Value.absent(),
     this.rowid = const Value.absent(),
-  }) : id = Value(id),
-       pictureContainer = Value(pictureContainer),
-       data = Value(data);
+  }) : id = Value(id);
   static Insertable<ProfileData> custom({
     Expression<String>? id,
-    Expression<String>? pictureContainer,
-    Expression<String>? data,
+    Expression<Uint8List>? pictureContainer,
+    Expression<Uint8List>? data,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -3112,8 +2878,8 @@ class ProfileCompanion extends UpdateCompanion<ProfileData> {
 
   ProfileCompanion copyWith({
     Value<String>? id,
-    Value<String>? pictureContainer,
-    Value<String>? data,
+    Value<Uint8List?>? pictureContainer,
+    Value<Uint8List?>? data,
     Value<int>? rowid,
   }) {
     return ProfileCompanion(
@@ -3131,10 +2897,10 @@ class ProfileCompanion extends UpdateCompanion<ProfileData> {
       map['id'] = Variable<String>(id.value);
     }
     if (pictureContainer.present) {
-      map['picture_container'] = Variable<String>(pictureContainer.value);
+      map['picture_container'] = Variable<Uint8List>(pictureContainer.value);
     }
     if (data.present) {
-      map['data'] = Variable<String>(data.value);
+      map['data'] = Variable<Uint8List>(data.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -3364,11 +3130,11 @@ class $LibraryEntryTable extends LibraryEntry
   );
   static const VerificationMeta _dataMeta = const VerificationMeta('data');
   @override
-  late final GeneratedColumn<String> data = GeneratedColumn<String>(
+  late final GeneratedColumn<Uint8List> data = GeneratedColumn<Uint8List>(
     'data',
     aliasedName,
     false,
-    type: DriftSqlType.string,
+    type: DriftSqlType.blob,
     requiredDuringInsert: true,
   );
   static const VerificationMeta _widthMeta = const VerificationMeta('width');
@@ -3489,7 +3255,7 @@ class $LibraryEntryTable extends LibraryEntry
           )!,
       data:
           attachedDatabase.typeMapping.read(
-            DriftSqlType.string,
+            DriftSqlType.blob,
             data['${effectivePrefix}data'],
           )!,
       width:
@@ -3520,7 +3286,7 @@ class LibraryEntryData extends DataClass
   final LibraryEntryType type;
   final BigInt createdAt;
   final String identifierHash;
-  final String data;
+  final Uint8List data;
   final int width;
   final int height;
   const LibraryEntryData({
@@ -3543,7 +3309,7 @@ class LibraryEntryData extends DataClass
     }
     map['created_at'] = Variable<BigInt>(createdAt);
     map['identifier_hash'] = Variable<String>(identifierHash);
-    map['data'] = Variable<String>(data);
+    map['data'] = Variable<Uint8List>(data);
     map['width'] = Variable<int>(width);
     map['height'] = Variable<int>(height);
     return map;
@@ -3573,7 +3339,7 @@ class LibraryEntryData extends DataClass
       ),
       createdAt: serializer.fromJson<BigInt>(json['createdAt']),
       identifierHash: serializer.fromJson<String>(json['identifierHash']),
-      data: serializer.fromJson<String>(json['data']),
+      data: serializer.fromJson<Uint8List>(json['data']),
       width: serializer.fromJson<int>(json['width']),
       height: serializer.fromJson<int>(json['height']),
     );
@@ -3588,7 +3354,7 @@ class LibraryEntryData extends DataClass
       ),
       'createdAt': serializer.toJson<BigInt>(createdAt),
       'identifierHash': serializer.toJson<String>(identifierHash),
-      'data': serializer.toJson<String>(data),
+      'data': serializer.toJson<Uint8List>(data),
       'width': serializer.toJson<int>(width),
       'height': serializer.toJson<int>(height),
     };
@@ -3599,7 +3365,7 @@ class LibraryEntryData extends DataClass
     LibraryEntryType? type,
     BigInt? createdAt,
     String? identifierHash,
-    String? data,
+    Uint8List? data,
     int? width,
     int? height,
   }) => LibraryEntryData(
@@ -3641,8 +3407,15 @@ class LibraryEntryData extends DataClass
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, type, createdAt, identifierHash, data, width, height);
+  int get hashCode => Object.hash(
+    id,
+    type,
+    createdAt,
+    identifierHash,
+    $driftBlobEquality.hash(data),
+    width,
+    height,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -3651,7 +3424,7 @@ class LibraryEntryData extends DataClass
           other.type == this.type &&
           other.createdAt == this.createdAt &&
           other.identifierHash == this.identifierHash &&
-          other.data == this.data &&
+          $driftBlobEquality.equals(other.data, this.data) &&
           other.width == this.width &&
           other.height == this.height);
 }
@@ -3661,7 +3434,7 @@ class LibraryEntryCompanion extends UpdateCompanion<LibraryEntryData> {
   final Value<LibraryEntryType> type;
   final Value<BigInt> createdAt;
   final Value<String> identifierHash;
-  final Value<String> data;
+  final Value<Uint8List> data;
   final Value<int> width;
   final Value<int> height;
   final Value<int> rowid;
@@ -3680,7 +3453,7 @@ class LibraryEntryCompanion extends UpdateCompanion<LibraryEntryData> {
     required LibraryEntryType type,
     required BigInt createdAt,
     this.identifierHash = const Value.absent(),
-    required String data,
+    required Uint8List data,
     required int width,
     required int height,
     this.rowid = const Value.absent(),
@@ -3695,7 +3468,7 @@ class LibraryEntryCompanion extends UpdateCompanion<LibraryEntryData> {
     Expression<int>? type,
     Expression<BigInt>? createdAt,
     Expression<String>? identifierHash,
-    Expression<String>? data,
+    Expression<Uint8List>? data,
     Expression<int>? width,
     Expression<int>? height,
     Expression<int>? rowid,
@@ -3717,7 +3490,7 @@ class LibraryEntryCompanion extends UpdateCompanion<LibraryEntryData> {
     Value<LibraryEntryType>? type,
     Value<BigInt>? createdAt,
     Value<String>? identifierHash,
-    Value<String>? data,
+    Value<Uint8List>? data,
     Value<int>? width,
     Value<int>? height,
     Value<int>? rowid,
@@ -3752,7 +3525,7 @@ class LibraryEntryCompanion extends UpdateCompanion<LibraryEntryData> {
       map['identifier_hash'] = Variable<String>(identifierHash.value);
     }
     if (data.present) {
-      map['data'] = Variable<String>(data.value);
+      map['data'] = Variable<Uint8List>(data.value);
     }
     if (width.present) {
       map['width'] = Variable<int>(width.value);
@@ -3787,7 +3560,6 @@ abstract class _$Database extends GeneratedDatabase {
   $DatabaseManager get managers => $DatabaseManager(this);
   late final $ConversationTable conversation = $ConversationTable(this);
   late final $MessageTable message = $MessageTable(this);
-  late final $MemberTable member = $MemberTable(this);
   late final $SettingTable setting = $SettingTable(this);
   late final $FriendTable friend = $FriendTable(this);
   late final $RequestTable request = $RequestTable(this);
@@ -3830,7 +3602,6 @@ abstract class _$Database extends GeneratedDatabase {
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     conversation,
     message,
-    member,
     setting,
     friend,
     request,
@@ -3851,27 +3622,29 @@ abstract class _$Database extends GeneratedDatabase {
 typedef $$ConversationTableCreateCompanionBuilder =
     ConversationCompanion Function({
       required String id,
-      required String vaultId,
+      required Uint8List vaultId,
       required ConversationType type,
-      required String data,
-      required String token,
-      required String key,
+      required Uint8List data,
+      required Uint8List members,
+      required Uint8List token,
+      required Uint8List key,
       required BigInt lastVersion,
       required BigInt updatedAt,
-      Value<String> reads,
+      required Uint8List reads,
       Value<int> rowid,
     });
 typedef $$ConversationTableUpdateCompanionBuilder =
     ConversationCompanion Function({
       Value<String> id,
-      Value<String> vaultId,
+      Value<Uint8List> vaultId,
       Value<ConversationType> type,
-      Value<String> data,
-      Value<String> token,
-      Value<String> key,
+      Value<Uint8List> data,
+      Value<Uint8List> members,
+      Value<Uint8List> token,
+      Value<Uint8List> key,
       Value<BigInt> lastVersion,
       Value<BigInt> updatedAt,
-      Value<String> reads,
+      Value<Uint8List> reads,
       Value<int> rowid,
     });
 
@@ -3889,7 +3662,7 @@ class $$ConversationTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get vaultId => $composableBuilder(
+  ColumnFilters<Uint8List> get vaultId => $composableBuilder(
     column: $table.vaultId,
     builder: (column) => ColumnFilters(column),
   );
@@ -3900,17 +3673,22 @@ class $$ConversationTableFilterComposer
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
-  ColumnFilters<String> get data => $composableBuilder(
+  ColumnFilters<Uint8List> get data => $composableBuilder(
     column: $table.data,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get token => $composableBuilder(
+  ColumnFilters<Uint8List> get members => $composableBuilder(
+    column: $table.members,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<Uint8List> get token => $composableBuilder(
     column: $table.token,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get key => $composableBuilder(
+  ColumnFilters<Uint8List> get key => $composableBuilder(
     column: $table.key,
     builder: (column) => ColumnFilters(column),
   );
@@ -3925,7 +3703,7 @@ class $$ConversationTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get reads => $composableBuilder(
+  ColumnFilters<Uint8List> get reads => $composableBuilder(
     column: $table.reads,
     builder: (column) => ColumnFilters(column),
   );
@@ -3945,7 +3723,7 @@ class $$ConversationTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get vaultId => $composableBuilder(
+  ColumnOrderings<Uint8List> get vaultId => $composableBuilder(
     column: $table.vaultId,
     builder: (column) => ColumnOrderings(column),
   );
@@ -3955,17 +3733,22 @@ class $$ConversationTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get data => $composableBuilder(
+  ColumnOrderings<Uint8List> get data => $composableBuilder(
     column: $table.data,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get token => $composableBuilder(
+  ColumnOrderings<Uint8List> get members => $composableBuilder(
+    column: $table.members,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<Uint8List> get token => $composableBuilder(
     column: $table.token,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get key => $composableBuilder(
+  ColumnOrderings<Uint8List> get key => $composableBuilder(
     column: $table.key,
     builder: (column) => ColumnOrderings(column),
   );
@@ -3980,7 +3763,7 @@ class $$ConversationTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get reads => $composableBuilder(
+  ColumnOrderings<Uint8List> get reads => $composableBuilder(
     column: $table.reads,
     builder: (column) => ColumnOrderings(column),
   );
@@ -3998,19 +3781,22 @@ class $$ConversationTableAnnotationComposer
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<String> get vaultId =>
+  GeneratedColumn<Uint8List> get vaultId =>
       $composableBuilder(column: $table.vaultId, builder: (column) => column);
 
   GeneratedColumnWithTypeConverter<ConversationType, int> get type =>
       $composableBuilder(column: $table.type, builder: (column) => column);
 
-  GeneratedColumn<String> get data =>
+  GeneratedColumn<Uint8List> get data =>
       $composableBuilder(column: $table.data, builder: (column) => column);
 
-  GeneratedColumn<String> get token =>
+  GeneratedColumn<Uint8List> get members =>
+      $composableBuilder(column: $table.members, builder: (column) => column);
+
+  GeneratedColumn<Uint8List> get token =>
       $composableBuilder(column: $table.token, builder: (column) => column);
 
-  GeneratedColumn<String> get key =>
+  GeneratedColumn<Uint8List> get key =>
       $composableBuilder(column: $table.key, builder: (column) => column);
 
   GeneratedColumn<BigInt> get lastVersion => $composableBuilder(
@@ -4021,7 +3807,7 @@ class $$ConversationTableAnnotationComposer
   GeneratedColumn<BigInt> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
 
-  GeneratedColumn<String> get reads =>
+  GeneratedColumn<Uint8List> get reads =>
       $composableBuilder(column: $table.reads, builder: (column) => column);
 }
 
@@ -4058,20 +3844,22 @@ class $$ConversationTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
-                Value<String> vaultId = const Value.absent(),
+                Value<Uint8List> vaultId = const Value.absent(),
                 Value<ConversationType> type = const Value.absent(),
-                Value<String> data = const Value.absent(),
-                Value<String> token = const Value.absent(),
-                Value<String> key = const Value.absent(),
+                Value<Uint8List> data = const Value.absent(),
+                Value<Uint8List> members = const Value.absent(),
+                Value<Uint8List> token = const Value.absent(),
+                Value<Uint8List> key = const Value.absent(),
                 Value<BigInt> lastVersion = const Value.absent(),
                 Value<BigInt> updatedAt = const Value.absent(),
-                Value<String> reads = const Value.absent(),
+                Value<Uint8List> reads = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ConversationCompanion(
                 id: id,
                 vaultId: vaultId,
                 type: type,
                 data: data,
+                members: members,
                 token: token,
                 key: key,
                 lastVersion: lastVersion,
@@ -4082,20 +3870,22 @@ class $$ConversationTableTableManager
           createCompanionCallback:
               ({
                 required String id,
-                required String vaultId,
+                required Uint8List vaultId,
                 required ConversationType type,
-                required String data,
-                required String token,
-                required String key,
+                required Uint8List data,
+                required Uint8List members,
+                required Uint8List token,
+                required Uint8List key,
                 required BigInt lastVersion,
                 required BigInt updatedAt,
-                Value<String> reads = const Value.absent(),
+                required Uint8List reads,
                 Value<int> rowid = const Value.absent(),
               }) => ConversationCompanion.insert(
                 id: id,
                 vaultId: vaultId,
                 type: type,
                 data: data,
+                members: members,
                 token: token,
                 key: key,
                 lastVersion: lastVersion,
@@ -4138,9 +3928,9 @@ typedef $$ConversationTableProcessedTableManager =
 typedef $$MessageTableCreateCompanionBuilder =
     MessageCompanion Function({
       required String id,
-      required String content,
+      required Uint8List content,
       required String senderToken,
-      required String senderAddress,
+      required Uint8List senderAddress,
       required BigInt createdAt,
       required String conversation,
       required bool edited,
@@ -4150,9 +3940,9 @@ typedef $$MessageTableCreateCompanionBuilder =
 typedef $$MessageTableUpdateCompanionBuilder =
     MessageCompanion Function({
       Value<String> id,
-      Value<String> content,
+      Value<Uint8List> content,
       Value<String> senderToken,
-      Value<String> senderAddress,
+      Value<Uint8List> senderAddress,
       Value<BigInt> createdAt,
       Value<String> conversation,
       Value<bool> edited,
@@ -4173,7 +3963,7 @@ class $$MessageTableFilterComposer extends Composer<_$Database, $MessageTable> {
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get content => $composableBuilder(
+  ColumnFilters<Uint8List> get content => $composableBuilder(
     column: $table.content,
     builder: (column) => ColumnFilters(column),
   );
@@ -4183,7 +3973,7 @@ class $$MessageTableFilterComposer extends Composer<_$Database, $MessageTable> {
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get senderAddress => $composableBuilder(
+  ColumnFilters<Uint8List> get senderAddress => $composableBuilder(
     column: $table.senderAddress,
     builder: (column) => ColumnFilters(column),
   );
@@ -4223,7 +4013,7 @@ class $$MessageTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get content => $composableBuilder(
+  ColumnOrderings<Uint8List> get content => $composableBuilder(
     column: $table.content,
     builder: (column) => ColumnOrderings(column),
   );
@@ -4233,7 +4023,7 @@ class $$MessageTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get senderAddress => $composableBuilder(
+  ColumnOrderings<Uint8List> get senderAddress => $composableBuilder(
     column: $table.senderAddress,
     builder: (column) => ColumnOrderings(column),
   );
@@ -4271,7 +4061,7 @@ class $$MessageTableAnnotationComposer
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<String> get content =>
+  GeneratedColumn<Uint8List> get content =>
       $composableBuilder(column: $table.content, builder: (column) => column);
 
   GeneratedColumn<String> get senderToken => $composableBuilder(
@@ -4279,7 +4069,7 @@ class $$MessageTableAnnotationComposer
     builder: (column) => column,
   );
 
-  GeneratedColumn<String> get senderAddress => $composableBuilder(
+  GeneratedColumn<Uint8List> get senderAddress => $composableBuilder(
     column: $table.senderAddress,
     builder: (column) => column,
   );
@@ -4328,9 +4118,9 @@ class $$MessageTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
-                Value<String> content = const Value.absent(),
+                Value<Uint8List> content = const Value.absent(),
                 Value<String> senderToken = const Value.absent(),
-                Value<String> senderAddress = const Value.absent(),
+                Value<Uint8List> senderAddress = const Value.absent(),
                 Value<BigInt> createdAt = const Value.absent(),
                 Value<String> conversation = const Value.absent(),
                 Value<bool> edited = const Value.absent(),
@@ -4350,9 +4140,9 @@ class $$MessageTableTableManager
           createCompanionCallback:
               ({
                 required String id,
-                required String content,
+                required Uint8List content,
                 required String senderToken,
-                required String senderAddress,
+                required Uint8List senderAddress,
                 required BigInt createdAt,
                 required String conversation,
                 required bool edited,
@@ -4398,198 +4188,16 @@ typedef $$MessageTableProcessedTableManager =
       MessageData,
       PrefetchHooks Function()
     >;
-typedef $$MemberTableCreateCompanionBuilder =
-    MemberCompanion Function({
-      required String id,
-      Value<String?> conversationId,
-      required String accountId,
-      required int roleId,
-      Value<int> rowid,
-    });
-typedef $$MemberTableUpdateCompanionBuilder =
-    MemberCompanion Function({
-      Value<String> id,
-      Value<String?> conversationId,
-      Value<String> accountId,
-      Value<int> roleId,
-      Value<int> rowid,
-    });
-
-class $$MemberTableFilterComposer extends Composer<_$Database, $MemberTable> {
-  $$MemberTableFilterComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnFilters<String> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get conversationId => $composableBuilder(
-    column: $table.conversationId,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get accountId => $composableBuilder(
-    column: $table.accountId,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<int> get roleId => $composableBuilder(
-    column: $table.roleId,
-    builder: (column) => ColumnFilters(column),
-  );
-}
-
-class $$MemberTableOrderingComposer extends Composer<_$Database, $MemberTable> {
-  $$MemberTableOrderingComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  ColumnOrderings<String> get id => $composableBuilder(
-    column: $table.id,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get conversationId => $composableBuilder(
-    column: $table.conversationId,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<String> get accountId => $composableBuilder(
-    column: $table.accountId,
-    builder: (column) => ColumnOrderings(column),
-  );
-
-  ColumnOrderings<int> get roleId => $composableBuilder(
-    column: $table.roleId,
-    builder: (column) => ColumnOrderings(column),
-  );
-}
-
-class $$MemberTableAnnotationComposer
-    extends Composer<_$Database, $MemberTable> {
-  $$MemberTableAnnotationComposer({
-    required super.$db,
-    required super.$table,
-    super.joinBuilder,
-    super.$addJoinBuilderToRootComposer,
-    super.$removeJoinBuilderFromRootComposer,
-  });
-  GeneratedColumn<String> get id =>
-      $composableBuilder(column: $table.id, builder: (column) => column);
-
-  GeneratedColumn<String> get conversationId => $composableBuilder(
-    column: $table.conversationId,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<String> get accountId =>
-      $composableBuilder(column: $table.accountId, builder: (column) => column);
-
-  GeneratedColumn<int> get roleId =>
-      $composableBuilder(column: $table.roleId, builder: (column) => column);
-}
-
-class $$MemberTableTableManager
-    extends
-        RootTableManager<
-          _$Database,
-          $MemberTable,
-          MemberData,
-          $$MemberTableFilterComposer,
-          $$MemberTableOrderingComposer,
-          $$MemberTableAnnotationComposer,
-          $$MemberTableCreateCompanionBuilder,
-          $$MemberTableUpdateCompanionBuilder,
-          (MemberData, BaseReferences<_$Database, $MemberTable, MemberData>),
-          MemberData,
-          PrefetchHooks Function()
-        > {
-  $$MemberTableTableManager(_$Database db, $MemberTable table)
-    : super(
-        TableManagerState(
-          db: db,
-          table: table,
-          createFilteringComposer:
-              () => $$MemberTableFilterComposer($db: db, $table: table),
-          createOrderingComposer:
-              () => $$MemberTableOrderingComposer($db: db, $table: table),
-          createComputedFieldComposer:
-              () => $$MemberTableAnnotationComposer($db: db, $table: table),
-          updateCompanionCallback:
-              ({
-                Value<String> id = const Value.absent(),
-                Value<String?> conversationId = const Value.absent(),
-                Value<String> accountId = const Value.absent(),
-                Value<int> roleId = const Value.absent(),
-                Value<int> rowid = const Value.absent(),
-              }) => MemberCompanion(
-                id: id,
-                conversationId: conversationId,
-                accountId: accountId,
-                roleId: roleId,
-                rowid: rowid,
-              ),
-          createCompanionCallback:
-              ({
-                required String id,
-                Value<String?> conversationId = const Value.absent(),
-                required String accountId,
-                required int roleId,
-                Value<int> rowid = const Value.absent(),
-              }) => MemberCompanion.insert(
-                id: id,
-                conversationId: conversationId,
-                accountId: accountId,
-                roleId: roleId,
-                rowid: rowid,
-              ),
-          withReferenceMapper:
-              (p0) =>
-                  p0
-                      .map(
-                        (e) => (
-                          e.readTable(table),
-                          BaseReferences(db, table, e),
-                        ),
-                      )
-                      .toList(),
-          prefetchHooksCallback: null,
-        ),
-      );
-}
-
-typedef $$MemberTableProcessedTableManager =
-    ProcessedTableManager<
-      _$Database,
-      $MemberTable,
-      MemberData,
-      $$MemberTableFilterComposer,
-      $$MemberTableOrderingComposer,
-      $$MemberTableAnnotationComposer,
-      $$MemberTableCreateCompanionBuilder,
-      $$MemberTableUpdateCompanionBuilder,
-      (MemberData, BaseReferences<_$Database, $MemberTable, MemberData>),
-      MemberData,
-      PrefetchHooks Function()
-    >;
 typedef $$SettingTableCreateCompanionBuilder =
     SettingCompanion Function({
       required String key,
-      required String value,
+      required Uint8List value,
       Value<int> rowid,
     });
 typedef $$SettingTableUpdateCompanionBuilder =
     SettingCompanion Function({
       Value<String> key,
-      Value<String> value,
+      Value<Uint8List> value,
       Value<int> rowid,
     });
 
@@ -4606,7 +4214,7 @@ class $$SettingTableFilterComposer extends Composer<_$Database, $SettingTable> {
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get value => $composableBuilder(
+  ColumnFilters<Uint8List> get value => $composableBuilder(
     column: $table.value,
     builder: (column) => ColumnFilters(column),
   );
@@ -4626,7 +4234,7 @@ class $$SettingTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get value => $composableBuilder(
+  ColumnOrderings<Uint8List> get value => $composableBuilder(
     column: $table.value,
     builder: (column) => ColumnOrderings(column),
   );
@@ -4644,7 +4252,7 @@ class $$SettingTableAnnotationComposer
   GeneratedColumn<String> get key =>
       $composableBuilder(column: $table.key, builder: (column) => column);
 
-  GeneratedColumn<String> get value =>
+  GeneratedColumn<Uint8List> get value =>
       $composableBuilder(column: $table.value, builder: (column) => column);
 }
 
@@ -4677,13 +4285,13 @@ class $$SettingTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> key = const Value.absent(),
-                Value<String> value = const Value.absent(),
+                Value<Uint8List> value = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => SettingCompanion(key: key, value: value, rowid: rowid),
           createCompanionCallback:
               ({
                 required String key,
-                required String value,
+                required Uint8List value,
                 Value<int> rowid = const Value.absent(),
               }) =>
                   SettingCompanion.insert(key: key, value: value, rowid: rowid),
@@ -4719,20 +4327,20 @@ typedef $$SettingTableProcessedTableManager =
 typedef $$FriendTableCreateCompanionBuilder =
     FriendCompanion Function({
       required String id,
-      required String name,
-      required String displayName,
-      required String vaultId,
-      required String keys,
+      required Uint8List name,
+      required Uint8List displayName,
+      required Uint8List vaultId,
+      required Uint8List keys,
       required BigInt updatedAt,
       Value<int> rowid,
     });
 typedef $$FriendTableUpdateCompanionBuilder =
     FriendCompanion Function({
       Value<String> id,
-      Value<String> name,
-      Value<String> displayName,
-      Value<String> vaultId,
-      Value<String> keys,
+      Value<Uint8List> name,
+      Value<Uint8List> displayName,
+      Value<Uint8List> vaultId,
+      Value<Uint8List> keys,
       Value<BigInt> updatedAt,
       Value<int> rowid,
     });
@@ -4750,22 +4358,22 @@ class $$FriendTableFilterComposer extends Composer<_$Database, $FriendTable> {
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get name => $composableBuilder(
+  ColumnFilters<Uint8List> get name => $composableBuilder(
     column: $table.name,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get displayName => $composableBuilder(
+  ColumnFilters<Uint8List> get displayName => $composableBuilder(
     column: $table.displayName,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get vaultId => $composableBuilder(
+  ColumnFilters<Uint8List> get vaultId => $composableBuilder(
     column: $table.vaultId,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get keys => $composableBuilder(
+  ColumnFilters<Uint8List> get keys => $composableBuilder(
     column: $table.keys,
     builder: (column) => ColumnFilters(column),
   );
@@ -4789,22 +4397,22 @@ class $$FriendTableOrderingComposer extends Composer<_$Database, $FriendTable> {
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get name => $composableBuilder(
+  ColumnOrderings<Uint8List> get name => $composableBuilder(
     column: $table.name,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get displayName => $composableBuilder(
+  ColumnOrderings<Uint8List> get displayName => $composableBuilder(
     column: $table.displayName,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get vaultId => $composableBuilder(
+  ColumnOrderings<Uint8List> get vaultId => $composableBuilder(
     column: $table.vaultId,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get keys => $composableBuilder(
+  ColumnOrderings<Uint8List> get keys => $composableBuilder(
     column: $table.keys,
     builder: (column) => ColumnOrderings(column),
   );
@@ -4827,18 +4435,18 @@ class $$FriendTableAnnotationComposer
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<String> get name =>
+  GeneratedColumn<Uint8List> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
 
-  GeneratedColumn<String> get displayName => $composableBuilder(
+  GeneratedColumn<Uint8List> get displayName => $composableBuilder(
     column: $table.displayName,
     builder: (column) => column,
   );
 
-  GeneratedColumn<String> get vaultId =>
+  GeneratedColumn<Uint8List> get vaultId =>
       $composableBuilder(column: $table.vaultId, builder: (column) => column);
 
-  GeneratedColumn<String> get keys =>
+  GeneratedColumn<Uint8List> get keys =>
       $composableBuilder(column: $table.keys, builder: (column) => column);
 
   GeneratedColumn<BigInt> get updatedAt =>
@@ -4874,10 +4482,10 @@ class $$FriendTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
-                Value<String> name = const Value.absent(),
-                Value<String> displayName = const Value.absent(),
-                Value<String> vaultId = const Value.absent(),
-                Value<String> keys = const Value.absent(),
+                Value<Uint8List> name = const Value.absent(),
+                Value<Uint8List> displayName = const Value.absent(),
+                Value<Uint8List> vaultId = const Value.absent(),
+                Value<Uint8List> keys = const Value.absent(),
                 Value<BigInt> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => FriendCompanion(
@@ -4892,10 +4500,10 @@ class $$FriendTableTableManager
           createCompanionCallback:
               ({
                 required String id,
-                required String name,
-                required String displayName,
-                required String vaultId,
-                required String keys,
+                required Uint8List name,
+                required Uint8List displayName,
+                required Uint8List vaultId,
+                required Uint8List keys,
                 required BigInt updatedAt,
                 Value<int> rowid = const Value.absent(),
               }) => FriendCompanion.insert(
@@ -4939,22 +4547,22 @@ typedef $$FriendTableProcessedTableManager =
 typedef $$RequestTableCreateCompanionBuilder =
     RequestCompanion Function({
       required String id,
-      required String name,
-      required String displayName,
+      required Uint8List name,
+      required Uint8List displayName,
       required bool self,
-      required String vaultId,
-      required String keys,
+      required Uint8List vaultId,
+      required Uint8List keys,
       required BigInt updatedAt,
       Value<int> rowid,
     });
 typedef $$RequestTableUpdateCompanionBuilder =
     RequestCompanion Function({
       Value<String> id,
-      Value<String> name,
-      Value<String> displayName,
+      Value<Uint8List> name,
+      Value<Uint8List> displayName,
       Value<bool> self,
-      Value<String> vaultId,
-      Value<String> keys,
+      Value<Uint8List> vaultId,
+      Value<Uint8List> keys,
       Value<BigInt> updatedAt,
       Value<int> rowid,
     });
@@ -4972,12 +4580,12 @@ class $$RequestTableFilterComposer extends Composer<_$Database, $RequestTable> {
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get name => $composableBuilder(
+  ColumnFilters<Uint8List> get name => $composableBuilder(
     column: $table.name,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get displayName => $composableBuilder(
+  ColumnFilters<Uint8List> get displayName => $composableBuilder(
     column: $table.displayName,
     builder: (column) => ColumnFilters(column),
   );
@@ -4987,12 +4595,12 @@ class $$RequestTableFilterComposer extends Composer<_$Database, $RequestTable> {
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get vaultId => $composableBuilder(
+  ColumnFilters<Uint8List> get vaultId => $composableBuilder(
     column: $table.vaultId,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get keys => $composableBuilder(
+  ColumnFilters<Uint8List> get keys => $composableBuilder(
     column: $table.keys,
     builder: (column) => ColumnFilters(column),
   );
@@ -5017,12 +4625,12 @@ class $$RequestTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get name => $composableBuilder(
+  ColumnOrderings<Uint8List> get name => $composableBuilder(
     column: $table.name,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get displayName => $composableBuilder(
+  ColumnOrderings<Uint8List> get displayName => $composableBuilder(
     column: $table.displayName,
     builder: (column) => ColumnOrderings(column),
   );
@@ -5032,12 +4640,12 @@ class $$RequestTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get vaultId => $composableBuilder(
+  ColumnOrderings<Uint8List> get vaultId => $composableBuilder(
     column: $table.vaultId,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get keys => $composableBuilder(
+  ColumnOrderings<Uint8List> get keys => $composableBuilder(
     column: $table.keys,
     builder: (column) => ColumnOrderings(column),
   );
@@ -5060,10 +4668,10 @@ class $$RequestTableAnnotationComposer
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<String> get name =>
+  GeneratedColumn<Uint8List> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
 
-  GeneratedColumn<String> get displayName => $composableBuilder(
+  GeneratedColumn<Uint8List> get displayName => $composableBuilder(
     column: $table.displayName,
     builder: (column) => column,
   );
@@ -5071,10 +4679,10 @@ class $$RequestTableAnnotationComposer
   GeneratedColumn<bool> get self =>
       $composableBuilder(column: $table.self, builder: (column) => column);
 
-  GeneratedColumn<String> get vaultId =>
+  GeneratedColumn<Uint8List> get vaultId =>
       $composableBuilder(column: $table.vaultId, builder: (column) => column);
 
-  GeneratedColumn<String> get keys =>
+  GeneratedColumn<Uint8List> get keys =>
       $composableBuilder(column: $table.keys, builder: (column) => column);
 
   GeneratedColumn<BigInt> get updatedAt =>
@@ -5110,11 +4718,11 @@ class $$RequestTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
-                Value<String> name = const Value.absent(),
-                Value<String> displayName = const Value.absent(),
+                Value<Uint8List> name = const Value.absent(),
+                Value<Uint8List> displayName = const Value.absent(),
                 Value<bool> self = const Value.absent(),
-                Value<String> vaultId = const Value.absent(),
-                Value<String> keys = const Value.absent(),
+                Value<Uint8List> vaultId = const Value.absent(),
+                Value<Uint8List> keys = const Value.absent(),
                 Value<BigInt> updatedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => RequestCompanion(
@@ -5130,11 +4738,11 @@ class $$RequestTableTableManager
           createCompanionCallback:
               ({
                 required String id,
-                required String name,
-                required String displayName,
+                required Uint8List name,
+                required Uint8List displayName,
                 required bool self,
-                required String vaultId,
-                required String keys,
+                required Uint8List vaultId,
+                required Uint8List keys,
                 required BigInt updatedAt,
                 Value<int> rowid = const Value.absent(),
               }) => RequestCompanion.insert(
@@ -5179,18 +4787,18 @@ typedef $$RequestTableProcessedTableManager =
 typedef $$UnknownProfileTableCreateCompanionBuilder =
     UnknownProfileCompanion Function({
       required String id,
-      required String name,
-      required String displayName,
-      required String keys,
+      required Uint8List name,
+      required Uint8List displayName,
+      required Uint8List keys,
       Value<DateTime> lastFetched,
       Value<int> rowid,
     });
 typedef $$UnknownProfileTableUpdateCompanionBuilder =
     UnknownProfileCompanion Function({
       Value<String> id,
-      Value<String> name,
-      Value<String> displayName,
-      Value<String> keys,
+      Value<Uint8List> name,
+      Value<Uint8List> displayName,
+      Value<Uint8List> keys,
       Value<DateTime> lastFetched,
       Value<int> rowid,
     });
@@ -5209,17 +4817,17 @@ class $$UnknownProfileTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get name => $composableBuilder(
+  ColumnFilters<Uint8List> get name => $composableBuilder(
     column: $table.name,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get displayName => $composableBuilder(
+  ColumnFilters<Uint8List> get displayName => $composableBuilder(
     column: $table.displayName,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get keys => $composableBuilder(
+  ColumnFilters<Uint8List> get keys => $composableBuilder(
     column: $table.keys,
     builder: (column) => ColumnFilters(column),
   );
@@ -5244,17 +4852,17 @@ class $$UnknownProfileTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get name => $composableBuilder(
+  ColumnOrderings<Uint8List> get name => $composableBuilder(
     column: $table.name,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get displayName => $composableBuilder(
+  ColumnOrderings<Uint8List> get displayName => $composableBuilder(
     column: $table.displayName,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get keys => $composableBuilder(
+  ColumnOrderings<Uint8List> get keys => $composableBuilder(
     column: $table.keys,
     builder: (column) => ColumnOrderings(column),
   );
@@ -5277,15 +4885,15 @@ class $$UnknownProfileTableAnnotationComposer
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<String> get name =>
+  GeneratedColumn<Uint8List> get name =>
       $composableBuilder(column: $table.name, builder: (column) => column);
 
-  GeneratedColumn<String> get displayName => $composableBuilder(
+  GeneratedColumn<Uint8List> get displayName => $composableBuilder(
     column: $table.displayName,
     builder: (column) => column,
   );
 
-  GeneratedColumn<String> get keys =>
+  GeneratedColumn<Uint8List> get keys =>
       $composableBuilder(column: $table.keys, builder: (column) => column);
 
   GeneratedColumn<DateTime> get lastFetched => $composableBuilder(
@@ -5334,9 +4942,9 @@ class $$UnknownProfileTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
-                Value<String> name = const Value.absent(),
-                Value<String> displayName = const Value.absent(),
-                Value<String> keys = const Value.absent(),
+                Value<Uint8List> name = const Value.absent(),
+                Value<Uint8List> displayName = const Value.absent(),
+                Value<Uint8List> keys = const Value.absent(),
                 Value<DateTime> lastFetched = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => UnknownProfileCompanion(
@@ -5350,9 +4958,9 @@ class $$UnknownProfileTableTableManager
           createCompanionCallback:
               ({
                 required String id,
-                required String name,
-                required String displayName,
-                required String keys,
+                required Uint8List name,
+                required Uint8List displayName,
+                required Uint8List keys,
                 Value<DateTime> lastFetched = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => UnknownProfileCompanion.insert(
@@ -5398,15 +5006,15 @@ typedef $$UnknownProfileTableProcessedTableManager =
 typedef $$ProfileTableCreateCompanionBuilder =
     ProfileCompanion Function({
       required String id,
-      required String pictureContainer,
-      required String data,
+      Value<Uint8List?> pictureContainer,
+      Value<Uint8List?> data,
       Value<int> rowid,
     });
 typedef $$ProfileTableUpdateCompanionBuilder =
     ProfileCompanion Function({
       Value<String> id,
-      Value<String> pictureContainer,
-      Value<String> data,
+      Value<Uint8List?> pictureContainer,
+      Value<Uint8List?> data,
       Value<int> rowid,
     });
 
@@ -5423,12 +5031,12 @@ class $$ProfileTableFilterComposer extends Composer<_$Database, $ProfileTable> {
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get pictureContainer => $composableBuilder(
+  ColumnFilters<Uint8List> get pictureContainer => $composableBuilder(
     column: $table.pictureContainer,
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get data => $composableBuilder(
+  ColumnFilters<Uint8List> get data => $composableBuilder(
     column: $table.data,
     builder: (column) => ColumnFilters(column),
   );
@@ -5448,12 +5056,12 @@ class $$ProfileTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get pictureContainer => $composableBuilder(
+  ColumnOrderings<Uint8List> get pictureContainer => $composableBuilder(
     column: $table.pictureContainer,
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get data => $composableBuilder(
+  ColumnOrderings<Uint8List> get data => $composableBuilder(
     column: $table.data,
     builder: (column) => ColumnOrderings(column),
   );
@@ -5471,12 +5079,12 @@ class $$ProfileTableAnnotationComposer
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<String> get pictureContainer => $composableBuilder(
+  GeneratedColumn<Uint8List> get pictureContainer => $composableBuilder(
     column: $table.pictureContainer,
     builder: (column) => column,
   );
 
-  GeneratedColumn<String> get data =>
+  GeneratedColumn<Uint8List> get data =>
       $composableBuilder(column: $table.data, builder: (column) => column);
 }
 
@@ -5509,8 +5117,8 @@ class $$ProfileTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
-                Value<String> pictureContainer = const Value.absent(),
-                Value<String> data = const Value.absent(),
+                Value<Uint8List?> pictureContainer = const Value.absent(),
+                Value<Uint8List?> data = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ProfileCompanion(
                 id: id,
@@ -5521,8 +5129,8 @@ class $$ProfileTableTableManager
           createCompanionCallback:
               ({
                 required String id,
-                required String pictureContainer,
-                required String data,
+                Value<Uint8List?> pictureContainer = const Value.absent(),
+                Value<Uint8List?> data = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ProfileCompanion.insert(
                 id: id,
@@ -5685,7 +5293,7 @@ typedef $$LibraryEntryTableCreateCompanionBuilder =
       required LibraryEntryType type,
       required BigInt createdAt,
       Value<String> identifierHash,
-      required String data,
+      required Uint8List data,
       required int width,
       required int height,
       Value<int> rowid,
@@ -5696,7 +5304,7 @@ typedef $$LibraryEntryTableUpdateCompanionBuilder =
       Value<LibraryEntryType> type,
       Value<BigInt> createdAt,
       Value<String> identifierHash,
-      Value<String> data,
+      Value<Uint8List> data,
       Value<int> width,
       Value<int> height,
       Value<int> rowid,
@@ -5732,7 +5340,7 @@ class $$LibraryEntryTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get data => $composableBuilder(
+  ColumnFilters<Uint8List> get data => $composableBuilder(
     column: $table.data,
     builder: (column) => ColumnFilters(column),
   );
@@ -5777,7 +5385,7 @@ class $$LibraryEntryTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get data => $composableBuilder(
+  ColumnOrderings<Uint8List> get data => $composableBuilder(
     column: $table.data,
     builder: (column) => ColumnOrderings(column),
   );
@@ -5816,7 +5424,7 @@ class $$LibraryEntryTableAnnotationComposer
     builder: (column) => column,
   );
 
-  GeneratedColumn<String> get data =>
+  GeneratedColumn<Uint8List> get data =>
       $composableBuilder(column: $table.data, builder: (column) => column);
 
   GeneratedColumn<int> get width =>
@@ -5862,7 +5470,7 @@ class $$LibraryEntryTableTableManager
                 Value<LibraryEntryType> type = const Value.absent(),
                 Value<BigInt> createdAt = const Value.absent(),
                 Value<String> identifierHash = const Value.absent(),
-                Value<String> data = const Value.absent(),
+                Value<Uint8List> data = const Value.absent(),
                 Value<int> width = const Value.absent(),
                 Value<int> height = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -5882,7 +5490,7 @@ class $$LibraryEntryTableTableManager
                 required LibraryEntryType type,
                 required BigInt createdAt,
                 Value<String> identifierHash = const Value.absent(),
-                required String data,
+                required Uint8List data,
                 required int width,
                 required int height,
                 Value<int> rowid = const Value.absent(),
@@ -5936,8 +5544,6 @@ class $DatabaseManager {
       $$ConversationTableTableManager(_db, _db.conversation);
   $$MessageTableTableManager get message =>
       $$MessageTableTableManager(_db, _db.message);
-  $$MemberTableTableManager get member =>
-      $$MemberTableTableManager(_db, _db.member);
   $$SettingTableTableManager get setting =>
       $$SettingTableTableManager(_db, _db.setting);
   $$FriendTableTableManager get friend =>

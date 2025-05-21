@@ -6,6 +6,7 @@ import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/theme/ui/dialogs/confirm_window.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
@@ -26,10 +27,15 @@ class RequestController {
   static Future<bool> loadRequests() async {
     for (RequestData data in await db.request.select().get()) {
       final address = LPHAddress.from(data.id);
+      final unpacked = await Request.fromEntity(data);
+      if (unpacked == null) {
+        sendLog("ERROR: Couldn't unencrypt request from local database");
+        continue;
+      }
       if (data.self) {
-        requestsSent[address] = Request.fromEntity(data);
+        requestsSent[address] = unpacked;
       } else {
-        requests[address] == Request.fromEntity(data);
+        requests[address] = unpacked;
       }
     }
 
@@ -131,13 +137,20 @@ class Request {
   Request(this.id, this.name, this.displayName, this.vaultId, this.keyStorage, this.updatedAt);
 
   /// Get a request from the database object.
-  factory Request.fromEntity(RequestData data) {
+  static Future<Request?> fromEntity(RequestData data) async {
+    final name = await fromDbEncrypted(data.name);
+    final displayName = await fromDbEncrypted(data.displayName);
+    final vaultId = await fromDbEncrypted(data.vaultId);
+    final keys = await fromDbEncrypted(data.keys);
+    if (name == null || displayName == null || vaultId == null || keys == null) {
+      return null;
+    }
     return Request(
       LPHAddress.from(data.id),
-      fromDbEncrypted(data.name),
-      fromDbEncrypted(data.displayName),
-      fromDbEncrypted(data.vaultId),
-      KeyStorage.fromJson(jsonDecode(fromDbEncrypted(data.keys))),
+      name,
+      displayName,
+      vaultId,
+      KeyStorage.fromJson(jsonDecode(keys)),
       data.updatedAt.toInt(),
     );
   }
@@ -174,12 +187,12 @@ class Request {
   }
 
   /// Convert a request object to the equivalent database object.
-  RequestData entity(bool self) => RequestData(
+  Future<RequestData> entity(bool self) async => RequestData(
     id: id.encode(),
-    name: dbEncrypted(name),
-    displayName: dbEncrypted(displayName),
-    vaultId: dbEncrypted(vaultId),
-    keys: dbEncrypted(jsonEncode(keyStorage.toJson())),
+    name: await dbEncrypted(name),
+    displayName: await dbEncrypted(displayName),
+    vaultId: await dbEncrypted(vaultId),
+    keys: await dbEncrypted(jsonEncode(keyStorage.toJson())),
     self: self,
     updatedAt: BigInt.from(updatedAt),
   );

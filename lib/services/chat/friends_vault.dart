@@ -39,11 +39,18 @@ class FriendsVault {
   /// The second element is a tuple of vault id and version in case successful.
   static Future<(String?, (String, int)?)> _store(String data) async {
     // Encrypt the friend for the vault
-    final payload = encryptSymmetric(data, vaultKey);
+    final payload = await encryptSymmetricContainer(
+      key: vaultKey,
+      signingKey: signatureKeyPair.signingKey,
+      message: packToBytes(data),
+    );
+    if (payload == null) {
+      return ("encryption.error".tr, null);
+    }
 
     // Add the friend to the vault
     final json = await postAuthorizedJSON("/account/friends/add", <String, dynamic>{
-      "payload": payload,
+      "payload": base64Encode(payload),
       "receive_date": encryptDate(DateTime.fromMillisecondsSinceEpoch(0)),
     });
 
@@ -75,12 +82,19 @@ class FriendsVault {
   /// The second element is the new version in case successsful.
   static Future<(String?, int?)> _update(String id, String data) async {
     // Encrypt the friend for the vault
-    final payload = encryptSymmetric(data, vaultKey);
+    final payload = await encryptSymmetricContainer(
+      key: vaultKey,
+      signingKey: signatureKeyPair.signingKey,
+      message: packToBytes(data),
+    );
+    if (payload == null) {
+      return ("encryption.error".tr, null);
+    }
 
     // Add the friend to the vault
     final json = await postAuthorizedJSON("/account/friends/update", <String, dynamic>{
       "entry": id,
-      "payload": payload,
+      "payload": base64Encode(payload),
     });
 
     // Check if there was an error
@@ -106,13 +120,16 @@ class FriendsVault {
   }
 
   /// Encrypt a date with server-side information
-  static String encryptDate(DateTime time) {
-    return ServerStoredInfo(time.millisecondsSinceEpoch.toString()).transform();
+  static Future<String?> encryptDate(DateTime time) async {
+    return await ServerStoredInfo(time.millisecondsSinceEpoch.toString()).transform();
   }
 
   /// Decrypt a date with server-side information
-  static DateTime decryptDate(String text) {
-    final info = ServerStoredInfo.untransform(text);
+  static Future<DateTime?> decryptDate(String text) async {
+    final info = await ServerStoredInfo.untransform(text);
+    if (info.error) {
+      return null;
+    }
     return DateTime.fromMillisecondsSinceEpoch(int.parse(info.text));
   }
 
@@ -134,10 +151,11 @@ class FriendsVault {
 
   /// Set a new receive date (for replay attack prevention)
   static Future<bool> setReceiveDate(String id, DateTime received) async {
-    final json = await postAuthorizedJSON("/account/friends/update_receive_date", {
-      "id": id,
-      "date": encryptDate(received),
-    });
+    final date = await encryptDate(received);
+    if (date == null) {
+      return false;
+    }
+    final json = await postAuthorizedJSON("/account/friends/update_receive_date", {"id": id, "date": date});
 
     if (!json["success"]) {
       sendLog("COULDN'T SAVE THE NEW RECEIVE DATE ${json["error"]}");
@@ -169,10 +187,7 @@ class FriendsVault {
     }
 
     // Parse the JSON (in different isolate)
-    final res = await sodiumLib.runIsolated(
-      (sodium, keys, pairs) => _parseFriends(version, json, sodium, keys[0]),
-      secureKeys: [vaultKey],
-    );
+    final res = await _parseFriends(version, json);
 
     // Update the local vault
     await updateFromVaultUpdate(res);
@@ -182,12 +197,7 @@ class FriendsVault {
   }
 
   /// Parse a response from the server vault sync to a friend vault update
-  static Future<FriendVaultUpdate> _parseFriends(
-    int currentVersion,
-    Map<String, dynamic> json,
-    Sodium sodium,
-    SecureKey key,
-  ) async {
+  static Future<FriendVaultUpdate> _parseFriends(int currentVersion, Map<String, dynamic> json) async {
     final deleted = <String>[];
     final friendVaultIds = <String>[];
     final friends = <Friend>[];
@@ -205,9 +215,28 @@ class FriendsVault {
         continue;
       }
 
-      // Check if request or friend
-      final decrypted = decryptSymmetric(friend["friend"], key, sodium);
-      final data = jsonDecode(decrypted);
+      // Decrypt the request
+      final unpacked = decodeFromBase64(friend["friend"]);
+      if (unpacked == null) {
+        sendLog("ERROR: Couldn't unpack friend");
+        continue;
+      }
+      final decrypted = await decryptSymmetricContainer(
+        ciphertext: unpacked,
+        key: vaultKey,
+        verifyingKey: signatureKeyPair.verifyingKey,
+      );
+      if (decrypted == null) {
+        sendLog("ERROR: Couldn't decrypt friend from the server");
+        continue;
+      }
+      final friendUnpacked = unpackFromBytes(decrypted);
+      if (friendUnpacked == null) {
+        sendLog("ERROR: Couldn't unpack friend (internal)");
+        continue;
+      }
+
+      final data = jsonDecode(friendUnpacked);
       if (data["rq"]) {
         if (data["self"]) {
           final rq = Request.fromStoredPayload(friend["id"], friend["updated_at"], data);
@@ -299,39 +328,34 @@ class FriendVaultUpdate {
 
 /// Class for storing all keys for a friend
 class KeyStorage {
-  late String profileKeyPacked;
+  SymmetricKey profileKey;
   String storedActionKey;
-  Uint8List publicKey;
-  Uint8List signatureKey;
+  PublicKey publicKey;
+  VerifyingKey verifyKey;
 
   KeyStorage.empty()
-    : publicKey = Uint8List(0),
-      signatureKey = Uint8List(0),
-      profileKeyPacked = "unbreathable_was_here_but_2024",
+    : publicKey = PublicKey(id: 0),
+      verifyKey = VerifyingKey(id: 0),
+      profileKey = SymmetricKey(id: 0),
       storedActionKey = "unbreathable_was_here";
-  KeyStorage(this.publicKey, this.signatureKey, SecureKey profileKey, this.storedActionKey) {
-    profileKeyPacked = packageSymmetricKey(profileKey);
-    unpackedProfileKey = profileKey;
-  }
-  KeyStorage.fromJson(Map<String, dynamic> json)
-    : publicKey = unpackagePublicKey(json["pub"]),
-      profileKeyPacked = json["pf"] ?? "",
-      signatureKey = unpackagePublicKey(json["sg"]),
-      storedActionKey = json["sa"] ?? "";
+  KeyStorage(this.publicKey, this.verifyKey, this.profileKey, this.storedActionKey);
 
-  Map<String, dynamic> toJson() {
-    return {
-      "pub": packagePublicKey(publicKey),
-      "pf": profileKeyPacked,
-      "sg": packagePublicKey(signatureKey),
-      "sa": storedActionKey,
-    };
+  static Future<KeyStorage?> fromJson(Map<String, dynamic> json) async {
+    final pub = await unpackagePublicKey(json["pub"]);
+    final profileKey = await unpackageSymmetricKey(json["pf"]);
+    final verifyKey = await unpackageVerifyingKey(json["ve"]);
+    if (pub == null || profileKey == null || verifyKey == null) {
+      return null;
+    }
+
+    return KeyStorage(pub, verifyKey, profileKey, json["sa"]);
   }
 
-  // Just so we don't break the API anywhere yk
-  SecureKey? unpackedProfileKey;
-  SecureKey get profileKey {
-    unpackedProfileKey ??= unpackageSymmetricKey(profileKeyPacked);
-    return unpackedProfileKey!;
+  Future<Map<String, dynamic>> toJson() async {
+    final pub = await packagePublicKey(publicKey);
+    final prof = await packageSymmetricKey(profileKey);
+    final verify = await packageVerifyingKey(verifyKey);
+
+    return {"pub": pub, "pf": prof, "ve": verify, "sa": storedActionKey};
   }
 }
