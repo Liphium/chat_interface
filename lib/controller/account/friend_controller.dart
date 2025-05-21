@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:ui' as ui;
 
 import 'package:chat_interface/controller/current/steps/key_step.dart';
-import 'package:chat_interface/main.dart';
 import 'package:chat_interface/services/chat/friends_service.dart';
 import 'package:chat_interface/services/chat/requests_service.dart';
 import 'package:chat_interface/services/chat/vault_versioning_service.dart';
@@ -137,26 +136,29 @@ class Friend {
 
   /// Convert the database entity to the actual type
   static Future<Friend?> fromEntity(FriendData data) async {
-    final name = await fromDbEncrypted(data.name);
-    final displayName = await fromDbEncrypted(data.displayName);
-    final vaultId = await fromDbEncrypted(data.vaultId);
-    final keys = await fromDbEncrypted(data.keys);
-    if (name == null || displayName == null || vaultId == null || keys == null) {
+    final results = await Future.wait([
+      fromDbEncrypted(data.name),
+      fromDbEncrypted(data.displayName),
+      fromDbEncrypted(data.vaultId),
+      fromDbEncrypted(data.keys),
+    ]);
+    if (results.any((element) => element == null)) {
       return null;
     }
-    return Friend(
-      LPHAddress.from(data.id),
-      name,
-      displayName,
-      vaultId,
-      KeyStorage.fromJson(jsonDecode(keys)),
-      data.updatedAt.toInt(),
-    );
+    final keyStorage = await KeyStorage.fromJson(jsonDecode(results[3]!));
+    if (keyStorage == null) {
+      return null;
+    }
+    return Friend(LPHAddress.from(data.id), results[0]!, results[1]!, results[2]!, keyStorage, data.updatedAt.toInt());
   }
 
   /// Convert a json to a friend (used for friends vault)
-  factory Friend.fromStoredPayload(String id, int updatedAt, Map<String, dynamic> json) {
-    return Friend(LPHAddress.from(json["id"]), json["name"], json["dname"], id, KeyStorage.fromJson(json), updatedAt);
+  static Future<Friend?> fromStoredPayload(String id, int updatedAt, Map<String, dynamic> json) async {
+    final keyStorage = await KeyStorage.fromJson(json);
+    if (keyStorage == null) {
+      return null;
+    }
+    return Friend(LPHAddress.from(json["id"]), json["name"], json["dname"], id, keyStorage, updatedAt);
   }
 
   // Convert to a stored payload for the friends vault
@@ -167,7 +169,7 @@ class Friend {
       "name": name,
       "dname": displayName.value,
     };
-    reqPayload.addAll((await getKeys()).toJson());
+    reqPayload.addAll(await (await getKeys()).toJson());
 
     return jsonEncode(reqPayload);
   }
@@ -201,12 +203,13 @@ class Friend {
     );
   }
 
-  //* Status
+  // Status
   final status = signal("");
   bool answerStatus = true;
   final statusType = signal(0);
 
   Future<void> loadStatus(String message) async {
+    // Decode and decrypt the status message
     final unpacked = decodeFromBase64(message);
     if (unpacked == null) {
       return;
@@ -219,8 +222,13 @@ class Friend {
     if (decoded == null) {
       return;
     }
+    final unpackedMsg = unpackFromBytes(decoded);
+    if (unpackedMsg == null) {
+      return;
+    }
+    message = unpackedMsg;
 
-    message = await decryptSymmetric(ciphertext: decoded, key: (await getKeys()).profileKey);
+    // Change the status to the new message
     final data = jsonDecode(message);
     try {
       status.value = utf8.decode(base64Decode(data["s"]));

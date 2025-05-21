@@ -1,12 +1,13 @@
 import 'dart:convert';
 
-import 'package:chat_interface/util/encryption/asymmetric_sodium.dart';
+import 'package:chat_interface/src/rust/api/encryption.dart';
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/controller/current/steps/key_step.dart';
 import 'package:chat_interface/database/trusted_links.dart';
 import 'package:chat_interface/pages/status/setup/instance_setup.dart';
+import 'package:chat_interface/util/encryption/packing.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:drift/drift.dart';
@@ -20,7 +21,7 @@ class UnknownService {
         StatusController.ownAddress,
         name,
         "",
-        signatureKeyPair.publicKey,
+        signatureKeyPair.verifyingKey,
         asymmetricKeyPair.publicKey,
       );
     }
@@ -35,12 +36,18 @@ class UnknownService {
     }
 
     // Parse the response into an unknown account
+    final verifyKey = await unpackageVerifyingKey(json["sg"]);
+    final pub = await unpackagePublicKey(json["pub"]);
+    if (verifyKey == null || pub == null) {
+      sendLog("couldn't unpack keys from the server");
+      return null;
+    }
     final profile = UnknownAccount(
       LPHAddress(basePath, json["id"]),
       json["name"],
       json["display_name"],
-      unpackagePublicKey(json["sg"]),
-      unpackagePublicKey(json["pub"]),
+      verifyKey,
+      pub,
     );
 
     return profile;
@@ -54,7 +61,7 @@ class UnknownService {
         StatusController.ownAddress,
         "",
         "",
-        signatureKeyPair.publicKey,
+        signatureKeyPair.verifyingKey,
         asymmetricKeyPair.publicKey,
       );
     }
@@ -92,16 +99,16 @@ class UnknownService {
     }
 
     // Parse the response into an unknown account
-    final profile = UnknownAccount(
-      address,
-      json["name"],
-      json["display_name"],
-      unpackagePublicKey(json["sg"]),
-      unpackagePublicKey(json["pub"]),
-    );
+    final verifyKey = await unpackageVerifyingKey(json["sg"]);
+    final pub = await unpackagePublicKey(json["pub"]);
+    if (verifyKey == null || pub == null) {
+      sendLog("couldn't unpack keys from the server");
+      return null;
+    }
+    final profile = UnknownAccount(address, json["name"], json["display_name"], verifyKey, pub);
 
     // Add the unknown profile to the database
-    await db.unknownProfile.insertOnConflictUpdate(profile.toData(DateTime.now()));
+    await db.unknownProfile.insertOnConflictUpdate(await profile.toData(DateTime.now()));
     return profile;
   }
 }
@@ -111,35 +118,47 @@ class UnknownAccount {
   final String name;
   final String displayName;
 
-  final Uint8List signatureKey;
-  final Uint8List publicKey;
+  final VerifyingKey verifyKey;
+  final PublicKey publicKey;
   DateTime? lastFetch;
 
-  UnknownAccount(this.id, this.name, this.displayName, this.signatureKey, this.publicKey);
+  UnknownAccount(this.id, this.name, this.displayName, this.verifyKey, this.publicKey);
 
-  factory UnknownAccount.fromData(UnknownProfileData data) {
-    final keys = jsonDecode(fromDbEncrypted(data.keys));
-    final account = UnknownAccount(
-      LPHAddress.from(data.id),
-      fromDbEncrypted(data.name),
-      fromDbEncrypted(data.displayName),
-      unpackagePublicKey(keys["sg"]),
-      unpackagePublicKey(keys["pub"]),
-    );
+  static Future<UnknownAccount?> fromData(UnknownProfileData data) async {
+    // Decrypt the key json
+    final keys = await fromDbEncrypted(data.keys);
+    if (keys == null) {
+      return null;
+    }
+    final keyStore = jsonDecode(keys);
+
+    // Decrypt the rest from the database
+    final name = await fromDbEncrypted(data.name);
+    final displayName = await fromDbEncrypted(data.displayName);
+    final verifyKey = await unpackageVerifyingKey(keyStore["sg"]);
+    final pub = await unpackagePublicKey(keyStore["pub"]);
+    if (name == null || displayName == null || verifyKey == null || pub == null) {
+      return null;
+    }
+
+    // Create the account and return
+    final account = UnknownAccount(LPHAddress.from(data.id), name, displayName, verifyKey, pub);
     account.lastFetch = data.lastFetched;
     return account;
   }
 
   static Future<UnknownAccount> fromFriend(Friend friend) async {
     final keys = await friend.getKeys();
-    return UnknownAccount(friend.id, friend.name, friend.displayName.value, keys.signatureKey, keys.publicKey);
+    return UnknownAccount(friend.id, friend.name, friend.displayName.value, keys.verifyKey, keys.publicKey);
   }
 
-  UnknownProfileData toData(DateTime lastFetched) => UnknownProfileData(
+  Future<UnknownProfileData> toData(DateTime lastFetched) async => UnknownProfileData(
     id: id.encode(),
-    name: dbEncrypted(name),
-    displayName: dbEncrypted(displayName),
-    keys: dbEncrypted(jsonEncode({"sg": packagePublicKey(signatureKey), "pub": packagePublicKey(publicKey)})),
+    name: await dbEncrypted(name),
+    displayName: await dbEncrypted(displayName),
+    keys: await dbEncrypted(
+      jsonEncode({"sg": await packageVerifyingKey(verifyKey), "pub": await packagePublicKey(publicKey)}),
+    ),
     lastFetched: lastFetched,
   );
 }

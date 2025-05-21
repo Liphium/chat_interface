@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:chat_interface/services/chat/conversation_member.dart';
 import 'package:chat_interface/services/chat/conversation_service.dart';
@@ -8,13 +9,14 @@ import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/database/database_entities.dart' as model;
 import 'package:chat_interface/database/database.dart';
 import 'package:chat_interface/pages/status/setup/instance_setup.dart';
+import 'package:chat_interface/src/rust/api/encryption.dart';
+import 'package:chat_interface/util/encryption/packing.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:signals/signals_flutter.dart';
-import 'package:sodium_libs/sodium_libs.dart';
 
 class ConversationController {
   static final loaded = signal(false);
@@ -133,13 +135,7 @@ class Conversation {
   final notificationCount = signal(0);
   final containerSub = signal(ConversationContainer("")); // Data subscription
   final error = signal<String?>(null);
-  String packedKey;
-  SecureKey? _cachedKey;
-
-  SecureKey get key {
-    _cachedKey ??= unpackageSymmetricKey(packedKey);
-    return _cachedKey!;
-  }
+  SymmetricKey key;
 
   final membersLoading = signal(false);
   final members = mapSignal(<LPHAddress, Member>{}); // Token ID -> Member
@@ -150,7 +146,7 @@ class Conversation {
     this.type,
     this.token,
     this.container,
-    this.packedKey,
+    this.key,
     this.lastVersion,
     this.updatedAt,
     this.reads,
@@ -169,18 +165,35 @@ class Conversation {
         0,
         ConversationReads.fromContainer(""),
       );
-  Conversation.fromData(ConversationData data)
-    : this(
-        LPHAddress.from(data.id),
-        fromDbEncrypted(data.vaultId),
-        data.type,
-        ConversationToken.fromJson(jsonDecode(fromDbEncrypted(data.token))),
-        ConversationContainer.fromJson(jsonDecode(fromDbEncrypted(data.data))),
-        fromDbEncrypted(data.key),
-        data.lastVersion.toInt(),
-        data.updatedAt.toInt(),
-        ConversationReads.fromLocalContainer(data.reads),
-      );
+
+  static Future<Conversation?> fromData(ConversationData data) async {
+    final results = await Future.wait([
+      fromDbEncrypted(data.vaultId),
+      fromDbEncrypted(data.token),
+      fromDbEncrypted(data.data),
+      fromDbEncrypted(data.key),
+      fromDbEncrypted(data.reads),
+    ]);
+    if (results.any((e) => e == null)) {
+      return null;
+    }
+    final key = await unpackageSymmetricKey(results[3]!);
+    if (key == null) {
+      return null;
+    }
+
+    return Conversation(
+      LPHAddress.from(data.id),
+      results[0]!,
+      data.type,
+      ConversationToken.fromJson(jsonDecode(results[1]!)),
+      ConversationContainer.fromJson(jsonDecode(results[2]!)),
+      key,
+      data.lastVersion.toInt(),
+      data.updatedAt.toInt(),
+      ConversationReads.fromContainer(results[4]!),
+    );
+  }
 
   /// Copy a conversation without the `key`.
   ///
@@ -193,7 +206,7 @@ class Conversation {
       conversation.type,
       conversation.token,
       conversation.container,
-      "",
+      SymmetricKey(id: -1),
       conversation.lastVersion,
       conversation.updatedAt,
       conversation.reads,
@@ -240,17 +253,25 @@ class Conversation {
               .address] ==
           null;
 
-  ConversationData get entity {
+  Future<ConversationData> get entity async {
+    final results = await Future.wait([
+      dbEncrypted(vaultId),
+      dbEncrypted(jsonEncode(container.toJson())),
+      dbEncrypted(token.toJson(id)),
+      packageSymmetricKey(key).then((value) => dbEncrypted(value!)),
+      dbEncrypted(reads.toContainer()),
+    ]);
     return ConversationData(
       id: id.encode(),
-      vaultId: dbEncrypted(vaultId),
+      vaultId: results[0],
       type: type,
-      data: dbEncrypted(jsonEncode(container.toJson())),
-      token: dbEncrypted(token.toJson(id)),
-      key: dbEncrypted(packageSymmetricKey(key)),
+      data: results[1],
+      members: Uint8List(0), // TODO: New members list
+      token: results[2],
+      key: results[3],
       lastVersion: BigInt.from(lastVersion),
       updatedAt: BigInt.from(updatedAt),
-      reads: reads.toLocalContainer(),
+      reads: results[4],
     );
   }
 

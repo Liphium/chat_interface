@@ -650,28 +650,8 @@ class ConversationReads {
     }
 
     // Parse the reads from the container to the map
-    final decrypted = decryptSymmetric(container, vaultKey);
-    for (var entry in jsonDecode(decrypted).entries) {
+    for (var entry in jsonDecode(container).entries) {
       map[entry.key] = entry.value;
-    }
-  }
-
-  /// Parse as the format received from the local database (use "" for empty conversation reads)
-  ConversationReads.fromLocalContainer(String container) {
-    // Make sure to not parse no reads at all
-    if (container == "") {
-      return;
-    }
-
-    // Parse the reads from the container to the map
-    try {
-      final decrypted = decryptSymmetric(container, databaseKey);
-      for (var entry in jsonDecode(decrypted).entries) {
-        map[entry.key] = entry.value;
-      }
-    } catch (_) {
-      sendLog("ERROR: Local conversation read decryption failure");
-      return;
     }
   }
 
@@ -682,11 +662,8 @@ class ConversationReads {
     }
   }
 
-  /// Get all the reads in the form they're stored on the server.
-  String toContainer() => encryptSymmetric(jsonEncode(map), vaultKey);
-
-  /// Get all the reads in the form they're stored in the local database.
-  String toLocalContainer() => encryptSymmetric(jsonEncode(map), databaseKey);
+  /// Get all the reads in container form.
+  String toContainer() => jsonEncode(map);
 
   /// Get the read time for an extra id.
   int get(String extra) {

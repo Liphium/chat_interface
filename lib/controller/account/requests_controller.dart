@@ -138,37 +138,33 @@ class Request {
 
   /// Get a request from the database object.
   static Future<Request?> fromEntity(RequestData data) async {
-    final name = await fromDbEncrypted(data.name);
-    final displayName = await fromDbEncrypted(data.displayName);
-    final vaultId = await fromDbEncrypted(data.vaultId);
-    final keys = await fromDbEncrypted(data.keys);
-    if (name == null || displayName == null || vaultId == null || keys == null) {
+    final results = await Future.wait([
+      fromDbEncrypted(data.name),
+      fromDbEncrypted(data.displayName),
+      fromDbEncrypted(data.vaultId),
+      fromDbEncrypted(data.keys),
+    ]);
+    if (results.any((a) => a == null)) {
       return null;
     }
-    return Request(
-      LPHAddress.from(data.id),
-      name,
-      displayName,
-      vaultId,
-      KeyStorage.fromJson(jsonDecode(keys)),
-      data.updatedAt.toInt(),
-    );
+    final keyStorage = await KeyStorage.fromJson(jsonDecode(results[3]!));
+    if (keyStorage == null) {
+      return null;
+    }
+    return Request(LPHAddress.from(data.id), results[0]!, results[1]!, results[2]!, keyStorage, data.updatedAt.toInt());
   }
 
   /// Get a request from a stored payload in the database.
-  factory Request.fromStoredPayload(String id, int updatedAt, Map<String, dynamic> json) {
-    return Request(
-      LPHAddress.from(json["id"]),
-      json["name"],
-      json["display_name"],
-      "",
-      KeyStorage.fromJson(json),
-      updatedAt,
-    );
+  static Future<Request?> fromStoredPayload(String id, int updatedAt, Map<String, dynamic> json) async {
+    final keyStorage = await KeyStorage.fromJson(json);
+    if (keyStorage == null) {
+      return null;
+    }
+    return Request(LPHAddress.from(json["id"]), json["name"], json["display_name"], "", keyStorage, updatedAt);
   }
 
   /// Convert to a payload for the friends vault (on the server).
-  String toStoredPayload(bool self) {
+  Future<String> toStoredPayload(bool self) async {
     final reqPayload = <String, dynamic>{
       "rq": true,
       "id": id.encode(),
@@ -176,14 +172,14 @@ class Request {
       "name": name,
       "display_name": displayName,
     };
-    reqPayload.addAll(keyStorage.toJson());
+    reqPayload.addAll(await keyStorage.toJson());
 
     return jsonEncode(reqPayload);
   }
 
   /// Convert the request to an unknown account (for accepting the friend request).
   UnknownAccount toUnknownAccount() {
-    return UnknownAccount(id, name, displayName, keyStorage.signatureKey, keyStorage.publicKey);
+    return UnknownAccount(id, name, displayName, keyStorage.verifyKey, keyStorage.publicKey);
   }
 
   /// Convert a request object to the equivalent database object.
