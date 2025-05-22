@@ -2,9 +2,12 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/conversation/sidebar_controller.dart';
+import 'package:chat_interface/controller/current/steps/key_step.dart';
 import 'package:chat_interface/services/connection/connection.dart';
-import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
+import 'package:chat_interface/src/rust/api/encryption.dart';
+import 'package:chat_interface/util/encryption/packing.dart';
 import 'package:chat_interface/services/connection/messaging.dart';
 import 'package:chat_interface/controller/conversation/conversation_controller.dart';
 import 'package:chat_interface/controller/conversation/message_provider.dart' as msg;
@@ -23,7 +26,6 @@ import 'package:get/get.dart';
 import 'package:liphium_bridge/liphium_bridge.dart';
 import 'package:open_file/open_file.dart';
 import 'package:signals/signals_flutter.dart';
-import 'package:sodium_libs/sodium_libs.dart';
 import 'package:path/path.dart' as path;
 
 class ZapShareController {
@@ -40,7 +42,7 @@ class ZapShareController {
   static String? transactionToken;
   static String? uploadToken;
   static String? filePath;
-  static SecureKey? key;
+  static SymmetricKey? key;
   static StreamSubscription<Uint8List>? partSubscription;
 
   static const chunkSize = 1024 * 1024;
@@ -125,7 +127,7 @@ class ZapShareController {
     XFile file = files[0];
 
     // Intialize the encryption key
-    key = randomSymmetricKey();
+    key = await generateSymmetricKey();
 
     // Start uploading the file
     filePath = file.path;
@@ -135,7 +137,7 @@ class ZapShareController {
     step.value = "chat.zapshare.waiting".tr;
     connector.sendAction(
       ServerAction("create_transaction", <String, dynamic>{"name": fileName, "size": fileSize}),
-      handler: (event) {
+      handler: (event) async {
         if (!event.data["success"]) {
           sendLog("creating transaction failed");
           showErrorPopup("error".tr, "zapshare.create_failed".tr);
@@ -156,13 +158,16 @@ class ZapShareController {
           fileName,
           key!,
         );
-        SidebarController.getCurrentProvider()!.sendMessage(
+        final error = await SidebarController.getCurrentProvider()!.sendMessage(
           signal(false),
           msg.MessageType.liveshare,
           [],
-          container.toJson(),
+          await container.toJson(),
           "",
         );
+        if (error != null) {
+          sendLog("ERROR: Couldn't send space invite: $error");
+        }
       },
     );
   }
@@ -257,7 +262,17 @@ class ZapShareController {
       onError: (e) => sendLog(e),
       onDone: () async {
         // Encrypt all the bytes and write them to the chunk file
-        final encrypted = encryptSymmetricBytes(Uint8List.fromList(toEncrypt), key!);
+        final encrypted = await encryptSymmetricContainer(
+          message: Uint8List.fromList(toEncrypt),
+          key: key!,
+          signingKey: signatureKeyPair.signingKey,
+          salt: packToBytes(chunk.toString() + transactionId!),
+        );
+        if (encrypted == null) {
+          sendLog("ERROR: Couldn't encrypt Zap packet");
+          completer.complete(false);
+          return;
+        }
 
         // Send chunk
         final formData = d.FormData.fromMap({
@@ -465,7 +480,18 @@ class ZapShareController {
             currentPart.value = currentChunk;
 
             // Append the chunk to the file
-            final decrypted = decryptSymmetricBytes(res.data!, key!);
+            final decrypted = await decryptSymmetricContainer(
+              ciphertext: res.data!,
+              key: key!,
+              verifyingKey: (await FriendController.friends[friendAddress]!.getKeys()).verifyKey,
+              salt: packToBytes(currentChunk.toString() + container.id),
+            );
+            if (decrypted == null) {
+              sendLog("ERROR DECRYPTING CHUNK $currentChunk");
+              await Future.delayed(2000.ms);
+              tries++;
+              continue;
+            }
             await fileUtil.appendToFile(XFile(receiveFile.path), decrypted);
 
             // Check if new chunk can be downloaded right away
@@ -541,22 +567,26 @@ class LiveshareInviteContainer {
   final String id;
   final String token;
   final String fileName;
-  final SecureKey key;
+  final SymmetricKey key;
 
   LiveshareInviteContainer(this.url, this.id, this.token, this.fileName, this.key);
 
-  factory LiveshareInviteContainer.fromJson(String json) {
+  static Future<LiveshareInviteContainer?> fromJson(String json) async {
     final data = jsonDecode(json);
-    return LiveshareInviteContainer(
-      data["url"],
-      data["id"],
-      data["token"],
-      data["name"],
-      unpackageSymmetricKey(data["key"]),
-    );
+    final key = await unpackageSymmetricKey(data["key"]);
+    if (key == null) {
+      return null;
+    }
+    return LiveshareInviteContainer(data["url"], data["id"], data["token"], data["name"], key);
   }
 
-  String toJson() {
-    return jsonEncode({"url": url, "id": id, "token": token, "name": fileName, "key": packageSymmetricKey(key)});
+  Future<String> toJson() async {
+    return jsonEncode({
+      "url": url,
+      "id": id,
+      "token": token,
+      "name": fileName,
+      "key": (await packageSymmetricKey(key))!,
+    });
   }
 }

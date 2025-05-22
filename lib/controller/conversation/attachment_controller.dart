@@ -406,7 +406,7 @@ class AttachmentController {
       fileName: json["n"], // The name could be null (if it is null it'll the object in the map will also be null)
       size: json["s"] ?? -1,
       url: json["u"],
-      key: key,
+      key: key!,
     );
     container.width = json["w"];
     container.height = json["h"];

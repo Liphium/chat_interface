@@ -1,9 +1,10 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:chat_interface/controller/current/steps/key_step.dart';
 import 'package:chat_interface/services/chat/status_service.dart';
 import 'package:chat_interface/theme/ui/profile/status_renderer.dart';
-import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
+import 'package:chat_interface/util/encryption/packing.dart';
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/controller/current/steps/account_step.dart';
 import 'package:chat_interface/util/web.dart';
@@ -66,16 +67,24 @@ class StatusController {
   }
 
   /// Get the encrypted version of the status json.
-  static String statusPacket([String? newStatusJson]) {
-    return encryptSymmetric(newStatusJson ?? statusJson(), profileKey);
+  static Future<String?> statusPacket([String? newStatusJson]) async {
+    return await encryptSymmetricContainerBase64String(
+      profileKey,
+      signatureKeyPair.signingKey,
+      newStatusJson ?? statusJson(),
+    );
   }
 
   /// Get the encrypted version of the currently shared content.
-  static String sharedContentPacket() {
+  static Future<String?> sharedContentPacket() async {
     if (ownContainer.value == null) {
       return "";
     }
-    return encryptSymmetric(ownContainer.value!.toJson(), profileKey);
+    return await encryptSymmetricContainerBase64String(
+      profileKey,
+      signatureKeyPair.signingKey,
+      ownContainer.value!.toJson(),
+    );
   }
 
   /// Share a new [ShareContainer].

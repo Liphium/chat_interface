@@ -2,6 +2,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:chat_interface/controller/current/steps/key_step.dart';
 import 'package:chat_interface/src/rust/api/encryption.dart';
 import 'package:sodium_libs/sodium_libs.dart';
 
@@ -97,4 +98,98 @@ Uint8List? decodeFromBase64(String message) {
   } catch (_) {
     return null;
   }
+}
+
+/// Encrypt a string with a symmetric key.
+Future<String?> encryptSymmetricBase64String(SymmetricKey key, String message) async {
+  final bytes = packToBytes(message);
+  final encrypted = await encryptSymmetric(key: key, message: bytes);
+  if (encrypted == null) {
+    return null;
+  }
+  return base64Encode(encrypted);
+}
+
+/// Encrypt bytes to a string using a symmetric key.
+Future<String?> encryptSymmetricBase64(SymmetricKey key, Uint8List message) async {
+  final encrypted = await encryptSymmetric(key: key, message: message);
+  if (encrypted == null) {
+    return null;
+  }
+  return base64Encode(encrypted);
+}
+
+/// Decrypt to bytes from a message encrypted using a symmetric key.
+Future<Uint8List?> decryptSymmetricBase64(SymmetricKey key, String message) async {
+  final unpacked = decodeFromBase64(message);
+  if (unpacked == null) {
+    return null;
+  }
+  return await decryptSymmetric(key: key, ciphertext: unpacked);
+}
+
+/// Decrypt to string form a message encrypted using a symmetric key.
+Future<String?> decryptSymmetricBase64String(SymmetricKey key, String message) async {
+  final unpacked = decodeFromBase64(message);
+  if (unpacked == null) {
+    return null;
+  }
+  final decrypted = await decryptSymmetric(key: key, ciphertext: unpacked);
+  if (decrypted == null) {
+    return null;
+  }
+  return unpackFromBytes(decrypted);
+}
+
+/// Encrypt to a string with a symmetric key and sign.
+Future<String?> encryptSymmetricContainerBase64String(
+  SymmetricKey key,
+  SigningKey signingKey,
+  String message, {
+  String? salt,
+}) async {
+  final bytes = packToBytes(message);
+  Uint8List? encrypted;
+  if (salt != null) {
+    encrypted = await encryptSymmetricContainer(
+      key: key,
+      message: bytes,
+      signingKey: signatureKeyPair.signingKey,
+      salt: packToBytes(salt),
+    );
+  } else {
+    encrypted = await encryptSymmetricContainer(key: key, message: bytes, signingKey: signingKey);
+  }
+  if (encrypted == null) {
+    return null;
+  }
+  return base64Encode(encrypted);
+}
+
+/// Decrypt a message encrypted with a symmetric key and signed.
+Future<String?> decryptSymmetricContainerBase64String(
+  SymmetricKey key,
+  VerifyingKey verifyingKey,
+  String message, {
+  String? salt,
+}) async {
+  final unpacked = decodeFromBase64(message);
+  if (unpacked == null) {
+    return null;
+  }
+  Uint8List? decrypted;
+  if (salt != null) {
+    decrypted = await decryptSymmetricContainer(
+      key: key,
+      verifyingKey: verifyingKey,
+      ciphertext: unpacked,
+      salt: packToBytes(salt),
+    );
+  } else {
+    decrypted = await decryptSymmetricContainer(key: key, verifyingKey: verifyingKey, ciphertext: unpacked);
+  }
+  if (decrypted == null) {
+    return null;
+  }
+  return unpackFromBytes(decrypted);
 }

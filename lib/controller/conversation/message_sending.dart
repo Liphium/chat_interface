@@ -52,12 +52,12 @@ class AnswerData {
   AnswerData(this.id, this.senderAddress, this.content, this.attachments);
 
   /// Convert a message to the answer content for the reply container
-  static String answerContent(
+  static Future<String> answerContent(
     MessageType type,
     String content,
     List<String> attachments, {
     FriendController? controller,
-  }) {
+  }) async {
     // Return different information based on every type
     switch (type) {
       case MessageType.text:
@@ -69,7 +69,8 @@ class AnswerData {
           if (attachments.first.isURL) {
             content = attachments.first;
           } else {
-            content = AttachmentController.fromJson(StorageType.cache, jsonDecode(attachments.first)).name;
+            final container = await AttachmentController.fromJson(StorageType.cache, jsonDecode(attachments.first));
+            content = container.name;
           }
         }
         return content;

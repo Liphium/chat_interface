@@ -1,9 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
+import 'package:chat_interface/src/rust/api/encryption.dart';
+import 'package:chat_interface/util/encryption/packing.dart';
 import 'package:chat_interface/controller/account/friend_controller.dart';
-import 'package:chat_interface/services/chat/unknown_service.dart';
 import 'package:chat_interface/controller/conversation/attachment_controller.dart';
 import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/pages/settings/data/settings_controller.dart';
@@ -20,7 +20,6 @@ import 'package:get/get.dart';
 import 'package:lorien_chat_list/chat_list_controller.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:signals/signals_flutter.dart';
-import 'package:sodium_libs/sodium_libs.dart';
 
 // Package this and message sending as one
 part 'message_sending.dart';
@@ -425,7 +424,7 @@ abstract class MessageProvider {
     final content = Message.buildContentJson(content: message, type: type, attachments: attachments, answerId: answer);
 
     // Encrypt message with signature
-    final info = SymmetricSequencedInfo.builder(content, stamp).finish(encryptionKey());
+    final info = await SymmetricSequencedInfo.generate(stamp, content, encryptionKey());
 
     // Send message
     final error = await handleMessageSend(timeToken, info, stamp);
@@ -468,7 +467,7 @@ abstract class MessageProvider {
   Future<(String, int)?> getTimestamp();
 
   /// This method should get the encryption key of the message provider.
-  SecureKey encryptionKey();
+  SymmetricKey encryptionKey();
 
   /// This method is called with an encrypted string that contains the entire message.
   /// This method should send this data to the server as the message.
@@ -632,25 +631,18 @@ class Message {
     return buildContentJson(content: content, type: type, attachments: attachments, answerId: answer);
   }
 
-  /// Verifies the signature of the message
-  Future<bool> verifySignature(SymmetricSequencedInfo info, [Sodium? sodium]) async {
-    final sender = await UnknownService.loadUnknownProfile(senderAddress);
-    if (sender == null) {
-      sendLog("NO SENDER FOUND");
-      verified.value = false;
-      return false;
-    }
-    verified.value = info.verifySignature(sender.signatureKey, sodium);
-    return true;
-  }
-
   /// Decrypts the account ids of a system message
-  void decryptSystemMessageAttachments(SecureKey key, Sodium sodium) {
+  Future<bool> decryptSystemMessageAttachments(SymmetricKey key) async {
     for (var i = 0; i < attachments.length; i++) {
       if (attachments[i].startsWith("a:")) {
-        attachments[i] = jsonDecode(decryptSymmetric(attachments[i].substring(2), key, sodium))["id"];
+        final dec = await decryptSymmetricBase64String(key, attachments[i].substring(2));
+        if (dec == null) {
+          return false;
+        }
+        attachments[i] = jsonDecode(dec);
       }
     }
+    return true;
   }
 
   /// Delete message on the server (and on the client)

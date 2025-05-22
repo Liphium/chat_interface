@@ -6,6 +6,8 @@ import 'package:chat_interface/database/database_entities.dart' as model;
 import 'package:chat_interface/pages/status/setup/instance_setup.dart';
 import 'package:chat_interface/services/chat/conversation_service.dart';
 import 'package:chat_interface/services/squares/square_container.dart';
+import 'package:chat_interface/src/rust/api/encryption.dart';
+import 'package:chat_interface/util/encryption/packing.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:signals/signals_flutter.dart';
 
@@ -17,11 +19,11 @@ class Square extends Conversation {
     String vaultId,
     ConversationToken token,
     SquareContainer container,
-    String packedKey,
+    SymmetricKey key,
     int lastVersion,
     int updatedAt,
     ConversationReads reads,
-  ) : super(id, vaultId, model.ConversationType.square, token, container, packedKey, lastVersion, updatedAt, reads);
+  ) : super(id, vaultId, model.ConversationType.square, token, container, key, lastVersion, updatedAt, reads);
 
   @override
   Square.fromJson(Map<String, dynamic> json, String vaultId)
@@ -36,35 +38,31 @@ class Square extends Conversation {
         ConversationReads.fromContainer(""),
       );
 
-  @override
-  Square.fromData(ConversationData data)
-    : this(
-        LPHAddress.from(data.id),
-        fromDbEncrypted(data.vaultId),
-        ConversationToken.fromJson(jsonDecode(fromDbEncrypted(data.token))),
-        SquareContainer.fromJson(jsonDecode(fromDbEncrypted(data.data))),
-        fromDbEncrypted(data.key),
-        data.lastVersion.toInt(),
-        data.updatedAt.toInt(),
-        ConversationReads.fromLocalContainer(data.reads),
-      );
+  static Future<Square?> fromData(ConversationData data) async {
+    final results = await Future.wait([
+      fromDbEncrypted(data.vaultId),
+      fromDbEncrypted(data.token),
+      fromDbEncrypted(data.data),
+      fromDbEncrypted(data.key),
+      fromDbEncrypted(data.reads),
+    ]);
+    if (results.any((a) => a == null)) {
+      return null;
+    }
+    final key = await unpackageSymmetricKey(results[3]!);
+    if (key == null) {
+      return null;
+    }
 
-  @override
-  factory Square.copyWithoutKey(Square square) {
-    final copy = Square(
-      square.id,
-      square.vaultId,
-      square.token,
-      square.container as SquareContainer,
-      "",
-      square.lastVersion,
-      square.updatedAt,
-      square.reads,
+    return Square(
+      LPHAddress.from(data.id),
+      results[0]!,
+      ConversationToken.fromJson(jsonDecode(results[1]!)),
+      SquareContainer.fromJson(jsonDecode(results[2]!)),
+      key,
+      data.lastVersion.toInt(),
+      data.updatedAt.toInt(),
+      ConversationReads.fromContainer(results[4]!),
     );
-
-    // Copy all the members
-    copy.members.addAll(square.members);
-
-    return copy;
   }
 }

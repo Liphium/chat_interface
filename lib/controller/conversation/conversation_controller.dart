@@ -195,29 +195,6 @@ class Conversation {
     );
   }
 
-  /// Copy a conversation without the `key`.
-  ///
-  /// If the key was actually used it would just thrown an error for
-  /// being completely invalid.
-  factory Conversation.copyWithoutKey(Conversation conversation) {
-    final conv = Conversation(
-      conversation.id,
-      conversation.vaultId,
-      conversation.type,
-      conversation.token,
-      conversation.container,
-      SymmetricKey(id: -1),
-      conversation.lastVersion,
-      conversation.updatedAt,
-      conversation.reads,
-    );
-
-    // Copy all the members
-    conv.members.addAll(conversation.members);
-
-    return conv;
-  }
-
   void addMember(Member member) {
     members[member.tokenId] = member;
   }
