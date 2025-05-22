@@ -75,7 +75,7 @@ class AccountStep extends ConnectionStep {
 
     // Set own key pair as cached (in the friend that represents this account)
     FriendController.friends[StatusController.ownAddress]!.setKeyStorage(
-      KeyStorage(asymmetricKeyPair.publicKey, signatureKeyPair.publicKey, profileKey, ""),
+      KeyStorage(asymmetricKeyPair.publicKey, signatureKeyPair.verifyingKey, profileKey, ""),
     );
 
     // Tell the completer that the keys of the own friend have been set

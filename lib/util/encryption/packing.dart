@@ -193,3 +193,23 @@ Future<String?> decryptSymmetricContainerBase64String(
   }
   return unpackFromBytes(decrypted);
 }
+
+/// Generate a base64 encoded signature for a string message.
+Future<String?> generateSignatureBase64String(SigningKey signingKey, String message) async {
+  final messageBytes = packToBytes(message);
+  final signatureBytes = await generateSignature(key: signingKey, message: messageBytes);
+  if (signatureBytes == null) {
+    return null;
+  }
+  return base64Encode(signatureBytes);
+}
+
+/// Verify a base64 encoded signature for a string message.
+Future<bool> verifySignatureBase64String(VerifyingKey verifyingKey, String message, String signature) async {
+  final messageBytes = packToBytes(message);
+  final signatureBytes = decodeFromBase64(signature);
+  if (signatureBytes == null) {
+    return false;
+  }
+  return await verifySignature(key: verifyingKey, message: messageBytes, signature: signatureBytes) ?? false;
+}

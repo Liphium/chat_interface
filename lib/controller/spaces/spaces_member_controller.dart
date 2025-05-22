@@ -1,10 +1,10 @@
-import 'package:chat_interface/util/encryption/signatures.dart';
-import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/account/friend_controller.dart';
 import 'package:chat_interface/services/chat/unknown_service.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/controller/spaces/space_controller.dart';
 import 'package:chat_interface/services/spaces/space_service.dart';
+import 'package:chat_interface/src/rust/api/encryption.dart';
+import 'package:chat_interface/util/encryption/packing.dart';
 import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:signals/signals_flutter.dart';
@@ -20,15 +20,26 @@ class SpaceMemberController {
   static String _ownId = "";
 
   /// Parse a member list and add it to the members map.
-  static void onMembersChanged(List<dynamic> newMembers) {
+  static Future<void> onMembersChanged(List<dynamic> newMembers) async {
     final membersFound = <String>[];
+
+    // Decrypt all of the account ids
+    final accounts = await Future.wait(
+      newMembers.map((e) {
+        return decryptSymmetricBase64String(SpaceController.key!, e["data"]);
+      }),
+    );
 
     // Start a batch to make sure members only updates after all the changes have been made
     batch(() {
+      int index = 0;
       for (var member in newMembers) {
         final clientId = member["id"];
-        final decrypted = decryptSymmetric(member["data"], SpaceController.key!);
-        final address = LPHAddress.from(decrypted);
+        if (accounts[index] == null) {
+          sendLog("WARNING: couldn't render one member of the space");
+          continue;
+        }
+        final address = LPHAddress.from(accounts[index]!);
         if (address == StatusController.ownAddress) {
           _ownId = clientId;
         }
@@ -41,7 +52,7 @@ class SpaceMemberController {
                 (address == StatusController.ownAddress ? Friend.me() : Friend.unknown(address)),
             clientId,
           );
-          members[clientId]!.verifySignature(member["sign"]);
+          members[clientId]!.checkSignature(member["sign"]);
         }
 
         // Update their state
@@ -54,6 +65,7 @@ class SpaceMemberController {
 
         // Cache the account id
         memberIds[clientId] = address;
+        index++;
       }
 
       // Remove everyone who left the space
@@ -99,23 +111,28 @@ class SpaceMember {
 
   SpaceMember(this.friend, this.id);
 
-  Future<void> verifySignature(String signature) async {
+  Future<void> checkSignature(String signature) async {
     // Load the guy's profile
     final profile = await UnknownService.loadUnknownProfile(friend.id);
     if (profile == null) {
       verified.value = false;
-      sendLog("couldn't find profile: identity of space member is uncertain");
+      sendLog("WARNING: couldn't find profile: identity of space member is uncertain");
       return;
     }
 
     // Verify the signature
-    try {
-      final message = SpaceService.craftSignature(SpaceController.id.value!, id, friend.id.encode());
-      verified.value = checkSignature(signature, profile.signatureKey, message);
-      sendLog("space member verified: ${verified.value}");
-    } catch (e) {
-      sendLog("error with verifying space signature: $e");
+    final message = SpaceService.craftSignature(SpaceController.id.value!, id, friend.id.encode());
+    // signature, profile.signatureKey, message
+    final decoded = decodeFromBase64(signature);
+    if (decoded == null) {
       verified.value = false;
+      sendLog("WARNING: space mmber couldn't be verified: coulnd't decode base64 signature");
+      return;
+    }
+    verified.value =
+        await verifySignature(key: profile.verifyKey, signature: packToBytes(message), message: decoded) ?? false;
+    if (!verified.peek()) {
+      sendLog("WARNING: space member not verified");
     }
   }
 }

@@ -4,8 +4,8 @@ import 'package:chat_interface/controller/conversation/sidebar_controller.dart';
 import 'package:chat_interface/controller/spaces/studio/studio_controller.dart';
 import 'package:chat_interface/controller/spaces/tabletop/tabletop_controller.dart';
 import 'package:chat_interface/pages/chat/chat_page_desktop.dart';
-import 'package:chat_interface/util/encryption/signatures.dart';
-import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
+import 'package:chat_interface/src/rust/api/encryption.dart';
+import 'package:chat_interface/util/encryption/packing.dart';
 import 'package:chat_interface/services/spaces/space_connection.dart';
 import 'package:chat_interface/controller/current/status_controller.dart';
 import 'package:chat_interface/controller/current/steps/key_step.dart';
@@ -16,11 +16,10 @@ import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:chat_interface/services/connection/messaging.dart' as msg;
 import 'package:get/get.dart';
-import 'package:sodium_libs/sodium_libs.dart';
 
 class SpaceService {
   /// Connect to a space using its connection container
-  static Future<String?> connectToSpace(String domain, String spaceId, SecureKey key) async {
+  static Future<String?> connectToSpace(String domain, String spaceId, SymmetricKey key) async {
     // Ask the server for a join token
     final spaceJson = await postAddress(
       "${nodeProtocol()}$domain",
@@ -67,7 +66,7 @@ class SpaceService {
     }
 
     // Connect to the space
-    final key = randomSymmetricKey();
+    final key = await generateSymmetricKey();
     final error = await _connectToRoom(
       json["domain"],
       spaceJson["token"],
@@ -90,7 +89,7 @@ class SpaceService {
     String token,
     String clientId,
     String spaceId,
-    SecureKey key,
+    SymmetricKey key,
   ) async {
     // Connect to space node
     final result = await SpaceConnection.createSpaceConnection(server, token);
@@ -110,14 +109,18 @@ class SpaceService {
     }
 
     // Send the server all the data required for setup
+    final results = await Future.wait([
+      encryptSymmetricBase64String(key, StatusController.ownAddress.encode()),
+      generateSignatureBase64String(
+        signatureKeyPair.signingKey,
+        craftSignature(spaceId, clientId, StatusController.ownAddress.encode()),
+      ),
+    ]);
+    if (results.any((e) => e == null)) {
+      return "encryption.error".tr;
+    }
     final event = await SpaceConnection.spaceConnector!.sendActionAndWait(
-      msg.ServerAction("setup", {
-        "data": encryptSymmetric(StatusController.ownAddress.encode(), key),
-        "signature": signMessage(
-          signatureKeyPair.secretKey,
-          craftSignature(spaceId, clientId, StatusController.ownAddress.encode()),
-        ),
-      }),
+      msg.ServerAction("setup", {"data": results[0]!, "signature": results[1]!}),
     );
     if (event == null) {
       return "server.error".tr;

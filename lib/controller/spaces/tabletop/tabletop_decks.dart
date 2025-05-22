@@ -47,7 +47,7 @@ class TabletopDeck {
   Future<bool> save() async {
     final encodedCards = <Map<String, dynamic>>[];
     for (var card in cards.peek()) {
-      final json = card.toJson();
+      final json = await card.toJson();
       json["amount"] = amounts.peek()[card.id] ?? 1;
       encodedCards.add(json);
     }
@@ -72,7 +72,7 @@ class TabletopDeck {
         usecase,
         types: [StorageType.permanent, StorageType.cache],
       );
-      final container = AttachmentController.fromJson(type, card);
+      final container = await AttachmentController.fromJson(type, card);
       amounts.value[container.id] = card['a'] ?? 1;
       final result = await AttachmentController.downloadAttachment(container);
       if (!result || container.error.value) {

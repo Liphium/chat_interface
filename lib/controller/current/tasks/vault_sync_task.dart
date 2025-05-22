@@ -5,13 +5,13 @@ import 'package:chat_interface/controller/square/shared_space_controller.dart';
 import 'package:chat_interface/services/chat/library_manager.dart';
 import 'package:chat_interface/services/chat/conversation_service.dart';
 import 'package:chat_interface/services/chat/vault_versioning_service.dart';
+import 'package:chat_interface/util/encryption/packing.dart';
 import 'package:chat_interface/util/encryption/symmetric_sodium.dart';
 import 'package:chat_interface/controller/current/connection_controller.dart';
 import 'package:chat_interface/controller/current/steps/account_step.dart';
-import 'package:chat_interface/main.dart';
+import 'package:chat_interface/util/logging_framework.dart';
 import 'package:chat_interface/util/web.dart';
 import 'package:get/get.dart';
-import 'package:sodium_libs/sodium_libs.dart';
 
 part 'vault_actions.dart';
 
@@ -47,40 +47,39 @@ class VaultSyncTask extends SynchronizationTask {
       return json["error"];
     }
 
-    // Parse all of the entries
-    final (deleted, newEntries, newVersions) = await sodiumLib.runIsolated((sodium, keys, pairs) {
-      // Sort the entries into deleted ones and new ones per tag
-      var deleted = <String, List<String>>{};
-      var newEntries = <String, List<VaultEntry>>{};
-      for (var unparsedEntry in json["entries"]) {
-        final entry = VaultEntry.fromJson(unparsedEntry);
+    // Sort the entries into deleted ones and new ones per tag
+    var deleted = <String, List<String>>{};
+    var newEntries = <String, List<VaultEntry>>{};
+    for (var unparsedEntry in json["entries"]) {
+      final entry = VaultEntry.fromJson(unparsedEntry);
 
-        // Increment the version of the tag in case increased
-        if (entry.version > versionMap[entry.tag]!) {
-          versionMap[entry.tag] = entry.version;
-        }
-
-        if (unparsedEntry["deleted"] == true) {
-          // Create a new deleted list or add if list already there
-          if (deleted[entry.tag] == null) {
-            deleted[entry.tag] = [entry.id];
-          } else {
-            deleted[entry.tag]!.add(entry.id);
-          }
-        } else {
-          // Decrypt payload and add to list of new entries
-          entry.payload = decryptSymmetric(entry.payload, keys[0], sodium);
-          if (newEntries[entry.tag] == null) {
-            newEntries[entry.tag] = [entry];
-          } else {
-            newEntries[entry.tag]!.add(entry);
-          }
-        }
+      // Increment the version of the tag in case increased
+      if (entry.version > versionMap[entry.tag]!) {
+        versionMap[entry.tag] = entry.version;
       }
 
-      // Return both lists to the outside
-      return (deleted, newEntries, versionMap);
-    }, secureKeys: [vaultKey]);
+      if (unparsedEntry["deleted"] == true) {
+        // Create a new deleted list or add if list already there
+        if (deleted[entry.tag] == null) {
+          deleted[entry.tag] = [entry.id];
+        } else {
+          deleted[entry.tag]!.add(entry.id);
+        }
+      } else {
+        // Decrypt payload and add to list of new entries
+        final decrypted = await decryptSymmetricBase64String(vaultKey, entry.payload);
+        if (decrypted == null) {
+          sendLog("ERROR: Couldn't decrypt vault entry");
+          return "encryption.error";
+        }
+        entry.payload = decrypted;
+        if (newEntries[entry.tag] == null) {
+          newEntries[entry.tag] = [entry];
+        } else {
+          newEntries[entry.tag]!.add(entry);
+        }
+      }
+    }
 
     // Save all the new versions
     for (var target in targets) {
@@ -88,7 +87,7 @@ class VaultSyncTask extends SynchronizationTask {
         VaultVersioningService.storeOrUpdateVersion(
           VaultVersioningService.vaultTypeGeneral,
           target.tag,
-          newVersions[target.tag]!,
+          versionMap[target.tag]!,
         ),
       );
     }
@@ -165,5 +164,5 @@ class VaultEntry {
       payload = json["payload"],
       updatedAt = json["updated_at"];
 
-  String decryptedPayload([SecureKey? key, Sodium? sodium]) => decryptSymmetric(payload, key ?? vaultKey, sodium);
+  Future<String?> decryptedPayload() => decryptSymmetricBase64String(vaultKey, payload);
 }

@@ -12,10 +12,10 @@ import 'package:chat_interface/main.dart';
 import 'package:chat_interface/pages/chat/chat_page_desktop.dart';
 import 'package:chat_interface/services/spaces/space_message_provider.dart';
 import 'package:chat_interface/services/spaces/space_service.dart';
+import 'package:chat_interface/src/rust/api/encryption.dart';
 import 'package:chat_interface/util/popups.dart';
 import 'package:get/get.dart';
 import 'package:signals/signals_flutter.dart';
-import 'package:sodium_libs/sodium_libs.dart';
 import 'package:window_manager/window_manager.dart';
 
 bool areSpacesSupported = !isWeb && !GetPlatform.isMobile;
@@ -32,7 +32,7 @@ class SpaceController {
   //* Space information
   static String? domain;
   static final id = signal<String?>(null);
-  static SecureKey? key;
+  static SymmetricKey? key;
 
   //* Call layout
   static final chatOpen = signal(true);
@@ -134,7 +134,7 @@ class SpaceController {
   }
 
   /// Function called by the space service to tell this controller about the connection
-  static void onConnect(String server, String spaceId, SecureKey spaceKey) {
+  static void onConnect(String server, String spaceId, SymmetricKey spaceKey) {
     // Load information from space container
     domain = server;
     key = spaceKey;

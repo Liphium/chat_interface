@@ -83,7 +83,7 @@ class StatusController {
     return await encryptSymmetricContainerBase64String(
       profileKey,
       signatureKeyPair.signingKey,
-      ownContainer.value!.toJson(),
+      await ownContainer.value!.toJson(),
     );
   }
 
@@ -121,10 +121,10 @@ abstract class ShareContainer {
 
   ShareContainer(this.sender, this.type);
 
-  Map<String, dynamic> toMap();
+  Future<Map<String, dynamic>> toMap();
 
-  String toJson() {
-    final map = toMap();
+  Future<String> toJson() async {
+    final map = await toMap();
     map["type"] = type.index;
     return jsonEncode(map);
   }
